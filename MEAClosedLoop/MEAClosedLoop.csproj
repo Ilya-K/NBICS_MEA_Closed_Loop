@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CFiltering.cs" />
     <Compile Include="Common\CCalcSE_Block.cs" />
     <Compile Include="Common\CCalcSE_N.cs" />
     <Compile Include="CLoopController.cs" />
@@ -55,11 +56,13 @@
     <Compile Include="Common\CExpAvg.cs" />
     <Compile Include="Common\CPack.cs" />
     <Compile Include="CPackDetector.cs" />
+    <Compile Include="CStimDetectShift.cs" />
     <Compile Include="CStimDetector.cs" />
     <Compile Include="Common\Common.cs" />
     <Compile Include="Common\Spike.cs" />
     <Compile Include="CRasterPlot.cs" />
     <Compile Include="CSpikeDetector.cs" />
+    <Compile Include="CStimLoader.cs" />
     <Compile Include="CStimulator.cs" />
     <Compile Include="FormCalibrate.cs">
       <SubType>Form</SubType>
@@ -69,7 +72,6 @@
     </Compile>
     <Compile Include="Neurorighter\ButterworthFilter.cs" />
     <Compile Include="CInputStream.cs" />
-    <Compile Include="CFiltering.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

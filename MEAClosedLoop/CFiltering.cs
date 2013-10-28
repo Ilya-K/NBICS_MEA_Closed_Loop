@@ -12,6 +12,7 @@ namespace MEAClosedLoop
   using TStimIndex = System.Int16;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
+  using StimuliList = List<TStimGroup>;
 
   public class CFiltering
   {
@@ -26,7 +27,7 @@ namespace MEAClosedLoop
     private AutoResetEvent m_notEmpty;
     private CStimDetector m_stimDetector;
     private int m_artifChannel;
-    private List<TStimIndex> m_expectedStims;
+    private StimuliList m_expectedStims;
     private Dictionary<int, ButterworthFilter> m_bandpassFilters = null;
     private Dictionary<int, LocalFit> m_salpaFilters = null;
     private OnStreamKillDelegate m_onStreamKill = null;
