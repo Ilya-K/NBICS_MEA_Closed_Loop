@@ -6,10 +6,11 @@ using System.Threading;
 using Neurorighter;
 using Common;
 
+
 namespace MEAClosedLoop
 {
   using TData = System.Double;
-  using TStimIndex = System.Int16;
+  using TStimIndex = System.Int16;  //TODO: what's this?
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using StimuliList = List<TStimGroup>;
 
@@ -17,6 +18,7 @@ namespace MEAClosedLoop
   {
     const int DEFAULT_VALUE = 32767;
     const int MIN_PACKET_SIZE = 150;
+    const int BLOCK_SIZE = 2500;
 
     private CInputStream m_inputStream;
     private TRawDataPacket m_prevPacket;
@@ -35,7 +37,7 @@ namespace MEAClosedLoop
     {
       List<int> channelList = new List<int>(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 });
 
-      m_inputStream = new CInputStream(fileName, channelList, 2500);
+      m_inputStream = new CInputStream(fileName, channelList, BLOCK_SIZE);
 
       m_inputStream.OnStreamKill = Dismiss;
       m_inputStream.ConsumerList.Add(ReceiveData);
@@ -44,7 +46,8 @@ namespace MEAClosedLoop
       m_stimDetector = new CStimDetector(15, 35, 150);
 
       m_artifChannel = m_inputStream.ChannelList[0];
-      m_expectedStims = null; // <- add sl data here
+      //m_expectedStims = null; // <- add sl data here
+      m_expectedStims = sl;
       m_kill = false;
     }
 
@@ -71,9 +74,9 @@ namespace MEAClosedLoop
 
     public UInt64 RunTest()
     {
-      m_inputStream.Start();
+      m_inputStream.Start();//TODO: what's this?
 
-      // Дождаться конца обработки файла
+      //TODO: compare m_expectedStims and results?
 
       //return squareError;
       return 0;
