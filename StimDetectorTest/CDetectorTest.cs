@@ -43,10 +43,9 @@ namespace MEAClosedLoop
       m_inputStream.ConsumerList.Add(ReceiveData);
 
 
-      m_stimDetector = new CStimDetector(15, 35, 150);
+      //m_stimDetector = new CStimDetector(15, 35, 150); //old
 
       m_artifChannel = m_inputStream.ChannelList[0];
-      //m_expectedStims = null; // <- add sl data here
       m_expectedStims = sl;
       m_kill = false;
     }
@@ -64,7 +63,11 @@ namespace MEAClosedLoop
       }
       // [TODO] Check here if we need to call Stim Detector now
       // if(IsStimulusExpected(timestamp, m_expectedStims) {
-      List<TStimIndex> stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+      
+      //List<TStimIndex> stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims); //old version
+      CStimDetectShift m_stimDetector = new CStimDetector();
+      List<TStimIndex> stimIndices = m_CStimDetector.GetShift();
+      
 
       // Calculate error
       // m_squareError += error;

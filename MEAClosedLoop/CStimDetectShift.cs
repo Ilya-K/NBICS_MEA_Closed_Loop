@@ -23,6 +23,8 @@ namespace MEAClosedLoop
 		private Average Previews;
 		private List<int> ExpectedStims;
 		private int WayNum;
+    private TRawData[] p;
+    private List<TStimGroup> m_expectedStims;
 		private int dF(long t)
 		{
 			return F[t + 1] - F[t];
@@ -42,6 +44,13 @@ namespace MEAClosedLoop
 				WayNum = 1;
 			}
 		}
+
+    public CStimDetectShift(TRawData[] p, List<TStimGroup> m_expectedStims)
+    {
+      // TODO: Complete member initialization
+      this.p = p;
+      this.m_expectedStims = m_expectedStims;
+    }
 		public List<int> GetShift()
 		{
 			List<int> FindedPegs = new List<int>();
