@@ -59,9 +59,9 @@ namespace MEAClosedLoop
 
   public struct TStimGroup
   {
-    UInt64 stimTime;
-    UInt16 period;
-    UInt16 count;
+    public UInt64 stimTime;
+    public UInt16 period;
+    public UInt16 count;
   }
 
 }

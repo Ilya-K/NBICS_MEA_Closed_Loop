@@ -12,7 +12,7 @@ using MEAClosedLoop.Properties;
 namespace StimDetectorTest
 {
   using StimuliList = List<TStimGroup>;
-  using MSTime = Int32;
+  using MSTime = UInt64;
   class Program
   {
     List<int> m_channelList;
@@ -23,30 +23,67 @@ namespace StimDetectorTest
     private bool m_DAQConfigured = false;
     private CMcsUsbListNet m_usbDAQList = new CMcsUsbListNet();
     Thread m_dataLoopThread;
-    StimuliList sl_vary;
-    const int IMP_RANGE = 10;
+    static StimuliList sl_vary;
+    const MSTime SINGLE_IMP_RANGE = 10000;
 
     const int STIM_PACK_NUM = 6;
-    const int STIM_PACK_PER = 340;
+    const MSTime STIM_PACK_IMP_RANGE = 340;
+    const MSTime STIM_PACK_PER = 10;
+
+    const MSTime MAX_TIME_NOISE = 10;
 
 
-    MSTime Int2Time(Int32 input)
+    static MSTime Int2Time(UInt64 input)
     {
       //100ms = 2500
       MSTime output = input / 25;
       return output;
     }
 
-    Int32 Time2Int(MSTime input)
+    const MSTime DO_HRENA = 800000;
+
+    static UInt64 Time2Int(MSTime input)
     {
-      Int32 output = input * 25;
+      UInt64 output = input * 25;
       return output;
     }
 
-    StimuliList GenStimulList(MSTime start_time, Int32 stimType)
+    static MSTime GenNoise(MSTime dest, MSTime maxNoise)
     {
-      StimuliList output = new StimuliList;
-      //TODO
+      Random random = new Random();
+      int randNoise = random.Next(0, Convert.ToInt32(2*maxNoise));
+      return dest - maxNoise + Convert.ToUInt64(randNoise);
+    }
+
+    static StimuliList GenStimulList(MSTime start_time, Int32 stimType, MSTime totalTime)
+    {
+      MSTime timeIterator;
+      TStimGroup newStim;
+      StimuliList output = new StimuliList();
+      
+      switch (stimType)
+      {
+        case 1:
+          newStim.count = 1;
+          newStim.period = 0;
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += GenNoise(SINGLE_IMP_RANGE, MAX_TIME_NOISE))
+          {
+            newStim.stimTime = Time2Int(timeIterator);
+            output.Add(newStim);
+          }
+          break;
+        case 2:
+          newStim.count = 6;
+          newStim.period = Convert.ToUInt16(Time2Int(STIM_PACK_PER));
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += GenNoise(STIM_PACK_IMP_RANGE, MAX_TIME_NOISE))
+          {
+            newStim.stimTime = Time2Int(timeIterator);
+            output.Add(newStim);
+          }
+          break;
+      }
+      return output;
+
     }
 
 
@@ -79,6 +116,7 @@ namespace StimDetectorTest
       //CInputStream In = new CInputStream(, m_channelList, 2500); //deault
       //int errorRate = 0;
       Stopwatch sw1 = new Stopwatch();
+      UInt64 errorRate = 0;
 
 
       using (StreamReader strReader = new StreamReader(confName)) //reading config
@@ -86,21 +124,28 @@ namespace StimDetectorTest
         string[] ss;
         while (!strReader.EndOfStream)
         {
-          int stimType, stimStart;
+          Int32 stimType, stimStart;
           string fileName;
           ss = strReader.ReadLine().Split(new Char[] { ' ', ' ' });
           stimType = Int32.Parse(ss[0]);
           stimStart = Int32.Parse(ss[1]);
           fileName = ss[2];
 
-          sl_vary = GenStimulList(Int2Time(stimStart), stimType);
+          Console.WriteLine("\tFILE: {0}", fileName);
+
+          sl_vary = GenStimulList(Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
 
 
           CDetectorTest tester = new CDetectorTest(fileName, sl_vary);
+
+          sw1.Start();
+          errorRate+=tester.RunTest();
+          sw1.Stop();
+          Console.WriteLine("\t\tTIME: "); //TODO
         }
       }
 
-
+      Console.WriteLine("TOTAL ERROR: {0}", errorRate);
 
     }
 

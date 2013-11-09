@@ -25,6 +25,7 @@ namespace MEAClosedLoop
     private CStimDetector m_stimDetector;
     private int m_artifChannel;
     private StimuliList m_expectedStims;
+    public List<TStimIndex> stimIndices;
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
 
@@ -50,7 +51,7 @@ namespace MEAClosedLoop
       m_kill = false;
     }
 
-    public void ReceiveData(TRawDataPacket currPacket)
+    public void ReceiveData(TRawDataPacket currPacket)  //TODO: make absolute stimIndices
     {
 
 
@@ -64,9 +65,9 @@ namespace MEAClosedLoop
       // [TODO] Check here if we need to call Stim Detector now
       // if(IsStimulusExpected(timestamp, m_expectedStims) {
       
-      //List<TStimIndex> stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims); //old version
-      CStimDetectShift m_stimDetector = new CStimDetector();
-      List<TStimIndex> stimIndices = m_CStimDetector.GetShift();
+      stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims); //old version
+      //CStimDetectShift m_stimDetector = new CStimDetector(); //TODO: fix constructor
+      //List<TStimIndex> stimIndices = m_CStimDetector.GetShift();
       
 
       // Calculate error
