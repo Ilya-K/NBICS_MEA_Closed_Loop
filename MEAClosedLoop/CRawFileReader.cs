@@ -12,7 +12,7 @@ namespace MEAClosedLoop
 
   public class CRawFileReader : IRawDataProvider
   {
-    private const int CRLF = 2;
+    private const int CRLF = 2;                     // Length of CRLF in Windows = 2
     private const int CYCLE_QUEUE_SIZE = 10;
     private const int START_CHANNEL_LIST = 13;
     private const int DEFAULT_SAMPLE_RATE = 25000;
@@ -122,7 +122,7 @@ namespace MEAClosedLoop
         m_onError("No one channel selected!", 0);
         return;
       }
-      if (m_readoutTimer.Enabled)
+      if ((m_binReader != null) || m_readoutTimer.Enabled)
       {
         m_onError("Device has been already started!", 0);
         return;
@@ -130,7 +130,7 @@ namespace MEAClosedLoop
       m_binReader = new BinaryReader(File.Open(m_fileName, FileMode.Open, FileAccess.Read));
       m_binReader.BaseStream.Position = m_startOfData;
       m_cbHandle = 0;
-      m_readoutTimer.Start();
+      if (!m_paused) m_readoutTimer.Start();
     }
 
     // Read Data ========================================================================================================
@@ -257,6 +257,7 @@ namespace MEAClosedLoop
         char[] header = new char[11];
         strReader.Read(header, 0, 11);
         int position = 11;
+
         if (new string(header).CompareTo("MC_DataTool") == 0)
         {
           string s;

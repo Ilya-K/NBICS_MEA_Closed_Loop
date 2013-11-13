@@ -25,7 +25,7 @@ namespace MEAClosedLoop
     int m_viewChannel1;
     int m_viewChannel2;
     CInputStream m_inputStream;
-    CFiltering m_bandpassFilter;
+    CFiltering m_salpaFilter;
     CSpikeDetector m_spikeDetector;
     CRasterPlot m_rasterPlotter;
     CStimulator m_stimulator;
@@ -99,11 +99,12 @@ namespace MEAClosedLoop
       //label_refreshRate.Text = (1000.0 / (DateTime.Now - m_prevTime).Milliseconds).ToString();
       //SetText(label_refreshRate, m_bandpassFilter.Test().ToString());       
       AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
-      SetText(label_time, (m_inputStream.Timestamp / 25000.0).ToString("F1"));
+      SetText(label_time, (m_inputStream.TimeStamp / 25000.0).ToString("F1"));
 
       m_prevTime = DateTime.Now;
     }
 
+    #region Data Display
     private void panel1_Paint(object sender, PaintEventArgs e)
     {
       int width = panel1.Width;
@@ -266,6 +267,7 @@ namespace MEAClosedLoop
         }
       }
     }
+    #endregion
 
     private void buttonStartDAQ_Click(object sender, EventArgs e)
     {
@@ -297,10 +299,10 @@ namespace MEAClosedLoop
         // length_sams [75], asym_sams [10], blank_sams [75], ahead_sams [5], forcepeg_sams [10], thresholds[]
         SALPAParams parSALPA = new SALPAParams(35, 10, 35, 5, 10, thresholds);
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
-        m_bandpassFilter = new CFiltering(m_inputStream, parSALPA, null);
+        m_salpaFilter = new CFiltering(m_inputStream, parSALPA, null);
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
-        m_bandpassFilter.OnDataAvailable = PeekData;
-        m_spikeDetector = new CSpikeDetector(m_bandpassFilter, -4.9);
+        m_salpaFilter.OnDataAvailable = PeekData;
+        m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, 2500, 2);
 
         m_DAQConfigured = true;
@@ -529,6 +531,19 @@ namespace MEAClosedLoop
     private void buttonClosedLoop_Click(object sender, EventArgs e)
     {
       buttonStop.Enabled = true;
+      if (m_closedLoop == null)
+      {
+        if (!m_DAQConfigured)
+        {
+          // [TODO] Configure DAQ
+        }
+        if (m_stimulator == null)
+        {
+          // [TODO] Configure Stimulator
+        }
+
+        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
+      }
       //buttonClosedLoop.Text = 
     }
 

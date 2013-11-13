@@ -9,7 +9,8 @@ using UsbNetDll;
 namespace MEAClosedLoop
 {
   using TRawDataPacket = Dictionary<int, ushort[]>;
-
+  using TTime = System.UInt64;
+ 
   public class CMeaDeviceNet_ : CMeaDeviceNet, IRawDataProvider
   {
     public CMeaDeviceNet_(McsBusTypeEnumNet busType, OnChannelData onChannelData, OnError onError)
@@ -22,6 +23,8 @@ namespace MEAClosedLoop
   public class CInputStream
   {
     //const int NUM_BUFFERS = 3;
+    const uint DEFAULT_SAMLPING_RATE = 25000;
+    private uint m_samplingRate;
     public IRawDataProvider m_dataSource;
 //    private ConcurrentQueue<TRawDataPacket> m_rawQueue;
     private Queue<TRawDataPacket> m_rawQueue;
@@ -35,15 +38,21 @@ namespace MEAClosedLoop
 
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
-    private volatile bool m_kill = false;
-    private volatile bool m_stop = false;
-    private volatile bool m_stopped = true;
+    private volatile bool m_kill = false;                   // Signal to stop acquisition and kill the thread
+    private volatile bool m_stop = false;                   // Signal to stop acquisition
+    private volatile bool m_stopped = true;                 // Flag = 1 when acquisition is stopped, = 0 otherwise
 
     delegate void OnChannelDataDelegate(Dictionary<int, ushort[]> data);
     
     private int m_lastBufLength;
-    private ulong m_timestamp;                                    // Contains sequental number of the first sample in latest buffer.
-    public ulong Timestamp { get { return m_timestamp; } }
+    private object lockDeqTime = new Object();
+    private TTime m_deqTimeStamp;                              // Contains sequental number of the first sample in the last dequeued buffer
+    public TTime TimeStamp { get { lock (lockDeqTime) return m_deqTimeStamp; } }
+
+    private object lockCurrentTime = new Object();
+    private TTime m_currentTimeStamp;                       // Contains sequental number of the last read sample + 1
+
+    private System.Diagnostics.Stopwatch m_windowsTime;
 
     //private delegate void OnChannelDataDelegate(TRawDataPacket data);
     
@@ -59,8 +68,11 @@ namespace MEAClosedLoop
       m_blockSize = blockSize;
       m_notEmpty = new AutoResetEvent(false);
       m_rawQueue = new Queue<TRawDataPacket>();
+      m_samplingRate = DEFAULT_SAMLPING_RATE; // MC_Card does not support all settings, please see MC_Rack for valid settings
       m_lastBufLength = 0;
-      m_timestamp = 0;
+      m_deqTimeStamp = 0;
+      m_currentTimeStamp = 0;
+      m_windowsTime = new System.Diagnostics.Stopwatch();
 
       m_channelSet = new bool[MEA.MAX_CHANNELS];
       channelList.ForEach(channel => m_channelSet[channel] = true);
@@ -81,32 +93,31 @@ namespace MEAClosedLoop
     }
 
     // Constructs InputStream for reading from USB-ME256 System
-    public CInputStream(CMcsUsbListNet usblist, uint idx, List<int> channelList, int blockSize)
+    public CInputStream(CMcsUsbListNet usbList, uint idx, List<int> channelList, int blockSize)
       : this(channelList, blockSize)
     {
-      usblist.Initialize(DeviceEnumNet.MCS_MEA_DEVICE);
-      uint dn = usblist.GetDeviceNumber();
-      CMeaDeviceNet_ device = new CMeaDeviceNet_(usblist.GetBusType(idx), OnChannelData, OnError);
-      device.Connect(usblist.GetUsbListEntry(idx));
+      usbList.Initialize(DeviceEnumNet.MCS_MEA_DEVICE);
+      uint dn = usbList.GetDeviceNumber();
+      CMeaDeviceNet_ device = new CMeaDeviceNet_(usbList.GetBusType(idx), OnChannelData, OnError);
+      device.Connect(usbList.GetUsbListEntry(idx));
 
       // [ToDo] Configure m_dataSource here
       device.SendStop(); // only to be sure
 
-      int hwchannels;
-      device.HWInfo().GetNumberOfHWADCChannels(out hwchannels);
-      device.SetNumberOfChannels(hwchannels);
+      int hwChannels;
+      device.HWInfo().GetNumberOfHWADCChannels(out hwChannels);
+      device.SetNumberOfChannels(hwChannels);
 
-      int samplingrate = 25000; // MC_Card does not support all settings, please see MC_Rack for valid settings
-      device.SetSampleRate(samplingrate);
+      device.SetSampleRate((int)m_samplingRate);
 
       int gain;
       device.GetGain(out gain);
 
       double[] voltageranges = device.HWInfo().GetSupportedVoltagesAsDoubles();
-      for (int i = 0; i < voltageranges.Length; i++)
+      /* for (int i = 0; i < voltageranges.Length; i++)
       {
-        //tbDeviceInfo.Text += "(" + i.ToString() + ") " + voltageranges[i] + "mV" + "\r\n";
-      }
+        tbDeviceInfo.Text += "(" + i.ToString() + ") " + voltageranges[i] + "mV" + "\r\n";
+      } */
 
       // Set the range acording to the index (only valid for MC_Card)
       device.SetVoltageRange(0);
@@ -137,17 +148,6 @@ namespace MEAClosedLoop
       device.SetSelectedChannelsQueue(selChannels, 10 * blockSize, blockSize, CMcsUsbDacqNet.SampleSize.Size16);
 
       m_dataSource = (IRawDataProvider)device;
-
-      /*
-      m_dataSource.StartDacq();
-      System.Threading.Thread.Sleep(300);
-      m_dataSource.StopDacq();
-      System.Threading.Thread.Sleep(200);
-      m_dataSource.StartDacq();
-      System.Threading.Thread.Sleep(300);
-      m_dataSource.StopDacq();
-      */
-
     }
     #endregion
 
@@ -205,6 +205,19 @@ namespace MEAClosedLoop
     }
     #endregion
 
+    public UInt32 GetIntervalFromNowInMS(TTime futureTime)
+    {
+      UInt32 delta;
+      TTime currTime;
+      lock (lockCurrentTime) {
+        currTime = m_currentTimeStamp + (TTime)m_windowsTime.ElapsedMilliseconds * (m_samplingRate / 1000);
+      }
+      if (futureTime < currTime) return 0;
+      delta = (UInt32)(futureTime - currTime);
+
+      return (1000 * delta) / m_samplingRate;
+    }
+
     public void Kill()
     {
       Stop();
@@ -223,6 +236,8 @@ namespace MEAClosedLoop
       }
     }
 
+    // Runs in separate stream
+    // Reads out queue ant calls hahdlers for each data packet
     private void RunStream()
     {
       TRawDataPacket dataPacket = null;
@@ -236,7 +251,8 @@ namespace MEAClosedLoop
             if (m_rawQueue.Count > 0)
             {
               dataPacket = m_rawQueue.Dequeue();
-              m_timestamp += (ulong)m_lastBufLength;
+
+              lock (lockDeqTime) m_deqTimeStamp += (ulong)m_lastBufLength;
               m_lastBufLength = dataPacket.First().Value.Length;
 
               if (m_rawQueue.Count > 0) m_notEmpty.Set();
@@ -261,9 +277,13 @@ namespace MEAClosedLoop
     // Функция, которая передаётся в источник данных в кач-ве callback-а
     private void OnChannelData(int CbHandle, int numSamples)
     {
+      // [TODO] Check time consistency
+      m_windowsTime.Restart();
+      
       int size_ret;
-
       Dictionary<int, ushort[]> data = m_dataSource.ChannelBlock_ReadFramesDictUI16(CbHandle, numSamples, out size_ret);
+
+      lock (lockCurrentTime) m_currentTimeStamp += (ulong)data.First().Value.Length;
 
       if (!m_stop)
       {

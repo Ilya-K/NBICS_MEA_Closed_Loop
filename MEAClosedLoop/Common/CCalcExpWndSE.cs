@@ -19,7 +19,7 @@ namespace MEAClosedLoop
     /// Create SE calculator.
     /// Exponential multiplier decays to 1/e in tau samples, to 0.05 in 3*tau.
     /// Multiplier to be used in exponential sum, m = (tau-1)/tau.
-    /// Consider 3*tau as a width of exponential window.
+    /// Consider 3*tau as a width of an exponential window.
     /// </summary>
     /// <param name="p">Number of samples to decay weight function to 1/e</param>
     public CCalcExpWndSE(int tau)
