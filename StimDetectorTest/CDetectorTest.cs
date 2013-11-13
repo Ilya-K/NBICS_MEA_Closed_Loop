@@ -11,6 +11,7 @@ using MEAClosedLoop;
 namespace MEAClosedLoop
 {
   using TData = System.Double;
+  using TTime = System.UInt64;
   using TStimIndex = System.Int16;  //TODO: what's this?
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using StimuliList = List<TStimGroup>;
@@ -26,7 +27,8 @@ namespace MEAClosedLoop
     //private CStimDetector m_stimDetector;
     private int m_artifChannel;
     private StimuliList m_expectedStims;
-    public List<TStimIndex> stimIndices;
+    public List<TStimIndex> m_stimIndices;
+    private TStimGroup m_nextExpectedStim;
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
     
@@ -49,27 +51,25 @@ namespace MEAClosedLoop
       m_stimDetector = new CStimDetectShift();
       m_artifChannel = m_inputStream.ChannelList[0];
       m_expectedStims = sl;
+      m_nextExpectedStim = sl[0];
+      sl.RemoveAt(0);
       m_kill = false;
     }
 
     public void ReceiveData(TRawDataPacket currPacket)  //TODO: make absolute stimIndices
     {
+      TTime endOfPacket = m_inputStream.TimeStamp + (TTime)currPacket[currPacket.Keys.Min()].Length;
 
-
-      // Prepare "previous" packet for the first packet processing
-      if (m_prevPacket == null)
+      if (m_nextExpectedStim.stimTime < endOfPacket)
       {
-        m_prevPacket = new TRawDataPacket(currPacket.Count);
-        foreach (int channel in currPacket.Keys) m_prevPacket[channel] = new ushort[MIN_PACKET_SIZE];
-        m_prevPacket.Keys.AsParallel().ForAll(channel => Helpers.PopulateArray<ushort>(m_prevPacket[channel], currPacket[channel][0]));
+        m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim)); //old version //new vers. used like old
+        m_nextExpectedStim = m_expectedStims[0];
+        m_expectedStims.RemoveAt(0);
       }
-      // [TODO] Check here if we need to call Stim Detector now
-      // if(IsStimulusExpected(timestamp, m_expectedStims) {
-      
-      stimIndices = m_stimDetector.GetStims(currPacket[m_artifChannel], m_expectedStims); //old version //new vers. used like old
-      //CStimDetectShift m_stimDetector = new CStimDetector(); //TODO: fix constructor
-      //List<TStimIndex> stimIndices = m_CStimDetector.GetShift();
-      
+      else
+      {
+        m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
+      }
 
       // Calculate error
       // m_squareError += error;

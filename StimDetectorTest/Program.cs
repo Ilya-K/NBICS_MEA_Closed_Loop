@@ -149,41 +149,6 @@ namespace StimDetectorTest
 
     }
 
-
-
-    /*void Init()
-    {
-        // Check if all necessary components of DAQ have been already created
-        if (!m_DAQConfigured)
-        {
-            // Configure Input Stream and filters here
-            if (m_inputStream == null)
-            {
-                if (m_selectedDAQ == m_fileIdx)
-                {
-                    m_inputStream = new CInputStream(m_fileOpenedconfig data, m_channelList, 2500);
-                }
-                else
-                {
-                    m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500); //not used
-                }
-            }
-
-            // (int)SpikeFiltOrder.Value, 25000.0, Convert.ToDouble(SpikeLowCut.Value), Convert.ToDouble(SpikeHighCut.Value), DATA_BUF_LEN
-            BFParams parBF = new BFParams(2, 25000, 150.0, 2000.0, 2500); // [ToDo] Eliminate data buffer length
-
-            // [TODO] Get rid of thresholds here. Should be calculated in SALPA dynamically
-            int[] thresholds = new int[60];
-            for (int i = 0; i < 60; i++)
-            {
-                thresholds[i] = 1000 * 3;
-            }
-
-            m_DAQConfigured = true;
-        }
-
-        m_inputStream.Start();
-    }*/
   }
 
 }
