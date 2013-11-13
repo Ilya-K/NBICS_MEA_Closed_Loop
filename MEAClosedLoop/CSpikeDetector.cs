@@ -84,7 +84,7 @@ namespace MEAClosedLoop
         });
         
         int packetLength = currPacket.First().Value.Length;
-        ulong timestamp = m_filteredStream.Timestamp;
+        ulong timestamp = m_filteredStream.TimeStamp;
         // [ToDo] Если потребуется уменьшить время реакции, то порезать блоки на куски тут
         // [ToDo] Extremely stupid realization. Should be replaced by something more smart.
         for (uint i = 0; i < packetLength; ++i)

@@ -37,7 +37,7 @@ namespace MEAClosedLoop
 
     public int NChannels { get { return m_inputStream.NChannels; } }
     public List<int> ChannelList { get { return m_inputStream.ChannelList; } }
-    public ulong Timestamp { get { return m_inputStream.Timestamp; } }
+    public ulong TimeStamp { get { return m_inputStream.TimeStamp; } }
     private volatile bool m_kill;
 
     // [DEBUG]
