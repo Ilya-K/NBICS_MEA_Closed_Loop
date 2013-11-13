@@ -9,10 +9,13 @@ using System.Threading;
 using System.Diagnostics;
 using System.IO;
 using MEAClosedLoop.Properties;
+
 namespace StimDetectorTest
 {
   using StimuliList = List<TStimGroup>;
   using MSTime = UInt64;
+  using TStimIndex = System.Int16;
+
   class Program
   {
     List<int> m_channelList;
@@ -23,7 +26,8 @@ namespace StimDetectorTest
     private bool m_DAQConfigured = false;
     private CMcsUsbListNet m_usbDAQList = new CMcsUsbListNet();
     Thread m_dataLoopThread;
-    static StimuliList sl_vary;
+    static StimuliList sl_vary; //with noise
+    static List<TStimIndex> sl_indices;
     const MSTime SINGLE_IMP_RANGE = 10000;
 
     const int STIM_PACK_NUM = 6;
@@ -32,21 +36,9 @@ namespace StimDetectorTest
 
     const MSTime MAX_TIME_NOISE = 10;
 
-
-    static MSTime Int2Time(UInt64 input)
-    {
-      //100ms = 2500
-      MSTime output = input / 25;
-      return output;
-    }
-
     const MSTime DO_HRENA = 800000;
+   
 
-    static UInt64 Time2Int(MSTime input)
-    {
-      UInt64 output = input * 25;
-      return output;
-    }
 
     static MSTime GenNoise(MSTime dest, MSTime maxNoise)
     {
@@ -55,12 +47,45 @@ namespace StimDetectorTest
       return dest - maxNoise + Convert.ToUInt64(randNoise);
     }
 
-    static StimuliList GenStimulList(MSTime start_time, Int32 stimType, MSTime totalTime)
+    static List<TStimIndex> GenStimulList(MSTime start_time, Int32 stimType, MSTime totalTime)
+    {
+      MSTime timeIterator;
+      TStimGroup newStim;
+      List<TStimIndex> output = new List<TStimIndex>();
+      
+      switch (stimType)
+      {
+        case 1:
+          newStim.count = 1;
+          newStim.period = 0;
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += SINGLE_IMP_RANGE)
+          {
+            newStim.stimTime = Helpers.Time2Int(timeIterator);
+            output.Add(Convert.ToInt16(Helpers.Time2Int(timeIterator)%2500));
+            //output.Add(newStim);
+          }
+          break;
+        case 2:
+          newStim.count = 6;
+          newStim.period = Convert.ToUInt16(Helpers.Time2Int(STIM_PACK_PER));
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += STIM_PACK_IMP_RANGE)
+          {
+            newStim.stimTime = Helpers.Time2Int(timeIterator);
+            output.Add(Convert.ToInt16(Helpers.Time2Int(timeIterator)%2500));
+            //output.Add(newStim);
+          }
+          break;
+      }
+      return output;
+
+    }
+
+    static StimuliList GenStimulVaryList(MSTime start_time, Int32 stimType, MSTime totalTime)
     {
       MSTime timeIterator;
       TStimGroup newStim;
       StimuliList output = new StimuliList();
-      
+
       switch (stimType)
       {
         case 1:
@@ -68,16 +93,16 @@ namespace StimDetectorTest
           newStim.period = 0;
           for (timeIterator = start_time; timeIterator < totalTime; timeIterator += GenNoise(SINGLE_IMP_RANGE, MAX_TIME_NOISE))
           {
-            newStim.stimTime = Time2Int(timeIterator);
+            newStim.stimTime = Helpers.Time2Int(timeIterator);
             output.Add(newStim);
           }
           break;
         case 2:
           newStim.count = 6;
-          newStim.period = Convert.ToUInt16(Time2Int(STIM_PACK_PER));
+          newStim.period = Convert.ToUInt16(Helpers.Time2Int(STIM_PACK_PER));
           for (timeIterator = start_time; timeIterator < totalTime; timeIterator += GenNoise(STIM_PACK_IMP_RANGE, MAX_TIME_NOISE))
           {
-            newStim.stimTime = Time2Int(timeIterator);
+            newStim.stimTime = Helpers.Time2Int(timeIterator);
             output.Add(newStim);
           }
           break;
@@ -133,13 +158,15 @@ namespace StimDetectorTest
 
           Console.WriteLine("\tFILE: {0}", fileName);
 
-          sl_vary = GenStimulList(Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
+
+          sl_indices = GenStimulList(Helpers.Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
+          sl_vary = GenStimulVaryList(Helpers.Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
 
 
           CDetectorTest tester = new CDetectorTest(fileName, sl_vary);
 
           sw1.Start();
-          errorRate+=tester.RunTest();
+          errorRate+=tester.RunTest(sl_indices);
           sw1.Stop();
           Console.WriteLine("\tTIME (in milliseconds): " + sw1.ElapsedMilliseconds.ToString());
         }

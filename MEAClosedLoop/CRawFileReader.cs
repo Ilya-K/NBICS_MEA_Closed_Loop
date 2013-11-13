@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using UsbNetDll;
 
 namespace MEAClosedLoop
@@ -26,6 +27,7 @@ namespace MEAClosedLoop
     private string m_fileName;
     private long m_startOfData;
     private bool m_paused = false;
+    private AutoResetEvent waitEOF;
 
     // Callback functions
     private OnChannelData m_onChannelData;
@@ -81,6 +83,7 @@ namespace MEAClosedLoop
       m_freePacketPool = new ConcurrentQueue<TRawDataPacket>();
       FillPool(ref m_freePacketPool, m_channelsToRead, m_blockSize);
 
+      waitEOF = new AutoResetEvent(false);
       // [DEBUG]
       //log = new long[10000];
 
@@ -189,6 +192,12 @@ namespace MEAClosedLoop
         TimerProc(o1, e1);
       }
     }
+    // [DEBUG]
+    // Wait till End of File ============================================================================================
+    public void WaitEOF()
+    {
+      waitEOF.WaitOne();
+    }
 
     // Private functions ================================================================================================
     // TimerProc runs in separate thread so we should take care about data sychronization
@@ -227,6 +236,7 @@ namespace MEAClosedLoop
       catch (EndOfStreamException e)
       {
         StopDacq();
+        waitEOF.Set();
         // System.Windows.Forms.MessageBox.Show("EOF! " + e.Message);
       }
 

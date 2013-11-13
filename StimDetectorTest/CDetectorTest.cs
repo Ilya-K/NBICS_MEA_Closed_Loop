@@ -8,13 +8,14 @@ using Common;
 using MEAClosedLoop;
 
 
-namespace MEAClosedLoop
+namespace StimDetectorTest
 {
   using TData = System.Double;
   using TTime = System.UInt64;
-  using TStimIndex = System.Int16;  //TODO: what's this?
+  using TStimIndex = System.Int16;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using StimuliList = List<TStimGroup>;
+  using MSTime = UInt64;
 
   public class CDetectorTest
   {
@@ -31,7 +32,7 @@ namespace MEAClosedLoop
     private TStimGroup m_nextExpectedStim;
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
-    
+
     private Int64 m_squareError;
     private CStimDetectShift m_stimDetector;
     private volatile bool m_kill;
@@ -46,6 +47,8 @@ namespace MEAClosedLoop
       m_inputStream.OnStreamKill = Dismiss;
       m_inputStream.ConsumerList.Add(ReceiveData);
 
+
+      m_stimIndices = new List<TStimIndex>();
 
       //m_stimDetector = new CStimDetector(15, 35, 150); //old
       m_stimDetector = new CStimDetectShift();
@@ -77,14 +80,23 @@ namespace MEAClosedLoop
       m_prevPacket = currPacket;
     }
 
-    public UInt64 RunTest()
+    public UInt64 RunTest(List<TStimIndex> realStimIndices)
     {
-      m_inputStream.Start();//TODO: what's this?
+      MSTime squareError = 0; //not really square
 
-      //TODO: compare m_expectedStims and results?
 
-      //return squareError;
-      return 0;
+      m_inputStream.Start();
+      m_inputStream.WaitEOF();
+
+      //comparing m_stimIndices with realStimIndices
+
+      for (int i = 0; i <= m_stimIndices.Count(); i++)
+      {
+        squareError += Helpers.Int2Time(Convert.ToUInt64(Math.Abs(m_stimIndices[i] - realStimIndices[i])));
+      }
+
+      return squareError;
+      //return 0;
     }
     private void Dismiss()
     {

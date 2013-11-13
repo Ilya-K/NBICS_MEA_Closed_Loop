@@ -203,6 +203,16 @@ namespace MEAClosedLoop
         ((CRawFileReader)m_dataSource).Next();
       }
     }
+    // [DEBUG]
+    // Wait till End of File ============================================================================================
+    public void WaitEOF()
+    {
+      if (m_dataSource is CRawFileReader)
+      {
+        ((CRawFileReader)m_dataSource).WaitEOF();
+      }
+    }
+
     #endregion
 
     public UInt32 GetIntervalFromNowInMS(TTime futureTime)
