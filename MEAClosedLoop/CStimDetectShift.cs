@@ -72,8 +72,7 @@ namespace MEAClosedLoop
         case 2:
           if (F[t + 1] - F[t] > 45 &&
               F[t + 2] - F[t + 1] > 45 &&
-              F[t + 3] - F[t + 2] > 45 &&
-						/*Trolololo*/ F[t-9]%2 == 0)
+              F[t + 3] - F[t + 2] > 45)
           {
             return true;
           }
