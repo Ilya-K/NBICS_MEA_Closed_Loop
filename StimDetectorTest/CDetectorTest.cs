@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Neurorighter;
 using Common;
+using MEAClosedLoop;
 
 
 namespace MEAClosedLoop
@@ -22,15 +23,15 @@ namespace MEAClosedLoop
 
     private CInputStream m_inputStream;
     private TRawDataPacket m_prevPacket;
-    private CStimDetector m_stimDetector;
+    //private CStimDetector m_stimDetector;
     private int m_artifChannel;
     private StimuliList m_expectedStims;
     public List<TStimIndex> stimIndices;
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
-
+    
     private Int64 m_squareError;
-
+    private CStimDetectShift m_stimDetector;
     private volatile bool m_kill;
 
 
@@ -45,7 +46,7 @@ namespace MEAClosedLoop
 
 
       //m_stimDetector = new CStimDetector(15, 35, 150); //old
-
+      m_stimDetector = new CStimDetectShift();
       m_artifChannel = m_inputStream.ChannelList[0];
       m_expectedStims = sl;
       m_kill = false;
@@ -65,7 +66,7 @@ namespace MEAClosedLoop
       // [TODO] Check here if we need to call Stim Detector now
       // if(IsStimulusExpected(timestamp, m_expectedStims) {
       
-      stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims); //old version
+      stimIndices = m_stimDetector.GetStims(currPacket[m_artifChannel], m_expectedStims); //old version //new vers. used like old
       //CStimDetectShift m_stimDetector = new CStimDetector(); //TODO: fix constructor
       //List<TStimIndex> stimIndices = m_CStimDetector.GetShift();
       

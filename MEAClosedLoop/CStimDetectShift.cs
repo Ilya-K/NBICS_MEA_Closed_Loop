@@ -10,7 +10,7 @@ namespace MEAClosedLoop
   using TData = Double;
   using TStimIndex = System.Int16;
 
-  class CStimDetectShift
+  public class CStimDetectShift
   {
     public const int ErrorState = -3303;
     private int shift;
@@ -31,7 +31,7 @@ namespace MEAClosedLoop
     //2: Get all pegs by Abstract reserch
 
 
-    public CStimDetectShift(TRawData[] p, List<TStimGroup> m_expectedStims)
+    public CStimDetectShift()
     {
       // TODO: Complete member initialization
 
@@ -51,7 +51,7 @@ namespace MEAClosedLoop
           //TODO find all by hard research;
           for (Int16 i = 0; i < DataPocket.Count(); i++)
           {
-            if (ValidateSingleStimInT(i))
+            if (BasicValidateSingleStimInT(i))
             {
               ValidateCount++;
               FindedPegs.Add(i);
@@ -63,7 +63,7 @@ namespace MEAClosedLoop
       //If all is realy bad;
       return ErrorList;
     }
-    private bool ValidateSingleStimInT(long t)
+    private bool BasicValidateSingleStimInT(long t)
     {
       switch (WayNum)
       {

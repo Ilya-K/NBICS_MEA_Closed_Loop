@@ -87,7 +87,7 @@ namespace StimDetectorTest
     }
 
 
-    private const string confName = "config.cfg";
+    private const string confName = "../../config.cfg";
 
     // does not work
     /*static string ParseConfigLine(string s, out int stimType, out int stimStart) {
@@ -141,7 +141,7 @@ namespace StimDetectorTest
           sw1.Start();
           errorRate+=tester.RunTest();
           sw1.Stop();
-          Console.WriteLine("\t\tTIME: "); //TODO
+          Console.WriteLine("\tTIME (in milliseconds): " + sw1.ElapsedMilliseconds.ToString());
         }
       }
 
