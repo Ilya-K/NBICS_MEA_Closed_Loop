@@ -41,6 +41,7 @@ namespace MEAClosedLoop
       List<TStimIndex> FindedPegs = new List<TStimIndex>();
       List<TStimIndex> ErrorList = new List<TStimIndex> { 0 };
       this.F = DataPocket;
+			WayNum = SearchType;
       int ValidateCount = 0;
       switch (WayNum)
       {
@@ -72,7 +73,7 @@ namespace MEAClosedLoop
         case 2:
           if (F[t + 1] - F[t] > 45 &&
               F[t + 2] - F[t + 1] > 45 &&
-              F[t + 3] - F[t + 2] > 45)
+              F[t + 3] - F[t + 2] > 45 )
           {
             return true;
           }
