@@ -57,12 +57,13 @@ namespace MEAClosedLoop
               ValidateCount++;
               FindedPegs.Add(i);
             }
-          }
+          }	
           MissedStimsCount = ExpectedStims[0].count - ValidateCount;
           break;
       }
+			return FindedPegs;
       //If all is realy bad;
-      return ErrorList;
+			//if(ValidateCount == 0) return null;
     }
     private bool BasicValidateSingleStimInT(long t)
     {
