@@ -78,7 +78,7 @@ namespace MEAClosedLoop
 
 			//TODO find all by hard research;
 			//Opimization cycle
-			int DataPacketLength = DataPacket.Count()-4;
+			int DataPacketLength = DataPacket.Length - 4;
 			//EndOpimization
 			for (Int16 i = 0; i < DataPacketLength; i++)
 			{
