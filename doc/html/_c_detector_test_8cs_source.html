@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.5"/>
+<title>MEA_Closed_Loop: Исходный файл StimDetectorTest/CDetectorTest.cs</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() { searchBox.OnSelectItem(0); });
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td style="padding-left: 0.5em;">
+   <div id="projectname">MEA_Closed_Loop
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.5 -->
+<script type="text/javascript">
+var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
+</script>
+  <div id="navrow1" class="tabs">
+    <ul class="tablist">
+      <li><a href="index.html"><span>Титульная&#160;страница</span></a></li>
+      <li><a href="pages.html"><span>Описания</span></a></li>
+      <li><a href="namespaces.html"><span>Пакеты</span></a></li>
+      <li><a href="annotated.html"><span>Классы</span></a></li>
+      <li class="current"><a href="files.html"><span>Файлы</span></a></li>
+      <li>
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.png"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Поиск" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.png" alt=""/></a>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="files.html"><span>Файлы</span></a></li>
+      <li><a href="globals.html"><span>Список&#160;членов&#160;всех&#160;файлов</span></a></li>
+    </ul>
+  </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('_c_detector_test_8cs_source.html','');});
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>Указатель</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Классы</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Пространства имен</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Файлы</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Функции</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Переменные</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Определения типов</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Элементы перечислений</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Свойства</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Страницы</a></div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">CDetectorTest.cs</div>  </div>
+</div><!--header-->
+<div class="contents">
+<a href="_c_detector_test_8cs.html">См. документацию.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="keyword">using</span> System;</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="keyword">using</span> System.Collections.Generic;</div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="keyword">using</span> System.Linq;</div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="keyword">using</span> System.Text;</div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="keyword">using</span> System.Threading;</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">using</span> Neurorighter;</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">using</span> Common;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">using</span> MEAClosedLoop;</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
+<div class="line"><a name="l00011"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html">   11</a></span>&#160;<span class="keyword">namespace </span>StimDetectorTest</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;{</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html#a45d42dc432346c0edaafe72e1c564e18">   13</a></span>&#160;  <span class="keyword">using</span> <a class="code" href="namespace_stim_detector_test.html#a45d42dc432346c0edaafe72e1c564e18">TData</a> = System.Double;</div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html#a69aaa546c2ea0ffbdd5e0e78ed050f2e">   14</a></span>&#160;  <span class="keyword">using</span> <a class="code" href="namespace_stim_detector_test.html#a69aaa546c2ea0ffbdd5e0e78ed050f2e">TTime</a> = System.UInt64;</div>
+<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html#a000a7aad3722f57fbabf6b52ca345071">   15</a></span>&#160;  <span class="keyword">using</span> <a class="code" href="namespace_stim_detector_test.html#a000a7aad3722f57fbabf6b52ca345071">TStimIndex</a> = System.Int16;</div>
+<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html#adebd710046fc529e74db8a626885b242">   16</a></span>&#160;  <span class="keyword">using</span> <a class="code" href="namespace_stim_detector_test.html#adebd710046fc529e74db8a626885b242">TRawDataPacket</a> = Dictionary&lt;int, ushort[]&gt;;</div>
+<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html#a99d7f5c8035fd41b47e6fc46728ad9b9">   17</a></span>&#160;  <span class="keyword">using</span> <a class="code" href="namespace_stim_detector_test.html#a99d7f5c8035fd41b47e6fc46728ad9b9">StimuliList</a> = List&lt;TStimGroup&gt;;</div>
+<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="namespace_stim_detector_test.html#a36edfb15f7afa848f09293229c1a91d6">   18</a></span>&#160;  <span class="keyword">using</span> <a class="code" href="namespace_stim_detector_test.html#a36edfb15f7afa848f09293229c1a91d6">MSTime</a> = UInt64;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="class_stim_detector_test_1_1_c_detector_test.html">   20</a></span>&#160;  <span class="keyword">public</span> <span class="keyword">class </span><a class="code" href="class_stim_detector_test_1_1_c_detector_test.html">CDetectorTest</a></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  {</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> DEFAULT_VALUE = 32767;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> MIN_PACKET_SIZE = 150;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> BLOCK_SIZE = 2500;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keyword">private</span> <a class="code" href="class_m_e_a_closed_loop_1_1_c_input_stream.html">CInputStream</a> m_inputStream;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keyword">private</span> <a class="code" href="namespace_stim_detector_test.html#adebd710046fc529e74db8a626885b242">TRawDataPacket</a> m_prevPacket;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="comment">//private CStimDetector m_stimDetector;</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keyword">private</span> <span class="keywordtype">int</span> m_artifChannel;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keyword">private</span> <a class="code" href="namespace_stim_detector_test.html#a99d7f5c8035fd41b47e6fc46728ad9b9">StimuliList</a> m_expectedStims;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="class_stim_detector_test_1_1_c_detector_test.html#ac2773cb0ab6fa5c094f68e200cb5b933">   31</a></span>&#160;    <span class="keyword">public</span> List&lt;TStimIndex&gt; <a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#ac2773cb0ab6fa5c094f68e200cb5b933">m_stimIndices</a>;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keyword">private</span> <a class="code" href="struct_m_e_a_closed_loop_1_1_t_stim_group.html">TStimGroup</a> m_nextExpectedStim;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keyword">private</span> <a class="code" href="namespace_m_e_a_closed_loop.html#a9117b99a9680bc96e3e8af56c3321cd6">OnStreamKillDelegate</a> m_onStreamKill = null;</div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="class_stim_detector_test_1_1_c_detector_test.html#ac95f8119af3a9d5982bc902f721cb07e">   34</a></span>&#160;    <span class="keyword">public</span> <a class="code" href="namespace_m_e_a_closed_loop.html#a9117b99a9680bc96e3e8af56c3321cd6">OnStreamKillDelegate</a> <a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#ac95f8119af3a9d5982bc902f721cb07e">OnStreamKill</a> { set { m_onStreamKill = value; } }</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">private</span> Int64 m_squareError;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">private</span> <a class="code" href="class_m_e_a_closed_loop_1_1_c_stim_detect_shift.html">CStimDetectShift</a> m_stimDetector;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keywordtype">bool</span> m_kill;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
+<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="class_stim_detector_test_1_1_c_detector_test.html#a72f98b1d100edc260adcae20c7308024">   41</a></span>&#160;    <span class="keyword">public</span> <a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#a72f98b1d100edc260adcae20c7308024">CDetectorTest</a>(<span class="keywordtype">string</span> fileName, <a class="code" href="namespace_stim_detector_test.html#a99d7f5c8035fd41b47e6fc46728ad9b9">StimuliList</a> sl)</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    {</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;      List&lt;int&gt; channelList = <span class="keyword">new</span> List&lt;int&gt;(<span class="keyword">new</span> <span class="keywordtype">int</span>[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 });</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;      m_inputStream = <span class="keyword">new</span> <a class="code" href="class_m_e_a_closed_loop_1_1_c_input_stream.html">CInputStream</a>(fileName, channelList, BLOCK_SIZE);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      m_inputStream.OnStreamKill = Dismiss;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      m_inputStream.ConsumerList.Add(<a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#ae6797ba2c36e481a846a9689e3474b6d">ReceiveData</a>);</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      <a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#ac2773cb0ab6fa5c094f68e200cb5b933">m_stimIndices</a> = <span class="keyword">new</span> List&lt;TStimIndex&gt;();</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      <span class="comment">//m_stimDetector = new CStimDetector(15, 35, 150); //old</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;      m_stimDetector = <span class="keyword">new</span> <a class="code" href="class_m_e_a_closed_loop_1_1_c_stim_detect_shift.html">CStimDetectShift</a>();</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      m_artifChannel = m_inputStream.ChannelList[0];</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;      m_expectedStims = sl;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      m_nextExpectedStim = sl[0];</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      sl.RemoveAt(0);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;      m_kill = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    }</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="class_stim_detector_test_1_1_c_detector_test.html#ae6797ba2c36e481a846a9689e3474b6d">   62</a></span>&#160;    <span class="keyword">public</span> <span class="keywordtype">void</span> <a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#ae6797ba2c36e481a846a9689e3474b6d">ReceiveData</a>(<a class="code" href="namespace_stim_detector_test.html#adebd710046fc529e74db8a626885b242">TRawDataPacket</a> currPacket)  <span class="comment">//TODO: make absolute stimIndices</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    {</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;      <a class="code" href="namespace_stim_detector_test.html#a69aaa546c2ea0ffbdd5e0e78ed050f2e">TTime</a> endOfPacket = m_inputStream.TimeStamp + (<a class="code" href="namespace_stim_detector_test.html#a69aaa546c2ea0ffbdd5e0e78ed050f2e">TTime</a>)currPacket[currPacket.Keys.Min()].Length;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;      <span class="keywordflow">if</span> (m_nextExpectedStim.<a class="code" href="struct_m_e_a_closed_loop_1_1_t_stim_group.html#a619c5c5bec9ca3ca2c8fe9106951d4d8">stimTime</a> &lt; endOfPacket)</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;      {</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim)); <span class="comment">//old version //new vers. used like old</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        m_nextExpectedStim = m_expectedStims[0];</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        m_expectedStims.RemoveAt(0);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      }</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;      <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      {</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;      }</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;      <span class="comment">// Calculate error</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;      <span class="comment">// m_squareError += error;</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      m_prevPacket = currPacket;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    }</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="class_stim_detector_test_1_1_c_detector_test.html#a781e9d8cf9f2047db26d4fa0e411cf81">   83</a></span>&#160;    <span class="keyword">public</span> UInt64 <a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#a781e9d8cf9f2047db26d4fa0e411cf81">RunTest</a>(List&lt;TStimIndex&gt; realStimIndices)</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    {</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;      <a class="code" href="namespace_stim_detector_test.html#a36edfb15f7afa848f09293229c1a91d6">MSTime</a> squareError = 0; <span class="comment">//not really square</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;      m_inputStream.Start();</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;      m_inputStream.WaitEOF();</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;      <span class="comment">//comparing m_stimIndices with realStimIndices</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt;= m_stimIndices.Count(); i++)</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;      {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        squareError += Helpers.Int2Time(Convert.ToUInt64(Math.Abs(<a class="code" href="class_stim_detector_test_1_1_c_detector_test.html#ac2773cb0ab6fa5c094f68e200cb5b933">m_stimIndices</a>[i] - realStimIndices[i])));</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;      }</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;      <span class="keywordflow">return</span> squareError;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;      <span class="comment">//return 0;</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    }</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="keyword">private</span> <span class="keywordtype">void</span> Dismiss()</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    {</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;      m_kill = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;      <span class="keywordflow">if</span> (m_onStreamKill != null) m_onStreamKill();</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    }</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;  }</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;}</div>
+<div class="ttc" id="namespace_stim_detector_test_html_a45d42dc432346c0edaafe72e1c564e18"><div class="ttname"><a href="namespace_stim_detector_test.html#a45d42dc432346c0edaafe72e1c564e18">StimDetectorTest.TData</a></div><div class="ttdeci">System.Double TData</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00013">CDetectorTest.cs:13</a></div></div>
+<div class="ttc" id="class_stim_detector_test_1_1_c_detector_test_html_ae6797ba2c36e481a846a9689e3474b6d"><div class="ttname"><a href="class_stim_detector_test_1_1_c_detector_test.html#ae6797ba2c36e481a846a9689e3474b6d">StimDetectorTest.CDetectorTest.ReceiveData</a></div><div class="ttdeci">void ReceiveData(TRawDataPacket currPacket)</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00062">CDetectorTest.cs:62</a></div></div>
+<div class="ttc" id="namespace_stim_detector_test_html_a69aaa546c2ea0ffbdd5e0e78ed050f2e"><div class="ttname"><a href="namespace_stim_detector_test.html#a69aaa546c2ea0ffbdd5e0e78ed050f2e">StimDetectorTest.TTime</a></div><div class="ttdeci">System.UInt64 TTime</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00014">CDetectorTest.cs:14</a></div></div>
+<div class="ttc" id="class_stim_detector_test_1_1_c_detector_test_html_a72f98b1d100edc260adcae20c7308024"><div class="ttname"><a href="class_stim_detector_test_1_1_c_detector_test.html#a72f98b1d100edc260adcae20c7308024">StimDetectorTest.CDetectorTest.CDetectorTest</a></div><div class="ttdeci">CDetectorTest(string fileName, StimuliList sl)</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00041">CDetectorTest.cs:41</a></div></div>
+<div class="ttc" id="class_m_e_a_closed_loop_1_1_c_input_stream_html"><div class="ttname"><a href="class_m_e_a_closed_loop_1_1_c_input_stream.html">MEAClosedLoop.CInputStream</a></div><div class="ttdef"><b>Definition:</b> <a href="_c_input_stream_8cs_source.html#l00023">CInputStream.cs:23</a></div></div>
+<div class="ttc" id="namespace_stim_detector_test_html_adebd710046fc529e74db8a626885b242"><div class="ttname"><a href="namespace_stim_detector_test.html#adebd710046fc529e74db8a626885b242">StimDetectorTest.TRawDataPacket</a></div><div class="ttdeci">Dictionary&lt; int, ushort[]&gt; TRawDataPacket</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00016">CDetectorTest.cs:16</a></div></div>
+<div class="ttc" id="struct_m_e_a_closed_loop_1_1_t_stim_group_html_a619c5c5bec9ca3ca2c8fe9106951d4d8"><div class="ttname"><a href="struct_m_e_a_closed_loop_1_1_t_stim_group.html#a619c5c5bec9ca3ca2c8fe9106951d4d8">MEAClosedLoop.TStimGroup.stimTime</a></div><div class="ttdeci">UInt64 stimTime</div><div class="ttdef"><b>Definition:</b> <a href="_m_e_a_closed_loop_2_common_2_common_8cs_source.html#l00062">Common.cs:62</a></div></div>
+<div class="ttc" id="struct_m_e_a_closed_loop_1_1_t_stim_group_html"><div class="ttname"><a href="struct_m_e_a_closed_loop_1_1_t_stim_group.html">MEAClosedLoop.TStimGroup</a></div><div class="ttdef"><b>Definition:</b> <a href="_m_e_a_closed_loop_2_common_2_common_8cs_source.html#l00060">Common.cs:60</a></div></div>
+<div class="ttc" id="class_stim_detector_test_1_1_c_detector_test_html_ac2773cb0ab6fa5c094f68e200cb5b933"><div class="ttname"><a href="class_stim_detector_test_1_1_c_detector_test.html#ac2773cb0ab6fa5c094f68e200cb5b933">StimDetectorTest.CDetectorTest.m_stimIndices</a></div><div class="ttdeci">List&lt; TStimIndex &gt; m_stimIndices</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00031">CDetectorTest.cs:31</a></div></div>
+<div class="ttc" id="namespace_stim_detector_test_html_a99d7f5c8035fd41b47e6fc46728ad9b9"><div class="ttname"><a href="namespace_stim_detector_test.html#a99d7f5c8035fd41b47e6fc46728ad9b9">StimDetectorTest.StimuliList</a></div><div class="ttdeci">List&lt; TStimGroup &gt; StimuliList</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00017">CDetectorTest.cs:17</a></div></div>
+<div class="ttc" id="namespace_stim_detector_test_html_a000a7aad3722f57fbabf6b52ca345071"><div class="ttname"><a href="namespace_stim_detector_test.html#a000a7aad3722f57fbabf6b52ca345071">StimDetectorTest.TStimIndex</a></div><div class="ttdeci">System.Int16 TStimIndex</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00015">CDetectorTest.cs:15</a></div></div>
+<div class="ttc" id="class_m_e_a_closed_loop_1_1_c_stim_detect_shift_html"><div class="ttname"><a href="class_m_e_a_closed_loop_1_1_c_stim_detect_shift.html">MEAClosedLoop.CStimDetectShift</a></div><div class="ttdef"><b>Definition:</b> <a href="_c_stim_detect_shift_8cs_source.html#l00013">CStimDetectShift.cs:13</a></div></div>
+<div class="ttc" id="class_stim_detector_test_1_1_c_detector_test_html_ac95f8119af3a9d5982bc902f721cb07e"><div class="ttname"><a href="class_stim_detector_test_1_1_c_detector_test.html#ac95f8119af3a9d5982bc902f721cb07e">StimDetectorTest.CDetectorTest.OnStreamKill</a></div><div class="ttdeci">OnStreamKillDelegate OnStreamKill</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00034">CDetectorTest.cs:34</a></div></div>
+<div class="ttc" id="class_stim_detector_test_1_1_c_detector_test_html"><div class="ttname"><a href="class_stim_detector_test_1_1_c_detector_test.html">StimDetectorTest.CDetectorTest</a></div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00020">CDetectorTest.cs:20</a></div></div>
+<div class="ttc" id="namespace_m_e_a_closed_loop_html_a9117b99a9680bc96e3e8af56c3321cd6"><div class="ttname"><a href="namespace_m_e_a_closed_loop.html#a9117b99a9680bc96e3e8af56c3321cd6">MEAClosedLoop.OnStreamKillDelegate</a></div><div class="ttdeci">delegate void OnStreamKillDelegate()</div></div>
+<div class="ttc" id="class_stim_detector_test_1_1_c_detector_test_html_a781e9d8cf9f2047db26d4fa0e411cf81"><div class="ttname"><a href="class_stim_detector_test_1_1_c_detector_test.html#a781e9d8cf9f2047db26d4fa0e411cf81">StimDetectorTest.CDetectorTest.RunTest</a></div><div class="ttdeci">UInt64 RunTest(List&lt; TStimIndex &gt; realStimIndices)</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00083">CDetectorTest.cs:83</a></div></div>
+<div class="ttc" id="namespace_stim_detector_test_html_a36edfb15f7afa848f09293229c1a91d6"><div class="ttname"><a href="namespace_stim_detector_test.html#a36edfb15f7afa848f09293229c1a91d6">StimDetectorTest.MSTime</a></div><div class="ttdeci">UInt64 MSTime</div><div class="ttdef"><b>Definition:</b> <a href="_c_detector_test_8cs_source.html#l00018">CDetectorTest.cs:18</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_d6f94dd29b796c2da3ed77c113d8e201.html">StimDetectorTest</a></li><li class="navelem"><a class="el" href="_c_detector_test_8cs.html">CDetectorTest.cs</a></li>
+    <li class="footer">Документация по MEA_Closed_Loop. Последние изменения: Пн 18 Ноя 2013 15:42:24. Создано системой
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.5 </li>
+  </ul>
+</div>
+</body>
+</html>
