@@ -151,18 +151,26 @@ namespace StimDetectorTest
         {
           Int32 stimType, stimStart;
           string fileName;
-          ss = strReader.ReadLine().Split(new Char[] { ' ', ' ' });
+          string str = strReader.ReadLine();
+          if (str[0] == '#') continue;
+          ss = str.Split(new Char[] { ' ', ' ' });
           stimType = Int32.Parse(ss[0]);
           stimStart = Int32.Parse(ss[1]);
           fileName = ss[2];
 
           Console.WriteLine("\tFILE: {0}", fileName);
 
-
-          sl_indices = GenStimulList(Helpers.Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
-          sl_vary = GenStimulVaryList(Helpers.Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
-
-
+          if (stimType != 0)
+          {
+            sl_indices = GenStimulList(Helpers.Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
+            sl_vary = GenStimulVaryList(Helpers.Int2Time(Convert.ToUInt64(stimStart)), stimType, DO_HRENA);
+          }
+          else
+          {
+            sl_vary = null;
+            sl_indices = null;
+          }
+          
           CDetectorTest tester = new CDetectorTest(fileName, sl_vary);
 
           sw1.Start();

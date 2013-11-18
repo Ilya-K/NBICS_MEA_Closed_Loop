@@ -37,6 +37,8 @@ namespace StimDetectorTest
     private CStimDetectShift m_stimDetector;
     private volatile bool m_kill;
 
+    private bool m_CalmMode;
+
 
     public CDetectorTest(string fileName, StimuliList sl)
     {
@@ -53,9 +55,15 @@ namespace StimDetectorTest
       //m_stimDetector = new CStimDetector(15, 35, 150); //old
       m_stimDetector = new CStimDetectShift();
       m_artifChannel = m_inputStream.ChannelList[0];
-      m_expectedStims = sl;
-      m_nextExpectedStim = sl[0];
-      sl.RemoveAt(0);
+
+      if (sl != null)
+      {
+        m_CalmMode = false;
+        m_expectedStims = sl;
+        m_nextExpectedStim = sl[0];
+        sl.RemoveAt(0);
+      }
+      else m_CalmMode = true;
       m_kill = false;
     }
 
@@ -65,9 +73,13 @@ namespace StimDetectorTest
 
       if (m_nextExpectedStim.stimTime < endOfPacket)
       {
-        m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim)); //old version //new vers. used like old
-        m_nextExpectedStim = m_expectedStims[0];
-        m_expectedStims.RemoveAt(0);
+        if (m_CalmMode) m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
+        else
+        {
+          m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim)); //old version //new vers. used like old
+          m_nextExpectedStim = m_expectedStims[0];
+          m_expectedStims.RemoveAt(0);
+        }
       }
       else
       {
@@ -90,9 +102,16 @@ namespace StimDetectorTest
 
       //comparing m_stimIndices with realStimIndices
 
-      for (int i = 0; i <= m_stimIndices.Count(); i++)
+      if (realStimIndices == null)
       {
-        squareError += Helpers.Int2Time(Convert.ToUInt64(Math.Abs(m_stimIndices[i] - realStimIndices[i])));
+        return Convert.ToUInt64(m_stimIndices.Count());
+      }
+      else
+      {
+        for (int i = 0; i < realStimIndices.Count(); i++)
+        {
+          squareError += Helpers.Int2Time(Convert.ToUInt64(Math.Abs(m_stimIndices[i] - realStimIndices[i])));
+        }
       }
 
       return squareError;

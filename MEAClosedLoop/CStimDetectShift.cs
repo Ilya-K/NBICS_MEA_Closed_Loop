@@ -13,6 +13,7 @@ namespace MEAClosedLoop
 	public class CStimDetectShift
 	{
 		public const int ErrorState = -3303;
+    private const TStimIndex FILTER_DEPTH = 3;
 		private int shift;
 		private int DoubleStimPeriod;
 		private int sigma;
@@ -24,7 +25,8 @@ namespace MEAClosedLoop
 		private int WayNum;
 		private TRawData[] F;
 		private List<TStimGroup> m_expectedStims;
-		private int MissedStimsCount; // how many stims wasn't found at preview Data Pocket  
+		private int MissedStimsCount; // how many stims wasn't found at preview Data Pocket
+    private TRawData[] m_prevDataPoints;
 
 		//Way Nums:
 		//1:Deault, Find all pegs by using ExpectedStims
@@ -34,15 +36,33 @@ namespace MEAClosedLoop
 		public CStimDetectShift()
 		{
 			// TODO: Complete member initialization
-
+      m_prevDataPoints = new TRawData[6];
 		}
 		public List<TStimIndex> GetStims(TRawData[] DataPacket, TStimGroup ExpectedStim)
 		{
-			List<TStimIndex> FindedPegs = new List<TStimIndex>();
+      List<TStimIndex> FoundPegs = new List<TStimIndex>();
 			List<TStimIndex> ErrorList = new List<TStimIndex> { 0 };
-			this.F = DataPacket;
-			WayNum = 2;
-			int ValidateCount = 0;
+      int ValidateCount = 0;
+
+      // Process last FILTER_DEPTH points of the previous packet
+      this.F = m_prevDataPoints;
+      
+      // [TODO] Миша, если тете нужен этот switch, повтори его тут сам
+      for (TStimIndex i = 0; i < FILTER_DEPTH; i++)
+      {
+        m_prevDataPoints[FILTER_DEPTH + i] = DataPacket[i];
+        if (BasicValidateSingleStimInT(i))
+        {
+          ValidateCount++;
+          FoundPegs.Add((TStimIndex)(i - FILTER_DEPTH));
+        }
+      }
+
+      // Process current packet
+      this.F = DataPacket;
+
+      WayNum = 2;
+      int DataPacketLength = DataPacket.Length - FILTER_DEPTH - 1;
 			switch (WayNum)
 			{
 				case 1:
@@ -51,20 +71,25 @@ namespace MEAClosedLoop
 				case 2:
 					//TODO find all by hard research;
 					//Opimization cycle
-					int DataPacketLength = DataPacket.Count();
 					//EndOpimization
-					for (Int16 i = 0; i < DataPacketLength; i++)
+          for (TStimIndex i = 0; i < DataPacketLength; i++)
 					{
 						if (BasicValidateSingleStimInT(i))
 						{
 							ValidateCount++;
-							FindedPegs.Add(i);
+							FoundPegs.Add(i);
 						}
 					}
 					MissedStimsCount = ExpectedStim.count - ValidateCount;
 					break;
 			}
-			return FindedPegs;
+
+      for (int i = 0; i < FILTER_DEPTH; i++)
+      {
+        m_prevDataPoints[i] = DataPacket[DataPacketLength + i];
+      }
+      
+			return FoundPegs;
 			//If all is realy bad;
 			//if(ValidateCount == 0) return null;
 		}
@@ -80,7 +105,8 @@ namespace MEAClosedLoop
 			//Opimization cycle
 			int DataPacketLength = DataPacket.Length - 4;
 			//EndOpimization
-			for (Int16 i = 0; i < DataPacketLength; i++)
+
+      for (Int16 i = 0; i < DataPacketLength; i++)
 			{
 				if (BasicValidateSingleStimInT(i))
 				{
@@ -102,7 +128,7 @@ namespace MEAClosedLoop
 				case 1:
 					break;
 				case 2:
-					if (F[t + 1] - F[t] > 45 &&
+          if (F[t + 1] - F[t] > 45 &&
 							F[t + 2] - F[t + 1] > 45 &&
 							F[t + 3] - F[t + 2] > 45)
 					{
