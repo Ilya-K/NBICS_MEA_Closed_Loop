@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 using Neurorighter;
 using Common;
 using MEAClosedLoop;
@@ -33,6 +34,14 @@ namespace StimDetectorTest
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
 
+    // Count overhead in the number of the expected stimuli artifacts
+    private int m_numberExceeded = 0;
+    public int NumberExceeded { get { return m_numberExceeded; } }
+
+    private Stopwatch sw1;
+    private long m_timeElapsed = 0;
+    public long TimeElapsed { get { lock (sw1) return m_timeElapsed; } }
+
     private Int64 m_squareError;
     private CStimDetectShift m_stimDetector;
     private volatile bool m_kill;
@@ -49,6 +58,8 @@ namespace StimDetectorTest
       m_inputStream.OnStreamKill = Dismiss;
       m_inputStream.ConsumerList.Add(ReceiveData);
 
+      sw1 = new Stopwatch();
+      sw1.Reset();
 
       m_stimIndices = new List<TStimIndex>();
 
@@ -69,23 +80,31 @@ namespace StimDetectorTest
 
     public void ReceiveData(TRawDataPacket currPacket)  //TODO: make absolute stimIndices
     {
+      m_inputStream.Next();
       TTime endOfPacket = m_inputStream.TimeStamp + (TTime)currPacket[currPacket.Keys.Min()].Length;
 
       if (m_nextExpectedStim.stimTime < endOfPacket)
       {
-        if (m_CalmMode) m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
+        sw1.Start();
+        if (m_CalmMode)
+        {
+          m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
+        }
         else
         {
           m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim)); //old version //new vers. used like old
+
           m_nextExpectedStim = m_expectedStims[0];
           m_expectedStims.RemoveAt(0);
         }
+        sw1.Stop();
       }
+      /* // [ILYA_K] I believe it's not necessarily to run Stimulus Detector on the "empty" space
       else
       {
         m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
       }
-
+      */
       // Calculate error
       // m_squareError += error;
 
@@ -96,9 +115,14 @@ namespace StimDetectorTest
     {
       MSTime squareError = 0; //not really square
 
-
+      m_inputStream.Pause();
       m_inputStream.Start();
+      m_inputStream.Next();
       m_inputStream.WaitEOF();
+      m_inputStream.Kill();
+      m_inputStream = null;
+
+      lock (sw1) m_timeElapsed = sw1.ElapsedMilliseconds;
 
       //comparing m_stimIndices with realStimIndices
 
@@ -108,7 +132,15 @@ namespace StimDetectorTest
       }
       else
       {
-        for (int i = 0; i < realStimIndices.Count(); i++)
+        int commonStimsCount = m_stimIndices.Count();
+        if (commonStimsCount > realStimIndices.Count())
+        {
+          // [TODO] CountOverhead считается не точно, т.к. объём realStimIndices сильно завышен.
+          // Но это не страшно, т.к. в случае, если стимулов найдётся больше чем заказывали, то сильно увеличится суммарная ошибка.
+          m_numberExceeded = commonStimsCount - realStimIndices.Count();
+          commonStimsCount = realStimIndices.Count();
+        }
+        for (int i = 0; i < commonStimsCount; i++)
         {
           squareError += Helpers.Int2Time(Convert.ToUInt64(Math.Abs(m_stimIndices[i] - realStimIndices[i])));
         }

@@ -45,8 +45,8 @@ namespace MEAClosedLoop
 
       // Process last FILTER_DEPTH points of the previous packet
       this.F = m_prevDataPoints;
-      
-      // [TODO] Миша, если тебе нужен этот switch, повтори его тут сам
+
+      // [TODO] Миша, если тебе нужен этот switch по WayNum, повтори его тут сам
       for (TStimIndex i = 0; i < FILTER_DEPTH; i++)
       {
         m_prevDataPoints[FILTER_DEPTH + i] = DataPacket[i];

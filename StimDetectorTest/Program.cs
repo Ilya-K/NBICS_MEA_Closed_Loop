@@ -140,9 +140,9 @@ namespace StimDetectorTest
     {
       //CInputStream In = new CInputStream(, m_channelList, 2500); //deault
       //int errorRate = 0;
-      Stopwatch sw1 = new Stopwatch();
+      long timeElapsed = 0;
       UInt64 errorRate = 0;
-
+      int countOverhead = 0;
 
       using (StreamReader strReader = new StreamReader(confName)) //reading config
       {
@@ -173,15 +173,20 @@ namespace StimDetectorTest
           
           CDetectorTest tester = new CDetectorTest(fileName, sl_vary);
 
-          sw1.Start();
           errorRate+=tester.RunTest(sl_indices);
-          sw1.Stop();
-          Console.WriteLine("\tTIME (in milliseconds): " + sw1.ElapsedMilliseconds.ToString());
+          timeElapsed += tester.TimeElapsed;
+          countOverhead += tester.NumberExceeded;
+
+          Console.WriteLine("\tTIME (in milliseconds): " + timeElapsed.ToString());
+          if (countOverhead > 0)
+          {
+            Console.WriteLine("\tThe maximum expected number of artifacts has been exceeded by: " + countOverhead.ToString());
+          }
         }
       }
 
       Console.WriteLine("TOTAL ERROR: {0}", errorRate);
-
+      Console.ReadKey();
     }
 
   }
