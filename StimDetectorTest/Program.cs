@@ -153,7 +153,7 @@ namespace StimDetectorTest
           string fileName;
           string str = strReader.ReadLine();
           if (str[0] == '#') continue;
-          ss = str.Split(new Char[] { ' ', ' ' });
+          ss = str.Split(new Char[] { ' ', '\t' });
           stimType = Int32.Parse(ss[0]);
           stimStart = Int32.Parse(ss[1]);
           fileName = ss[2];

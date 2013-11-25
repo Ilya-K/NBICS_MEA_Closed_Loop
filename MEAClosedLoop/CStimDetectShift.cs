@@ -6,9 +6,9 @@ using System.Text;
 namespace MEAClosedLoop
 {
 
-	using TRawData = UInt16;
-	using TData = Double;
-	using TStimIndex = System.Int16;
+  using TRawData = UInt16;
+  using TData = Double;
+  using TStimIndex = System.Int16;
 
 	public class CStimDetectShift
 	{
@@ -28,10 +28,9 @@ namespace MEAClosedLoop
 		private int MissedStimsCount; // how many stims wasn't found at preview Data Pocket
     private TRawData[] m_prevDataPoints;
 
-		//Way Nums:
-		//1:Deault, Find all pegs by using ExpectedStims
-		//2: Get all pegs by Abstract reserch
-
+    //Way Nums:
+    //1:Deault, Find all pegs by using ExpectedStims
+    //2: Get all pegs by Abstract reserch
 
 		public CStimDetectShift()
 		{
@@ -47,7 +46,7 @@ namespace MEAClosedLoop
       // Process last FILTER_DEPTH points of the previous packet
       this.F = m_prevDataPoints;
       
-      // [TODO] Миша, если тете нужен этот switch, повтори его тут сам
+      // [TODO] Миша, если тебе нужен этот switch, повтори его тут сам
       for (TStimIndex i = 0; i < FILTER_DEPTH; i++)
       {
         m_prevDataPoints[FILTER_DEPTH + i] = DataPacket[i];
