@@ -14,9 +14,8 @@ namespace StimDetectorTest
   using TData = System.Double;
   using TTime = System.UInt64;
   using TStimIndex = System.Int16;
+  using TAbsStimIndex = System.UInt64;
   using TRawDataPacket = Dictionary<int, ushort[]>;
-  using StimuliList = List<TStimGroup>;
-  using MSTime = UInt64;
 
   public class CDetectorTest
   {
@@ -28,8 +27,8 @@ namespace StimDetectorTest
     private TRawDataPacket m_prevPacket;
     //private CStimDetector m_stimDetector;
     private int m_artifChannel;
-    private StimuliList m_expectedStims;
-    public List<TStimIndex> m_stimIndices;
+    private List<TStimGroup> m_expectedStims;
+    public List<TAbsStimIndex> m_stimIndices;
     private TStimGroup m_nextExpectedStim;
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
@@ -49,7 +48,7 @@ namespace StimDetectorTest
     private bool m_CalmMode;
 
 
-    public CDetectorTest(string fileName, StimuliList sl)
+    public CDetectorTest(string fileName, List<TStimGroup> sl)
     {
       List<int> channelList = new List<int>(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 });
 
@@ -61,7 +60,7 @@ namespace StimDetectorTest
       sw1 = new Stopwatch();
       sw1.Reset();
 
-      m_stimIndices = new List<TStimIndex>();
+      m_stimIndices = new List<TAbsStimIndex>();
 
       //m_stimDetector = new CStimDetector(15, 35, 150); //old
       m_stimDetector = new CStimDetectShift();
@@ -85,14 +84,19 @@ namespace StimDetectorTest
 
       if (m_nextExpectedStim.stimTime < endOfPacket)
       {
+        List<TStimIndex> currentList;
         sw1.Start();
         if (m_CalmMode)
         {
-          m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
+//          m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
         }
         else
         {
-          m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim)); //old version //new vers. used like old
+          currentList = m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim);
+          foreach (TStimIndex stimIdx in currentList)
+          {
+            m_stimIndices.Add(m_inputStream.TimeStamp + (TAbsStimIndex)stimIdx);
+          }
 
           m_nextExpectedStim = m_expectedStims[0];
           m_expectedStims.RemoveAt(0);
@@ -100,6 +104,7 @@ namespace StimDetectorTest
         sw1.Stop();
       }
       /* // [ILYA_K] I believe it's not necessarily to run Stimulus Detector on the "empty" space
+       * //may be needed on empty file test
       else
       {
         m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
@@ -111,9 +116,8 @@ namespace StimDetectorTest
       m_prevPacket = currPacket;
     }
 
-    public UInt64 RunTest(List<TStimIndex> realStimIndices)
+    public List<TAbsStimIndex> RunTest()
     {
-      MSTime squareError = 0; //not really square
 
       m_inputStream.Pause();
       m_inputStream.Start();
@@ -124,9 +128,11 @@ namespace StimDetectorTest
 
       lock (sw1) m_timeElapsed = sw1.ElapsedMilliseconds;
 
-      //comparing m_stimIndices with realStimIndices
+      //comparing m_stimIndices with realStimIndices moved to Program.cs
 
-      if (realStimIndices == null)
+      return m_stimIndices;
+
+      /*if (realStimIndices == null)
       {
         return Convert.ToUInt64(m_stimIndices.Count());
       }
@@ -147,8 +153,9 @@ namespace StimDetectorTest
       }
 
       return squareError;
-      //return 0;
+      //return 0;*/
     }
+
     private void Dismiss()
     {
       m_kill = true;

@@ -9,7 +9,6 @@ namespace MEAClosedLoop
   using TRawData = UInt16;
   using TData = Double;
   using TStimIndex = System.Int16;
-  using StimuliList = List<TStimGroup>;
 
   using TRawDataPacket = Dictionary<int, ushort[]>;
   //using TStimIndex = System.Int16;
@@ -46,7 +45,7 @@ namespace MEAClosedLoop
       //N_MEAN = 1;
     }
 
-    public List<TStimIndex> Detect(TRawData[] packet, StimuliList expectedStims)
+    public List<TStimIndex> Detect(TRawData[] packet, List<TStimGroup> expectedStims)
     {
       List<TStimIndex> detected = new List<TStimIndex>();
       if (expectedStims != null)

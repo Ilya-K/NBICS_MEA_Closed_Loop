@@ -6,20 +6,20 @@ using System.Text;
 namespace StimDetectorTest
 {
 
-  using MSTime = UInt64;
+  using TTime = UInt64;
 
   public static class Helpers
   {
-    public static MSTime Int2Time(UInt64 input)
+    public static TTime Int2Time(TTime input)
     {
       //100ms = 2500
-      MSTime output = input / 25;
+      TTime output = input / 25;
       return output;
     }
 
-    public static UInt64 Time2Int(MSTime input)
+    public static TTime Time2Int(TTime input)
     {
-      UInt64 output = input * 25;
+      TTime output = input * 25;
       return output;
     }
   }
