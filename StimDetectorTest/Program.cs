@@ -31,19 +31,15 @@ namespace StimDetectorTest
 
     private const TTime MAX_FILE_LENGTH = 800000 * TIME_MULT;
 
-    List<int> m_channelList;
-    private int m_selectedDAQ = -1;
-    private int m_fileIdx = -1;
-    private bool m_DAQConfigured = false;
+
     private CMcsUsbListNet m_usbDAQList = new CMcsUsbListNet();
-    Thread m_dataLoopThread;
     static List<TStimGroup> sl_vary; //with noise
     static List<TStimGroup> sl_groups; //exact
 
     static TTime GenNoise(TTime dest, TTime maxNoise)
     {
       Random random = new Random();
-      int randNoise = random.Next(0, Convert.ToInt32(2*maxNoise));
+      int randNoise = random.Next(0, Convert.ToInt32(2 * maxNoise));
       return dest - maxNoise + Convert.ToUInt64(randNoise);
     }
 
@@ -52,7 +48,7 @@ namespace StimDetectorTest
       TTime timeIterator;
       TStimGroup newStim;
       List<TStimGroup> output = new List<TStimGroup>();
-      
+
       switch (stimType)
       {
         case 1:
@@ -119,6 +115,7 @@ namespace StimDetectorTest
         for (localCount = 0; localCount < groupIterator.count; localCount++)
         {
           newIndex = groupIterator.stimTime + (UInt64)(localCount * groupIterator.period);
+          output.Add(newIndex);
         }
       }
 
@@ -164,7 +161,7 @@ namespace StimDetectorTest
             sl_vary = null;
             sl_groups = null;
           }
-          
+
           CDetectorTest tester = new CDetectorTest(fileName, sl_vary);
 
           List<TAbsStimIndex> foundStimIndices = tester.RunTest();
@@ -172,33 +169,35 @@ namespace StimDetectorTest
           List<TAbsStimIndex> realStimIndices = Groups2Indices(sl_groups);
 
           if (realStimIndices == null)
-      {
-        errorRate = Convert.ToUInt64(foundStimIndices.Count());
-      }
-      else
-      {
-        int commonStimsCount = foundStimIndices.Count();
-        if (commonStimsCount > realStimIndices.Count())
-        {
-          // [TODO] CountOverhead считается не точно, т.к. объём realStimIndices сильно завышен.
-          // Но это не страшно, т.к. в случае, если стимулов найдётся больше чем заказывали, то сильно увеличится суммарная ошибка.
-          countOverhead = commonStimsCount - realStimIndices.Count();
-          commonStimsCount = realStimIndices.Count();
-        }
-        
-        for (int i = 0; i < commonStimsCount; i++)
-        {
-          if (foundStimIndices[i] > realStimIndices[i])
           {
-            errorRate += foundStimIndices[i] - realStimIndices[i];
+            errorRate = Convert.ToUInt64(foundStimIndices.Count());
           }
           else
           {
-            errorRate += realStimIndices[i] - foundStimIndices[i];
-          }
+            int commonStimsCount = foundStimIndices.Count();
+            if (commonStimsCount > realStimIndices.Count())
+            {
+              // [TODO] CountOverhead считается не точно, т.к. объём realStimIndices сильно завышен.
+              // Но это не страшно, т.к. в случае, если стимулов найдётся больше чем заказывали, то сильно увеличится суммарная ошибка.
+              countOverhead = commonStimsCount - realStimIndices.Count();
+              commonStimsCount = realStimIndices.Count();
+            }
 
-        }
-      }
+
+            Console.WriteLine("stims count: " + commonStimsCount.ToString());
+            for (int i = 0; i < commonStimsCount; i++)
+            {
+              if (foundStimIndices[i] > realStimIndices[i])
+              {
+                errorRate += foundStimIndices[i] - realStimIndices[i];
+              }
+              else
+              {
+                errorRate += realStimIndices[i] - foundStimIndices[i];
+              }
+              Console.WriteLine("index " + i.ToString() + ": error: " + errorRate.ToString());
+            }
+          }
 
 
 

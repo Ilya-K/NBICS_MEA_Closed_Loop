@@ -93,6 +93,7 @@ namespace StimDetectorTest
           foreach (TStimIndex stimIdx in currentList)
           {
             m_stimIndices.Add(m_inputStream.TimeStamp + (TAbsStimIndex)stimIdx);
+            Console.WriteLine("stim add: " + m_stimIndices[m_stimIndices.Count()-1].ToString());
           }
 
           m_nextExpectedStim = m_expectedStims[0];
