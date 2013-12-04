@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Diagnostics;
 using Neurorighter;
-using Common;
 using MEAClosedLoop;
 
 
@@ -25,7 +24,6 @@ namespace StimDetectorTest
 
     private CInputStream m_inputStream;
     private TRawDataPacket m_prevPacket;
-    //private CStimDetector m_stimDetector;
     private int m_artifChannel;
     private List<TStimGroup> m_expectedStims;
     public List<TAbsStimIndex> m_stimIndices;
@@ -61,8 +59,7 @@ namespace StimDetectorTest
       sw1.Reset();
 
       m_stimIndices = new List<TAbsStimIndex>();
-
-      //m_stimDetector = new CStimDetector(15, 35, 150); //old
+      
       m_stimDetector = new CStimDetectShift();
       m_artifChannel = m_inputStream.ChannelList[0];
 
@@ -131,29 +128,6 @@ namespace StimDetectorTest
       //comparing m_stimIndices with realStimIndices moved to Program.cs
 
       return m_stimIndices;
-
-      /*if (realStimIndices == null)
-      {
-        return Convert.ToUInt64(m_stimIndices.Count());
-      }
-      else
-      {
-        int commonStimsCount = m_stimIndices.Count();
-        if (commonStimsCount > realStimIndices.Count())
-        {
-          // [TODO] CountOverhead считается не точно, т.к. объём realStimIndices сильно завышен.
-          // Но это не страшно, т.к. в случае, если стимулов найдётся больше чем заказывали, то сильно увеличится суммарная ошибка.
-          m_numberExceeded = commonStimsCount - realStimIndices.Count();
-          commonStimsCount = realStimIndices.Count();
-        }
-        for (int i = 0; i < commonStimsCount; i++)
-        {
-          squareError += Helpers.Int2Time(Convert.ToUInt64(Math.Abs(m_stimIndices[i] - realStimIndices[i])));
-        }
-      }
-
-      return squareError;
-      //return 0;*/
     }
 
     private void Dismiss()
