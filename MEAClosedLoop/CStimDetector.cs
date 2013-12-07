@@ -8,6 +8,7 @@ namespace MEAClosedLoop
 {
   using TRawData = UInt16;
   using TData = Double;
+  using TTime = UInt64;
   using TStimIndex = System.Int16;
 
   using TRawDataPacket = Dictionary<int, ushort[]>;
@@ -15,16 +16,24 @@ namespace MEAClosedLoop
 
   public class CStimDetector
   {
+    private const int DAQ_FREQ = 25000;
+    private const int TIME_MULT = DAQ_FREQ / 1000;
     //private const int EXP_MEAN_N = 50;
     //private TRawDataPacket m_prevPacket;
     private CCalcSE_N m_calcSE;
     private double m_threshhold;
     private int m_blankWidth;
     private int m_maxSlope;
+    // Maximum possible deviation of stimulus with respect to the expected stimulus
+    private uint m_maxJitter;
     private bool m_prevPacketNotFinished = false;
     private bool m_continuePrevPacket = false;
     private TRawData[] m_prevBlock;
     private TData m_prevSE;
+    private List<TStimGroup> m_expectedStims;
+    private object lockStimList = new object();
+    private TStimGroup m_nextExpectedStim;
+
     //private double m_meanSE = 0;
     //private int N_MEAN;
 
@@ -35,14 +44,38 @@ namespace MEAClosedLoop
     /// <param name="n">SE window width. Should be half of "still" period</param>
     /// <param name="threshhold">How much SE should decrease to consider start of blanking period</param>
     /// <param name="maxSlope">How much should be summary slope of 3 samples after blanking period</param>
-    public CStimDetector(int n, TData threshhold = 35, TRawData maxSlope = 150)
+    public CStimDetector(int n, int maxJitter = 20 * TIME_MULT, TData threshhold = 35, TRawData maxSlope = 150)
     {
       m_calcSE = new CCalcSE_N(n);
       m_prevBlock = new TRawData[n];
       m_blankWidth = n;
       m_threshhold = threshhold;
       m_maxSlope = maxSlope;
+      m_maxJitter = (uint)maxJitter;
       //N_MEAN = 1;
+    }
+
+    public void SetExpectedStims(TStimGroup nextStimGroup)
+    {
+      lock (lockStimList)
+      {
+        m_expectedStims.Add(nextStimGroup);
+      }
+    }
+
+    public bool IsStimulusExpected(TTime eopTimestamp)
+    {
+      lock (lockStimList)
+      {
+        if (m_expectedStims.Count > 0)
+        {
+          if (eopTimestamp + m_maxJitter >= m_expectedStims[0].stimTime)
+          {
+            return true;
+          }
+        }
+      }
+      return false;
     }
 
     public List<TStimIndex> Detect(TRawData[] packet, List<TStimGroup> expectedStims)

@@ -9,6 +9,7 @@ using Common;
 namespace MEAClosedLoop
 {
   using TData = System.Double;
+  using TTime = System.UInt64;
   using TStimIndex = System.Int16;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
@@ -42,15 +43,14 @@ namespace MEAClosedLoop
 
     // [DEBUG]
 
-    public CFiltering(CInputStream inputStream, SALPAParams parSALPA, BFParams parBF)
+    public CFiltering(CInputStream inputStream, CStimDetector stimDetector, SALPAParams parSALPA, BFParams parBF)
     {
       m_inputStream = inputStream;
       m_inputStream.OnStreamKill = Dismiss;
       m_inputStream.ConsumerList.Add(ReceiveData);
 
+      m_stimDetector = stimDetector;
 
-      // [TODO] Get parameters from UI and save them in Settings
-      m_stimDetector = new CStimDetector(15, 35, 150);
       // [TODO] Allow user to choose stimulus artifact detection channel
       m_artifChannel = m_inputStream.ChannelList[0];
       m_expectedStims = null;
@@ -131,11 +131,22 @@ namespace MEAClosedLoop
           foreach (int channel in currPacket.Keys) m_prevPacket[channel] = new ushort[MIN_PACKET_SIZE];
           m_prevPacket.Keys.AsParallel().ForAll(channel => Helpers.PopulateArray<ushort>(m_prevPacket[channel], currPacket[channel][0]));
         }
-        // [TODO] Check here if we need to call Stim Detector now
-        // if(IsStimulusExpected(timestamp, m_expectedStims) {
-        List<TStimIndex> stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+        // [TODO] Check here if we need to call the Stim Detector now
+
+        int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
+
         Dictionary<int, List<TStimIndex>> parStimInd = new Dictionary<int, List<TStimIndex>>(currPacket.Count);
-        foreach (int channel in currPacket.Keys) parStimInd[channel] = new List<TStimIndex>(stimIndices);
+        if (m_stimDetector.IsStimulusExpected(m_inputStream.TimeStamp + (TTime)currPacketLength))
+        {
+          List<TStimIndex> stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+          // Make parallel collection of expected stimulus lists
+          foreach (int channel in currPacket.Keys) parStimInd[channel] = new List<TStimIndex>(stimIndices);
+        }
+        else
+        {
+          // Make parallel collection of expected stimulus lists
+          foreach (int channel in currPacket.Keys) parStimInd[channel] = null;
+        }
         
         // [DONE] Add multithreading here // PLINQ
         m_prevPacket.Keys.AsParallel().ForAll(channel =>
