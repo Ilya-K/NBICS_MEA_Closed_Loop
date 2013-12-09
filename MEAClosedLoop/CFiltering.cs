@@ -21,7 +21,7 @@ namespace MEAClosedLoop
     const int MIN_PACKET_SIZE = 150;
 
     private CInputStream m_inputStream;
-    private TRawDataPacket m_prevPacket;
+    private TRawDataPacket m_prevPacket = null;
     //private TRawDataPacket m_currPacket;
     //private TFltDataPacket m_filteredData;
     private Queue<TFltDataPacket> m_filteredQueue;
@@ -29,6 +29,7 @@ namespace MEAClosedLoop
     private CStimDetector m_stimDetector;
     private int m_artifChannel;
     private StimuliList m_expectedStims;
+    private bool m_missedStimulus = false;
     private Dictionary<int, ButterworthFilter> m_bandpassFilters = null;
     private Dictionary<int, LocalFit> m_salpaFilters = null;
     private OnStreamKillDelegate m_onStreamKill = null;
@@ -57,6 +58,10 @@ namespace MEAClosedLoop
 
       if (parSALPA != null)
       {
+        if (m_stimDetector == null)
+        {
+          throw new ArgumentException("Unable to use SALPA without Stimulus Artifact Detector", "stimDetector");
+        }
         m_salpaFilters = new Dictionary<int, LocalFit>(inputStream.NChannels);
         foreach (int channel in inputStream.ChannelList)
         {
@@ -116,59 +121,108 @@ namespace MEAClosedLoop
       return dataPacket;
     }
 
+    // Получает очередной пакет входного потока, проверяет, ожидается ли стимуляция и фильтрует его Сальпой и/или Баттервортом
+    /// <summary>
+    /// Filter current data packet with the SALPA or/and Butterworth
+    /// </summary>
+    /// <param name="currPacket">Current packet of input stream</param>
     public void ReceiveData(TRawDataPacket currPacket)
     {
       TFltDataPacket filteredData = new TFltDataPacket(currPacket.Count);
       // Fill keys to enable parallel foreach on the next step
       foreach (int channel in currPacket.Keys) filteredData[channel] = null;
 
-      if ((m_salpaFilters != null) && (m_stimDetector != null))
+      if (m_salpaFilters != null)
       {
-        // Prepare "previous" packet for the first packet processing
+        /* // Prepare "previous" packet for the first packet processing
         if (m_prevPacket == null)
         {
           m_prevPacket = new TRawDataPacket(currPacket.Count);
           foreach (int channel in currPacket.Keys) m_prevPacket[channel] = new ushort[MIN_PACKET_SIZE];
           m_prevPacket.Keys.AsParallel().ForAll(channel => Helpers.PopulateArray<ushort>(m_prevPacket[channel], currPacket[channel][0]));
-        }
-        // [TODO] Check here if we need to call the Stim Detector now
+        } */
 
         int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
+        List<TStimIndex> stimIndices = null;
 
-        Dictionary<int, List<TStimIndex>> parStimInd = new Dictionary<int, List<TStimIndex>>(currPacket.Count);
-        if (m_stimDetector.IsStimulusExpected(m_inputStream.TimeStamp + (TTime)currPacketLength))
+        if (m_missedStimulus)
         {
-          List<TStimIndex> stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
-          // Make parallel collection of expected stimulus lists
-          foreach (int channel in currPacket.Keys) parStimInd[channel] = new List<TStimIndex>(stimIndices);
+          stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+
+          // Stimulation hasn't been found in the two subsequent packets
+          if (stimIndices == null) throw new Exception("Loop is out of sync!");
         }
         else
         {
-          // Make parallel collection of expected stimulus lists
-          foreach (int channel in currPacket.Keys) parStimInd[channel] = null;
+          // Check here if we need to call the Stim Detector now
+          if (m_stimDetector.IsStimulusExpected(m_inputStream.TimeStamp + (TTime)currPacketLength))
+          {
+            stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+            if (stimIndices == null)
+            {
+              m_missedStimulus = true;
+              m_prevPacket = currPacket;
+              // Put off processing of the current packet until a stimuli artifacts are found
+              return;
+            }
+          }
         }
-        
-        // [DONE] Add multithreading here // PLINQ
-        m_prevPacket.Keys.AsParallel().ForAll(channel =>
+        // Сюда попадаем, либо в обычном случае, либо когда найдены артефакты во втором пакете в случае m_missedStimulus
+
+        // В обычном случае, если артефакты не ожидались, сразу вызываем SALPA с пустым списком артефактов
+        if (stimIndices == null)
         {
-          // [TODO] Make SALPA with TRawData input and eliminate the next line
-          filteredData[channel] = Array.ConvertAll(m_prevPacket[channel], x => (TData)x);
-          filteredData[channel] = m_salpaFilters[channel].filter(filteredData[channel], parStimInd[channel]);
-          //filteredData[channel] = m_salpaFilters[channel].filter(filteredData[channel], stimIndices);
-        });
+          // Process all channels in parallel (using PLINQ)
+          currPacket.Keys.AsParallel().ForAll(channel =>
+          {
+            filteredData[channel] = m_salpaFilters[channel].filter(currPacket[channel], null);
+          });
+        }
+        else  // Если артефакты ожидались и найдены, обрабатываем текущий пакет
+        {
+          Dictionary<int, List<TStimIndex>> parStimInd = new Dictionary<int, List<TStimIndex>>(currPacket.Count);
+          // Make a parallel collection of the expected stimuli lists
+          foreach (int channel in currPacket.Keys) parStimInd[channel] = new List<TStimIndex>(stimIndices);
+
+          // Если предыдущий пакет ещё не обработан, то значит артефакты ожидались в нём, а найдены в текущем. Обрабатываем оба пакета
+          if (m_prevPacket != null)
+          {
+            // Process all channels of the previous packet in parallel (using PLINQ)
+            m_prevPacket.Keys.AsParallel().ForAll(channel =>
+            {
+              filteredData[channel] = m_salpaFilters[channel].filter(currPacket[channel], parStimInd[channel]);
+            });
+            PushForth(filteredData);
+            m_prevPacket = null;
+          }
+
+          // Process all channels in parallel (using PLINQ)
+          currPacket.Keys.AsParallel().ForAll(channel =>
+          {
+            filteredData[channel] = m_salpaFilters[channel].filter(currPacket[channel], parStimInd[channel]);
+          });
+
+          // Обработали пропущенный на прошлой итерации пакет
+          m_missedStimulus = false;
+        }
       }
       else
       {
+        // Without SALPA just copy data and change type to TData
         currPacket.Keys.AsParallel().ForAll(channel =>
         {
           filteredData[channel] = Array.ConvertAll(currPacket[channel], x => (TData)x);
         });
       }
 
+      PushForth(filteredData);
+    }
+
+    private void PushForth(TFltDataPacket filteredData)
+    {
       if (m_bandpassFilters != null)
       {
-        // [DONE] Add multithreading here
-        currPacket.Keys.AsParallel().ForAll(channel =>
+        filteredData.Keys.AsParallel().ForAll(channel =>
         {
           m_bandpassFilters[channel].filterData(filteredData[channel]);
         });
@@ -179,8 +233,6 @@ namespace MEAClosedLoop
       if (m_onDataAvailable != null) m_onDataAvailable(filteredData);
 
       m_notEmpty.Set();
-      
-      m_prevPacket = currPacket;
     }
 
     private void Dismiss()

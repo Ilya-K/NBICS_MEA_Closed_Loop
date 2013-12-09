@@ -52,6 +52,7 @@ namespace MEAClosedLoop
       m_threshhold = threshhold;
       m_maxSlope = maxSlope;
       m_maxJitter = (uint)maxJitter;
+      m_expectedStims = new List<TStimGroup>();
       //N_MEAN = 1;
     }
 
