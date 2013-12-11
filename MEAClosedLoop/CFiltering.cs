@@ -13,7 +13,6 @@ namespace MEAClosedLoop
   using TStimIndex = System.Int16;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
-  using StimuliList = List<TStimGroup>;
 
   public class CFiltering
   {
@@ -27,8 +26,7 @@ namespace MEAClosedLoop
     private Queue<TFltDataPacket> m_filteredQueue;
     private AutoResetEvent m_notEmpty;
     private CStimDetector m_stimDetector;
-    private int m_artifChannel;
-    private StimuliList m_expectedStims;
+    public CStimDetector StimDetector { get { return m_stimDetector; } }
     private bool m_missedStimulus = false;
     private Dictionary<int, ButterworthFilter> m_bandpassFilters = null;
     private Dictionary<int, LocalFit> m_salpaFilters = null;
@@ -53,14 +51,13 @@ namespace MEAClosedLoop
       m_stimDetector = stimDetector;
 
       // [TODO] Allow user to choose stimulus artifact detection channel
-      m_artifChannel = m_inputStream.ChannelList[0];
-      m_expectedStims = null;
+      stimDetector.ArtifactChannel = m_inputStream.ChannelList[0];
 
       if (parSALPA != null)
       {
         if (m_stimDetector == null)
         {
-          throw new ArgumentException("Unable to use SALPA without Stimulus Artifact Detector", "stimDetector");
+          throw new ArgumentException("Unable to use SALPA without a Stimulus Artifact Detector", "stimDetector");
         }
         m_salpaFilters = new Dictionary<int, LocalFit>(inputStream.NChannels);
         foreach (int channel in inputStream.ChannelList)
@@ -134,30 +131,22 @@ namespace MEAClosedLoop
 
       if (m_salpaFilters != null)
       {
-        /* // Prepare "previous" packet for the first packet processing
-        if (m_prevPacket == null)
-        {
-          m_prevPacket = new TRawDataPacket(currPacket.Count);
-          foreach (int channel in currPacket.Keys) m_prevPacket[channel] = new ushort[MIN_PACKET_SIZE];
-          m_prevPacket.Keys.AsParallel().ForAll(channel => Helpers.PopulateArray<ushort>(m_prevPacket[channel], currPacket[channel][0]));
-        } */
-
         int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
         List<TStimIndex> stimIndices = null;
 
         if (m_missedStimulus)
         {
-          stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+          stimIndices = m_stimDetector.Detect(currPacket);
 
           // Stimulation hasn't been found in the two subsequent packets
           if (stimIndices == null) throw new Exception("Loop is out of sync!");
         }
         else
         {
-          // Check here if we need to call the Stim Detector now
+          // Check here if we need to call the Stim Detector for the current packet
           if (m_stimDetector.IsStimulusExpected(m_inputStream.TimeStamp + (TTime)currPacketLength))
           {
-            stimIndices = m_stimDetector.Detect(currPacket[m_artifChannel], m_expectedStims);
+            stimIndices = m_stimDetector.Detect(currPacket);
             if (stimIndices == null)
             {
               m_missedStimulus = true;
@@ -169,7 +158,8 @@ namespace MEAClosedLoop
         }
         // Сюда попадаем, либо в обычном случае, либо когда найдены артефакты во втором пакете в случае m_missedStimulus
 
-        // В обычном случае, если артефакты не ожидались, сразу вызываем SALPA с пустым списком артефактов
+        // В обычном случае, если артефакты не ожидались, сразу вызываем SALPA без списка артефактов
+        // If stimuli are not expected, just run SALPA without expected stimuli list.
         if (stimIndices == null)
         {
           // Process all channels in parallel (using PLINQ)
@@ -181,7 +171,7 @@ namespace MEAClosedLoop
         else  // Если артефакты ожидались и найдены, обрабатываем текущий пакет
         {
           Dictionary<int, List<TStimIndex>> parStimInd = new Dictionary<int, List<TStimIndex>>(currPacket.Count);
-          // Make a parallel collection of the expected stimuli lists
+          // Make a parallel collection of the expected stimuli lists to enable parallel processing
           foreach (int channel in currPacket.Keys) parStimInd[channel] = new List<TStimIndex>(stimIndices);
 
           // Если предыдущий пакет ещё не обработан, то значит артефакты ожидались в нём, а найдены в текущем. Обрабатываем оба пакета

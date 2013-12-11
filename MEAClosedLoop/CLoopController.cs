@@ -24,6 +24,7 @@ namespace MEAClosedLoop
     private CStimulator m_stimulator;
     private CFiltering m_filter;
     private CPackDetector m_packDetector;
+    private TStimGroup m_stimulus;
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
@@ -34,6 +35,8 @@ namespace MEAClosedLoop
       m_inputStream = inputStream;
       m_stimulator = stimulator;
       m_filter = filter;
+
+      m_stimulus = m_stimulator.GetStimulus();
       m_packDetector = new CPackDetector(m_filter);
 
       m_stimTimer = new System.Timers.Timer();
@@ -98,6 +101,11 @@ namespace MEAClosedLoop
 
         TTime nextStimTime = currPack.Start + (TTime)(STIM_TIME_PERCENT * stimShift);
 
+        // Pass the next stimulation time to the StimDetector
+        m_stimulus.stimTime = nextStimTime;
+        m_filter.StimDetector.SetExpectedStims(m_stimulus);
+
+        // 
         m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime);
         m_stimTimer.Start();
 
@@ -108,7 +116,7 @@ namespace MEAClosedLoop
 
     private void StimTimer(object o1, EventArgs e1)
     {
-
+      m_stimulator.Start();
     }
   }
 }

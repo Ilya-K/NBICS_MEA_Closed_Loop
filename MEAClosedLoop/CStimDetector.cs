@@ -10,9 +10,7 @@ namespace MEAClosedLoop
   using TData = Double;
   using TTime = UInt64;
   using TStimIndex = System.Int16;
-
   using TRawDataPacket = Dictionary<int, ushort[]>;
-  //using TStimIndex = System.Int16;
 
   public class CStimDetector
   {
@@ -33,6 +31,9 @@ namespace MEAClosedLoop
     private List<TStimGroup> m_expectedStims;
     private object lockStimList = new object();
     private TStimGroup m_nextExpectedStim;
+    private int m_artifChannel = -1;
+    public int ArtifactChannel { set { m_artifChannel = value; } }
+
 
     //private double m_meanSE = 0;
     //private int N_MEAN;
@@ -41,7 +42,8 @@ namespace MEAClosedLoop
     /// <summary>
     /// Stimulus artefact detector
     /// </summary>
-    /// <param name="n">SE window width. Should be half of "still" period</param>
+    /// <param name="n">SE window width. Should be equal to a half of the blanking period</param>
+    /// <param name="maxJitter">Maximum possible deviation of the real stimulus with respect to the expected one</param>
     /// <param name="threshhold">How much SE should decrease to consider start of blanking period</param>
     /// <param name="maxSlope">How much should be summary slope of 3 samples after blanking period</param>
     public CStimDetector(int n, int maxJitter = 20 * TIME_MULT, TData threshhold = 35, TRawData maxSlope = 150)
@@ -79,10 +81,12 @@ namespace MEAClosedLoop
       return false;
     }
 
-    public List<TStimIndex> Detect(TRawData[] packet, List<TStimGroup> expectedStims)
+    public List<TStimIndex> Detect(TRawDataPacket fullPacket)
     {
       List<TStimIndex> detected = new List<TStimIndex>();
-      if (expectedStims != null)
+      TRawData[] packet = fullPacket[m_artifChannel];
+
+      if (m_expectedStims != null)
       {
         // [TODO] Code to take expectedStims into account should be placed here
       }
