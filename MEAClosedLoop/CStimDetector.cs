@@ -66,7 +66,7 @@ namespace MEAClosedLoop
       }
     }
 
-    public bool IsStimulusExpected(TTime eopTimestamp)
+    public bool IsDataRequired(TTime eopTimestamp)
     {
       lock (lockStimList)
       {
