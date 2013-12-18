@@ -6,6 +6,7 @@ using System.Text;
 namespace MEAClosedLoop
 {
     using TTime = UInt64;
+    using TPack = List<bool>;
 
     public class CStat
     {
@@ -13,8 +14,12 @@ namespace MEAClosedLoop
         TTime m_totalPackPeriod;
         uint m_packCount;
         TTime m_prevPackStart;
+        
+      const int PACK_DETECTED_PERCENT_CRITERION = 50;
+      const TTime DEFAULT_DEAD_ZONE_SIZE = 10;
+      const TTime DEFAULT_WIN_LENGTH = 20;
 
-        private uint FindWindow(List<bool> pack, TTime deadZoneSize, TTime winLength)
+        private uint FindWindow(TPack pack, TTime deadZoneSize, TTime winLength)
         {
             uint emptyCombo = 0, emptyComboStart=0;
             for (uint Iterator = (uint)deadZoneSize; Iterator < Convert.ToUInt64(pack.Count()); Iterator++)
@@ -45,7 +50,7 @@ namespace MEAClosedLoop
             m_totalPackPeriod = 0;
         }
 
-        public void AddPack(List<bool> pack, TTime packStart)
+        public void AddPack(TPack pack, TTime packStart)
         {
             if (m_packCount >= 1)
             {
@@ -60,7 +65,28 @@ namespace MEAClosedLoop
         public TTime AvgPackPeriod()
         {
             return m_totalPackPeriod / m_packCount;
-        } 
+        }
+
+        public uint WindowStat(List<TPack> all_packs)
+        {
+          List<uint> foundWindows = new List<uint>();
+          double foundWindowPercent;
+          uint currentWindow;
+          foreach(TPack PackIterator in all_packs){
+            currentWindow = FindWindow(PackIterator, DEFAULT_DEAD_ZONE_SIZE, DEFAULT_WIN_LENGTH);
+            if(currentWindow != (uint)(PackIterator.Count())){
+              foundWindows.Add(currentWindow);
+            }
+          }
+
+          foundWindowPercent = foundWindows.Count() * 100 / all_packs.Count();
+          if(foundWindowPercent < PACK_DETECTED_PERCENT_CRITERION)
+            return uint.MaxValue;
+
+
+
+          return uint.MaxValue; //if none found
+        }
         
 
 
