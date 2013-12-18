@@ -10,6 +10,12 @@ namespace MEAClosedLoop
 
     public class CStat
     {
+      public struct windowBorder
+      {
+        public uint winStart;
+        public uint winEnd;
+      }
+
         const double Psp = 0.1;
         TTime m_totalPackPeriod;
         uint m_packCount;
@@ -19,14 +25,21 @@ namespace MEAClosedLoop
       const TTime DEFAULT_DEAD_ZONE_SIZE = 10;
       const TTime DEFAULT_WIN_LENGTH = 20;
 
-        private uint FindWindow(TPack pack, TTime deadZoneSize, TTime winLength)
+        private windowBorder FindWindow(TPack pack, TTime deadZoneSize, TTime winLength)
         {
             uint emptyCombo = 0, emptyComboStart=0;
+            windowBorder output;
             for (uint Iterator = (uint)deadZoneSize; Iterator < Convert.ToUInt64(pack.Count()); Iterator++)
             {
                 if (pack[(int)Iterator])
                 { //combo break
-                    emptyCombo = 0;
+                  if (emptyCombo >= winLength)
+                  {
+                    output.winStart = emptyComboStart;
+                    output.winEnd = Iterator;
+                    return output;
+                  }
+                  emptyCombo = 0;
                 }
                 else
                 {
@@ -34,13 +47,19 @@ namespace MEAClosedLoop
                         emptyComboStart = Iterator;
 
                     emptyCombo++;
-
-                    if (emptyCombo >= winLength)
-                        return emptyComboStart;
                 }
             }
-            
-            return (uint)(pack.Count()); //return last pack moment if no windows found
+
+            if (emptyCombo >= winLength)
+            {
+              output.winStart = emptyComboStart;
+              output.winEnd = Convert.ToUInt32(pack.Count());
+              return output;
+            }
+
+            output.winStart = Convert.ToUInt32(pack.Count());
+            output.winEnd = Convert.ToUInt32(pack.Count());
+            return output; //return last pack moment if no windows found
         }
         
         public CStat()
@@ -69,12 +88,13 @@ namespace MEAClosedLoop
 
         public uint WindowStat(List<TPack> all_packs)
         {
-          List<uint> foundWindows = new List<uint>();
+          List<windowBorder> foundWindows = new List<windowBorder>();
+          //List<uint> coverMap = new List<uint>List
           double foundWindowPercent;
-          uint currentWindow;
+          windowBorder currentWindow;
           foreach(TPack PackIterator in all_packs){
             currentWindow = FindWindow(PackIterator, DEFAULT_DEAD_ZONE_SIZE, DEFAULT_WIN_LENGTH);
-            if(currentWindow != (uint)(PackIterator.Count())){
+            if(currentWindow.winStart != (uint)(PackIterator.Count())){
               foundWindows.Add(currentWindow);
             }
           }
