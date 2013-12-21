@@ -6,7 +6,6 @@ using System.Text;
 namespace MEAClosedLoop
 {
     using TTime = UInt64;
-    using TPack = List<bool>;
 
     public class CStat
     {
@@ -29,9 +28,9 @@ namespace MEAClosedLoop
         {
             uint emptyCombo = 0, emptyComboStart=0;
             windowBorder output;
-            for (uint Iterator = (uint)deadZoneSize; Iterator < Convert.ToUInt64(pack.Count()); Iterator++)
+            for (uint Iterator = (uint)deadZoneSize; Iterator < Convert.ToUInt64(pack.data.Count()); Iterator++)
             {
-                if (pack[(int)Iterator])
+                if (pack.data[(int)Iterator])
                 { //combo break
                   if (emptyCombo >= winLength)
                   {
@@ -53,12 +52,12 @@ namespace MEAClosedLoop
             if (emptyCombo >= winLength)
             {
               output.winStart = emptyComboStart;
-              output.winEnd = Convert.ToUInt32(pack.Count());
+              output.winEnd = Convert.ToUInt32(pack.data.Count());
               return output;
             }
 
-            output.winStart = Convert.ToUInt32(pack.Count());
-            output.winEnd = Convert.ToUInt32(pack.Count());
+            output.winStart = Convert.ToUInt32(pack.data.Count());
+            output.winEnd = Convert.ToUInt32(pack.data.Count());
             return output; //return last pack moment if no windows found
         }
         
@@ -85,30 +84,6 @@ namespace MEAClosedLoop
         {
             return m_totalPackPeriod / m_packCount;
         }
-
-        public uint WindowStat(List<TPack> all_packs)
-        {
-          List<windowBorder> foundWindows = new List<windowBorder>();
-          //List<uint> coverMap = new List<uint>List
-          double foundWindowPercent;
-          windowBorder currentWindow;
-          foreach(TPack PackIterator in all_packs){
-            currentWindow = FindWindow(PackIterator, DEFAULT_DEAD_ZONE_SIZE, DEFAULT_WIN_LENGTH);
-            if(currentWindow.winStart != (uint)(PackIterator.Count())){
-              foundWindows.Add(currentWindow);
-            }
-          }
-
-          foundWindowPercent = foundWindows.Count() * 100 / all_packs.Count();
-          if(foundWindowPercent < PACK_DETECTED_PERCENT_CRITERION)
-            return uint.MaxValue;
-
-
-
-          return uint.MaxValue; //if none found
-        }
-        
-
 
     }
 }
