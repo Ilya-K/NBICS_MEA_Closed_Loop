@@ -52,6 +52,7 @@
           this.buttonClosedLoop = new System.Windows.Forms.Button();
           this.label_time = new System.Windows.Forms.Label();
           this.button_integral0 = new System.Windows.Forms.Button();
+          this.buttonFindWindow = new System.Windows.Forms.Button();
           this.SuspendLayout();
           // 
           // panel1
@@ -283,11 +284,22 @@
           this.button_integral0.UseVisualStyleBackColor = true;
           this.button_integral0.Click += new System.EventHandler(this.button_integral0_Click);
           // 
+          // buttonFindWindow
+          // 
+          this.buttonFindWindow.Location = new System.Drawing.Point(616, 303);
+          this.buttonFindWindow.Name = "buttonFindWindow";
+          this.buttonFindWindow.Size = new System.Drawing.Size(88, 23);
+          this.buttonFindWindow.TabIndex = 26;
+          this.buttonFindWindow.Text = "Find Window";
+          this.buttonFindWindow.UseVisualStyleBackColor = true;
+          this.buttonFindWindow.Click += new System.EventHandler(this.buttonFindWindow_Click);
+          // 
           // Form1
           // 
           this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
           this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
           this.ClientSize = new System.Drawing.Size(716, 604);
+          this.Controls.Add(this.buttonFindWindow);
           this.Controls.Add(this.comboBox_Stimulators);
           this.Controls.Add(this.comboBox_DAQs);
           this.Controls.Add(this.label2);
@@ -348,6 +360,7 @@
         private System.Windows.Forms.Button buttonClosedLoop;
         private System.Windows.Forms.Label label_time;
         private System.Windows.Forms.Button button_integral0;
+        private System.Windows.Forms.Button buttonFindWindow;
     }
 }
 

@@ -592,5 +592,11 @@ namespace MEAClosedLoop
       m_integral1 = 0;
     }
 
+    private void buttonFindWindow_Click(object sender, EventArgs e)
+    {
+      PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
+      formShowWindows.Show();
+    }
+
   }
 }

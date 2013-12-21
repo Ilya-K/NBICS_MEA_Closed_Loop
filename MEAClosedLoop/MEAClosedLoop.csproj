@@ -98,6 +98,9 @@
     <EmbeddedResource Include="FormCalibrate.resx">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PackGraphForm.resx">
+      <DependentUpon>PackGraphForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
