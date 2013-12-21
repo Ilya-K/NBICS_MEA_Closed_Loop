@@ -33,18 +33,35 @@ namespace MEAClosedLoop
         tmpPanel.Size = new System.Drawing.Size(panelWidth, panelHeight);
         tmpPanel.BorderStyle = BorderStyle.FixedSingle;
         tmpPanel.BackColor = Color.White;
-
+        tmpPanel.Paint += channelPanel_Paint;
         this.Controls.Add(tmpPanel);
 
-        //tmpPanel.Show();
-
-
-        
+       
         channelPanels[channel] = tmpPanel;
 
       }
 
       this.Invalidate();
+    }
+
+    private void channelPanel_Paint(object sender, PaintEventArgs e)
+    {
+      int width = ((Panel)sender).Width;
+      int height = ((Panel)sender).Height;
+
+//      lock (m_chDataLock1)
+      {
+          // [TODO] указать реальный размер данных
+          int dataLength = 20;
+          Point[] points = new Point[dataLength];
+          for (int i = 0; i < dataLength; i++)
+          {
+            points[i] = new Point(i * width / dataLength, (int)(height - i));//linear function for testing
+          }
+          Pen pen = new Pen(Color.Blue, 1);
+          e.Graphics.DrawLines(pen, points);
+       
+      }
     }
   }
 }
