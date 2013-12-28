@@ -49,6 +49,8 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
 
+
+
 //      lock (m_chDataLock1)
       {
           // [TODO] указать реальный размер данных
