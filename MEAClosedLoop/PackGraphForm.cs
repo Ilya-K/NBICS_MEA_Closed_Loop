@@ -9,8 +9,12 @@ using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
+  using TPackMap = List<uint>;
+
   public partial class PackGraphForm : Form
   {
+    TPackMap data;
+
     public PackGraphForm(List<int> channelList)
     {
       InitializeComponent();
@@ -20,6 +24,10 @@ namespace MEAClosedLoop
       int formHeight = this.Size.Height;
       int panelWidth = formWidth / 8 - 2;
       int panelHeight = formHeight / 8 - 2;
+
+      PackGraph dataGenerator = new PackGraph();
+      List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
+      data = dataGenerator.ProcessPackStat(bool_data);
 
       foreach (int channel in channelList)
       {
@@ -54,11 +62,11 @@ namespace MEAClosedLoop
 //      lock (m_chDataLock1)
       {
           // [TODO] указать реальный размер данных
-          int dataLength = 20;
+          int dataLength = data.Count();
           Point[] points = new Point[dataLength];
           for (int i = 0; i < dataLength; i++)
           {
-            points[i] = new Point(i * width / dataLength, (int)(height - i));//linear function for testing
+            points[i] = new Point(i * width / dataLength, /*(int)(height - i)*/ (int)data[i]);
           }
           Pen pen = new Pen(Color.Blue, 1);
           e.Graphics.DrawLines(pen, points);

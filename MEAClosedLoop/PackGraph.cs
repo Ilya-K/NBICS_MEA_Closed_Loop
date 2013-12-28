@@ -75,7 +75,7 @@ namespace MEAClosedLoop
       return output;
     }
     
-    PackGraph()
+    public PackGraph()
     {
       foundPackPercent = 0;
       realMaxPackLength = 0;
