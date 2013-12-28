@@ -16,6 +16,7 @@ namespace MEAClosedLoop
   {
     private const int DAQ_FREQ = 25000;
     private const int TIME_MULT = DAQ_FREQ / 1000;
+    private const TTime INFINITY = TTime.MaxValue;
     //private const int EXP_MEAN_N = 50;
     //private TRawDataPacket m_prevPacket;
     private CCalcSE_N m_calcSE;
@@ -33,6 +34,7 @@ namespace MEAClosedLoop
     private TStimGroup m_nextExpectedStim;
     private int m_artifChannel = -1;
     public int ArtifactChannel { set { m_artifChannel = value; } }
+    bool m_stimExpectedNow = false;
 
 
     //private double m_meanSE = 0;
@@ -55,6 +57,7 @@ namespace MEAClosedLoop
       m_maxSlope = maxSlope;
       m_maxJitter = (uint)maxJitter;
       m_expectedStims = new List<TStimGroup>();
+      m_nextExpectedStim.stimTime = INFINITY;
       //N_MEAN = 1;
     }
 
@@ -62,7 +65,14 @@ namespace MEAClosedLoop
     {
       lock (lockStimList)
       {
-        m_expectedStims.Add(nextStimGroup);
+        if (m_nextExpectedStim.stimTime == INFINITY)
+        {
+          m_nextExpectedStim = nextStimGroup;
+        }
+        else
+        {
+          m_expectedStims.Add(nextStimGroup);
+        }
       }
     }
 
@@ -70,15 +80,9 @@ namespace MEAClosedLoop
     {
       lock (lockStimList)
       {
-        if (m_expectedStims.Count > 0)
-        {
-          if (eopTimestamp + m_maxJitter >= m_expectedStims[0].stimTime)
-          {
-            return true;
-          }
-        }
+        if (m_expectedStims.Count > 0) return false;
+        return m_stimExpectedNow = (eopTimestamp + m_maxJitter >= m_nextExpectedStim.stimTime); //m_expectedStims[0].stimTime);
       }
-      return false;
     }
 
     public List<TStimIndex> Detect(TRawDataPacket fullPacket)
@@ -89,6 +93,8 @@ namespace MEAClosedLoop
       if (m_expectedStims != null)
       {
         // [TODO] Code to take expectedStims into account should be placed here
+
+
       }
       else
       {

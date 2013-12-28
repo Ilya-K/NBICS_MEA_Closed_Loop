@@ -23,7 +23,7 @@ namespace MEAClosedLoop
       private TData m_maOld = 0;
       private bool m_packFound = false;
 
-      public List<Int32> Detect(TData[] data)
+      public List<Int32> FindSpikeTrains(TData[] data)
       {
         List<Int32> trainList = null;
 
@@ -51,6 +51,7 @@ namespace MEAClosedLoop
 
           if (m_packFound && (diff < 0))
           {
+
           }
         }
         return trainList;
@@ -61,11 +62,31 @@ namespace MEAClosedLoop
     private Dictionary<int, CSpikeTrainDetector> m_stDet;
     private CFiltering m_filteredData;
 
+    // [DEBUG]
+    private System.Timers.Timer m_dummyTimer;
+    Int32 m_dummyPackTime = -1;
+    Random m_rnd;
+
     public CPackDetector(CFiltering filteredData)
     {
       m_filteredData = filteredData;
       m_stDet = new Dictionary<int, CSpikeTrainDetector>(filteredData.ChannelList.Count);
       foreach (int channel in filteredData.ChannelList) m_stDet[channel] = new CSpikeTrainDetector();
+
+      // [DEBUG]
+      m_dummyTimer = new System.Timers.Timer(4000);
+      m_dummyTimer.Elapsed += DummyTimer;
+      m_dummyTimer.Start();
+      m_rnd = new Random(123);
+      
+    }
+
+    private void DummyTimer(object o1, EventArgs e1)
+    {
+      lock (m_dummyTimer)
+      {
+        m_dummyPackTime = m_rnd.Next(2500);
+      }
     }
 
     public CPack WaitPack()
@@ -87,11 +108,25 @@ namespace MEAClosedLoop
     {
       List<TTime> packList = new List<TTime>();
 
+      // [DEBUG]
+      #region DEBUG
+
+      if (m_dummyPackTime >= 0)
+      {
+        packList.Add((TTime)m_dummyPackTime);
+        m_dummyPackTime = -1;
+      }
+      
+      return packList;
+      #endregion // DEBUG
+
       Dictionary<int, List<Int32>> spikeTrains = new Dictionary<int, List<int>>();
 
       // Fill keys to enable parallel foreach on the next step
       foreach (int channel in packet.Keys) spikeTrains[channel] = null;
-      packet.Keys.AsParallel().ForAll(channel => spikeTrains[channel] = m_stDet[channel].Detect(packet[channel]));
+      packet.Keys.AsParallel().ForAll(channel => spikeTrains[channel] = m_stDet[channel].FindSpikeTrains(packet[channel]));
+
+      
 
       return packList;
     }
