@@ -120,7 +120,7 @@ namespace MEAClosedLoop
       m_filteredQueue = new Queue<TFltDataPacket>();
       m_notEmpty = new AutoResetEvent(false);
 
-      m_filteredStream.ConsumerList.Add(ReceiveData);
+      m_filteredStream.AddDataConsumer(ReceiveData);
 
 
       // [DEBUG]

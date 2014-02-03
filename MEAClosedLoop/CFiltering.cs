@@ -43,11 +43,32 @@ namespace MEAClosedLoop
     private volatile bool m_kill;
 
     public delegate void ConsumerDelegate(Dictionary<int, TData[]> data);
-    public List<ConsumerDelegate> ConsumerList = null;
+    private List<ConsumerDelegate> m_consumerList = null;
 
+    public delegate void StimulTimeDelegate(List<TStimIndex> stimul);
+    private List<StimulTimeDelegate> m_stimulCallback = null;
 
     // [DEBUG]
     public int m_Count = 0;
+
+    public void AddDataConsumer(ConsumerDelegate consumer)
+    {
+      lock (m_consumerList)
+      {
+        if (m_consumerList.Contains(consumer)) return;
+        m_consumerList.Add(consumer);
+      }
+    }
+
+    public void AddStimulConsumer(StimulTimeDelegate stimConsumer)
+    {
+      lock (m_stimulCallback)
+      {
+        if (m_stimulCallback.Contains(stimConsumer)) return;
+        m_stimulCallback.Add(stimConsumer);
+      }
+    }
+
 
     public CFiltering(CInputStream inputStream, CStimDetector stimDetector, SALPAParams parSALPA, BFParams parBF)
     {
@@ -57,7 +78,8 @@ namespace MEAClosedLoop
 
       m_stimDetector = stimDetector;
 
-      ConsumerList = new List<ConsumerDelegate>();
+      m_consumerList = new List<ConsumerDelegate>();
+      m_stimulCallback = new List<StimulTimeDelegate>();
 
       // [TODO] Allow user to choose stimulus artifact detection channel
       stimDetector.ArtifactChannel = m_inputStream.ChannelList[0];
@@ -158,6 +180,13 @@ namespace MEAClosedLoop
           filteredData[channel] = m_salpaFilters[channel].filter(packet[channel], parStimInd[channel]);
         });
       }
+      lock (m_stimulCallback)
+      {
+        if (m_stimulCallback.Count != 0)
+        {
+          foreach (StimulTimeDelegate consumer in m_stimulCallback) consumer(stimIndices);
+        }
+      }
       PushToButterworth(filteredData);
     }
 
@@ -229,11 +258,11 @@ namespace MEAClosedLoop
         m_timeStamp += (TTime)m_sentPacketLength;
         m_sentPacketLength = filteredData[filteredData.Keys.ElementAt(0)].Length;
       }
-      lock (ConsumerList)
+      lock (m_consumerList)
       {
-        if ((ConsumerList != null) && (ConsumerList.Count != 0))
+        if ((m_consumerList != null) && (m_consumerList.Count != 0))
         {
-          foreach (ConsumerDelegate consumer in ConsumerList) consumer(filteredData);
+          foreach (ConsumerDelegate consumer in m_consumerList) consumer(filteredData);
         }
       }
 

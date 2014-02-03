@@ -15,6 +15,7 @@ namespace MEAClosedLoop
 {
   using TFltDataPacket = Dictionary<int, System.Double[]>;
   using TData = System.Double;
+  using TTime = UInt64;
 
   public partial class Form1 : Form
   {
@@ -325,7 +326,7 @@ namespace MEAClosedLoop
         m_salpaFilter = new CFiltering(m_inputStream, m_stimDetector, parSALPA, null);
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
-        m_salpaFilter.ConsumerList.Add(PeekData);
+        m_salpaFilter.AddDataConsumer(PeekData);
         m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
 
@@ -625,9 +626,17 @@ namespace MEAClosedLoop
       m_integral1 = 0;
     }
 
+    Dictionary<int, bool[]> GetBoolData()
+    {
+      Dictionary<int, bool[]> output = new Dictionary<int, bool[]>();
+      //TODO: make proper output
+      return output;
+    }
+
     private void buttonFindWindow_Click(object sender, EventArgs e)
     {
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
+      TTime start_data = 0; //TODO: get time from CFiltering
+      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, GetBoolData(), start_data);
       formShowWindows.Show();
     }
 

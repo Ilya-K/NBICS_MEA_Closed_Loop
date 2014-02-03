@@ -36,7 +36,7 @@ namespace MEAClosedLoop
       m_thresholds = new double[MAX_NUM_CHANNELS];
       m_calcSE = new Dictionary<int, CCalcSE_Block>(filteredStream.NChannels);
       filteredStream.ChannelList.ForEach(channel => m_calcSE[channel] = new CCalcSE_Block(SE_AVG_RANGE));
-      filteredStream.ConsumerList.Add(DetectSpikes);
+      filteredStream.AddDataConsumer(DetectSpikes);
 
       m_kill = false;
       //Thread t = new Thread(new ThreadStart(DetectSpikes));
