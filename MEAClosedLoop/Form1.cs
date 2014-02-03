@@ -54,10 +54,13 @@ namespace MEAClosedLoop
     private TData[] m_integral2 = new TData[3000];
     private CMovingSum m_ms = new CMovingSum(250);
     private CExpAvg m_expAvg = new CExpAvg(167);
+    private CExpAvg m_expAvgCorr1 = new CExpAvg(167);
+    private TData prev2;
 
     public Form1()
     {
       InitializeComponent();
+      prev2 = 0;
     }
 
     private void Form1_Load(object sender, EventArgs e)
@@ -99,7 +102,7 @@ namespace MEAClosedLoop
       //label_refreshRate.Text = (1000.0 / (DateTime.Now - m_prevTime).Milliseconds).ToString();
       //SetText(label_refreshRate, m_bandpassFilter.Test().ToString());       
       AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
-      SetText(label_time, (m_inputStream.TimeStamp / 25000.0).ToString("F1"));
+      SetText(label_time, (m_inputStream.TimeStamp / (double)Param.DAQ_FREQ).ToString("F1"));
 
       m_prevTime = DateTime.Now;
     }
@@ -221,10 +224,24 @@ namespace MEAClosedLoop
         {
           TData[] se = new TData[m_channelData2.Length];
           TData[] seLT = new TData[m_channelData2.Length];
+          TData[] corr1 = new TData[m_channelData2.Length];
+
           for (int i = 0; i < m_channelData2.Length; i++)
           {
             se[i] = m_se2.SE(m_channelData2[i]);
             seLT[i] = m_seLongTerm2.SE(m_channelData2[i]);
+
+            if (i == 0)
+            {
+              corr1[i] = m_expAvgCorr1.Add(m_channelData2[i] - prev2);
+            }
+            else
+            {
+              corr1[i] = m_expAvgCorr1.Add(m_channelData2[i] - m_channelData2[i - 1]);
+            }
+
+
+
             if (m_channelData2[i] > max)
             {
               max = m_channelData2[i];
@@ -234,6 +251,8 @@ namespace MEAClosedLoop
               min = m_channelData2[i];
             }
           }
+          prev2 = m_channelData2[m_channelData2.Length];
+
           double delta = max - min;
           double shift = 0;
           if (delta < 200)
@@ -269,7 +288,7 @@ namespace MEAClosedLoop
     }
     #endregion
 
-    private void buttonStartDAQ_Click(object sender, EventArgs e)
+    private void EnsureDAQIsConfigured()
     {
       // Check if all necessary components of DAQ have been already created
       if (!m_DAQConfigured)
@@ -287,8 +306,8 @@ namespace MEAClosedLoop
           }
         }
 
-        // (int)SpikeFiltOrder.Value, 25000.0, Convert.ToDouble(SpikeLowCut.Value), Convert.ToDouble(SpikeHighCut.Value), DATA_BUF_LEN
-        BFParams parBF = new BFParams(2, 25000, 150.0, 2000.0, 2500); // [TODO] Eliminate data buffer length
+        // (int)SpikeFiltOrder.Value, 25000, Convert.ToDouble(SpikeLowCut.Value), Convert.ToDouble(SpikeHighCut.Value), DATA_BUF_LEN
+        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DAQ_FREQ / 10); // [TODO] Eliminate data buffer length
 
         // [TODO] Get rid of thresholds here. Should be calculated in SALPA dynamically
         int[] thresholds = new int[60];
@@ -305,12 +324,18 @@ namespace MEAClosedLoop
 
         m_salpaFilter = new CFiltering(m_inputStream, m_stimDetector, parSALPA, null);
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
-        m_salpaFilter.OnDataAvailable = PeekData;
+        //m_salpaFilter.OnDataAvailable = PeekData;
+        m_salpaFilter.ConsumerList.Add(PeekData);
         m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
-        m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, 2500, 2);
+        m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
 
         m_DAQConfigured = true;
       }
+    }
+
+    private void buttonStartDAQ_Click(object sender, EventArgs e)
+    {
+      EnsureDAQIsConfigured();
 
       // Check if DataLoop Thread has been alredy created
       if (m_dataLoopThread == null)
@@ -331,6 +356,7 @@ namespace MEAClosedLoop
     {
       m_inputStream.Stop();
       buttonStartDAQ.Enabled = true;
+      buttonClosedLoop.Enabled = true;
       comboBox_DAQs.Enabled = true;
     }
 
@@ -537,17 +563,24 @@ namespace MEAClosedLoop
       buttonStop.Enabled = true;
       if (m_closedLoop == null)
       {
-        if (!m_DAQConfigured)
-        {
-          // [TODO] Configure DAQ
-        }
+        EnsureDAQIsConfigured();
+
         if (m_stimulator == null)
         {
           // [TODO] Configure Stimulator
+          // [DEBUG]
+          // Fake stimulator
+          m_stimulator = new CStimulator();
+          // [/DEBUG] 
         }
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
+
+      m_inputStream.Start();
+      buttonClosedLoop.Enabled = false;
+      if (checkBox_Manual.Checked) m_inputStream.Pause();
+
       //buttonClosedLoop.Text = 
     }
 

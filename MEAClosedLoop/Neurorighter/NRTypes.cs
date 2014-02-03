@@ -1,4 +1,5 @@
 ﻿using System;
+using MEAClosedLoop;
 
 using TData = System.Double;
 
@@ -12,7 +13,7 @@ namespace Neurorighter
     public double highCutFreq;
     public int dataBufLength;
 
-    public BFParams(int filterOrder = 2, double samplingFreq = 25000, double lowCutFreq = 150.0, double highCutFreq = 2000.0, int dataBufLength = 2500)
+    public BFParams(int filterOrder = 2, double samplingFreq = Param.DAQ_FREQ, double lowCutFreq = 150.0, double highCutFreq = 2000.0, int dataBufLength = Param.DAQ_FREQ / 10)
     {
       this.filterOrder = filterOrder;
       this.samplingFreq = samplingFreq;

@@ -16,9 +16,9 @@ namespace MEAClosedLoop
     private const int CRLF = 2;                     // Length of CRLF in Windows = 2
     private const int CYCLE_QUEUE_SIZE = 10;
     private const int START_CHANNEL_LIST = 13;
-    private const int DEFAULT_SAMPLE_RATE = 25000;
+    private const int DEFAULT_SAMPLE_RATE = Param.DAQ_FREQ;
     private const int DEFAULT_ZERO_LEVEL = 32768;
-    private const int DEFAULT_BLOCK_SIZE = 2500;
+    private const int DEFAULT_BLOCK_SIZE = Param.DAQ_FREQ / 10;
 
     private readonly bool WITH_HEADER;
     private int N_CHANNELS_IN_FILE;       // if (!WITH_HEADER) N_CHANNELS_IN_FILE = min(|m_channelsToRead|, MAX_CHANNELS)

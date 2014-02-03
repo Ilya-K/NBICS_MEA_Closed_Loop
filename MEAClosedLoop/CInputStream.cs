@@ -23,7 +23,7 @@ namespace MEAClosedLoop
   public class CInputStream
   {
     //const int NUM_BUFFERS = 3;
-    const uint DEFAULT_SAMLPING_RATE = 25000;
+    const uint DEFAULT_SAMLPING_RATE = Param.DAQ_FREQ;
     private uint m_samplingRate;
     public IRawDataProvider m_dataSource;
 //    private ConcurrentQueue<TRawDataPacket> m_rawQueue;
@@ -247,7 +247,7 @@ namespace MEAClosedLoop
     }
 
     // Runs in separate stream
-    // Reads out queue ant calls hahdlers for each data packet
+    // Reads out queue and calls handlers for each data packet
     private void RunStream()
     {
       TRawDataPacket dataPacket = null;

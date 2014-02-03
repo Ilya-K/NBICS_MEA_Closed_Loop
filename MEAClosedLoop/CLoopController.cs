@@ -13,10 +13,13 @@ namespace MEAClosedLoop
   {
     // Time of applying of stimulus as a share of period of activity
     private double STIM_TIME_PERCENT = 0.8;
+
     // Delay of stimulus introduced by signal processing time (in 40 us intervals)
-    private Int16 STIM_TIME_DELAY = 100;
+    private const Int16 STIM_TIME_DELAY = 4 * Param.MS;             // 4 ms
+
     // Minimal allowed period for stimulation
-    private const Int16 MIN_STIM_PERIOD = 10000; // 10000 = 0.4s
+    private const Int16 MIN_STIM_PERIOD = 400 * Param.MS;           // 0.4s = 10000
+
     // Number of SE to leave before the next expected pack
     private const Int16 N_SE = 2;
 
@@ -32,6 +35,10 @@ namespace MEAClosedLoop
 
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
+      if (inputStream == null) throw new ArgumentNullException("inputStream");
+      if (filter == null) throw new ArgumentNullException("filter");
+      if (stimulator == null) throw new ArgumentNullException("stimulator");
+
       m_inputStream = inputStream;
       m_stimulator = stimulator;
       m_filter = filter;
@@ -72,17 +79,18 @@ namespace MEAClosedLoop
       {
         CPack currSemiPack = m_packDetector.WaitPack();
         // [TODO] May be it would be useful to use timeout and give control back sometimes
-        // while (null == (currSemiPack = m_packDetector.WaitPack(500)));
+        // while (null == (currSemiPack = m_packDetector.WaitPack(500))) { }; // Just don't know what to do here
 
         // Handle the situation when a single pack is divided into two parts: Start and End
+        // The Start part has already been processed at the previous step
         if (currSemiPack.EOP)                     // We've just received a pack with EndOfPack flag
         {
-          if (insidePack)                         // End of previously started pack
+          if (insidePack)                         // We're inside of previously started pack
           {
             currPack.Length = (Int32)(currSemiPack.Start - currPack.Start);
             prevPack = currPack;
             insidePack = false;
-            continue;
+            continue;                             // Start of this pack has already been processed
           }
         }
         else                                      // We've received Start of a long pack
@@ -116,7 +124,7 @@ namespace MEAClosedLoop
 
     private void StimTimer(object o1, EventArgs e1)
     {
-      m_stimulator.Start();
+      //[DEBUG] m_stimulator.Start();
     }
   }
 }

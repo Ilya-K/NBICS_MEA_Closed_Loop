@@ -257,7 +257,7 @@
           // 
           // buttonClosedLoop
           // 
-          this.buttonClosedLoop.Enabled = false;
+          this.buttonClosedLoop.Enabled = true;
           this.buttonClosedLoop.Location = new System.Drawing.Point(547, 45);
           this.buttonClosedLoop.Name = "buttonClosedLoop";
           this.buttonClosedLoop.Size = new System.Drawing.Size(75, 23);

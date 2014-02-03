@@ -54,7 +54,10 @@
     <Compile Include="Common\CCalcExpWndSE.cs" />
     <Compile Include="Common\CMovingSum.cs" />
     <Compile Include="Common\CExpAvg.cs" />
-    <Compile Include="Common\CPack.cs" />
+    <Compile Include="Common\CPack.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Common\CSpikeTrain.cs" />
     <Compile Include="CPackDetector.cs" />
     <Compile Include="CStat.cs" />
     <Compile Include="CStimDetectShift.cs" />

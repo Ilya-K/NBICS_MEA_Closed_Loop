@@ -17,6 +17,14 @@ namespace MEAClosedLoop
     private StimuliList m_stimuliList = new StimuliList();
     private bool m_configured = false;
 
+    // [DEBUG]
+    public CStimulator()
+    {
+      // Fake stimulator
+      m_device = null;
+    }
+    // [/DEBUG]
+
     public CStimulator(CMcsUsbListNet usblist, uint idx, OnStg200xPollStatus pollHandler = null, string fileName = null)
     {
       //m_pollHandler = pollHandler;

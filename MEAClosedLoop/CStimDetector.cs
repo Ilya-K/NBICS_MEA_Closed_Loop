@@ -14,8 +14,6 @@ namespace MEAClosedLoop
 
   public class CStimDetector
   {
-    private const int DAQ_FREQ = 25000;
-    private const int TIME_MULT = DAQ_FREQ / 1000;
     private const TTime INFINITY = TTime.MaxValue;
     //private const int EXP_MEAN_N = 50;
     //private TRawDataPacket m_prevPacket;
@@ -48,7 +46,7 @@ namespace MEAClosedLoop
     /// <param name="maxJitter">Maximum possible deviation of the real stimulus with respect to the expected one</param>
     /// <param name="threshhold">How much SE should decrease to consider start of blanking period</param>
     /// <param name="maxSlope">How much should be summary slope of 3 samples after blanking period</param>
-    public CStimDetector(int n, int maxJitter = 20 * TIME_MULT, TData threshhold = 35, TRawData maxSlope = 150)
+    public CStimDetector(int n, int maxJitter = 20 * Param.MS, TData threshhold = 35, TRawData maxSlope = 150)
     {
       m_calcSE = new CCalcSE_N(n);
       m_prevBlock = new TRawData[n];

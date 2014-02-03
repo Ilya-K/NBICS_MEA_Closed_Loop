@@ -11,7 +11,7 @@ namespace MEAClosedLoop
 {
   class CRasterPlot
   {
-    private const int SAMPLING_F = 25000;
+    private const int SAMPLING_F = Param.DAQ_FREQ;
     private Timer m_refreshTimer;
     private Panel m_panel;
     private Queue<Spike> m_data;

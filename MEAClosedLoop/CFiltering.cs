@@ -23,23 +23,31 @@ namespace MEAClosedLoop
     private TRawDataPacket m_prevPacket = null;
     //private TRawDataPacket m_currPacket;
     //private TFltDataPacket m_filteredData;
-    private Queue<TFltDataPacket> m_filteredQueue;
-    private AutoResetEvent m_notEmpty;
+    //private Queue<TFltDataPacket> m_filteredQueue;
+    //private AutoResetEvent m_notEmpty;
     private CStimDetector m_stimDetector;
     public CStimDetector StimDetector { get { return m_stimDetector; } }
     private Dictionary<int, ButterworthFilter> m_bandpassFilters = null;
     private Dictionary<int, LocalFit> m_salpaFilters = null;
     private OnStreamKillDelegate m_onStreamKill = null;
     public OnStreamKillDelegate OnStreamKill { set { m_onStreamKill = value; } }
-    private OnDataAvailableDelegate m_onDataAvailable = null;
-    public OnDataAvailableDelegate OnDataAvailable { set { m_onDataAvailable = value; } }
+    //private OnDataAvailableDelegate m_onDataAvailable = null;
+    //public OnDataAvailableDelegate OnDataAvailable { set { m_onDataAvailable = value; } }
 
     public int NChannels { get { return m_inputStream.NChannels; } }
     public List<int> ChannelList { get { return m_inputStream.ChannelList; } }
-    public ulong TimeStamp { get { return m_inputStream.TimeStamp; } }
+    private TTime m_timeStamp = 0;
+    private Int32 m_sentPacketLength = 0;
+    private object m_timeLock = new object();
+    public ulong TimeStamp { get { lock (m_timeLock) return m_timeStamp; } }
     private volatile bool m_kill;
 
+    public delegate void ConsumerDelegate(Dictionary<int, TData[]> data);
+    public List<ConsumerDelegate> ConsumerList = null;
+
+
     // [DEBUG]
+    public int m_Count = 0;
 
     public CFiltering(CInputStream inputStream, CStimDetector stimDetector, SALPAParams parSALPA, BFParams parBF)
     {
@@ -48,6 +56,8 @@ namespace MEAClosedLoop
       m_inputStream.ConsumerList.Add(ReceiveData);
 
       m_stimDetector = stimDetector;
+
+      ConsumerList = new List<ConsumerDelegate>();
 
       // [TODO] Allow user to choose stimulus artifact detection channel
       stimDetector.ArtifactChannel = m_inputStream.ChannelList[0];
@@ -85,8 +95,8 @@ namespace MEAClosedLoop
         }
       }
 
-      m_filteredQueue = new Queue<TFltDataPacket>();
-      m_notEmpty = new AutoResetEvent(false);
+      //m_filteredQueue = new Queue<TFltDataPacket>();
+      //m_notEmpty = new AutoResetEvent(false);
 //      Thread t = new Thread(new ThreadStart(DoFiltering));
       m_kill = false;
 //      t.Start();
@@ -97,8 +107,10 @@ namespace MEAClosedLoop
 
     }
 
+    /*
     public TFltDataPacket WaitData()
     {
+      m_Count++;
       TFltDataPacket dataPacket = null;
       do
       {
@@ -114,9 +126,14 @@ namespace MEAClosedLoop
         }
       } while (dataPacket == null);
 
-      return dataPacket;
+      lock (m_timeLock)
+      {
+        m_timeStamp += (TTime)m_sentPacketLength;
+        m_sentPacketLength = dataPacket[dataPacket.Keys.ElementAt(0)].Length;
+        return dataPacket;
+      }
     }
-
+    */
     private void PushToSalpa(TRawDataPacket packet, List<TStimIndex> stimIndices)
     {
       TFltDataPacket filteredData = new TFltDataPacket(packet.Count);
@@ -206,19 +223,33 @@ namespace MEAClosedLoop
           m_bandpassFilters[channel].filterData(filteredData[channel]);
         });
       }
-      lock (m_filteredQueue) m_filteredQueue.Enqueue(filteredData);
+
+      lock (m_timeLock)
+      {
+        m_timeStamp += (TTime)m_sentPacketLength;
+        m_sentPacketLength = filteredData[filteredData.Keys.ElementAt(0)].Length;
+      }
+      lock (ConsumerList)
+      {
+        if ((ConsumerList != null) && (ConsumerList.Count != 0))
+        {
+          foreach (ConsumerDelegate consumer in ConsumerList) consumer(filteredData);
+        }
+      }
+
+      //lock (m_filteredQueue) m_filteredQueue.Enqueue(filteredData);
 
       // Callback
-      if (m_onDataAvailable != null) m_onDataAvailable(filteredData);
+      //if (m_onDataAvailable != null) m_onDataAvailable(filteredData);
 
-      m_notEmpty.Set();
+      //m_notEmpty.Set();
     }
 
     private void Dismiss()
     {
       m_kill = true;
       if (m_onStreamKill != null) m_onStreamKill();
-      m_notEmpty.Set();
+      //m_notEmpty.Set();
     }
 
     // There are some obsolete functions here ************************************************
