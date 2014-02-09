@@ -87,12 +87,13 @@ namespace MEAClosedLoop
     private TTime m_firstSpikeTime = 0;
     private TTime m_lastSpikeTime = 0;
     private Int32 m_packDataStart = 0;
-    private TTime m_timeStamp = 0;
+    private TTime m_timestamp = 0;
     private Int32 m_prevPacketLength = 0;
     private bool m_inPack = false;
     private volatile bool m_kill = false;
 
     // [DEBUG]
+    private TTime m_debugTimestamp;
     private int m_entryCount = 0;
     private int m_entryCount2 = 0;
     private System.Timers.Timer m_dummyTimer;
@@ -142,6 +143,7 @@ namespace MEAClosedLoop
 
     private void ReceiveData(TFltDataPacket packet)
     {
+      m_debugTimestamp = m_filteredStream.TimeStamp;
       lock (m_filteredQueue) m_filteredQueue.Enqueue(packet);
       m_notEmpty.Set();
     }
@@ -180,7 +182,8 @@ namespace MEAClosedLoop
           }
         } while (dataPacket == null);
 
-        m_timeStamp += (TTime)m_prevPacketLength;
+        m_timestamp += (TTime)m_prevPacketLength;
+        if (m_debugTimestamp != m_timestamp) throw new Exception("Wrong Timestamp");
         m_prevPacketLength = dataPacket[dataPacket.Keys.ElementAt(0)].Length;
 
         pack = DetectPacks(dataPacket);
@@ -262,7 +265,7 @@ namespace MEAClosedLoop
             {
               TTime prevSpikeTrainTime = spikeTrainList.Min(el => el.Start);
 
-              if (prevSpikeTrainTime + (TTime)prevPacketLength >= m_timeStamp + Param.PRE_SPIKE)
+              if (prevSpikeTrainTime + (TTime)prevPacketLength >= m_timestamp + Param.PRE_SPIKE)
               {
                 m_packDataList.Add(m_prevPacket);
                 m_firstSpikeTime = prevSpikeTrainTime;
@@ -275,7 +278,7 @@ namespace MEAClosedLoop
             }
             m_packDataList.Add(packet);
 
-            TTime firstPacketTime = m_timeStamp - ((m_firstSpikeTime > m_timeStamp) ? 0 : (TTime)prevPacketLength);
+            TTime firstPacketTime = m_timestamp - ((m_firstSpikeTime > m_timestamp) ? 0 : (TTime)prevPacketLength);
 
             if (m_firstSpikeTime < firstPacketTime) throw new Exception("Pack start has been detected before data start"); // Never should happen
             m_packDataStart = (Int32)(m_firstSpikeTime - firstPacketTime);
@@ -304,7 +307,7 @@ namespace MEAClosedLoop
           if (m_lastSpikeTime == 0) throw new Exception("Something is wrong in Spike-train Detector. Spike-train has been lost.");
 
           // If we are in a pack and haven't got any spikes for POST_SPIKE time, terminate this pack
-          if (m_timeStamp + (TTime)currPacketLength > m_lastSpikeTime + Param.POST_SPIKE)
+          if (m_timestamp + (TTime)currPacketLength > m_lastSpikeTime + Param.POST_SPIKE)
           {                                                 
             // [TODO] Join all the necessary data from m_packDataList and Create EOP here
             Int32 packLength = (Int32)(m_lastSpikeTime - m_firstSpikeTime);

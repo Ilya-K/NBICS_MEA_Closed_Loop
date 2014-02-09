@@ -53,6 +53,7 @@
           this.label_time = new System.Windows.Forms.Label();
           this.button_integral0 = new System.Windows.Forms.Button();
           this.buttonFindWindow = new System.Windows.Forms.Button();
+          this.buttonStatWindow = new System.Windows.Forms.Button();
           this.SuspendLayout();
           // 
           // panel1
@@ -257,7 +258,6 @@
           // 
           // buttonClosedLoop
           // 
-          this.buttonClosedLoop.Enabled = true;
           this.buttonClosedLoop.Location = new System.Drawing.Point(547, 45);
           this.buttonClosedLoop.Name = "buttonClosedLoop";
           this.buttonClosedLoop.Size = new System.Drawing.Size(75, 23);
@@ -294,11 +294,23 @@
           this.buttonFindWindow.UseVisualStyleBackColor = true;
           this.buttonFindWindow.Click += new System.EventHandler(this.buttonFindWindow_Click);
           // 
+          // buttonStatWindow
+          // 
+          this.buttonStatWindow.Enabled = false;
+          this.buttonStatWindow.Location = new System.Drawing.Point(615, 332);
+          this.buttonStatWindow.Name = "buttonStatWindow";
+          this.buttonStatWindow.Size = new System.Drawing.Size(88, 23);
+          this.buttonStatWindow.TabIndex = 26;
+          this.buttonStatWindow.Text = "Stat";
+          this.buttonStatWindow.UseVisualStyleBackColor = true;
+          this.buttonStatWindow.Click += new System.EventHandler(this.buttonStatWindow_Click);
+          // 
           // Form1
           // 
           this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
           this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
           this.ClientSize = new System.Drawing.Size(716, 604);
+          this.Controls.Add(this.buttonStatWindow);
           this.Controls.Add(this.buttonFindWindow);
           this.Controls.Add(this.comboBox_Stimulators);
           this.Controls.Add(this.comboBox_DAQs);
@@ -361,6 +373,7 @@
         private System.Windows.Forms.Label label_time;
         private System.Windows.Forms.Button button_integral0;
         private System.Windows.Forms.Button buttonFindWindow;
+        private System.Windows.Forms.Button buttonStatWindow;
     }
 }
 

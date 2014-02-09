@@ -42,7 +42,7 @@ namespace MEAClosedLoop
     public ulong TimeStamp { get { lock (m_timeLock) return m_timeStamp; } }
     private volatile bool m_kill;
 
-    public delegate void ConsumerDelegate(Dictionary<int, TData[]> data);
+    public delegate void ConsumerDelegate(TFltDataPacket data);
     private List<ConsumerDelegate> m_consumerList = null;
 
     public delegate void StimulTimeDelegate(List<TStimIndex> stimul);

@@ -56,6 +56,8 @@ namespace MEAClosedLoop
     private CMovingSum m_ms = new CMovingSum(250);
     private CExpAvg m_expAvg = new CExpAvg(167);
     private CExpAvg m_expAvgCorr1 = new CExpAvg(167);
+    private CExpAvg m_expAvgCorr2u = new CExpAvg(167);
+    private CExpAvg m_expAvgCorr2d = new CExpAvg(167);
     private TData prev2;
 
     public Form1()
@@ -226,20 +228,26 @@ namespace MEAClosedLoop
           TData[] se = new TData[m_channelData2.Length];
           TData[] seLT = new TData[m_channelData2.Length];
           TData[] corr1 = new TData[m_channelData2.Length];
+          TData[] corr2 = new TData[m_channelData2.Length];
 
           for (int i = 0; i < m_channelData2.Length; i++)
           {
             se[i] = m_se2.SE(m_channelData2[i]);
             seLT[i] = m_seLongTerm2.SE(m_channelData2[i]);
 
+            TData corr2u;
             if (i == 0)
             {
               corr1[i] = m_expAvgCorr1.Add(m_channelData2[i] - prev2);
+              corr2u = m_expAvgCorr2u.Add(m_channelData2[i] * prev2);
             }
             else
             {
               corr1[i] = m_expAvgCorr1.Add(m_channelData2[i] - m_channelData2[i - 1]);
+              corr2u = m_expAvgCorr2u.Add(m_channelData2[i] * m_channelData2[i - 1]);
             }
+            TData corr2d = m_expAvgCorr2d.Add(m_channelData2[i] * m_channelData2[i]);
+            if (Math.Abs(corr2d) > Param.PRECISION) corr2[i] = corr2u / corr2d;
 
 
 
@@ -252,7 +260,7 @@ namespace MEAClosedLoop
               min = m_channelData2[i];
             }
           }
-          prev2 = m_channelData2[m_channelData2.Length];
+          prev2 = m_channelData2[m_channelData2.Length - 1];
 
           double delta = max - min;
           double shift = 0;
@@ -272,15 +280,24 @@ namespace MEAClosedLoop
           // [DEBUG]
           Point[] se_points = new Point[se.Length];
           Point[] se_pointsLT = new Point[seLT.Length];
+          Point[] corr1_points = new Point[se.Length];
+          Point[] corr2_points = new Point[se.Length];
+
           for (int i = 0; i < se.Length; i++)
           {
             se_points[i] = new Point(i * width / se.Length, (int)(height - (se[i] - min + shift + 1) * height / (delta + 2)));
             se_pointsLT[i] = new Point(i * width / seLT.Length, (int)(height - (seLT[i] - min + shift + 1) * height / (delta + 2)));
+            corr1_points[i] = new Point(i * width / corr1.Length, (int)((height * 3) / 4 - corr1[i] * 5));
+            corr2_points[i] = new Point(i * width / corr2.Length, (int)(height  - corr2[i] * 30));
           }
           pen = new Pen(Color.Red, 1);
           e.Graphics.DrawLines(pen, se_points);
           pen = new Pen(Color.Green, 1);
           e.Graphics.DrawLines(pen, se_pointsLT);
+          pen = new Pen(Color.Red, 1);
+          e.Graphics.DrawLines(pen, corr1_points);
+          pen = new Pen(Color.Wheat, 1);
+          e.Graphics.DrawLines(pen, corr2_points);
           // [/Debug]
 
           labelAmpl2.Text = (max - min).ToString();
@@ -331,6 +348,8 @@ namespace MEAClosedLoop
         m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
 
         m_DAQConfigured = true;
+        
+        buttonStatWindow.Enabled = true;
       }
     }
 
@@ -638,6 +657,12 @@ namespace MEAClosedLoop
       TTime start_data = 0; //TODO: get time from CFiltering
       PackGraphForm formShowWindows = new PackGraphForm(m_channelList, GetBoolData(), start_data);
       formShowWindows.Show();
+    }
+
+    private void buttonStatWindow_Click(object sender, EventArgs e)
+    {
+      StatForm statForm = new StatForm(m_salpaFilter);
+      statForm.Show();
     }
 
   }
