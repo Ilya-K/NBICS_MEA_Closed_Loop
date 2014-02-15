@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CFiltering.cs" />
+    <Compile Include="CMCDFileReader.cs" />
     <Compile Include="Common\CCalcSE_Block.cs" />
     <Compile Include="Common\CCalcSE_N.cs" />
     <Compile Include="CLoopController.cs" />
