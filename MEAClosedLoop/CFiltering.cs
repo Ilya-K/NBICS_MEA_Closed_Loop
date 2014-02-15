@@ -60,6 +60,12 @@ namespace MEAClosedLoop
       }
     }
 
+    public void RemoveDataConsumer(ConsumerDelegate consumer)
+    {
+      lock (m_consumerList) m_consumerList.Remove(consumer);
+      return;
+    }
+
     public void AddStimulConsumer(StimulTimeDelegate stimConsumer)
     {
       lock (m_stimulCallback)
@@ -67,6 +73,12 @@ namespace MEAClosedLoop
         if (m_stimulCallback.Contains(stimConsumer)) return;
         m_stimulCallback.Add(stimConsumer);
       }
+    }
+
+    public void RemoveStimulConsumer(StimulTimeDelegate stimConsumer)
+    {
+      lock (m_stimulCallback) m_stimulCallback.Remove(stimConsumer);
+      return;
     }
 
 
@@ -260,7 +272,7 @@ namespace MEAClosedLoop
       }
       lock (m_consumerList)
       {
-        if ((m_consumerList != null) && (m_consumerList.Count != 0))
+        if (m_consumerList.Count != 0)
         {
           foreach (ConsumerDelegate consumer in m_consumerList) consumer(filteredData);
         }

@@ -11,6 +11,7 @@ namespace MEAClosedLoop
 {
   using TData = System.Double;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
+  using TStimIndex = System.Int16;
 
   public partial class StatForm : Form
   {
@@ -42,6 +43,7 @@ namespace MEAClosedLoop
       m_channel = cb_Channel.SelectedIndex;
 
       m_dataStream.AddDataConsumer(DataCallback);
+      m_dataStream.AddStimulConsumer(ArtifCallback);
       m_prevDataPanelWidth = panel_Data.Width;
     }
 
@@ -68,6 +70,11 @@ namespace MEAClosedLoop
       panel_Data.Invalidate(updateRegion);
     }
 
+    private void ArtifCallback(List<TStimIndex> stimul)
+    {
+      
+    }
+    
     private void panel_Data_Paint(object sender, PaintEventArgs e)
     {
       if (m_time == 0) return;
@@ -132,6 +139,12 @@ namespace MEAClosedLoop
     private void panel_Data_Resize(object sender, EventArgs e)
     {
       if (panel_Data.Width < m_prevDataPanelWidth) panel_Data.Refresh();
+    }
+
+    private void StatForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      m_running = false;
+      m_dataStream.RemoveDataConsumer(DataCallback);
     }
 
   }

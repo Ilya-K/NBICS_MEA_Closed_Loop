@@ -99,6 +99,7 @@
       this.Controls.Add(this.panel_Data);
       this.Name = "StatForm";
       this.Text = "StatForm";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StatForm_FormClosing);
       this.ResumeLayout(false);
 
     }

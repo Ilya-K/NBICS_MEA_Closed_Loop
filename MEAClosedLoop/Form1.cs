@@ -103,7 +103,7 @@ namespace MEAClosedLoop
 
       // [DEBUG]
       //label_refreshRate.Text = (1000.0 / (DateTime.Now - m_prevTime).Milliseconds).ToString();
-      //SetText(label_refreshRate, m_bandpassFilter.Test().ToString());       
+      //SetText(label_refreshRate, m_bandpassFilter.Test().ToString());
       AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
       SetText(label_time, (m_inputStream.TimeStamp / (double)Param.DAQ_FREQ).ToString("F1"));
 
@@ -612,7 +612,7 @@ namespace MEAClosedLoop
       // If these threads are different, it returns true.
       if (this.textBox_DeviceInfo.InvokeRequired)
       {
-        this.Invoke(new AddTextCallback(AddText), new object[] { text });
+        this.BeginInvoke(new AddTextCallback(AddText), new object[] { text });
       }
       else
       {
@@ -630,7 +630,7 @@ namespace MEAClosedLoop
       {
         try
         {
-          this.Invoke(new SetTextCallback(SetText), new object[] { ctl, text });
+          this.BeginInvoke(new SetTextCallback(SetText), new object[] { ctl, text });
         }
         catch (ObjectDisposedException ex) { };
       }
