@@ -338,7 +338,7 @@ namespace MEAClosedLoop
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
 
         // [TODO] Get parameters from the UI and save them in Settings
-        CStimDetector m_stimDetector = new CStimDetector(15, 20, 35, 150);
+        CStimDetectShift m_stimDetector = new CStimDetectShift(); //new CStimDetector(15, 20, 35, 150);
 
         m_salpaFilter = new CFiltering(m_inputStream, m_stimDetector, parSALPA, null);
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);

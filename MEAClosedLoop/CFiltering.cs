@@ -25,8 +25,8 @@ namespace MEAClosedLoop
     //private TFltDataPacket m_filteredData;
     //private Queue<TFltDataPacket> m_filteredQueue;
     //private AutoResetEvent m_notEmpty;
-    private CStimDetector m_stimDetector;
-    public CStimDetector StimDetector { get { return m_stimDetector; } }
+    private CStimDetectShift m_stimDetector;
+    public CStimDetectShift StimDetector { get { return m_stimDetector; } }
     private Dictionary<int, ButterworthFilter> m_bandpassFilters = null;
     private Dictionary<int, LocalFit> m_salpaFilters = null;
     private OnStreamKillDelegate m_onStreamKill = null;
@@ -82,7 +82,7 @@ namespace MEAClosedLoop
     }
 
 
-    public CFiltering(CInputStream inputStream, CStimDetector stimDetector, SALPAParams parSALPA, BFParams parBF)
+    public CFiltering(CInputStream inputStream, CStimDetectShift stimDetector, SALPAParams parSALPA, BFParams parBF)
     {
       m_inputStream = inputStream;
       m_inputStream.OnStreamKill = Dismiss;
@@ -94,7 +94,7 @@ namespace MEAClosedLoop
       m_stimulCallback = new List<StimulTimeDelegate>();
 
       // [TODO] Allow user to choose stimulus artifact detection channel
-      stimDetector.ArtifactChannel = m_inputStream.ChannelList[0];
+      stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0];
 
       if (parSALPA != null)
       {
@@ -231,7 +231,7 @@ namespace MEAClosedLoop
         // Check here if we need to call the Stimulus Artifact Detector for the current packet
         if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
         {
-          stimIndices = m_stimDetector.Detect(currPacket);
+          stimIndices = m_stimDetector.GetStims(currPacket);
         }
 
         if (m_prevPacket != null)                 // В прошлый раз чего-то не нашли, а теперь, может быть, нашли
