@@ -287,7 +287,7 @@ namespace MEAClosedLoop
 
       inner_data_to_display = DataPacket;
       inner_found_indexes_to_display = FindedPegs;
-      //Thread.Sleep(1250);
+      Thread.Sleep(50);
       return FindedPegs;
     }
     #endregion
