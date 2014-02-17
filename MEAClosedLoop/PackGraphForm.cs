@@ -31,6 +31,10 @@ namespace MEAClosedLoop
       PackGraph dataGenerator = new PackGraph();
       List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
+      //getting filtered data
+      
+
+
         //filling bool_data
       int i;
       TPack tmp = new TPack();

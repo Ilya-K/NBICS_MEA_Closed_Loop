@@ -27,7 +27,7 @@ namespace StimDetectorTest
     private const UInt16 MULTI_INNER_PERIOD = 10 * TIME_MULT; //!< Период между соседними стимулами внутри пачки
     private const UInt16 MULTI_PACK_PERIOD = 300 * TIME_MULT; //!< Период между пачками
 
-    private const UInt16 MAX_TIME_NOISE = 10 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
+    private const UInt16 MAX_TIME_NOISE = 9 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
 
     private const TTime MAX_FILE_LENGTH = 800000 * TIME_MULT; //!< Максимальная длина входного файла
 
@@ -36,10 +36,11 @@ namespace StimDetectorTest
     static List<TStimGroup> sl_vary; //!< Приблизительный список моментов стимуляции
     static List<TStimGroup> sl_groups; //!< Точный список моментов стимуляции
 
-    static TTime GenNoise(TTime dest, TTime maxNoise)
+
+
+    static TTime GenNoise(TTime dest, TTime maxNoise, Random m_random)
     {
-      Random random = new Random();
-      int randNoise = random.Next(0, Convert.ToInt32(2 * maxNoise));
+      int randNoise = m_random.Next(0, Convert.ToInt32(2 * maxNoise));
       return dest - maxNoise + Convert.ToUInt64(randNoise);
     }
 
@@ -73,7 +74,7 @@ namespace StimDetectorTest
       return output;
     }
 
-    static List<TStimGroup> GenStimulVaryList(TTime start_time, Int32 stimType, TTime totalTime)
+    static List<TStimGroup> GenStimulVaryList(TTime start_time, Int32 stimType, TTime totalTime, Random m_random)
     {
       TTime timeIterator;
       TStimGroup newStim;
@@ -84,18 +85,18 @@ namespace StimDetectorTest
         case 1:
           newStim.count = 1;
           newStim.period = 0;
-          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += GenNoise(SINGLE_STIM_PERIOD, MAX_TIME_NOISE))
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += SINGLE_STIM_PERIOD)
           {
-            newStim.stimTime = timeIterator;
+            newStim.stimTime = timeIterator + GenNoise(SINGLE_STIM_PERIOD, MAX_TIME_NOISE, m_random);
             output.Add(newStim);
           }
           break;
         case 2:
-          newStim.count = 6;
-          newStim.period = MULTI_PACK_PERIOD;
-          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += GenNoise(MULTI_PACK_PERIOD, MAX_TIME_NOISE))
+          newStim.count = MULTI_PACK_NUM;
+          newStim.period = MULTI_INNER_PERIOD;
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += MULTI_PACK_PERIOD)
           {
-            newStim.stimTime = timeIterator;
+            newStim.stimTime = timeIterator + GenNoise(MULTI_PACK_PERIOD, MAX_TIME_NOISE, m_random);
             output.Add(newStim);
           }
           break;
@@ -137,6 +138,7 @@ namespace StimDetectorTest
       using (StreamReader strReader = new StreamReader(confName)) //reading config
       {
         string[] ss;
+        Random random = new Random(DateTime.Now.Millisecond);
         while (!strReader.EndOfStream)
         {
           Int32 stimType;
@@ -157,7 +159,7 @@ namespace StimDetectorTest
             sl_groups = GenStimulList(stimStart, stimType, MAX_FILE_LENGTH);
             Console.WriteLine("Done.");
             Console.Write("Building noisy stimuli list... ");
-            sl_vary = GenStimulVaryList(stimStart, stimType, MAX_FILE_LENGTH);
+            sl_vary = GenStimulVaryList(stimStart, stimType, MAX_FILE_LENGTH, random);
             Console.WriteLine("Done.");
           }
           else
@@ -195,6 +197,68 @@ namespace StimDetectorTest
               countOverhead = commonStimsCount - realStimIndices.Count();
               commonStimsCount = realStimIndices.Count();
             }
+            List<TAbsStimIndex> ExcessStimIndices = new List<TAbsStimIndex>();
+            List<TAbsStimIndex> NotfoundedStimIndices = new List<TAbsStimIndex>();
+            /*
+            for (int i = 0; i < foundStimIndices.Count(); i++)
+            {
+              if (!realStimIndices.Contains(foundStimIndices[i]) && !realStimIndices.Contains(foundStimIndices[i] + 1))
+              {
+                ExcessStimIndices.Add(foundStimIndices[i]);
+                Console.WriteLine("excess abs stim index: {0}", foundStimIndices[i]);
+              }
+
+            }
+            for (int i = 0; i < realStimIndices.Count(); i++)
+            {
+              if (!foundStimIndices.Contains(realStimIndices[i]) && !foundStimIndices.Contains(realStimIndices[i] - 1))
+              {
+                NotfoundedStimIndices.Add(realStimIndices[i]);
+                Console.WriteLine("not found abs stim index: {0}", foundStimIndices[i]);
+              }
+            }
+             */
+            for (int i = 0; i < foundStimIndices.Count(); i++)
+            {
+              bool flag = false;
+              for (int j = 0; j < realStimIndices.Count; j++)
+              {
+                if (Math.Abs((Int64)(foundStimIndices[i] - realStimIndices[j])) < 6000)
+                {
+                  flag = true;
+                  break;
+                }
+              }
+              if (!flag)
+              {
+                ExcessStimIndices.Add(foundStimIndices[i]);
+              }
+            }
+            for (int i = 0; i < realStimIndices.Count(); i++)
+            {
+              bool flag = false;
+              for (int j = 0; j < foundStimIndices.Count; j++)
+              {
+                if (Math.Abs((Int64)(foundStimIndices[j] - realStimIndices[i])) < 260)
+                {
+                  flag = true;
+                  break;
+                }
+              }
+              if (!flag)
+              {
+                NotfoundedStimIndices.Add(realStimIndices[i]);
+              }
+            }
+            for (int i = 0; i < ExcessStimIndices.Count; i++)
+            {
+              Console.WriteLine("Exessly Founded Stim Index {0} : {1}", i, ExcessStimIndices[i]);
+            }
+            for (int i = 0; i < NotfoundedStimIndices.Count; i++)
+            {
+              Console.WriteLine("NotFounded Stim Index {0} : {1}", i, NotfoundedStimIndices[i]);
+            }
+
             for (int i = 0; i < commonStimsCount; i++)
             {
               TAbsStimIndex CurrentError = 0;
@@ -208,11 +272,12 @@ namespace StimDetectorTest
                 CurrentError = realStimIndices[i] - foundStimIndices[i];
                 errorRate += CurrentError;
               }
-              Console.WriteLine("index " + i.ToString() + ": error: " + CurrentError.ToString());
+              //Console.WriteLine("index " + i.ToString() + ": error: " + CurrentError.ToString());
             }
             Console.WriteLine("stims expected:  {0}", realStimIndices.Count());
             Console.WriteLine("stims found:     {0}", foundStimIndices.Count());
             Console.WriteLine("stims not found: {0}", realStimIndices.Count() - commonStimsCount);
+
           }
           timeElapsed += tester.TimeElapsed;
           countOverhead += tester.NumberExceeded;
