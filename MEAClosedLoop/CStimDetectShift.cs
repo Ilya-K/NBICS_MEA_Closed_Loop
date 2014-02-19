@@ -64,7 +64,7 @@ namespace MEAClosedLoop
       IsInNextBuffZone = false;
       Thread RawDataRender = new Thread(DrawCallFunc);
       RawDataRender.Start();
-      Thread.Sleep(2400);
+      //Thread.Sleep(2400);
 
     }
     #endregion
@@ -346,10 +346,10 @@ namespace MEAClosedLoop
     #region отрисовка
     public void DrawCallFunc()
     {
-      DataRender = new CGraphRender();
-      DataRender.IsMouseVisible = true;
-      DataRender.SetDataObj(this);
-      DataRender.Run();
+      //DataRender = new CGraphRender();
+      //DataRender.IsMouseVisible = true;
+      //DataRender.SetDataObj(this);
+      //DataRender.Run();
     }
     #endregion
   }

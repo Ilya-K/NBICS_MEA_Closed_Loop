@@ -25,11 +25,13 @@ namespace MEAClosedLoop
     private object m_chDataLock2 = new object();
     int m_viewChannel1;
     int m_viewChannel2;
-    CInputStream m_inputStream;
-    CFiltering m_salpaFilter;
-    CSpikeDetector m_spikeDetector;
-    CRasterPlot m_rasterPlotter;
-    CStimulator m_stimulator;
+    private CInputStream m_inputStream;
+    private CFiltering m_salpaFilter;
+    private CSpikeDetector m_spikeDetector;
+    private CRasterPlot m_rasterPlotter;
+    private CStimulator m_stimulator;
+    private CPackStat m_statForm;
+    private CPackDetector m_packDetector;
     private volatile bool m_killDataLoop;
     List<int> m_channelList;
     Thread m_dataLoopThread;
@@ -341,15 +343,19 @@ namespace MEAClosedLoop
         CStimDetectShift m_stimDetector = new CStimDetectShift(); //new CStimDetector(15, 20, 35, 150);
 
         m_salpaFilter = new CFiltering(m_inputStream, m_stimDetector, parSALPA, null);
+        
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
         m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
-
+        m_packDetector = new CPackDetector(m_salpaFilter);
+        m_statForm = new CPackStat(m_packDetector);
+        m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
         m_DAQConfigured = true;
-        
+        PackStatButton.Enabled = true;
         buttonStatWindow.Enabled = true;
+
       }
     }
 
@@ -594,7 +600,7 @@ namespace MEAClosedLoop
           // [/DEBUG] 
         }
 
-        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
+        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator, m_packDetector);
       }
 
       m_inputStream.Start();
@@ -663,6 +669,12 @@ namespace MEAClosedLoop
     {
       StatForm statForm = new StatForm(m_salpaFilter);
       statForm.Show();
+    }
+
+    private void PackStatButton_Click(object sender, EventArgs e)
+    {
+      m_statForm = new CPackStat(m_packDetector);
+      m_statForm.Show();
     }
 
   }

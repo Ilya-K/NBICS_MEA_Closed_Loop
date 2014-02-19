@@ -33,7 +33,7 @@ namespace MEAClosedLoop
     private System.Timers.Timer m_stimTimer;
 
 
-    public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
+    public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator, CPackDetector packDetector)
     {
       if (inputStream == null) throw new ArgumentNullException("inputStream");
       if (filter == null) throw new ArgumentNullException("filter");
