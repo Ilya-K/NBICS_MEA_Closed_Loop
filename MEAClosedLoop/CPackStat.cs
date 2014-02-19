@@ -28,9 +28,11 @@ namespace MEAClosedLoop
     public List<TStimIndex> StimList;
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
-    private const int Minimum_Pack_Requered_Count = 100;
+    private const int Minimum_Pack_Requered_Count = 600;
     bool DoStatCollection = false;
     Thread CollectingDataThread;
+    public delegate void DelegateSetProgress(object sender, int value);
+    public event DelegateSetProgress SetVal;
     #endregion
     #region Констнуртор
     public CPackStat(CPackDetector _PackDetector)
@@ -39,7 +41,8 @@ namespace MEAClosedLoop
       PackListAfter = new List<CPack>();
       PackDetector = _PackDetector;
       InitializeComponent();
-      StatProgressBar.Maximum = 100;
+      StatProgressBar.Maximum = Minimum_Pack_Requered_Count;
+      SetVal += UpdateProgressBar;
     }
     #endregion
 
@@ -72,12 +75,13 @@ namespace MEAClosedLoop
     {
       Pen pen = new Pen(Color.Blue);
       pen.Width = 1;
-      int[] PackLengthDestrib = new int[50];
+      int maxInd = 0;
+      int[] PackLengthDestrib = new int[400];
       //set as 0
       for (int i = 0; i < PackLengthDestrib.Length; i++)
       {
-        //dt = 0.1 sec
-        //summ time Length = 5 sec
+        //dt = 0.05 sec
+        //summ time Length = 10 sec
         PackLengthDestrib[i] = 0;//50 / (1 + (i - 25) * (i - 25) / 10);
       }
       lock (PacklListBlock)
@@ -86,19 +90,27 @@ namespace MEAClosedLoop
         {
           for (int j = 0; j < PackLengthDestrib.Length; j++)
           {
-            if (PackListBefore[i].Start - PackListBefore[i + 1].Start > (TAbsStimIndex)j * 2500)
+            if (PackListBefore[i + 1].Start - PackListBefore[i].Start > (TAbsStimIndex)j * 1250
+              && PackListBefore[i + 1].Start - PackListBefore[i].Start < (TAbsStimIndex)(j + 1) * 1250)
+            {
               PackLengthDestrib[j] += 1;
+              break;
+            }
           }
         }
         //Draw
         for (int i = 0; i < PackLengthDestrib.Length; i++)
         {
           e.Graphics.DrawLine(pen,
-            i * 10,
-            PackLengthDestrib[i] * 3,
-            i * 10 + 10,
-            PackLengthDestrib[i] * 3);
+            i * 5,
+            e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height,
+            i * 5 + 6,
+            e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height);
+          if (PackLengthDestrib[i] > PackLengthDestrib[maxInd]) maxInd = i;
+
         }
+        pen.Color = Color.Red;
+        e.Graphics.DrawLine(pen, maxInd * 5 + 3, 0, maxInd * 5 + 3, e.ClipRectangle.Height);
       }
     }
     public void RecieveStimData(List<TStimIndex> stimlist)
@@ -116,27 +128,60 @@ namespace MEAClosedLoop
     }
     private void CollectPacks()
     {
+      int InputCount = 0;
+      Random rnd = new Random(DateTime.Now.Millisecond);
       while (true)
       {
+
         Thread.Sleep(20);
         while (DoStatCollection)
         {
           lock (PacklListBlock)
           {
-            PackListBefore.Add(PackDetector.WaitPack());
-            StatProgressBar.Value += 1;
-            if (PackListBefore.Count() >= Minimum_Pack_Requered_Count)
+            //PackListBefore.Add(PackDetector.WaitPack());
             {
-              this.CollectStatButton.Text = "Готово";
+              Thread.Sleep(5);//Вместо функции WaitPack()
+              CPack pack_to_add = new CPack((TTime)(InputCount * 43000 + rnd.Next(12000)), 0, null);
+              PackListBefore.Add(pack_to_add);
+            }
+            StatProgressBar.BeginInvoke(SetVal, null, 1);
+            InputCount++;
+            if (PackListBefore.Count() >= Minimum_Pack_Requered_Count
+              || InputCount >= Minimum_Pack_Requered_Count - 1) // for debug(If WaitPuck dont work )
+            {
+              //this.CollectStatButton.Text = "Готово";
+              MessageBox.Show("Собрано достаточное количество данных");
               this.DoStatCollection = false;
             }
           }
         }
       }
     }
+    #region Подсчет статистики
     private void CalcStat()
     {
+      Average Stat = new Average();
+      for (int i = 0; i < PackListBefore.Count() - 1; i++)
+      {
+        Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+      }
+      Stat.Calc();
+      this.SelectedAverageBox.Text = (Stat.Value/25000).ToString() + " сек";
+      this.SelectedSigmaBox.Text = (Stat.Sigma / 25000).ToString() + " сек";
+      // Обновить график       
+      this.DistribGrath.Refresh();
 
     }
+    #endregion
+    void UpdateProgressBar(object sender, int val)
+    {
+      StatProgressBar.Value += val;
+    }
+
+    private void CalcStatButton_Click(object sender, EventArgs e)
+    {
+      CalcStat();
+    }
   }
+
 }

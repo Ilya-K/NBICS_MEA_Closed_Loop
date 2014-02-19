@@ -51,6 +51,7 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
+      this.CalcStatButton = new System.Windows.Forms.Button();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -62,6 +63,7 @@
       // 
       // Prepearing
       // 
+      this.Prepearing.Controls.Add(this.CalcStatButton);
       this.Prepearing.Controls.Add(this.CollectStatButton);
       this.Prepearing.Controls.Add(this.label2);
       this.Prepearing.Controls.Add(this.StatProgressBar);
@@ -75,11 +77,11 @@
       // 
       // CollectStatButton
       // 
-      this.CollectStatButton.Location = new System.Drawing.Point(328, 13);
+      this.CollectStatButton.Location = new System.Drawing.Point(321, 13);
       this.CollectStatButton.Name = "CollectStatButton";
-      this.CollectStatButton.Size = new System.Drawing.Size(126, 23);
+      this.CollectStatButton.Size = new System.Drawing.Size(133, 23);
       this.CollectStatButton.TabIndex = 0;
-      this.CollectStatButton.Text = "CollectStat";
+      this.CollectStatButton.Text = "Собрать Статистику";
       this.CollectStatButton.UseVisualStyleBackColor = true;
       this.CollectStatButton.Click += new System.EventHandler(this.CollectStatButton_Click);
       // 
@@ -94,16 +96,16 @@
       // 
       // StatProgressBar
       // 
-      this.StatProgressBar.Location = new System.Drawing.Point(216, 13);
+      this.StatProgressBar.Location = new System.Drawing.Point(150, 13);
       this.StatProgressBar.Name = "StatProgressBar";
-      this.StatProgressBar.Size = new System.Drawing.Size(100, 23);
+      this.StatProgressBar.Size = new System.Drawing.Size(139, 23);
       this.StatProgressBar.TabIndex = 1;
       // 
       // numericUpDown1
       // 
       this.numericUpDown1.Location = new System.Drawing.Point(90, 16);
       this.numericUpDown1.Name = "numericUpDown1";
-      this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+      this.numericUpDown1.Size = new System.Drawing.Size(43, 20);
       this.numericUpDown1.TabIndex = 3;
       // 
       // StimParams
@@ -162,14 +164,14 @@
       // 
       this.SelectedSigmaBox.Location = new System.Drawing.Point(150, 182);
       this.SelectedSigmaBox.Name = "SelectedSigmaBox";
-      this.SelectedSigmaBox.Size = new System.Drawing.Size(100, 20);
+      this.SelectedSigmaBox.Size = new System.Drawing.Size(174, 20);
       this.SelectedSigmaBox.TabIndex = 2;
       // 
       // SelectedAverageBox
       // 
       this.SelectedAverageBox.Location = new System.Drawing.Point(150, 156);
       this.SelectedAverageBox.Name = "SelectedAverageBox";
-      this.SelectedAverageBox.Size = new System.Drawing.Size(100, 20);
+      this.SelectedAverageBox.Size = new System.Drawing.Size(174, 20);
       this.SelectedAverageBox.TabIndex = 2;
       // 
       // DistribGrath
@@ -280,11 +282,21 @@
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
       // 
+      // CalcStatButton
+      // 
+      this.CalcStatButton.Location = new System.Drawing.Point(321, 42);
+      this.CalcStatButton.Name = "CalcStatButton";
+      this.CalcStatButton.Size = new System.Drawing.Size(133, 23);
+      this.CalcStatButton.TabIndex = 4;
+      this.CalcStatButton.Text = "Посчитать статистику";
+      this.CalcStatButton.UseVisualStyleBackColor = true;
+      this.CalcStatButton.Click += new System.EventHandler(this.CalcStatButton_Click);
+      // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(523, 629);
+      this.ClientSize = new System.Drawing.Size(486, 629);
       this.Controls.Add(this.StimParams);
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
@@ -330,5 +342,6 @@
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.PictureBox PackCountGraph;
+    private System.Windows.Forms.Button CalcStatButton;
   }
 }

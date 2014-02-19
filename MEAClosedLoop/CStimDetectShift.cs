@@ -363,21 +363,9 @@ namespace MEAClosedLoop
     private double mean;
     private bool first_point = true;
 
-    public void AddValueElem(int ValueToAdd)
+    public void AddValueElem(double ValueToAdd)
     {
-      //values.Add(ValueToAdd);
       values.Add(ValueToAdd);
-    }
-
-    double hpf(int Value)
-    {
-      if (first_point)
-      {
-        mean = Value;
-        first_point = false;
-      }
-      mean = 0.9 * mean + 0.1 * Value;
-      return Value - mean;
     }
     public void Calc()
     {
