@@ -29,12 +29,13 @@
     private void InitializeComponent()
     {
       this.Prepearing = new System.Windows.Forms.GroupBox();
-      this.CalcStatButton = new System.Windows.Forms.Button();
       this.CollectStatButton = new System.Windows.Forms.Button();
       this.label2 = new System.Windows.Forms.Label();
       this.StatProgressBar = new System.Windows.Forms.ProgressBar();
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
       this.StimParams = new System.Windows.Forms.GroupBox();
+      this.label10 = new System.Windows.Forms.Label();
+      this.trackBar1 = new System.Windows.Forms.TrackBar();
       this.label9 = new System.Windows.Forms.Label();
       this.StimType = new System.Windows.Forms.ComboBox();
       this.StartStimButton = new System.Windows.Forms.Button();
@@ -54,45 +55,29 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
-      this.trackBar1 = new System.Windows.Forms.TrackBar();
-      this.label10 = new System.Windows.Forms.Label();
-      this.trackBar2 = new System.Windows.Forms.TrackBar();
-      this.label11 = new System.Windows.Forms.Label();
-      this.hScrollBar1 = new System.Windows.Forms.HScrollBar();
+      this.button1 = new System.Windows.Forms.Button();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
       this.StatResult.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.DistribGrath)).BeginInit();
       this.PackProbability.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar2)).BeginInit();
       this.SuspendLayout();
       // 
       // Prepearing
       // 
-      this.Prepearing.Controls.Add(this.CalcStatButton);
       this.Prepearing.Controls.Add(this.CollectStatButton);
       this.Prepearing.Controls.Add(this.label2);
       this.Prepearing.Controls.Add(this.StatProgressBar);
       this.Prepearing.Controls.Add(this.numericUpDown1);
       this.Prepearing.Location = new System.Drawing.Point(12, 12);
       this.Prepearing.Name = "Prepearing";
-      this.Prepearing.Size = new System.Drawing.Size(460, 76);
+      this.Prepearing.Size = new System.Drawing.Size(460, 53);
       this.Prepearing.TabIndex = 6;
       this.Prepearing.TabStop = false;
       this.Prepearing.Text = "Подготовка";
-      // 
-      // CalcStatButton
-      // 
-      this.CalcStatButton.Location = new System.Drawing.Point(321, 42);
-      this.CalcStatButton.Name = "CalcStatButton";
-      this.CalcStatButton.Size = new System.Drawing.Size(133, 23);
-      this.CalcStatButton.TabIndex = 4;
-      this.CalcStatButton.Text = "Посчитать статистику";
-      this.CalcStatButton.UseVisualStyleBackColor = true;
-      this.CalcStatButton.Click += new System.EventHandler(this.CalcStatButton_Click);
       // 
       // CollectStatButton
       // 
@@ -123,26 +108,49 @@
       // numericUpDown1
       // 
       this.numericUpDown1.Location = new System.Drawing.Point(90, 16);
+      this.numericUpDown1.Maximum = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
       this.numericUpDown1.Name = "numericUpDown1";
       this.numericUpDown1.Size = new System.Drawing.Size(43, 20);
       this.numericUpDown1.TabIndex = 3;
       // 
       // StimParams
       // 
-      this.StimParams.Controls.Add(this.hScrollBar1);
-      this.StimParams.Controls.Add(this.label11);
+      this.StimParams.Controls.Add(this.button1);
       this.StimParams.Controls.Add(this.label10);
-      this.StimParams.Controls.Add(this.trackBar2);
       this.StimParams.Controls.Add(this.trackBar1);
       this.StimParams.Controls.Add(this.label9);
       this.StimParams.Controls.Add(this.StimType);
       this.StimParams.Controls.Add(this.StartStimButton);
-      this.StimParams.Location = new System.Drawing.Point(13, 314);
+      this.StimParams.Location = new System.Drawing.Point(12, 301);
       this.StimParams.Name = "StimParams";
-      this.StimParams.Size = new System.Drawing.Size(682, 229);
+      this.StimParams.Size = new System.Drawing.Size(459, 168);
       this.StimParams.TabIndex = 11;
       this.StimParams.TabStop = false;
       this.StimParams.Text = "Параметры стимуляции";
+      // 
+      // label10
+      // 
+      this.label10.AutoSize = true;
+      this.label10.Location = new System.Drawing.Point(2, 26);
+      this.label10.Name = "label10";
+      this.label10.Size = new System.Drawing.Size(205, 13);
+      this.label10.TabIndex = 4;
+      this.label10.Text = "отступ импулься от предыдущей пачки";
+      // 
+      // trackBar1
+      // 
+      this.trackBar1.Location = new System.Drawing.Point(0, 51);
+      this.trackBar1.Maximum = 2000;
+      this.trackBar1.Name = "trackBar1";
+      this.trackBar1.Size = new System.Drawing.Size(453, 45);
+      this.trackBar1.SmallChange = 20;
+      this.trackBar1.TabIndex = 3;
+      this.trackBar1.TickFrequency = 15;
+      this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
       // 
       // label9
       // 
@@ -169,6 +177,7 @@
       this.StartStimButton.TabIndex = 0;
       this.StartStimButton.Text = "Начать стимуляцию";
       this.StartStimButton.UseVisualStyleBackColor = true;
+      this.StartStimButton.Click += new System.EventHandler(this.StartStimButton_Click);
       // 
       // StatResult
       // 
@@ -178,7 +187,7 @@
       this.StatResult.Controls.Add(this.SelectedAverageBox);
       this.StatResult.Controls.Add(this.DistribGrath);
       this.StatResult.Controls.Add(this.label1);
-      this.StatResult.Location = new System.Drawing.Point(12, 94);
+      this.StatResult.Location = new System.Drawing.Point(12, 71);
       this.StatResult.Name = "StatResult";
       this.StatResult.Size = new System.Drawing.Size(460, 209);
       this.StatResult.TabIndex = 10;
@@ -246,7 +255,7 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(12, 549);
+      this.PackProbability.Location = new System.Drawing.Point(11, 475);
       this.PackProbability.Name = "PackProbability";
       this.PackProbability.Size = new System.Drawing.Size(460, 128);
       this.PackProbability.TabIndex = 9;
@@ -324,54 +333,22 @@
       this.PackCountGraph.Size = new System.Drawing.Size(444, 75);
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
-      this.PackCountGraph.Click += new System.EventHandler(this.PackCountGraph_Click);
       // 
-      // trackBar1
+      // button1
       // 
-      this.trackBar1.Location = new System.Drawing.Point(-1, 32);
-      this.trackBar1.Name = "trackBar1";
-      this.trackBar1.Size = new System.Drawing.Size(453, 45);
-      this.trackBar1.TabIndex = 3;
-      this.trackBar1.TickFrequency = 40;
-      // 
-      // label10
-      // 
-      this.label10.AutoSize = true;
-      this.label10.Location = new System.Drawing.Point(458, 32);
-      this.label10.Name = "label10";
-      this.label10.Size = new System.Drawing.Size(205, 13);
-      this.label10.TabIndex = 4;
-      this.label10.Text = "отступ импулься от предыдущей пачки";
-      // 
-      // trackBar2
-      // 
-      this.trackBar2.Location = new System.Drawing.Point(0, 83);
-      this.trackBar2.Name = "trackBar2";
-      this.trackBar2.Size = new System.Drawing.Size(453, 45);
-      this.trackBar2.TabIndex = 3;
-      this.trackBar2.TickFrequency = 20;
-      // 
-      // label11
-      // 
-      this.label11.AutoSize = true;
-      this.label11.Location = new System.Drawing.Point(458, 83);
-      this.label11.Name = "label11";
-      this.label11.Size = new System.Drawing.Size(161, 13);
-      this.label11.TabIndex = 4;
-      this.label11.Text = "правая граница рамки поиска";
-      // 
-      // hScrollBar1
-      // 
-      this.hScrollBar1.Location = new System.Drawing.Point(3, 180);
-      this.hScrollBar1.Name = "hScrollBar1";
-      this.hScrollBar1.Size = new System.Drawing.Size(443, 17);
-      this.hScrollBar1.TabIndex = 5;
+      this.button1.Location = new System.Drawing.Point(320, 103);
+      this.button1.Name = "button1";
+      this.button1.Size = new System.Drawing.Size(133, 23);
+      this.button1.TabIndex = 5;
+      this.button1.Text = "дополнительо";
+      this.button1.UseVisualStyleBackColor = true;
+      this.button1.Click += new System.EventHandler(this.button1_Click);
       // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(707, 742);
+      this.ClientSize = new System.Drawing.Size(484, 616);
       this.Controls.Add(this.StimParams);
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
@@ -383,14 +360,13 @@
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
       this.StimParams.ResumeLayout(false);
       this.StimParams.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
       this.StatResult.ResumeLayout(false);
       this.StatResult.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.DistribGrath)).EndInit();
       this.PackProbability.ResumeLayout(false);
       this.PackProbability.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar2)).EndInit();
       this.ResumeLayout(false);
 
     }
@@ -420,13 +396,10 @@
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.PictureBox PackCountGraph;
-    private System.Windows.Forms.Button CalcStatButton;
     private System.Windows.Forms.Label label9;
     private System.Windows.Forms.ComboBox StimType;
-    private System.Windows.Forms.Label label11;
     private System.Windows.Forms.Label label10;
-    private System.Windows.Forms.TrackBar trackBar2;
     private System.Windows.Forms.TrackBar trackBar1;
-    private System.Windows.Forms.HScrollBar hScrollBar1;
+    private System.Windows.Forms.Button button1;
   }
 }
