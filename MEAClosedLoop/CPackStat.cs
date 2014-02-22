@@ -182,6 +182,11 @@ namespace MEAClosedLoop
     {
       CalcStat();
     }
+
+    private void PackCountGraph_Click(object sender, EventArgs e)
+    {
+
+    }
   }
 
 }
