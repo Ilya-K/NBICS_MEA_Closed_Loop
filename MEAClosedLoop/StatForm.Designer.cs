@@ -66,6 +66,7 @@
       this.panel_Stat1.Name = "panel_Stat1";
       this.panel_Stat1.Size = new System.Drawing.Size(1171, 145);
       this.panel_Stat1.TabIndex = 19;
+      this.panel_Stat1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_Stat1_Paint);
       // 
       // bt_Start
       // 

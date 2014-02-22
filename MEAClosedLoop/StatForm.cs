@@ -19,16 +19,28 @@ namespace MEAClosedLoop
     private const int STAT_BUF_LEN = 30 * 1000 * Param.MS;
     private CFiltering m_dataStream;
     private TData[] m_data;
+    private TData[] m_shortSE;
+    private TData[] m_sumSE;
+    private Point[] m_dataPoints;
+    private Point[] m_shortSEPoints;
+    private Point[] m_sumSEPoints;
+
     private int m_channel; // [TODO]: It's not a true channel name, but just an index in a Dic. Correct some day.
     private int m_prevDataPanelWidth;
     private volatile int m_time = 0;
+    private int m_drawWidth = 0;
     private volatile bool m_running = false;
+
 
     public StatForm(CFiltering fltStream)
     {
       InitializeComponent();
 
       m_data = new TData[STAT_BUF_LEN];
+      m_dataPoints = new Point[panel_Data.Width * 2];
+      m_shortSEPoints = new Point[panel_Data.Width * 2];
+      m_sumSEPoints = new Point[panel_Data.Width * 2];
+
       m_dataStream = fltStream;
 
       foreach (int channel in m_dataStream.ChannelList)
@@ -63,10 +75,15 @@ namespace MEAClosedLoop
         m_data[m_time++] = data[m_channel][i];
       }
 
+
       int width = panel_Data.Width;
       int height = panel_Data.Height;
-      double dotsPerPixel = (double)STAT_BUF_LEN / width;
-      Rectangle updateRegion = new Rectangle((int)((m_time - dataLength) / dotsPerPixel), 0, (int)(dataLength / dotsPerPixel) + 1, height);
+
+      int dataStart = m_time - dataLength;
+      UpdateStoredPoints(dataStart);
+
+      double dataPointsPerPixel = (double)STAT_BUF_LEN / width;
+      Rectangle updateRegion = new Rectangle((int)(dataStart / dataPointsPerPixel), 0, (int)(dataLength / dataPointsPerPixel) + 1, height);
       panel_Data.Invalidate(updateRegion);
     }
 
@@ -78,50 +95,66 @@ namespace MEAClosedLoop
     private void panel_Data_Paint(object sender, PaintEventArgs e)
     {
       if (m_time == 0) return;
-     
+      int dataLength = m_time;
+
       int width = panel_Data.Width;
       int height = panel_Data.Height;
-      
-      int drawLength = e.ClipRectangle.Width;
-      int start = e.ClipRectangle.Left;
+      double dataPointsPerPixel = (double)STAT_BUF_LEN / width;
 
       if (m_prevDataPanelWidth != width)
       {
-        start = 0;
-        drawLength = width;
+        m_dataPoints = new Point[width * 2];
+        m_shortSEPoints = new Point[width * 2];
+        m_sumSEPoints = new Point[width * 2];
+        UpdateStoredPoints(0);
+
         m_prevDataPanelWidth = width;
         panel_Data.Refresh();
         return;
       }
 
-      int dataStart = (start * STAT_BUF_LEN) / width;
+      int start = e.ClipRectangle.Left;
+      int drawLength = Math.Min(e.ClipRectangle.Width, (int)(dataLength / dataPointsPerPixel) - start + 1);
+      Point[] dataPoints = new Point[drawLength * 2];
+      Array.Copy(m_dataPoints, start * 2, dataPoints, 0, drawLength * 2);
 
-      if (dataStart > m_time) return;
+      Pen pen = new Pen(Color.Blue, 1);
+      e.Graphics.DrawLines(pen, dataPoints);
+    }
+
+    private void panel_Stat1_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void UpdateStoredPoints(int dataStart)
+    {
+      if (m_time <= dataStart) return;
+
       int dataLength = m_time - dataStart;
-      dataLength = Math.Min(dataLength, (drawLength * STAT_BUF_LEN) / width);
-      drawLength = Math.Min(drawLength, (dataLength * width) / STAT_BUF_LEN + 1);
-      Point[] points = new Point[drawLength * 2];
+      double dataPointsPerPixel = (double)STAT_BUF_LEN / panel_Data.Width;
+      int start = (int)(dataStart / dataPointsPerPixel);
 
-      int x = -1;
+      m_drawWidth = (dataLength * panel_Data.Width) / STAT_BUF_LEN + 1;
+      int height = panel_Data.Height;
+
+      int x = start;
       for (int i = 0; i < dataLength; ++i)
       {
-        int xNew = (i * width) / STAT_BUF_LEN;
-        int y = (int)(height / 2 - m_data[dataStart + i] / 20);
+        int xNew = (int)((dataStart + i) / dataPointsPerPixel);
+        int yData = (int)(height / 2 - m_data[dataStart + i] / 20);
         if (xNew > x)
         {
           x = xNew;
-          points[2 * x] = new Point(start + x*3, y);
-          points[2 * x + 1] = new Point(start + x*3, y);
+          m_dataPoints[2 * x] = new Point(x, yData);
+          m_dataPoints[2 * x + 1] = new Point(x, yData);
         }
         else
         {
-          points[2 * x].Y = Math.Min(points[2 * x].Y, y);
-          points[2 * x + 1].Y = Math.Max(points[2 * x + 1].Y, y);
+          m_dataPoints[2 * x].Y = Math.Min(m_dataPoints[2 * x].Y, yData);
+          m_dataPoints[2 * x + 1].Y = Math.Max(m_dataPoints[2 * x + 1].Y, yData);
         }
       }
-
-      Pen pen = new Pen(Color.Blue, 1);
-      e.Graphics.DrawLines(pen, points);
     }
 
     private void bt_Start_Click(object sender, EventArgs e)

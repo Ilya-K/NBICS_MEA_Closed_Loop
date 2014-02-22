@@ -346,10 +346,10 @@ namespace MEAClosedLoop
     #region отрисовка
     public void DrawCallFunc()
     {
-      DataRender = new CGraphRender();
-      DataRender.IsMouseVisible = true;
-      DataRender.SetDataObj(this);
-      DataRender.Run();
+      //DataRender = new CGraphRender();
+      //DataRender.IsMouseVisible = true;
+      //DataRender.SetDataObj(this);
+      //DataRender.Run();
     }
     #endregion
   }
