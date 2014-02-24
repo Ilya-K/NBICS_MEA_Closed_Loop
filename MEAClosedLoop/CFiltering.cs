@@ -47,8 +47,22 @@ namespace MEAClosedLoop
 
     public delegate void StimulTimeDelegate(List<TStimIndex> stimul);
     private List<StimulTimeDelegate> m_stimulCallback = null;
+    // [DEBUG STIM LOAD VARIABLES]
 
-    // [DEBUG]
+    private const int DAQ_FREQ = 25000;
+    private const int TIME_MULT = DAQ_FREQ / 1000; //!< Коэффициент перевода времени в милисекунды
+    private const TTime SINGLE_STIM_PERIOD = 10000 * TIME_MULT; //!< Период между одиночными стимулами (stimType = 1)
+    private const int MULTI_PACK_NUM = 6; //!< Количество стимулов в пачке
+    private const UInt16 MULTI_INNER_PERIOD = 10 * TIME_MULT; //!< Период между соседними стимулами внутри пачки
+    private const UInt16 MULTI_PACK_PERIOD = 300 * TIME_MULT; //!< Период между пачками
+    private const UInt16 MAX_TIME_NOISE = 9 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
+    private const TTime MAX_FILE_LENGTH = 900000 * TIME_MULT; //!< Максимальная длина входного файла 
+    TTime StartStimTime = 4210; // время начала стимуляций
+    int StimType = 2;
+    private List<TStimGroup> sl_groups; //!< Точный список моментов стимуляции
+    //[DEBUG STIM LOAD VARIABLES /]
+    
+    // [/DEBUG]
     public int m_Count = 0;
 
     public void AddDataConsumer(ConsumerDelegate consumer)
@@ -84,6 +98,8 @@ namespace MEAClosedLoop
 
     public CFiltering(CInputStream inputStream, CStimDetectShift stimDetector, SALPAParams parSALPA, BFParams parBF)
     {
+
+      
       m_inputStream = inputStream;
       m_inputStream.OnStreamKill = Dismiss;
       m_inputStream.ConsumerList.Add(ReceiveData);
@@ -95,7 +111,15 @@ namespace MEAClosedLoop
 
       // [TODO] Allow user to choose stimulus artifact detection channel
       stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0];
+      ///[DEBUG STIM]
+      sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
+      //ACHTUNG IDIOT WRITES HERE!!!!
+      foreach (TStimGroup stim in sl_groups)
+      {
+        m_stimDetector.SetExpectedStims(stim);
 
+      }
+      ///[/DEBUG STIM]
       if (parSALPA != null)
       {
         if (m_stimDetector == null)
@@ -186,8 +210,8 @@ namespace MEAClosedLoop
         // Make a parallel collection of the expected stimuli lists to enable parallel processing
         foreach (int channel in packet.Keys) parStimInd[channel] = new List<TStimIndex>(stimIndices);
 
-        // Process all channels of the previous packet in parallel (using PLINQ)
-        m_prevPacket.Keys.AsParallel().ForAll(channel =>
+        // Process all channels of the packet in parallel (using PLINQ)
+        packet.Keys.AsParallel().ForAll(channel =>
         {
           filteredData[channel] = m_salpaFilters[channel].filter(packet[channel], parStimInd[channel]);
         });
@@ -221,16 +245,52 @@ namespace MEAClosedLoop
     /// Filter current data packet with the SALPA or/and Butterworth
     /// </summary>
     /// <param name="currPacket">Current packet of input stream</param>
+    /// 
+    private List<TStimGroup> GenStimulList(TTime start_time, Int32 stimType, TTime totalTime)
+    {
+      TTime timeIterator;
+      TStimGroup newStim;
+      List<TStimGroup> output = new List<TStimGroup>();
+
+      switch (stimType)
+      {
+        case 1:
+          newStim.count = 1;
+          newStim.period = 0;
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += SINGLE_STIM_PERIOD)
+          {
+            newStim.stimTime = timeIterator;
+            output.Add(newStim);
+          }
+          break;
+        case 2:
+          newStim.count = 6;
+          newStim.period = MULTI_INNER_PERIOD;
+          for (timeIterator = start_time; timeIterator < totalTime; timeIterator += MULTI_PACK_PERIOD)
+          {
+            newStim.stimTime = timeIterator;
+            output.Add(newStim);
+          }
+          break;
+      }
+      return output;
+    }
     public void ReceiveData(TRawDataPacket currPacket)
     {
       if (m_salpaFilters != null)
       {
         int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
         List<TStimIndex> stimIndices = null;
+        //[DEBUG MODE] ATTENITION ACHTUNG!
+
+
+        //[DEBUG MODE] END
 
         // Check here if we need to call the Stimulus Artifact Detector for the current packet
+        // Returns true if the current packet is requred (stimulation might be expected in the next packet)
         if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
         {
+          // Retuns null when we need to put off processing of the current packet until next packet arrived
           stimIndices = m_stimDetector.GetStims(currPacket);
         }
 
@@ -238,6 +298,8 @@ namespace MEAClosedLoop
         {
           PushToSalpa(m_prevPacket, stimIndices); // поэтому проталкиваем предыдущий пакет вперёд
           m_prevPacket = null;
+          PushToSalpa(currPacket, null);
+          return;
         }
 
         if (stimIndices != null)                  // Нормальный случай. Нашли, что ожидалось, или не нашли, что не ожидалось

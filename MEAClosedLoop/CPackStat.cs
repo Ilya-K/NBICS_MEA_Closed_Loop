@@ -28,7 +28,7 @@ namespace MEAClosedLoop
     private CPackDetector PackDetector;
     public List<CPack> PackListBefore; //befor stim started
     public List<CPack> PackListAfter; // After stim started
-    public List<CPack> 
+    public List<CPack> PackListDetectReaction; // Лист пачек, которые считаются реакцией культуры
     public List<TStimIndex> StimList;
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
@@ -54,6 +54,7 @@ namespace MEAClosedLoop
       CurrentState = state.BeforeStimulation;
       PackListBefore = new List<CPack>();
       PackListAfter = new List<CPack>();
+      StimList = new List<TStimIndex>();
       PackDetector = _PackDetector;
       StatProgressBar.Maximum = Minimum_Pack_Requered_Count;
 
@@ -199,7 +200,7 @@ namespace MEAClosedLoop
                 //PackListAfter.Add(PackDetector.WaitPack());
                 {
                   Thread.Sleep(25);//Вместо функции WaitPack()
-                  CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(12000)), 0, null);
+                  CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(16000)), 0, null);
                   PackListAfter.Add(pack_to_add);
                 }
                 break;

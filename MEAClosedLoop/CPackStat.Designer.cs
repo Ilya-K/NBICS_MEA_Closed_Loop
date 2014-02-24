@@ -34,6 +34,7 @@
       this.StatProgressBar = new System.Windows.Forms.ProgressBar();
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
       this.StimParams = new System.Windows.Forms.GroupBox();
+      this.button1 = new System.Windows.Forms.Button();
       this.label10 = new System.Windows.Forms.Label();
       this.trackBar1 = new System.Windows.Forms.TrackBar();
       this.label9 = new System.Windows.Forms.Label();
@@ -55,7 +56,6 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
-      this.button1 = new System.Windows.Forms.Button();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -132,6 +132,16 @@
       this.StimParams.TabStop = false;
       this.StimParams.Text = "Параметры стимуляции";
       // 
+      // button1
+      // 
+      this.button1.Location = new System.Drawing.Point(320, 103);
+      this.button1.Name = "button1";
+      this.button1.Size = new System.Drawing.Size(133, 23);
+      this.button1.TabIndex = 5;
+      this.button1.Text = "дополнительо";
+      this.button1.UseVisualStyleBackColor = true;
+      this.button1.Click += new System.EventHandler(this.button1_Click);
+      // 
       // label10
       // 
       this.label10.AutoSize = true;
@@ -163,7 +173,10 @@
       // 
       // StimType
       // 
+      this.StimType.DisplayMember = "1";
       this.StimType.FormattingEnabled = true;
+      this.StimType.Items.AddRange(new object[] {
+            "эмуляция"});
       this.StimType.Location = new System.Drawing.Point(104, 134);
       this.StimType.Name = "StimType";
       this.StimType.Size = new System.Drawing.Size(121, 21);
@@ -334,16 +347,6 @@
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
       // 
-      // button1
-      // 
-      this.button1.Location = new System.Drawing.Point(320, 103);
-      this.button1.Name = "button1";
-      this.button1.Size = new System.Drawing.Size(133, 23);
-      this.button1.TabIndex = 5;
-      this.button1.Text = "дополнительо";
-      this.button1.UseVisualStyleBackColor = true;
-      this.button1.Click += new System.EventHandler(this.button1_Click);
-      // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -353,6 +356,7 @@
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
       this.Controls.Add(this.Prepearing);
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
       this.Name = "CPackStat";
       this.Text = "CPackStat";
       this.Prepearing.ResumeLayout(false);

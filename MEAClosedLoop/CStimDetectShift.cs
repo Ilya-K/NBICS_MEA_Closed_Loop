@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define GRAPH
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,23 +24,23 @@ namespace MEAClosedLoop
     private const TStimIndex FILTER_DEPTH = 16;
     private const TStimIndex default_offset = 8;
     private const TStimIndex start_offset = 16;
-    private const TStimIndex GUARANTEED_EMPTY_SPACE = 10;
-    private const TStimIndex POST_SIGMA_CALC_DEPTH = 12;
+    private const TStimIndex GUARANTEED_EMPTY_SPACE = 240;
+    private const TStimIndex POST_SIGMA_CALC_DEPTH = 20;
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 40;
     public TAbsStimIndex MaximumShiftRange = 250;
     private TStimIndex MinimumLengthBetweenPegs = 10; // 250 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
     public bool FullResearch = false; //True for unoptimized research
-    public int m_Artif_Channel = 28;
-    public int m_Artif_Channel2 = 14;
+    public int m_Artif_Channel = MEA.EL_DECODE[23];
     #endregion
 
-    #region Внутрение данные
+    #region Внутрение данные|
     private cases CurrentCase;
     private cases NextCase;
     private int CallCount;
     private object LockStimList = new object();
     private object LockExpStimList = new object();
+    public object LockExternalData = new object();
     private TRawDataPacket PrevPacket;
     private TTime CurrentTime;
     private bool IsInNextBuffZone;
@@ -64,7 +65,7 @@ namespace MEAClosedLoop
       IsInNextBuffZone = false;
       Thread RawDataRender = new Thread(DrawCallFunc);
       RawDataRender.Start();
-      //Thread.Sleep(2400);
+      Thread.Sleep(2400);
 
     }
     #endregion
@@ -136,6 +137,11 @@ namespace MEAClosedLoop
     public List<TStimIndex> GetStims(TRawDataPacket DataPacket)
     {
       CallCount++;
+      lock (LockExternalData)
+      {
+        //inner_data_to_display = DataPacket[m_Artif_Channel];
+      }
+      //Thread.Sleep(100);
       #region Определение ситуации с расположением артефактов в пакете
       //Случай, когда мы просим задержать пакет.
       if (IsNullReturned)
@@ -230,8 +236,12 @@ namespace MEAClosedLoop
         #region Поиск около ожидаемых артефактов
         foreach (TStimGroup stim in m_expectedStims)
         {
-          TAbsStimIndex rightRange = (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange) + (TAbsStimIndex)FILTER_DEPTH > (TAbsStimIndex)DataPacket.Length) ? (TAbsStimIndex)DataPacket.Length : (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange));
-          TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0 && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ? 0 : (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange);
+          TAbsStimIndex rightRange = (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange) + (TAbsStimIndex)FILTER_DEPTH > (TAbsStimIndex)DataPacket.Length) ?
+                  (TAbsStimIndex)DataPacket.Length : (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange));
+          TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0 && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ? 
+                   0 : (stim.stimTime -           CurrentTime - (TAbsStimIndex)MaximumShiftRange);
+          if (FindedPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10)
+            leftRange += (TAbsStimIndex)GUARANTEED_EMPTY_SPACE;
           for (TAbsStimIndex i = leftRange; i < rightRange; i++)
           {
             if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)i))
@@ -271,7 +281,14 @@ namespace MEAClosedLoop
           }
         }
         #endregion
+      } 
+      lock (LockExternalData)
+      {
+        inner_data_to_display = DataPacket;
+        inner_found_indexes_to_display = FindedPegs;
       }
+      //Thread.Sleep(150);
+      int x = FindedPegs.Count();
       #region Удаление найденных координат артефактов стимуляций из списка ожидаемых.
       #region  Добавим устаревшие на удаление.
       foreach (TStimGroup _stim in m_expectedStims)
@@ -284,11 +301,9 @@ namespace MEAClosedLoop
         if (m_expectedStims.Contains(_stim)) m_expectedStims.Remove(_stim);
       }
       #endregion
-
-      inner_data_to_display = DataPacket;
-      inner_found_indexes_to_display = FindedPegs;
-      Thread.Sleep(50);
+      
       return FindedPegs;
+
     }
     #endregion
     #region Упрощенная верификация артефакта в момент времени t
@@ -321,8 +336,8 @@ namespace MEAClosedLoop
           && !pre_average.IsInArea(post_average.Value - pre_average.TripleSigma)
           && !pre_average.IsInArea(post_average.Value + pre_average.TripleSigma)
           //Clipping Fix
-          && pre_average.Value > 10
-          && pre_average.Value < 65000
+          && pre_average.Value > 0
+          && pre_average.Value < 65535
           //StableLinesFix
           && Math.Abs(pre_average.Value - post_average.Value) > 220
           //Blanking Fix
@@ -340,16 +355,17 @@ namespace MEAClosedLoop
       {
         return false;
       }
-
     }
     #endregion
     #region отрисовка
     public void DrawCallFunc()
     {
-      //DataRender = new CGraphRender();
-      //DataRender.IsMouseVisible = true;
-      //DataRender.SetDataObj(this);
-      //DataRender.Run();
+#if GRAPH
+      DataRender = new CGraphRender();
+      DataRender.IsMouseVisible = true;
+      DataRender.SetDataObj(this);
+      DataRender.Run();
+#endif
     }
     #endregion
   }
