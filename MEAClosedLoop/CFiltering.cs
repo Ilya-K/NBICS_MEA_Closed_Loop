@@ -47,6 +47,8 @@ namespace MEAClosedLoop
 
     public delegate void StimulTimeDelegate(List<TStimIndex> stimul);
     private List<StimulTimeDelegate> m_stimulCallback = null;
+
+    private List<TStimIndex> m_noArtifacts = new List<TStimIndex>();
     // [DEBUG STIM LOAD VARIABLES]
 
     private const int DAQ_FREQ = 25000;
@@ -57,6 +59,7 @@ namespace MEAClosedLoop
     private const UInt16 MULTI_PACK_PERIOD = 300 * TIME_MULT; //!< Период между пачками
     private const UInt16 MAX_TIME_NOISE = 9 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
     private const TTime MAX_FILE_LENGTH = 900000 * TIME_MULT; //!< Максимальная длина входного файла 
+   
     TTime StartStimTime = 4210; // время начала стимуляций
     int StimType = 2;
     private List<TStimGroup> sl_groups; //!< Точный список моментов стимуляции
@@ -98,8 +101,6 @@ namespace MEAClosedLoop
 
     public CFiltering(CInputStream inputStream, CStimDetectShift stimDetector, SALPAParams parSALPA, BFParams parBF)
     {
-
-      
       m_inputStream = inputStream;
       m_inputStream.OnStreamKill = Dismiss;
       m_inputStream.ConsumerList.Add(ReceiveData);
@@ -277,43 +278,40 @@ namespace MEAClosedLoop
     }
     public void ReceiveData(TRawDataPacket currPacket)
     {
-      if (m_salpaFilters != null)
-      {
-        int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
-        List<TStimIndex> stimIndices = null;
-        //[DEBUG MODE] ATTENITION ACHTUNG!
-
-
-        //[DEBUG MODE] END
-
-        // Check here if we need to call the Stimulus Artifact Detector for the current packet
-        // Returns true if the current packet is requred (stimulation might be expected in the next packet)
-        if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
-        {
-          // Retuns null when we need to put off processing of the current packet until next packet arrived
-          stimIndices = m_stimDetector.GetStims(currPacket);
-        }
-
-        if (m_prevPacket != null)                 // В прошлый раз чего-то не нашли, а теперь, может быть, нашли
-        {
-          PushToSalpa(m_prevPacket, stimIndices); // поэтому проталкиваем предыдущий пакет вперёд
-          m_prevPacket = null;
-          PushToSalpa(currPacket, null);
-          return;
-        }
-
-        if (stimIndices != null)                  // Нормальный случай. Нашли, что ожидалось, или не нашли, что не ожидалось
-        {
-          PushToSalpa(currPacket, stimIndices);
-        }
-        else                                      // Put off processing of the current packet until a stimuli artifacts are found
-        {
-          m_prevPacket = currPacket;
-        }
-      }
-      else
+      if (m_salpaFilters == null)
       {
         PassBySalpa(currPacket);
+        return;
+      }
+
+      int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
+      List<TStimIndex> stimIndices = m_noArtifacts;
+
+      // Check here if we need to call the Stimulus Artifact Detector for the current packet
+      // Returns true if the current packet is requred (stimulation might be expected in the next packet)
+      
+      if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
+      {
+        // Retuns null when we need to put off processing of the current packet until next packet arrived
+        stimIndices = m_stimDetector.GetStims(currPacket);
+      }
+      
+
+      if (m_prevPacket != null)                 // В прошлый раз чего-то не нашли, а теперь, может быть, нашли
+      {
+        PushToSalpa(m_prevPacket, stimIndices); // поэтому проталкиваем предыдущий пакет вперёд
+        m_prevPacket = null;
+        PushToSalpa(currPacket, null);
+        return;
+      }
+
+      if (stimIndices != null)                  // Нормальный случай. Нашли, что ожидалось, или не нашли, что не ожидалось
+      {
+        PushToSalpa(currPacket, stimIndices);
+      }
+      else                                      // Put off processing of the current packet until stimuli artifacts are found
+      {
+        m_prevPacket = currPacket;
       }
     }
 

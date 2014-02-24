@@ -347,8 +347,8 @@ namespace MEAClosedLoop
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
-        m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
-        m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
+        //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
+        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
         m_packDetector = new CPackDetector(m_salpaFilter);
         m_statForm = new CPackStat(m_packDetector);
         m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
@@ -364,12 +364,14 @@ namespace MEAClosedLoop
       EnsureDAQIsConfigured();
 
       // Check if DataLoop Thread has been alredy created
+      /*
       if (m_dataLoopThread == null)
       {
         m_dataLoopThread = new Thread(new ThreadStart(DataLoop));
         m_killDataLoop = false;
         m_dataLoopThread.Start();
       }
+      */
 
       comboBox_DAQs.Enabled = false;
       m_inputStream.Start();

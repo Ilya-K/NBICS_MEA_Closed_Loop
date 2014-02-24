@@ -144,21 +144,20 @@ namespace Neurorighter
       int t_processTo;
       toPeg = false;
       //System.Console.Write(channel.ToString() + " on " + elecState.ToString() + ":");
+
+      if (stimIndices != null) m_stimIndices.AddRange(stimIndices);
+      bool stimIndexOutOfBuffer = false;
+
       while (t_stream < t_limit)
       {
-
         //look for pegs between PRE+t_ahead and PRE+POST+bufferLength in the source buffer
         //- this corresponds to -POST+t_ahead through bufferLength in the stimindices/filtdata
         t_nextPeg = t_limit;//if we don't have an upcoming peg
-
-        if (stimIndices != null) m_stimIndices.AddRange(stimIndices);
-
-        while (m_stimIndices.Count > 0)//look for a peg
+        while ((m_stimIndices.Count > 0) && !stimIndexOutOfBuffer)//look for a peg
         {
           if ((m_stimIndices[0] + PRE + POST) < (t_ahead + t_stream))
           {
             m_stimIndices.RemoveAt(0); //pop off
-
           }
           else
           {
@@ -166,12 +165,17 @@ namespace Neurorighter
             if (m_stimIndices[0] <= bufferLength + tau + t_ahead)// peg is somewhere we care about
             {
               t_nextPeg = m_stimIndices[0] + PRE + POST;//convert from real samples to buffered samples
-              t_processTo = t_nextPeg;
+              // t_processTo = t_nextPeg;
               //t0 = t_nextPeg - 1;
               //elecState = state.PEGGING;
               m_stimIndices.RemoveAt(0);
               source[t_nextPeg] = railHigh + 0.01;//this is a hell of a hack, but I'm keeping with tradition- in order to force a peg, I just set the damn trace to railHigh where it should peg.
               toPeg = true;
+            }
+            if ((m_stimIndices.Count > 0) && (m_stimIndices[0] > t_limit))
+            {
+              m_stimIndices = m_stimIndices.ConvertAll(stimIndex => (TStimIndex)(stimIndex - bufferLength));
+              stimIndexOutOfBuffer = true;
             }
             break;
 
@@ -191,7 +195,6 @@ namespace Neurorighter
         //}
 
         //set limit
-
         t_processTo = Math.Min(t_nextPeg, t_limit);
 
 
