@@ -96,5 +96,10 @@ namespace MEAClosedLoop
        
       }
     }
+
+    private void PackGraphForm_Load(object sender, EventArgs e)
+    {
+
+    }
   }
 }

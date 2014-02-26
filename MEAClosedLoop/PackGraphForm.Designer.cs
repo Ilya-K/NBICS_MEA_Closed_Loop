@@ -37,6 +37,7 @@
       this.ClientSize = new System.Drawing.Size(747, 611);
       this.Name = "PackGraphForm";
       this.Text = "PackGraphForm";
+      this.Load += new System.EventHandler(this.PackGraphForm_Load);
       this.ResumeLayout(false);
 
     }

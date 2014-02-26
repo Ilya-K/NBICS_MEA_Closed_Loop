@@ -36,6 +36,7 @@ namespace MEAClosedLoop
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
     bool DoStimulation = false;
+    List<int> m_channelList; //TODO: get channel list
     state CurrentState;
     Thread CollectingDataThread;
     public delegate void DelegateSetProgress(object sender, int value);
@@ -64,6 +65,39 @@ namespace MEAClosedLoop
       SetCollectStatButtonText += SetStatButtontext;
     }
     #endregion
+
+    #region Клик по кнопке выбора канала
+    private void GraphChannelSelectButton_Click(object sender, EventArgs e)
+    {
+      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, GetBoolData(), start_data);
+      formShowWindows.Show();
+      /*if (!DoStatCollection)
+      {
+        DoStatCollection = true;
+        CollectStatButton.Text = "Остановить";
+        if (CollectingDataThread == null)
+        {
+          CollectingDataThread = new Thread(CollectPacks);
+          CollectingDataThread.Start();
+        }
+        else
+        {
+          //CollectingDataThread.Resume();
+        }
+      }
+      else
+      {
+        DoStatCollection = false;
+        CollectStatButton.Text = "Продолжить";
+        //CollectingDataThread.Suspend();
+      }*/
+    }
+    /*private void SetStatButtontext(string text)
+    {
+      CollectStatButton.Text = text;
+    }*/
+    #endregion
+
     #region Клик по кнопке сбора статистики
     private void CollectStatButton_Click(object sender, EventArgs e)
     {
@@ -263,6 +297,16 @@ namespace MEAClosedLoop
     {
       BeforeStimulation,
       AfterStimulation
+    }
+
+    private void CPackStat_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+    {
+
     }
   }
 

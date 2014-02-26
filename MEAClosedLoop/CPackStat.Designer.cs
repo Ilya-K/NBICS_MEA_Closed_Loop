@@ -56,6 +56,8 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
+      this.GraphChannelSelectButton = new System.Windows.Forms.Button();
+      this.label11 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -68,20 +70,22 @@
       // 
       // Prepearing
       // 
+      this.Prepearing.Controls.Add(this.label11);
+      this.Prepearing.Controls.Add(this.GraphChannelSelectButton);
       this.Prepearing.Controls.Add(this.CollectStatButton);
       this.Prepearing.Controls.Add(this.label2);
       this.Prepearing.Controls.Add(this.StatProgressBar);
       this.Prepearing.Controls.Add(this.numericUpDown1);
       this.Prepearing.Location = new System.Drawing.Point(12, 12);
       this.Prepearing.Name = "Prepearing";
-      this.Prepearing.Size = new System.Drawing.Size(460, 53);
+      this.Prepearing.Size = new System.Drawing.Size(461, 87);
       this.Prepearing.TabIndex = 6;
       this.Prepearing.TabStop = false;
       this.Prepearing.Text = "Подготовка";
       // 
       // CollectStatButton
       // 
-      this.CollectStatButton.Location = new System.Drawing.Point(321, 13);
+      this.CollectStatButton.Location = new System.Drawing.Point(322, 45);
       this.CollectStatButton.Name = "CollectStatButton";
       this.CollectStatButton.Size = new System.Drawing.Size(133, 23);
       this.CollectStatButton.TabIndex = 0;
@@ -92,7 +96,7 @@
       // label2
       // 
       this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(6, 16);
+      this.label2.Location = new System.Drawing.Point(21, 42);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(78, 13);
       this.label2.TabIndex = 4;
@@ -100,14 +104,14 @@
       // 
       // StatProgressBar
       // 
-      this.StatProgressBar.Location = new System.Drawing.Point(150, 13);
+      this.StatProgressBar.Location = new System.Drawing.Point(153, 42);
       this.StatProgressBar.Name = "StatProgressBar";
       this.StatProgressBar.Size = new System.Drawing.Size(139, 23);
       this.StatProgressBar.TabIndex = 1;
       // 
       // numericUpDown1
       // 
-      this.numericUpDown1.Location = new System.Drawing.Point(90, 16);
+      this.numericUpDown1.Location = new System.Drawing.Point(104, 45);
       this.numericUpDown1.Maximum = new decimal(new int[] {
             60,
             0,
@@ -116,6 +120,7 @@
       this.numericUpDown1.Name = "numericUpDown1";
       this.numericUpDown1.Size = new System.Drawing.Size(43, 20);
       this.numericUpDown1.TabIndex = 3;
+      this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
       // 
       // StimParams
       // 
@@ -125,7 +130,7 @@
       this.StimParams.Controls.Add(this.label9);
       this.StimParams.Controls.Add(this.StimType);
       this.StimParams.Controls.Add(this.StartStimButton);
-      this.StimParams.Location = new System.Drawing.Point(12, 301);
+      this.StimParams.Location = new System.Drawing.Point(14, 320);
       this.StimParams.Name = "StimParams";
       this.StimParams.Size = new System.Drawing.Size(459, 168);
       this.StimParams.TabIndex = 11;
@@ -200,7 +205,7 @@
       this.StatResult.Controls.Add(this.SelectedAverageBox);
       this.StatResult.Controls.Add(this.DistribGrath);
       this.StatResult.Controls.Add(this.label1);
-      this.StatResult.Location = new System.Drawing.Point(12, 71);
+      this.StatResult.Location = new System.Drawing.Point(12, 105);
       this.StatResult.Name = "StatResult";
       this.StatResult.Size = new System.Drawing.Size(460, 209);
       this.StatResult.TabIndex = 10;
@@ -268,7 +273,7 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(11, 475);
+      this.PackProbability.Location = new System.Drawing.Point(14, 494);
       this.PackProbability.Name = "PackProbability";
       this.PackProbability.Size = new System.Drawing.Size(460, 128);
       this.PackProbability.TabIndex = 9;
@@ -347,11 +352,29 @@
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
       // 
+      // GraphChannelSelectButton
+      // 
+      this.GraphChannelSelectButton.Location = new System.Drawing.Point(321, 13);
+      this.GraphChannelSelectButton.Name = "GraphChannelSelectButton";
+      this.GraphChannelSelectButton.Size = new System.Drawing.Size(133, 25);
+      this.GraphChannelSelectButton.TabIndex = 5;
+      this.GraphChannelSelectButton.Text = "открыть";
+      this.GraphChannelSelectButton.UseVisualStyleBackColor = true;
+      // 
+      // label11
+      // 
+      this.label11.AutoSize = true;
+      this.label11.Location = new System.Drawing.Point(21, 19);
+      this.label11.Name = "label11";
+      this.label11.Size = new System.Drawing.Size(271, 13);
+      this.label11.TabIndex = 6;
+      this.label11.Text = "Анализ активности культуры на различных каналах";
+      // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(484, 616);
+      this.ClientSize = new System.Drawing.Size(485, 633);
       this.Controls.Add(this.StimParams);
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
@@ -359,6 +382,7 @@
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
       this.Name = "CPackStat";
       this.Text = "CPackStat";
+      this.Load += new System.EventHandler(this.CPackStat_Load);
       this.Prepearing.ResumeLayout(false);
       this.Prepearing.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
@@ -405,5 +429,7 @@
     private System.Windows.Forms.Label label10;
     private System.Windows.Forms.TrackBar trackBar1;
     private System.Windows.Forms.Button button1;
+    private System.Windows.Forms.Button GraphChannelSelectButton;
+    private System.Windows.Forms.Label label11;
   }
 }
