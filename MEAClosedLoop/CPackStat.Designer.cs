@@ -29,6 +29,8 @@
     private void InitializeComponent()
     {
       this.Prepearing = new System.Windows.Forms.GroupBox();
+      this.label11 = new System.Windows.Forms.Label();
+      this.GraphChannelSelectButton = new System.Windows.Forms.Button();
       this.CollectStatButton = new System.Windows.Forms.Button();
       this.label2 = new System.Windows.Forms.Label();
       this.StatProgressBar = new System.Windows.Forms.ProgressBar();
@@ -56,8 +58,6 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
-      this.GraphChannelSelectButton = new System.Windows.Forms.Button();
-      this.label11 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -82,6 +82,25 @@
       this.Prepearing.TabIndex = 6;
       this.Prepearing.TabStop = false;
       this.Prepearing.Text = "Подготовка";
+      // 
+      // label11
+      // 
+      this.label11.AutoSize = true;
+      this.label11.Location = new System.Drawing.Point(21, 19);
+      this.label11.Name = "label11";
+      this.label11.Size = new System.Drawing.Size(271, 13);
+      this.label11.TabIndex = 6;
+      this.label11.Text = "Анализ активности культуры на различных каналах";
+      // 
+      // GraphChannelSelectButton
+      // 
+      this.GraphChannelSelectButton.Location = new System.Drawing.Point(321, 13);
+      this.GraphChannelSelectButton.Name = "GraphChannelSelectButton";
+      this.GraphChannelSelectButton.Size = new System.Drawing.Size(133, 25);
+      this.GraphChannelSelectButton.TabIndex = 5;
+      this.GraphChannelSelectButton.Text = "открыть";
+      this.GraphChannelSelectButton.UseVisualStyleBackColor = true;
+      this.GraphChannelSelectButton.Click += new System.EventHandler(this.GraphChannelSelectButton_Click);
       // 
       // CollectStatButton
       // 
@@ -351,24 +370,6 @@
       this.PackCountGraph.Size = new System.Drawing.Size(444, 75);
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
-      // 
-      // GraphChannelSelectButton
-      // 
-      this.GraphChannelSelectButton.Location = new System.Drawing.Point(321, 13);
-      this.GraphChannelSelectButton.Name = "GraphChannelSelectButton";
-      this.GraphChannelSelectButton.Size = new System.Drawing.Size(133, 25);
-      this.GraphChannelSelectButton.TabIndex = 5;
-      this.GraphChannelSelectButton.Text = "открыть";
-      this.GraphChannelSelectButton.UseVisualStyleBackColor = true;
-      // 
-      // label11
-      // 
-      this.label11.AutoSize = true;
-      this.label11.Location = new System.Drawing.Point(21, 19);
-      this.label11.Name = "label11";
-      this.label11.Size = new System.Drawing.Size(271, 13);
-      this.label11.TabIndex = 6;
-      this.label11.Text = "Анализ активности культуры на различных каналах";
       // 
       // CPackStat
       // 

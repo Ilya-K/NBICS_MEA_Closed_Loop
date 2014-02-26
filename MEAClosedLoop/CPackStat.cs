@@ -39,6 +39,7 @@ namespace MEAClosedLoop
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
     Thread CollectingDataThread;
+    PackGraphForm ChannelSelector;
     public delegate void DelegateSetProgress(object sender, int value);
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
@@ -49,7 +50,7 @@ namespace MEAClosedLoop
     private double StimStartPosition;
     #endregion
     #region Конструктор
-    public CPackStat(CPackDetector _PackDetector)
+    public CPackStat(CPackDetector _PackDetector, List<int> channelList)
     {
       InitializeComponent();
       CurrentState = state.BeforeStimulation;
@@ -58,6 +59,7 @@ namespace MEAClosedLoop
       StimList = new List<TStimIndex>();
       PackDetector = _PackDetector;
       StatProgressBar.Maximum = Minimum_Pack_Requered_Count;
+      m_channelList = channelList;
 
       SetVal += UpdateProgressBar;
       UpdateDistribGrath += DistribGrath.Refresh;
@@ -69,33 +71,9 @@ namespace MEAClosedLoop
     #region Клик по кнопке выбора канала
     private void GraphChannelSelectButton_Click(object sender, EventArgs e)
     {
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, GetBoolData(), start_data);
+      PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
       formShowWindows.Show();
-      /*if (!DoStatCollection)
-      {
-        DoStatCollection = true;
-        CollectStatButton.Text = "Остановить";
-        if (CollectingDataThread == null)
-        {
-          CollectingDataThread = new Thread(CollectPacks);
-          CollectingDataThread.Start();
-        }
-        else
-        {
-          //CollectingDataThread.Resume();
-        }
-      }
-      else
-      {
-        DoStatCollection = false;
-        CollectStatButton.Text = "Продолжить";
-        //CollectingDataThread.Suspend();
-      }*/
     }
-    /*private void SetStatButtontext(string text)
-    {
-      CollectStatButton.Text = text;
-    }*/
     #endregion
 
     #region Клик по кнопке сбора статистики
@@ -293,6 +271,7 @@ namespace MEAClosedLoop
       DoStimulation = true;
 
     }
+
     private enum state
     {
       BeforeStimulation,

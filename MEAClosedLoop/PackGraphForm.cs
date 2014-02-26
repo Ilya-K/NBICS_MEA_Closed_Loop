@@ -17,9 +17,11 @@ namespace MEAClosedLoop
     TPackMap data;
    
     const int MAX_DETECTION_TIME = 200; //number of ms
+    PackGraph dataGenerator;
 
-    public PackGraphForm(List<int> channelList, Dictionary<int, bool[]> dict_bool_data, TTime data_start)
+    public PackGraphForm(List<int> channelList/*, Dictionary<int, bool[]> dict_bool_data, TTime data_start*/)
     {
+      //TODO: real-time getting data & list of stim indices
       InitializeComponent();
       Panel[] channelPanels = new Panel[channelList.Count];
 
@@ -28,8 +30,8 @@ namespace MEAClosedLoop
       int panelWidth = formWidth / 8 - 2;
       int panelHeight = formHeight / 8 - 2;
 
-      PackGraph dataGenerator = new PackGraph();
-      List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
+      dataGenerator = new PackGraph();
+      /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
       //getting filtered data
       
@@ -50,7 +52,7 @@ namespace MEAClosedLoop
 
         data = dataGenerator.ProcessPackStat(bool_data); //тут всё переделывать >_<
         //все данные по 1 каналу -> 1 кусок данных по всем каналам
-
+      */
         foreach (int channel in channelList)
         {
           int elName = MEA.AR_DECODE[channel];
@@ -99,6 +101,19 @@ namespace MEAClosedLoop
 
     private void PackGraphForm_Load(object sender, EventArgs e)
     {
+
+    }
+
+    private bool CheckStatPar()
+    {
+      //checking consistency
+      return false;
+    }
+
+    private void RunStatButton_Click(object sender, EventArgs e)
+    {
+      if(CheckStatPar())
+        dataGenerator.ProcessPackStat();
 
     }
   }

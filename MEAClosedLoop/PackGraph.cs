@@ -49,10 +49,10 @@ namespace MEAClosedLoop
     }
 
 
-    public TPackMap ProcessPackStat(List<TPack> all_packs) //now from all channels
+    public TPackMap ProcessPackStat() //now from all channels
     {
       TPackMap current_spikes, output = new TPackMap(MAX_PACK_LENGTH);
-      double foundPackIterator = 100.0 / (double)all_packs.Count();
+     /* double foundPackIterator = 100.0 / (double)all_packs.Count();
 
       
       foreach (TPack PackIterator in all_packs)
@@ -71,7 +71,7 @@ namespace MEAClosedLoop
       if (realMaxPackLength == 0)
       {
         //something goes wrong
-      }
+      }*/
       return output;
     }
     

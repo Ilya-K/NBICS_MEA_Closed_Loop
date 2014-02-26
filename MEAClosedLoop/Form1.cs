@@ -350,7 +350,7 @@ namespace MEAClosedLoop
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
         m_packDetector = new CPackDetector(m_salpaFilter);
-        m_statForm = new CPackStat(m_packDetector);
+        m_statForm = new CPackStat(m_packDetector, m_channelList);
         m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
         m_DAQConfigured = true;
         PackStatButton.Enabled = true;
@@ -663,7 +663,7 @@ namespace MEAClosedLoop
     private void buttonFindWindow_Click(object sender, EventArgs e)
     {
       TTime start_data = 0; //TODO: get time from CFiltering
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, GetBoolData(), start_data);
+      PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
       formShowWindows.Show();
     }
 
@@ -675,7 +675,6 @@ namespace MEAClosedLoop
 
     private void PackStatButton_Click(object sender, EventArgs e)
     {
-      m_statForm = new CPackStat(m_packDetector);
       m_statForm.Show();
     }
 
