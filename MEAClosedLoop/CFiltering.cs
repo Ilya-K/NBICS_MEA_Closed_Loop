@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Neurorighter;
+using System.Diagnostics;
 using Common;
 
 namespace MEAClosedLoop
@@ -58,7 +59,7 @@ namespace MEAClosedLoop
     private const UInt16 MULTI_INNER_PERIOD = 10 * TIME_MULT; //!< Период между соседними стимулами внутри пачки
     private const UInt16 MULTI_PACK_PERIOD = 300 * TIME_MULT; //!< Период между пачками
     private const UInt16 MAX_TIME_NOISE = 9 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
-    private const TTime MAX_FILE_LENGTH = 900000 * TIME_MULT; //!< Максимальная длина входного файла 
+    private const TTime MAX_FILE_LENGTH = 9000000 * TIME_MULT; //!< Максимальная длина входного файла 
    
     TTime StartStimTime = 4210; // время начала стимуляций
     int StimType = 2;
@@ -278,6 +279,8 @@ namespace MEAClosedLoop
     }
     public void ReceiveData(TRawDataPacket currPacket)
     {
+      Stopwatch sw1 = new Stopwatch();
+      Stopwatch sw2 = new Stopwatch();
       if (m_salpaFilters == null)
       {
         PassBySalpa(currPacket);
@@ -289,14 +292,14 @@ namespace MEAClosedLoop
 
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
       // Returns true if the current packet is requred (stimulation might be expected in the next packet)
-      
+      sw1.Start();
       if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
       {
         // Retuns null when we need to put off processing of the current packet until next packet arrived
         stimIndices = m_stimDetector.GetStims(currPacket);
       }
-      
-
+      sw1.Stop();
+      sw2.Start();
       if (m_prevPacket != null)                 // В прошлый раз чего-то не нашли, а теперь, может быть, нашли
       {
         PushToSalpa(m_prevPacket, stimIndices); // поэтому проталкиваем предыдущий пакет вперёд
@@ -313,6 +316,7 @@ namespace MEAClosedLoop
       {
         m_prevPacket = currPacket;
       }
+      sw2.Stop();
     }
 
     private void PushToButterworth(TFltDataPacket filteredData)
