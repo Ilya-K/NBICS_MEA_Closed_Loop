@@ -46,6 +46,8 @@ namespace MEAClosedLoop
     public delegate void ConsumerDelegate(TFltDataPacket data);
     private List<ConsumerDelegate> m_consumerList = null;
 
+
+
     public delegate void StimulTimeDelegate(List<TStimIndex> stimul);
     private List<StimulTimeDelegate> m_stimulCallback = null;
 
@@ -59,7 +61,7 @@ namespace MEAClosedLoop
     private const UInt16 MULTI_INNER_PERIOD = 10 * TIME_MULT; //!< Период между соседними стимулами внутри пачки
     private const UInt16 MULTI_PACK_PERIOD = 300 * TIME_MULT; //!< Период между пачками
     private const UInt16 MAX_TIME_NOISE = 9 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
-    private const TTime MAX_FILE_LENGTH = 9000000 * TIME_MULT; //!< Максимальная длина входного файла 
+    private const TTime MAX_FILE_LENGTH = 900000 * TIME_MULT; //!< Максимальная длина входного файла 
    
     TTime StartStimTime = 4210; // время начала стимуляций
     int StimType = 2;
@@ -115,10 +117,11 @@ namespace MEAClosedLoop
       stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0];
       ///[DEBUG STIM]
       sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
+
       //ACHTUNG IDIOT WRITES HERE!!!!
       foreach (TStimGroup stim in sl_groups)
       {
-        m_stimDetector.SetExpectedStims(stim);
+        //m_stimDetector.SetExpectedStims(stim);
 
       }
       ///[/DEBUG STIM]
@@ -281,15 +284,20 @@ namespace MEAClosedLoop
     {
       Stopwatch sw1 = new Stopwatch();
       Stopwatch sw2 = new Stopwatch();
+      Stopwatch sw3 = new Stopwatch();
+      sw3.Start();
       if (m_salpaFilters == null)
       {
         PassBySalpa(currPacket);
         return;
       }
-
       int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
       List<TStimIndex> stimIndices = m_noArtifacts;
-
+      if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
+      {
+        m_stimDetector.SetExpectedStims(sl_groups[0]);
+        sl_groups.RemoveAt(0);
+      }
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
       // Returns true if the current packet is requred (stimulation might be expected in the next packet)
       sw1.Start();
@@ -298,8 +306,6 @@ namespace MEAClosedLoop
         // Retuns null when we need to put off processing of the current packet until next packet arrived
         stimIndices = m_stimDetector.GetStims(currPacket);
       }
-      sw1.Stop();
-      sw2.Start();
       if (m_prevPacket != null)                 // В прошлый раз чего-то не нашли, а теперь, может быть, нашли
       {
         PushToSalpa(m_prevPacket, stimIndices); // поэтому проталкиваем предыдущий пакет вперёд
@@ -307,7 +313,6 @@ namespace MEAClosedLoop
         PushToSalpa(currPacket, null);
         return;
       }
-
       if (stimIndices != null)                  // Нормальный случай. Нашли, что ожидалось, или не нашли, что не ожидалось
       {
         PushToSalpa(currPacket, stimIndices);
@@ -316,7 +321,6 @@ namespace MEAClosedLoop
       {
         m_prevPacket = currPacket;
       }
-      sw2.Stop();
     }
 
     private void PushToButterworth(TFltDataPacket filteredData)

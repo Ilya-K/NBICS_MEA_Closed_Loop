@@ -190,7 +190,7 @@ namespace MEAClosedLoop
     #region Непосредственно поиск артефактов основываясь на ExpectedStims
     public List<TStimIndex> FindStims(TRawData[] DataPacket)
     {
-      lock (LockExpStimList)
+      lock (LockExternalData)
       {
         inner_expectedStims_to_display = new List<TStimGroup>();
         for (int i = 0; i < m_expectedStims.Count(); i++)
