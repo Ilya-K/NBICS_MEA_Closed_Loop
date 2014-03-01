@@ -23,6 +23,8 @@ namespace MEAClosedLoop
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
     const int STAT_ITERATION_LENGTH = 125; //5 ms
 
+
+
     private TPackMap SpikesInPack(TPack input)
     {
       TPackMap output = new TPackMap();
@@ -79,6 +81,14 @@ namespace MEAClosedLoop
     {
       foundPackPercent = 0;
       realMaxPackLength = 0;
+    }
+
+    public void ProcessAmpStat(TTime statTime)
+    {
+    }
+
+    public void ProcessFreqStat(TTime statTime)
+    {
     }
   }
 }

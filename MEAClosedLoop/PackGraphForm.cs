@@ -28,6 +28,8 @@ namespace MEAClosedLoop
     {
       //TODO: real-time getting data & list of stim indices
       InitializeComponent();
+      this.FormBorderStyle = FormBorderStyle.FixedSingle;
+      this.MaximizeBox = false;
       Panel[] channelPanels = new Panel[channelList.Count];
 
       int formWidth = this.Size.Width;
@@ -107,6 +109,7 @@ namespace MEAClosedLoop
     private void tmpPanel_Click(object sender, System.EventArgs e)
     {
       string elName = (sender as Panel).Name;
+      RunStatButton.PerformClick();
        MessageBox.Show("канал выбран");
        loadSelection(MEA.EL_DECODE[Convert.ToInt32(elName)]);
        this.Close();
@@ -117,17 +120,20 @@ namespace MEAClosedLoop
 
     }
 
-    private bool CheckStatPar()
+    private void RunStatButton_Click(object sender, EventArgs e) //WTF?
     {
-      //checking consistency
-      return false;
-    }
-
-    private void RunStatButton_Click(object sender, EventArgs e)
-    {
-      if(CheckStatPar())
-        dataGenerator.ProcessPackStat();
-
+      int statType = StatTypeListBox.SelectedIndex;
+      TTime totalStatTime = (ulong)MinCountBox.Value * 60 * 25000;
+      switch (statType)
+      {
+        case 0:
+          dataGenerator.ProcessAmpStat(totalStatTime);
+          break;
+        case 1:
+          dataGenerator.ProcessFreqStat(totalStatTime);
+          break;
+      }
+      MessageBox.Show("подсчёт завершён");
     }
   }
 }

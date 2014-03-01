@@ -653,19 +653,12 @@ namespace MEAClosedLoop
       m_integral1 = 0;
     }
 
-    Dictionary<int, bool[]> GetBoolData()
+ /*   Dictionary<int, bool[]> GetBoolData()
     {
       Dictionary<int, bool[]> output = new Dictionary<int, bool[]>();
       //TODO: make proper output
       return output;
-    }
-
-    private void buttonFindWindow_Click(object sender, EventArgs e)
-    {
-      TTime start_data = 0; //TODO: get time from CFiltering
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
-      formShowWindows.Show();
-    }
+    }*/
 
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {

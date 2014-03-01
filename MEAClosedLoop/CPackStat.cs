@@ -176,6 +176,7 @@ namespace MEAClosedLoop
         }
       }
     }
+    
     #endregion
     #region Функция для заргрузки информации об пачках, исполняется в отдельном потоке
     private void CollectPacks()

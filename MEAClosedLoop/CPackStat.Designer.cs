@@ -98,7 +98,7 @@
       this.GraphChannelSelectButton.Name = "GraphChannelSelectButton";
       this.GraphChannelSelectButton.Size = new System.Drawing.Size(133, 25);
       this.GraphChannelSelectButton.TabIndex = 5;
-      this.GraphChannelSelectButton.Text = "открыть";
+      this.GraphChannelSelectButton.Text = "Анализировать";
       this.GraphChannelSelectButton.UseVisualStyleBackColor = true;
       this.GraphChannelSelectButton.Click += new System.EventHandler(this.GraphChannelSelectButton_Click);
       // 
