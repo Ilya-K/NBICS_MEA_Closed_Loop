@@ -11,10 +11,15 @@ namespace MEAClosedLoop
 {
   using TPackMap = List<uint>;
   using TTime = UInt64;
+  public delegate void LoadSelectionDelegate(int sel);
 
   public partial class PackGraphForm : Form
   {
     TPackMap data;
+    const int SUBPANEL_SPACE_X = 2;
+    const int SUBPANEL_SPACE_Y = 2;
+
+    public event LoadSelectionDelegate loadSelection;
    
     const int MAX_DETECTION_TIME = 200; //number of ms
     PackGraph dataGenerator;
@@ -28,7 +33,7 @@ namespace MEAClosedLoop
       int formWidth = this.Size.Width;
       int formHeight = this.Size.Height;
       int panelWidth = formWidth / 8 - 2;
-      int panelHeight = formHeight / 8 - 2;
+      int panelHeight = (formHeight - this.groupBox1.Height) / 8 - 2;
 
       dataGenerator = new PackGraph();
       /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
@@ -61,14 +66,14 @@ namespace MEAClosedLoop
           int y = elName % 10 - 1;
 
           Panel tmpPanel = new Panel();
-          tmpPanel.Location = new Point(x * panelWidth + 2, y * panelHeight + 2);
+          tmpPanel.Location = new Point(x * panelWidth + SUBPANEL_SPACE_X, y * panelHeight + SUBPANEL_SPACE_Y + this.groupBox1.Height);
           tmpPanel.Size = new System.Drawing.Size(panelWidth, panelHeight);
           tmpPanel.BorderStyle = BorderStyle.FixedSingle;
           tmpPanel.BackColor = Color.White;
           tmpPanel.Paint += channelPanel_Paint;
+          tmpPanel.Name = elName.ToString();
+          tmpPanel.Click += new EventHandler(tmpPanel_Click);
           this.Controls.Add(tmpPanel);
-
-
           channelPanels[channel] = tmpPanel;
 
         }
@@ -91,12 +96,20 @@ namespace MEAClosedLoop
           Point[] points = new Point[dataLength];
           for (int i = 0; i < dataLength; i++)
           {
-            points[i] = new Point(i * width / dataLength, /*(int)(height - i)*/ (int)data[i]);
+            points[i] = new Point(i * width / dataLength, (int)(height - i) /*(int)data[i]*/);
           }
           Pen pen = new Pen(Color.Blue, 1);
           e.Graphics.DrawLines(pen, points);
        
       }
+    }
+
+    private void tmpPanel_Click(object sender, System.EventArgs e)
+    {
+      string elName = (sender as Panel).Name;
+       MessageBox.Show("канал выбран");
+       loadSelection(MEA.EL_DECODE[Convert.ToInt32(elName)]);
+       this.Close();
     }
 
     private void PackGraphForm_Load(object sender, EventArgs e)

@@ -52,7 +52,6 @@
       this.buttonClosedLoop = new System.Windows.Forms.Button();
       this.label_time = new System.Windows.Forms.Label();
       this.button_integral0 = new System.Windows.Forms.Button();
-      this.buttonFindWindow = new System.Windows.Forms.Button();
       this.buttonStatWindow = new System.Windows.Forms.Button();
       this.PackStatButton = new System.Windows.Forms.Button();
       this.SuspendLayout();
@@ -285,20 +284,10 @@
       this.button_integral0.UseVisualStyleBackColor = true;
       this.button_integral0.Click += new System.EventHandler(this.button_integral0_Click);
       // 
-      // buttonFindWindow
-      // 
-      this.buttonFindWindow.Location = new System.Drawing.Point(616, 303);
-      this.buttonFindWindow.Name = "buttonFindWindow";
-      this.buttonFindWindow.Size = new System.Drawing.Size(88, 23);
-      this.buttonFindWindow.TabIndex = 26;
-      this.buttonFindWindow.Text = "Find Window";
-      this.buttonFindWindow.UseVisualStyleBackColor = true;
-      this.buttonFindWindow.Click += new System.EventHandler(this.buttonFindWindow_Click);
-      // 
       // buttonStatWindow
       // 
       this.buttonStatWindow.Enabled = false;
-      this.buttonStatWindow.Location = new System.Drawing.Point(615, 332);
+      this.buttonStatWindow.Location = new System.Drawing.Point(616, 303);
       this.buttonStatWindow.Name = "buttonStatWindow";
       this.buttonStatWindow.Size = new System.Drawing.Size(88, 23);
       this.buttonStatWindow.TabIndex = 26;
@@ -309,7 +298,7 @@
       // PackStatButton
       // 
       this.PackStatButton.Enabled = false;
-      this.PackStatButton.Location = new System.Drawing.Point(616, 362);
+      this.PackStatButton.Location = new System.Drawing.Point(616, 332);
       this.PackStatButton.Name = "PackStatButton";
       this.PackStatButton.Size = new System.Drawing.Size(87, 23);
       this.PackStatButton.TabIndex = 27;
@@ -324,7 +313,6 @@
       this.ClientSize = new System.Drawing.Size(716, 604);
       this.Controls.Add(this.PackStatButton);
       this.Controls.Add(this.buttonStatWindow);
-      this.Controls.Add(this.buttonFindWindow);
       this.Controls.Add(this.comboBox_Stimulators);
       this.Controls.Add(this.comboBox_DAQs);
       this.Controls.Add(this.label2);
@@ -385,7 +373,6 @@
         private System.Windows.Forms.Button buttonClosedLoop;
         private System.Windows.Forms.Label label_time;
         private System.Windows.Forms.Button button_integral0;
-        private System.Windows.Forms.Button buttonFindWindow;
         private System.Windows.Forms.Button buttonStatWindow;
         private System.Windows.Forms.Button PackStatButton;
     }

@@ -72,6 +72,7 @@ namespace MEAClosedLoop
     private void GraphChannelSelectButton_Click(object sender, EventArgs e)
     {
       PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
+      formShowWindows.loadSelection += ChannelChangeRequest;
       formShowWindows.Show();
     }
     #endregion
@@ -281,6 +282,11 @@ namespace MEAClosedLoop
     private void CPackStat_Load(object sender, EventArgs e)
     {
 
+    }
+
+    void ChannelChangeRequest(int number)
+    {
+      this.numericUpDown1.Value = number;
     }
 
     private void numericUpDown1_ValueChanged(object sender, EventArgs e)
