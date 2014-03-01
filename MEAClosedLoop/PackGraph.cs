@@ -7,6 +7,7 @@ namespace MEAClosedLoop
 {
   using TTime = UInt64;
   using TPackMap = List<uint>;
+  using TStimIndex = System.Int16;
 
   public struct TPack
   {
@@ -14,10 +15,18 @@ namespace MEAClosedLoop
     public TTime stimTime;
   }
 
+  public class Timeline
+  {
+
+  }
+
   public class PackGraph
   {
     public double foundPackPercent;
     uint realMaxPackLength;
+
+    List<TStimIndex> indexData;
+
     
     const int MAX_PACK_LENGTH = 12500; //500 ms 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
@@ -83,11 +92,15 @@ namespace MEAClosedLoop
       realMaxPackLength = 0;
     }
 
-    public void ProcessAmpStat(TTime statTime)
+    public void CollectStat(TTime statTime)
+    {
+    }
+    
+    public void ProcessAmpStat()
     {
     }
 
-    public void ProcessFreqStat(TTime statTime)
+    public void ProcessFreqStat()
     {
     }
   }

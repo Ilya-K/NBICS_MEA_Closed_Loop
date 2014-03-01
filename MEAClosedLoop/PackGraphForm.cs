@@ -109,7 +109,6 @@ namespace MEAClosedLoop
     private void tmpPanel_Click(object sender, System.EventArgs e)
     {
       string elName = (sender as Panel).Name;
-      RunStatButton.PerformClick();
        MessageBox.Show("канал выбран");
        loadSelection(MEA.EL_DECODE[Convert.ToInt32(elName)]);
        this.Close();
@@ -124,13 +123,15 @@ namespace MEAClosedLoop
     {
       int statType = StatTypeListBox.SelectedIndex;
       TTime totalStatTime = (ulong)MinCountBox.Value * 60 * 25000;
+
+      dataGenerator.CollectStat(totalStatTime);
       switch (statType)
       {
         case 0:
-          dataGenerator.ProcessAmpStat(totalStatTime);
+          dataGenerator.ProcessAmpStat();
           break;
         case 1:
-          dataGenerator.ProcessFreqStat(totalStatTime);
+          dataGenerator.ProcessFreqStat();
           break;
       }
       MessageBox.Show("подсчёт завершён");
