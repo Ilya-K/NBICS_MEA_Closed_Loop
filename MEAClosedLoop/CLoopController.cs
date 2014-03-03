@@ -31,6 +31,13 @@ namespace MEAClosedLoop
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
+    
+    Queue<CPack> PackSequence;
+
+    public void GetPack(CPack current_pack)
+    {
+      PackSequence.Enqueue(current_pack);
+    }
 
 
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator, CPackDetector packDetector)
@@ -44,10 +51,13 @@ namespace MEAClosedLoop
       m_filter = filter;
 
       m_stimulus = m_stimulator.GetStimulus();
-      m_packDetector = new CPackDetector(m_filter, true);
+      m_packDetector = new CPackDetector(m_filter, false);
 
       m_stimTimer = new System.Timers.Timer();
       m_stimTimer.Elapsed += StimTimer;
+
+      PackSequence = new Queue<CPack>();
+      m_packDetector.PackArrived += GetPack;
 
       m_t = new Thread(FeedBackLoop);
       m_t.Start();
@@ -58,15 +68,23 @@ namespace MEAClosedLoop
       m_stop = true;
     }
 
+    private CPack WaitPack()
+    {
+      while (true)
+      {
+        if (PackSequence.Count > 0) return PackSequence.Dequeue();
+      }
+    }
+
     private void FeedBackLoop()
     {
       CCalcExpWndSE m_se = new CCalcExpWndSE(10); // Mean over ~30 samples
       
       // Wait one full pack first of all
-      CPack prevPack = m_packDetector.WaitPack();
+      CPack prevPack = WaitPack();
       if (!prevPack.EOP)
       {
-        CPack tempPack = m_packDetector.WaitPack();
+        CPack tempPack = WaitPack();
         prevPack.Length = (Int32)(tempPack.Start - prevPack.Start);
       }
 
@@ -77,9 +95,9 @@ namespace MEAClosedLoop
 
       while (!m_stop)
       {
-        CPack currSemiPack = m_packDetector.WaitPack();
+        CPack currSemiPack = WaitPack();
         // [TODO] May be it would be useful to use timeout and give control back sometimes
-        // while (null == (currSemiPack = m_packDetector.WaitPack(500))) { }; // Just don't know what to do here
+        // while (null == (currSemiPack = WaitPack(500))) { }; // Just don't know what to do here
 
         // Handle the situation when a single pack is divided into two parts: Start and End
         // The Start part has already been processed at the previous step

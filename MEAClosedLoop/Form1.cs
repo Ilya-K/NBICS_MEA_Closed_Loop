@@ -31,7 +31,8 @@ namespace MEAClosedLoop
     private CRasterPlot m_rasterPlotter;
     private CStimulator m_stimulator;
     private CPackStat m_statForm;
-    private CPackDetector m_packDetector;
+    private CPackDetector m_PackDetector;
+    //private CPackDetector m_ClosedLoopPackDetector;
     private volatile bool m_killDataLoop;
     List<int> m_channelList;
     Thread m_dataLoopThread;
@@ -349,8 +350,8 @@ namespace MEAClosedLoop
         m_salpaFilter.AddDataConsumer(PeekData);
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
-        m_packDetector = new CPackDetector(m_salpaFilter, true);
-        m_statForm = new CPackStat(m_packDetector, m_channelList);
+        m_PackDetector = new CPackDetector(m_salpaFilter, false);
+        m_statForm = new CPackStat(m_PackDetector, m_channelList);
         m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
         m_DAQConfigured = true;
         PackStatButton.Enabled = true;
@@ -602,7 +603,7 @@ namespace MEAClosedLoop
           // [/DEBUG] 
         }
 
-        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator, m_packDetector);
+        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator, m_PackDetector);
       }
 
       m_inputStream.Start();

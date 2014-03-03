@@ -95,8 +95,8 @@ namespace MEAClosedLoop
     private volatile bool m_kill = false;
 
     public event AutoWaitPackDelegate PackArrived;
-    bool m_compabilityMode;
-    Queue<CPack> PackSequence; //for compability mode
+    /*bool m_compabilityMode;
+    Queue<CPack> PackSequence; //for compability mode */
     Thread PackCollectorThread;
 
     // [DEBUG]
@@ -120,6 +120,8 @@ namespace MEAClosedLoop
       m_spikeTraintDet = new Dictionary<int, CSpikeTrainDetector>(channelList.Count);
       foreach (Int16 channel in m_activeChannelList) m_spikeTraintDet[channel] = new CSpikeTrainDetector(channel);
 
+      m_rnd = new Random(DateTime.Now.Millisecond);
+
       m_packSpikeTrainList = new List<CSpikeTrainFrame>();
       m_prevSpikeTrains = new List<CSpikeTrainFrame>();
       m_packDataList = new List<TFltDataPacket>();
@@ -127,10 +129,9 @@ namespace MEAClosedLoop
       m_prevPacket[0] = new TData[0];                 // just to avoid NullReferenceException at the first packet
       m_filteredQueue = new Queue<TFltDataPacket>();
       m_notEmpty = new AutoResetEvent(false);
-      m_compabilityMode = compabilityMode;
-
       PackCollectorThread = new Thread(AutoWaitPack);
-     
+      PackCollectorThread.Start();
+      
 
       // [DEBUG]
       /*
@@ -170,7 +171,7 @@ namespace MEAClosedLoop
     }
     */
 
-    public CPack WaitSinglePack()
+    private CPack WaitSinglePack() //ex. WaitPack
     {
       CPack pack = null;
       TFltDataPacket dataPacket = null;
@@ -204,25 +205,13 @@ namespace MEAClosedLoop
       m_kill = true;
     }
 
-    public void AutoWaitPack()
+    private void AutoWaitPack()
     {
       CPack current_pack;
       while (true)
       {
         current_pack = WaitSinglePack();
-        if(m_compabilityMode)
-          PackSequence.Enqueue(current_pack);
-        else
-          PackArrived(current_pack);
-      }
-    }
-
-    public CPack WaitPack() //for compability mode
-    {
-      if (!m_compabilityMode) return null;
-      while (true)
-      {
-        if (PackSequence.Count > 0) return PackSequence.Dequeue();
+        PackArrived(current_pack);
       }
     }
 

@@ -38,7 +38,7 @@ namespace MEAClosedLoop
     bool DoStimulation = false;
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
-    Thread CollectingDataThread;
+    //Thread CollectingDataThread;
     public delegate void DelegateSetProgress(object sender, int value);
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
@@ -84,7 +84,7 @@ namespace MEAClosedLoop
       {
         DoStatCollection = true;
         CollectStatButton.Text = "Остановить";
-        if (CollectingDataThread == null)
+        /*if (CollectingDataThread == null)
         {
           CollectingDataThread = new Thread(CollectPacks);
           CollectingDataThread.Start();
@@ -92,13 +92,16 @@ namespace MEAClosedLoop
         else
         {
           //CollectingDataThread.Resume();
-        }
+        }*/
+
+        PackDetector.PackArrived += AddPack;
       }
       else
       {
         DoStatCollection = false;
         CollectStatButton.Text = "Продолжить";
         //CollectingDataThread.Suspend();
+        PackDetector.PackArrived -= AddPack;
       }
     }
     private void SetStatButtontext(string text)
@@ -178,7 +181,7 @@ namespace MEAClosedLoop
     
     #endregion
     #region Функция для заргрузки информации об пачках, исполняется в отдельном потоке
-    private void CollectPacks()
+ /*   private void CollectPacks() //old, random
     {
       int InputCount = 0;
       Random rnd = new Random(DateTime.Now.Millisecond);
@@ -221,8 +224,8 @@ namespace MEAClosedLoop
           }
         }
       }
-    }
-/*    private void CollectPacks() //new, under construction
+    }*/
+    private void AddPack(CPack pack_to_add)
     {
       int InputCount = 0;
       //Random rnd = new Random(DateTime.Now.Millisecond);
@@ -240,24 +243,18 @@ namespace MEAClosedLoop
                 //PackListBefore.Add(PackDetector.WaitPack());
                 {
                   //Thread.Sleep(5);//Вместо функции WaitPack()
-                  CPack pack_to_add = new CPack((TTime)(InputCount * 43000 + rnd.Next(12000)), 0, null);
+                  //CPack pack_to_add = new CPack((TTime)(InputCount * 43000 + rnd.Next(12000)), 0, null);
                   PackListBefore.Add(pack_to_add);
                 }
                 StatProgressBar.BeginInvoke(SetVal, null, 1);
                 DistribGrath.BeginInvoke(UpdateDistribGrath);
                 InputCount++;
-                if (PackListBefore.Count() >= Minimum_Pack_Requered_Count
-                  || InputCount >= Minimum_Pack_Requered_Count - 1) // for debug(If WaitPack dont work )
-                {
-                  CollectStatButton.BeginInvoke(SetCollectStatButtonText, "готово");
-                  this.DoStatCollection = false;
-                }
                 break;
               case state.AfterStimulation:
                 //PackListAfter.Add(PackDetector.WaitPack());
                 {
                   //Thread.Sleep(25);//Вместо функции WaitPack()
-                  CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(16000)), 0, null);
+                  //CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(16000)), 0, null);
                   PackListAfter.Add(pack_to_add);
                 }
                 break;
@@ -265,7 +262,7 @@ namespace MEAClosedLoop
           }
         //}
       }
-    }*/
+    }
     
     #endregion
     #region Подсчет статистики
