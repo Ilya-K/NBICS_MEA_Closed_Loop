@@ -58,6 +58,8 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
+      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -66,19 +68,18 @@
       ((System.ComponentModel.ISupportInitialize)(this.DistribGrath)).BeginInit();
       this.PackProbability.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).BeginInit();
+      this.groupBox1.SuspendLayout();
+      this.groupBox2.SuspendLayout();
       this.SuspendLayout();
       // 
       // Prepearing
       // 
       this.Prepearing.Controls.Add(this.label11);
-      this.Prepearing.Controls.Add(this.GraphChannelSelectButton);
       this.Prepearing.Controls.Add(this.CollectStatButton);
-      this.Prepearing.Controls.Add(this.label2);
       this.Prepearing.Controls.Add(this.StatProgressBar);
-      this.Prepearing.Controls.Add(this.numericUpDown1);
       this.Prepearing.Location = new System.Drawing.Point(12, 12);
       this.Prepearing.Name = "Prepearing";
-      this.Prepearing.Size = new System.Drawing.Size(461, 87);
+      this.Prepearing.Size = new System.Drawing.Size(461, 44);
       this.Prepearing.TabIndex = 6;
       this.Prepearing.TabStop = false;
       this.Prepearing.Text = "Подготовка";
@@ -86,15 +87,15 @@
       // label11
       // 
       this.label11.AutoSize = true;
-      this.label11.Location = new System.Drawing.Point(21, 19);
+      this.label11.Location = new System.Drawing.Point(2, 18);
       this.label11.Name = "label11";
-      this.label11.Size = new System.Drawing.Size(271, 13);
+      this.label11.Size = new System.Drawing.Size(167, 13);
       this.label11.TabIndex = 6;
-      this.label11.Text = "Анализ активности культуры на различных каналах";
+      this.label11.Text = "Анализ спонтанной активности";
       // 
       // GraphChannelSelectButton
       // 
-      this.GraphChannelSelectButton.Location = new System.Drawing.Point(321, 13);
+      this.GraphChannelSelectButton.Location = new System.Drawing.Point(6, 19);
       this.GraphChannelSelectButton.Name = "GraphChannelSelectButton";
       this.GraphChannelSelectButton.Size = new System.Drawing.Size(133, 25);
       this.GraphChannelSelectButton.TabIndex = 5;
@@ -104,7 +105,7 @@
       // 
       // CollectStatButton
       // 
-      this.CollectStatButton.Location = new System.Drawing.Point(322, 45);
+      this.CollectStatButton.Location = new System.Drawing.Point(321, 13);
       this.CollectStatButton.Name = "CollectStatButton";
       this.CollectStatButton.Size = new System.Drawing.Size(133, 23);
       this.CollectStatButton.TabIndex = 0;
@@ -115,7 +116,7 @@
       // label2
       // 
       this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(21, 42);
+      this.label2.Location = new System.Drawing.Point(154, 26);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(78, 13);
       this.label2.TabIndex = 4;
@@ -123,14 +124,14 @@
       // 
       // StatProgressBar
       // 
-      this.StatProgressBar.Location = new System.Drawing.Point(153, 42);
+      this.StatProgressBar.Location = new System.Drawing.Point(176, 13);
       this.StatProgressBar.Name = "StatProgressBar";
       this.StatProgressBar.Size = new System.Drawing.Size(139, 23);
       this.StatProgressBar.TabIndex = 1;
       // 
       // numericUpDown1
       // 
-      this.numericUpDown1.Location = new System.Drawing.Point(104, 45);
+      this.numericUpDown1.Location = new System.Drawing.Point(251, 24);
       this.numericUpDown1.Maximum = new decimal(new int[] {
             60,
             0,
@@ -143,22 +144,18 @@
       // 
       // StimParams
       // 
-      this.StimParams.Controls.Add(this.button1);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
-      this.StimParams.Controls.Add(this.label9);
-      this.StimParams.Controls.Add(this.StimType);
-      this.StimParams.Controls.Add(this.StartStimButton);
-      this.StimParams.Location = new System.Drawing.Point(14, 320);
+      this.StimParams.Location = new System.Drawing.Point(12, 277);
       this.StimParams.Name = "StimParams";
-      this.StimParams.Size = new System.Drawing.Size(459, 168);
+      this.StimParams.Size = new System.Drawing.Size(459, 93);
       this.StimParams.TabIndex = 11;
       this.StimParams.TabStop = false;
-      this.StimParams.Text = "Параметры стимуляции";
+      this.StimParams.Text = "Выбор параметров стимуляции";
       // 
       // button1
       // 
-      this.button1.Location = new System.Drawing.Point(320, 103);
+      this.button1.Location = new System.Drawing.Point(315, 19);
       this.button1.Name = "button1";
       this.button1.Size = new System.Drawing.Size(133, 23);
       this.button1.TabIndex = 5;
@@ -189,7 +186,7 @@
       // label9
       // 
       this.label9.AutoSize = true;
-      this.label9.Location = new System.Drawing.Point(9, 134);
+      this.label9.Location = new System.Drawing.Point(34, 19);
       this.label9.Name = "label9";
       this.label9.Size = new System.Drawing.Size(89, 13);
       this.label9.TabIndex = 2;
@@ -201,14 +198,14 @@
       this.StimType.FormattingEnabled = true;
       this.StimType.Items.AddRange(new object[] {
             "эмуляция"});
-      this.StimType.Location = new System.Drawing.Point(104, 134);
+      this.StimType.Location = new System.Drawing.Point(152, 16);
       this.StimType.Name = "StimType";
       this.StimType.Size = new System.Drawing.Size(121, 21);
       this.StimType.TabIndex = 1;
       // 
       // StartStimButton
       // 
-      this.StartStimButton.Location = new System.Drawing.Point(320, 134);
+      this.StartStimButton.Location = new System.Drawing.Point(315, 14);
       this.StartStimButton.Name = "StartStimButton";
       this.StartStimButton.Size = new System.Drawing.Size(133, 23);
       this.StartStimButton.TabIndex = 0;
@@ -224,7 +221,7 @@
       this.StatResult.Controls.Add(this.SelectedAverageBox);
       this.StatResult.Controls.Add(this.DistribGrath);
       this.StatResult.Controls.Add(this.label1);
-      this.StatResult.Location = new System.Drawing.Point(12, 105);
+      this.StatResult.Location = new System.Drawing.Point(12, 62);
       this.StatResult.Name = "StatResult";
       this.StatResult.Size = new System.Drawing.Size(460, 209);
       this.StatResult.TabIndex = 10;
@@ -371,11 +368,38 @@
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
       // 
+      // groupBox1
+      // 
+      this.groupBox1.Controls.Add(this.label2);
+      this.groupBox1.Controls.Add(this.numericUpDown1);
+      this.groupBox1.Controls.Add(this.button1);
+      this.groupBox1.Controls.Add(this.GraphChannelSelectButton);
+      this.groupBox1.Location = new System.Drawing.Point(17, 376);
+      this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(454, 52);
+      this.groupBox1.TabIndex = 12;
+      this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "Выбор канала";
+      // 
+      // groupBox2
+      // 
+      this.groupBox2.Controls.Add(this.label9);
+      this.groupBox2.Controls.Add(this.StimType);
+      this.groupBox2.Controls.Add(this.StartStimButton);
+      this.groupBox2.Location = new System.Drawing.Point(17, 444);
+      this.groupBox2.Name = "groupBox2";
+      this.groupBox2.Size = new System.Drawing.Size(456, 44);
+      this.groupBox2.TabIndex = 13;
+      this.groupBox2.TabStop = false;
+      this.groupBox2.Text = "Стимуляция";
+      // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(485, 633);
+      this.ClientSize = new System.Drawing.Size(480, 633);
+      this.Controls.Add(this.groupBox2);
+      this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.StimParams);
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
@@ -396,6 +420,10 @@
       this.PackProbability.ResumeLayout(false);
       this.PackProbability.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).EndInit();
+      this.groupBox1.ResumeLayout(false);
+      this.groupBox1.PerformLayout();
+      this.groupBox2.ResumeLayout(false);
+      this.groupBox2.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -432,5 +460,7 @@
     private System.Windows.Forms.Button button1;
     private System.Windows.Forms.Button GraphChannelSelectButton;
     private System.Windows.Forms.Label label11;
+    private System.Windows.Forms.GroupBox groupBox1;
+    private System.Windows.Forms.GroupBox groupBox2;
   }
 }
