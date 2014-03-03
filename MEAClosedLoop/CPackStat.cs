@@ -39,7 +39,6 @@ namespace MEAClosedLoop
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
     Thread CollectingDataThread;
-    PackGraphForm ChannelSelector;
     public delegate void DelegateSetProgress(object sender, int value);
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
@@ -223,6 +222,51 @@ namespace MEAClosedLoop
         }
       }
     }
+/*    private void CollectPacks() //new, under construction
+    {
+      int InputCount = 0;
+      //Random rnd = new Random(DateTime.Now.Millisecond);
+      while (true)
+      {
+
+        //Thread.Sleep(10);
+        //while (DoStatCollection)
+        //{
+          lock (PacklListBlock)
+          {
+            switch (CurrentState)
+            {
+              case state.BeforeStimulation:
+                //PackListBefore.Add(PackDetector.WaitPack());
+                {
+                  //Thread.Sleep(5);//Вместо функции WaitPack()
+                  CPack pack_to_add = new CPack((TTime)(InputCount * 43000 + rnd.Next(12000)), 0, null);
+                  PackListBefore.Add(pack_to_add);
+                }
+                StatProgressBar.BeginInvoke(SetVal, null, 1);
+                DistribGrath.BeginInvoke(UpdateDistribGrath);
+                InputCount++;
+                if (PackListBefore.Count() >= Minimum_Pack_Requered_Count
+                  || InputCount >= Minimum_Pack_Requered_Count - 1) // for debug(If WaitPack dont work )
+                {
+                  CollectStatButton.BeginInvoke(SetCollectStatButtonText, "готово");
+                  this.DoStatCollection = false;
+                }
+                break;
+              case state.AfterStimulation:
+                //PackListAfter.Add(PackDetector.WaitPack());
+                {
+                  //Thread.Sleep(25);//Вместо функции WaitPack()
+                  CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(16000)), 0, null);
+                  PackListAfter.Add(pack_to_add);
+                }
+                break;
+            }
+          }
+        //}
+      }
+    }*/
+    
     #endregion
     #region Подсчет статистики
     private void CalcStat()

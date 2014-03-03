@@ -10,6 +10,8 @@ namespace MEAClosedLoop
   using TData = System.Double;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
 
+  public delegate void AutoWaitPackDelegate(CPack last_pack);
+
   public class CPackDetector
   {
     private class CSpikeTrainDetector
@@ -92,6 +94,11 @@ namespace MEAClosedLoop
     private bool m_inPack = false;
     private volatile bool m_kill = false;
 
+    public event AutoWaitPackDelegate PackArrived;
+    bool m_compabilityMode;
+    Queue<CPack> PackSequence; //for compability mode
+    Thread PackCollectorThread;
+
     // [DEBUG]
     private TTime m_debugTimestamp;
     private int m_entryCount = 0;
@@ -100,7 +107,7 @@ namespace MEAClosedLoop
     Int32 m_dummyPackTime = -1;
     Random m_rnd;
 
-    public CPackDetector(CFiltering filteredStream, List<int> channelList = null)
+    public CPackDetector(CFiltering filteredStream, bool compabilityMode, List<int> channelList = null)
     {
       if (filteredStream == null) throw new ArgumentNullException("filteredStream");
 
@@ -120,9 +127,10 @@ namespace MEAClosedLoop
       m_prevPacket[0] = new TData[0];                 // just to avoid NullReferenceException at the first packet
       m_filteredQueue = new Queue<TFltDataPacket>();
       m_notEmpty = new AutoResetEvent(false);
+      m_compabilityMode = compabilityMode;
 
-      m_filteredStream.AddDataConsumer(ReceiveData);
-
+      PackCollectorThread = new Thread(AutoWaitPack);
+     
 
       // [DEBUG]
       /*
@@ -162,7 +170,7 @@ namespace MEAClosedLoop
     }
     */
 
-    public CPack WaitPack()
+    public CPack WaitSinglePack()
     {
       CPack pack = null;
       TFltDataPacket dataPacket = null;
@@ -194,6 +202,28 @@ namespace MEAClosedLoop
     public void Dismiss()
     {
       m_kill = true;
+    }
+
+    public void AutoWaitPack()
+    {
+      CPack current_pack;
+      while (true)
+      {
+        current_pack = WaitSinglePack();
+        if(m_compabilityMode)
+          PackSequence.Enqueue(current_pack);
+        else
+          PackArrived(current_pack);
+      }
+    }
+
+    public CPack WaitPack() //for compability mode
+    {
+      if (!m_compabilityMode) return null;
+      while (true)
+      {
+        if (PackSequence.Count > 0) return PackSequence.Dequeue();
+      }
     }
 
     // Алгоритм поиска пачек.

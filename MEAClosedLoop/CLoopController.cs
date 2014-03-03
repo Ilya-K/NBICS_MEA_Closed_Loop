@@ -44,7 +44,7 @@ namespace MEAClosedLoop
       m_filter = filter;
 
       m_stimulus = m_stimulator.GetStimulus();
-      m_packDetector = new CPackDetector(m_filter);
+      m_packDetector = new CPackDetector(m_filter, true);
 
       m_stimTimer = new System.Timers.Timer();
       m_stimTimer.Elapsed += StimTimer;
