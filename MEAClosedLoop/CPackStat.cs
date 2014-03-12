@@ -33,12 +33,17 @@ namespace MEAClosedLoop
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
     private const int Minimum_Pack_Requered_Count = 600;
+    private TTime StartStimulationTime = 0; // точка отсчета начала стимуляций. 
+    private int Stat_Window_Minutes = 0;
+    private int Stat_Window_Seconds = 10;
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
     bool DoStimulation = false;
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
-    //Thread CollectingDataThread;
+    Thread CollectingDataThread;
+
+
     public delegate void DelegateSetProgress(object sender, int value);
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
@@ -84,7 +89,7 @@ namespace MEAClosedLoop
       {
         DoStatCollection = true;
         CollectStatButton.Text = "Остановить";
-        /*if (CollectingDataThread == null)
+        if (CollectingDataThread == null)
         {
           CollectingDataThread = new Thread(CollectPacks);
           CollectingDataThread.Start();
@@ -92,7 +97,7 @@ namespace MEAClosedLoop
         else
         {
           //CollectingDataThread.Resume();
-        }*/
+        }
 
         PackDetector.PackArrived += AddPack;
       }
@@ -178,92 +183,84 @@ namespace MEAClosedLoop
         }
       }
     }
-    
+
     #endregion
     #region Функция для заргрузки информации об пачках, исполняется в отдельном потоке
- /*   private void CollectPacks() //old, random
+    private void CollectPacks() //old, random
     {
-      int InputCount = 0;
+      TTime InputCount = 0;
       Random rnd = new Random(DateTime.Now.Millisecond);
       while (true)
       {
-
         Thread.Sleep(10);
         while (DoStatCollection)
         {
-          lock (PacklListBlock)
+
+          switch (CurrentState)
           {
-            switch (CurrentState)
-            {
-              case state.BeforeStimulation:
-                //PackListBefore.Add(PackDetector.WaitPack());
+            case state.BeforeStimulation:
+              {
+                Thread.Sleep(5);
+                CPack pack_to_add = new CPack(InputCount * 43000 + (TTime)rnd.Next(12000), 0, null);
+                lock (PacklListBlock)
                 {
-                  Thread.Sleep(5);//Вместо функции WaitPack()
-                  CPack pack_to_add = new CPack((TTime)(InputCount * 43000 + rnd.Next(12000)), 0, null);
                   PackListBefore.Add(pack_to_add);
                 }
-                StatProgressBar.BeginInvoke(SetVal, null, 1);
-                DistribGrath.BeginInvoke(UpdateDistribGrath);
+              }
+              StatProgressBar.BeginInvoke(SetVal, null, 1);
+              DistribGrath.BeginInvoke(UpdateDistribGrath);
+              InputCount++;
+              if (PackListBefore.Count() >= Minimum_Pack_Requered_Count
+                || InputCount >= Minimum_Pack_Requered_Count - 1)
+              {
+                CollectStatButton.BeginInvoke(SetCollectStatButtonText, "готово");
+                this.DoStatCollection = false;
+              }
+              break;
+            case state.AfterStimulation:
+              {
+                Thread.Sleep(150);//Вместо функции WaitPack()
+                CPack pack_to_add = new CPack(InputCount * 40000 + (TTime)rnd.Next(16000), 0, null);
                 InputCount++;
-                if (PackListBefore.Count() >= Minimum_Pack_Requered_Count
-                  || InputCount >= Minimum_Pack_Requered_Count - 1) // for debug(If WaitPack dont work )
+                lock (PacklListBlock)
                 {
-                  CollectStatButton.BeginInvoke(SetCollectStatButtonText, "готово");
-                  this.DoStatCollection = false;
-                }
-                break;
-              case state.AfterStimulation:
-                //PackListAfter.Add(PackDetector.WaitPack());
-                {
-                  Thread.Sleep(25);//Вместо функции WaitPack()
-                  CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(16000)), 0, null);
                   PackListAfter.Add(pack_to_add);
                 }
-                break;
-            }
+                PackCountGraph.Invalidate();
+              }
+              break;
           }
+
         }
       }
-    }*/
+    }
     private void AddPack(CPack pack_to_add)
     {
       int InputCount = 0;
-      //Random rnd = new Random(DateTime.Now.Millisecond);
       while (true)
       {
-
-        //Thread.Sleep(10);
-        //while (DoStatCollection)
-        //{
-          lock (PacklListBlock)
+        lock (PacklListBlock)
+        {
+          switch (CurrentState)
           {
-            switch (CurrentState)
-            {
-              case state.BeforeStimulation:
-                //PackListBefore.Add(PackDetector.WaitPack());
-                {
-                  //Thread.Sleep(5);//Вместо функции WaitPack()
-                  //CPack pack_to_add = new CPack((TTime)(InputCount * 43000 + rnd.Next(12000)), 0, null);
-                  PackListBefore.Add(pack_to_add);
-                }
-                StatProgressBar.BeginInvoke(SetVal, null, 1);
-                DistribGrath.BeginInvoke(UpdateDistribGrath);
-                InputCount++;
-                break;
-              case state.AfterStimulation:
-                //PackListAfter.Add(PackDetector.WaitPack());
-                {
-                  //Thread.Sleep(25);//Вместо функции WaitPack()
-                  //CPack pack_to_add = new CPack((TTime)(InputCount * 40000 + rnd.Next(16000)), 0, null);
-                  PackListAfter.Add(pack_to_add);
-                }
-                break;
-            }
+            case state.BeforeStimulation:
+              {
+                PackListBefore.Add(pack_to_add);
+              }
+              StatProgressBar.BeginInvoke(SetVal, null, 1);
+              DistribGrath.BeginInvoke(UpdateDistribGrath);
+              InputCount++;
+              break;
+            case state.AfterStimulation:
+              {
+                PackListAfter.Add(pack_to_add);
+              }
+              break;
           }
-        //}
+        }
       }
     }
-    
+
     #endregion
     #region Подсчет статистики
     private void CalcStat()
@@ -284,7 +281,7 @@ namespace MEAClosedLoop
     #region Обработка события обновления прогресс бара
     void UpdateProgressBar(object sender, int val)
     {
-      if (StatProgressBar.Value < StatProgressBar.Maximum)
+      if (StatProgressBar.Value < StatProgressBar.Maximum - 1)
         StatProgressBar.Value += val;
     }
     #endregion
@@ -297,7 +294,7 @@ namespace MEAClosedLoop
       DistribGrath.Refresh();
     }
     #endregion
-
+    #region Кнопка отображения опций стимуляции
     private void button1_Click(object sender, EventArgs e)
     {
       StimParams paramswindow = new StimParams(25);
@@ -307,23 +304,22 @@ namespace MEAClosedLoop
         WAIT_PACK_WINDOW_LENGTH = paramswindow.Time;
       }
     }
+    #endregion
     private void StartStimButton_Click(object sender, EventArgs e)
     {
       CurrentState = state.AfterStimulation;
       DoStatCollection = true;
       DoStimulation = true;
-
+      //TODO: вызов функции, начинающей стимуляции.
+      PackCountGraph.Invalidate();
+      PackCountGraph.Refresh();
     }
 
-    private enum state
-    {
-      BeforeStimulation,
-      AfterStimulation
-    }
 
     private void CPackStat_Load(object sender, EventArgs e)
     {
-
+      MinutesWindow.Value = Stat_Window_Minutes;
+      SecondsWindow.Value = Stat_Window_Seconds;
     }
 
     void ChannelChangeRequest(int number)
@@ -334,6 +330,59 @@ namespace MEAClosedLoop
     private void numericUpDown1_ValueChanged(object sender, EventArgs e)
     {
 
+    }
+    #region Настройка временного окна для подсчета статистики
+    private void MinutesWindow_ValueChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void SecondsWindow_ValueChanged(object sender, EventArgs e)
+    {
+
+    }
+    #endregion
+    private enum state
+    {
+      BeforeStimulation,
+      AfterStimulation
+    }
+
+    private void PackCountGraph_Paint(object sender, PaintEventArgs e)
+    {
+      //Главное условие отрисовки
+
+      if (PackListAfter.Count > 0)
+      {
+        lock (PacklListBlock)
+        {
+          //Обновляем прошедшее время
+          double CurrentTime = PackListAfter[PackListAfter.Count - 1].Start / 25000 - PackListAfter[0].Start / 25000; // текущее время в секундах
+          HourCount.Text = (((TTime)CurrentTime) / 3600).ToString();
+          MinuteCount.Text = ((((TTime)CurrentTime) % 3600) / 60).ToString();
+          SecondCount.Text = ((((TTime)CurrentTime) % 3600) % 60).ToString();
+          //составляем массив для гистаграммы
+          TTime dT = (TTime)MinutesWindow.Value * 60 * 25000 + (TTime)SecondsWindow.Value * 25000;
+          Point[] GistoGraphPoints = new Point[(int)(CurrentTime * 25000 / dT)];
+          for (int j = 0; j < GistoGraphPoints.Count(); j++)
+          {
+            GistoGraphPoints[j].Y = e.ClipRectangle.Height - 10;
+            GistoGraphPoints[j].X = j * e.ClipRectangle.Width / GistoGraphPoints.Count();
+          }
+          for (int i = 0; i < PackListAfter.Count; i++)
+          {
+            for (int j = 0; j < GistoGraphPoints.Count(); j++)
+            {
+              if ((TTime)j * dT > PackListAfter[i].Start)
+                GistoGraphPoints[j].Y -= 4;
+            }
+          }
+          //отрисовка массива
+          Pen pen = new Pen(Color.Red);
+          if(GistoGraphPoints.Count() > 1)
+          e.Graphics.DrawLines(pen, GistoGraphPoints);
+        }
+      }
     }
   }
 
