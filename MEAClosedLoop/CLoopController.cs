@@ -31,7 +31,8 @@ namespace MEAClosedLoop
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
-
+    public delegate void OnPackFoundDelegate(CPack pack);
+    public event OnPackFoundDelegate OnPackFound;
 
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
@@ -90,15 +91,19 @@ namespace MEAClosedLoop
             currPack.Length = (Int32)(currSemiPack.Start - currPack.Start);
             prevPack = currPack;
             insidePack = false;
+            // Distribute current pack to consumers
+            OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
+          // Distribute current pack to consumers
+          OnPackFound(currPack);
         }
         else                                      // We've received Start of a long pack
         {
           insidePack = true;
         }
         currPack = currSemiPack;
-
+        
         // Calculate Mean and SE
         sePackPeriod = m_se.SE(currPack.Start - prevPack.Start);
         meanPackPeriod = m_se.Mean;

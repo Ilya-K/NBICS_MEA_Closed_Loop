@@ -19,11 +19,12 @@ namespace MEAClosedLoop
     private const int STAT_BUF_LEN = 30 * 1000 * Param.MS;
     private CFiltering m_dataStream;
     private TData[] m_data;
-    private TData[] m_shortSE;
+    private TData[] m_SE500;
     private TData[] m_sumSE;
     private Point[] m_dataPoints;
-    private Point[] m_shortSEPoints;
+    private Point[] m_SE500Points;
     private Point[] m_sumSEPoints;
+    private CCalcExpWndSE m_calcSE500 = new CCalcExpWndSE(167);
 
     private int m_channel; // [TODO]: It's not a true channel name, but just an index in a Dic. Correct some day.
     private int m_prevDataPanelWidth;
@@ -37,8 +38,9 @@ namespace MEAClosedLoop
       InitializeComponent();
 
       m_data = new TData[STAT_BUF_LEN];
+      m_SE500 = new TData[STAT_BUF_LEN];
       m_dataPoints = new Point[panel_Data.Width * 2];
-      m_shortSEPoints = new Point[panel_Data.Width * 2];
+      m_SE500Points = new Point[panel_Data.Width * 2];
       m_sumSEPoints = new Point[panel_Data.Width * 2];
 
       m_dataStream = fltStream;
@@ -72,7 +74,9 @@ namespace MEAClosedLoop
 
       for (int i = 0; i < dataLength; ++i)
       {
-        m_data[m_time++] = data[m_channel][i];
+        m_data[m_time] = data[m_channel][i];
+        m_SE500[m_time] = m_calcSE500.SE(data[m_channel][i]);
+        m_time++;
       }
 
 
@@ -104,7 +108,7 @@ namespace MEAClosedLoop
       if (m_prevDataPanelWidth != width)
       {
         m_dataPoints = new Point[width * 2];
-        m_shortSEPoints = new Point[width * 2];
+        m_SE500Points = new Point[width * 2];
         m_sumSEPoints = new Point[width * 2];
         UpdateStoredPoints(0);
 
@@ -116,10 +120,14 @@ namespace MEAClosedLoop
       int start = e.ClipRectangle.Left;
       int drawLength = Math.Min(e.ClipRectangle.Width, (int)(dataLength / dataPointsPerPixel) - start + 1);
       Point[] dataPoints = new Point[drawLength * 2];
+      Point[] se500Points = new Point[drawLength * 2];
       Array.Copy(m_dataPoints, start * 2, dataPoints, 0, drawLength * 2);
+      Array.Copy(m_SE500Points, start * 2, se500Points, 0, drawLength * 2);
 
-      Pen pen = new Pen(Color.Blue, 1);
-      e.Graphics.DrawLines(pen, dataPoints);
+      Pen penB = new Pen(Color.Blue, 1);
+      e.Graphics.DrawLines(penB, dataPoints);
+      Pen penR = new Pen(Color.Red, 1);
+      e.Graphics.DrawLines(penR, se500Points);
     }
 
     private void panel_Stat1_Paint(object sender, PaintEventArgs e)
@@ -143,16 +151,22 @@ namespace MEAClosedLoop
       {
         int xNew = (int)((dataStart + i) / dataPointsPerPixel);
         int yData = (int)(height / 2 - m_data[dataStart + i] / 20);
+        int ySE500 = (int)(height / 2 - m_SE500[dataStart + i] / 20);
         if (xNew > x)
         {
           x = xNew;
           m_dataPoints[2 * x] = new Point(x, yData);
           m_dataPoints[2 * x + 1] = new Point(x, yData);
+          m_SE500Points[2 * x] = new Point(x, ySE500);
+          m_SE500Points[2 * x + 1] = new Point(x, ySE500);
+
         }
         else
         {
           m_dataPoints[2 * x].Y = Math.Min(m_dataPoints[2 * x].Y, yData);
           m_dataPoints[2 * x + 1].Y = Math.Max(m_dataPoints[2 * x + 1].Y, yData);
+          m_SE500Points[2 * x].Y = Math.Min(m_dataPoints[2 * x].Y, ySE500);
+          m_SE500Points[2 * x + 1].Y = Math.Max(m_dataPoints[2 * x + 1].Y, ySE500);
         }
       }
     }
@@ -178,6 +192,11 @@ namespace MEAClosedLoop
     {
       m_running = false;
       m_dataStream.RemoveDataConsumer(DataCallback);
+    }
+
+    private void cb_Channel_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      m_channel = cb_Channel.SelectedIndex;
     }
 
   }

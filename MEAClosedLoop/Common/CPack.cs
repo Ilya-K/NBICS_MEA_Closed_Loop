@@ -11,9 +11,9 @@ namespace MEAClosedLoop
   using TSpikesBinary =  Dictionary<int, bool[]>;
   
   // Pack events can be of two types:
-  // S: Start, T: Stop
-  // Length < 0 indicates T type of a pack event
-  // In this case Start means end of a pack.
+  // S: Start, EOP = false; T: Stop, EOP = true
+  // Length > 0 indicates T type of a pack event
+  // In this case Start time means time of the pack end.
 
   public class CPack
   {

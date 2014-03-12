@@ -141,6 +141,7 @@ namespace MEAClosedLoop
       }
     }
 
+    // Callback to readout data from the Filtered Stream
     private void ReceiveData(TFltDataPacket packet)
     {
       m_debugTimestamp = m_filteredStream.TimeStamp;
@@ -148,20 +149,9 @@ namespace MEAClosedLoop
       m_notEmpty.Set();
     }
 
-    /*
-    public CPack WaitPack()
-    {
-      CPack pack = null;
-      do
-      {
-        m_entryCount2++;
-        pack = DetectPacks(m_filteredStream.WaitData());
-      } while (pack == null);
-
-      return pack;
-    }
-    */
-
+    // Reads filtered packets from the queue and passes then to DetectPacks() until a pack is found
+    // [TODO] It is probably usefull to make timeout here and return null if no pack is found in given time
+    // public CPack WaitPack(int timeout = 0)
     public CPack WaitPack()
     {
       CPack pack = null;

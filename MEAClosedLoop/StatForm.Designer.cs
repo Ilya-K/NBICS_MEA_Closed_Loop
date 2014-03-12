@@ -55,6 +55,7 @@
       this.cb_Channel.Name = "cb_Channel";
       this.cb_Channel.Size = new System.Drawing.Size(113, 21);
       this.cb_Channel.TabIndex = 18;
+      this.cb_Channel.SelectedIndexChanged += new System.EventHandler(this.cb_Channel_SelectedIndexChanged);
       // 
       // panel_Stat1
       // 

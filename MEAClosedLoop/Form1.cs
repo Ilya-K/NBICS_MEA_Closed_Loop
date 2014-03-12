@@ -74,6 +74,7 @@ namespace MEAClosedLoop
       SetDefaultChannels();
     }
 
+    /*
     private void DataLoop()
     {
       do
@@ -81,6 +82,7 @@ namespace MEAClosedLoop
         m_rasterPlotter.AddData(m_spikeDetector.WaitData());
       } while (!m_killDataLoop);
     }
+    */
 
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -344,8 +346,8 @@ namespace MEAClosedLoop
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
-        m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
-        m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
+        //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
+        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
 
         m_DAQConfigured = true;
         
@@ -358,12 +360,14 @@ namespace MEAClosedLoop
       EnsureDAQIsConfigured();
 
       // Check if DataLoop Thread has been alredy created
+      /*
       if (m_dataLoopThread == null)
       {
         m_dataLoopThread = new Thread(new ThreadStart(DataLoop));
         m_killDataLoop = false;
         m_dataLoopThread.Start();
       }
+      */
 
       comboBox_DAQs.Enabled = false;
       m_inputStream.Start();
@@ -578,6 +582,13 @@ namespace MEAClosedLoop
       }
     }
 
+    // [DEBUG]
+    void TestCallback(CPack pack)
+    {
+
+    }
+    // [/DEBUG]
+
     private void buttonClosedLoop_Click(object sender, EventArgs e)
     {
       buttonStop.Enabled = true;
@@ -595,6 +606,8 @@ namespace MEAClosedLoop
         }
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
+        // [DEBUG]
+        m_closedLoop.OnPackFound += TestCallback;
       }
 
       m_inputStream.Start();
