@@ -54,7 +54,7 @@ namespace MEAClosedLoop
 
 
     }
-    protected override void Initialize()
+    protected override void Initialize() //TODO: lock data inside this function
     {
       lock (detector.LockExternalData)
       {

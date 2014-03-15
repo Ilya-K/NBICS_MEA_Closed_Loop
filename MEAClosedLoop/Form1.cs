@@ -350,7 +350,7 @@ namespace MEAClosedLoop
         m_salpaFilter.AddDataConsumer(PeekData);
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
-        m_PackDetector = new CPackDetector(m_salpaFilter, false);
+        m_PackDetector = new CPackDetector(m_salpaFilter);
         
         
         m_DAQConfigured = true;

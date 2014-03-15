@@ -193,11 +193,14 @@ namespace MEAClosedLoop
       lock (LockExternalData)
       {
         inner_expectedStims_to_display = new List<TStimGroup>();
-        for (int i = 0; i < m_expectedStims.Count(); i++)
+        lock (LockStimList)
         {
-          TStimGroup gr = new TStimGroup();
-          gr.stimTime = m_expectedStims[i].stimTime - CurrentTime;
-          inner_expectedStims_to_display.Add(gr);
+          for (int i = 0; i < m_expectedStims.Count(); i++)
+          {
+            TStimGroup gr = new TStimGroup();
+            gr.stimTime = m_expectedStims[i].stimTime - CurrentTime;
+            inner_expectedStims_to_display.Add(gr);
+          }
         }
       }
       FindedPegs = new List<TStimIndex>();
@@ -234,48 +237,51 @@ namespace MEAClosedLoop
       else
       {
         #region Поиск около ожидаемых артефактов
-        foreach (TStimGroup stim in m_expectedStims)
+        lock (LockStimList)
         {
-          TAbsStimIndex rightRange = (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange) + (TAbsStimIndex)FILTER_DEPTH > (TAbsStimIndex)DataPacket.Length) ?
-                  (TAbsStimIndex)DataPacket.Length : (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange));
-          TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0 && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ? 
-                   0 : (stim.stimTime -           CurrentTime - (TAbsStimIndex)MaximumShiftRange);
-          if (FindedPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10)
-            leftRange += (TAbsStimIndex)GUARANTEED_EMPTY_SPACE;
-          for (TAbsStimIndex i = leftRange; i < rightRange; i++)
+          foreach (TStimGroup stim in m_expectedStims)
           {
-            if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)i))
+            TAbsStimIndex rightRange = (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange) + (TAbsStimIndex)FILTER_DEPTH > (TAbsStimIndex)DataPacket.Length) ?
+                    (TAbsStimIndex)DataPacket.Length : (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange));
+            TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0 && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ?
+                     0 : (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange);
+            if (FindedPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10)
+              leftRange += (TAbsStimIndex)GUARANTEED_EMPTY_SPACE;
+            for (TAbsStimIndex i = leftRange; i < rightRange; i++)
             {
-              bool IsBlankinkArtif = false;
-              TAbsStimIndex SubRightRange = (i + BLANK_ARTIF_PRE_MAX_LENGTH + (TAbsStimIndex)FILTER_DEPTH < (TAbsStimIndex)DataPacket.Length) ? i + BLANK_ARTIF_PRE_MAX_LENGTH : (TAbsStimIndex)DataPacket.Length - (TAbsStimIndex)FILTER_DEPTH - 1;
-              for (TAbsStimIndex j = i + 28; j < SubRightRange; j++)
+              if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)i))
               {
-                if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)j))
+                bool IsBlankinkArtif = false;
+                TAbsStimIndex SubRightRange = (i + BLANK_ARTIF_PRE_MAX_LENGTH + (TAbsStimIndex)FILTER_DEPTH < (TAbsStimIndex)DataPacket.Length) ? i + BLANK_ARTIF_PRE_MAX_LENGTH : (TAbsStimIndex)DataPacket.Length - (TAbsStimIndex)FILTER_DEPTH - 1;
+                for (TAbsStimIndex j = i + 28; j < SubRightRange; j++)
                 {
-                  IsBlankinkArtif = true;
-                  break;
+                  if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)j))
+                  {
+                    IsBlankinkArtif = true;
+                    break;
+                  }
                 }
-              }
-              if (IsBlankinkArtif)
-              {
-                i += 28;
-                continue;
-              }
-              else
-              {
-                bool IsItPrev = false;
-                for (int j = 0; j < FindedPegs.Count(); j++)
+                if (IsBlankinkArtif)
                 {
-                  if (FindedPegs[j] + MinimumLengthBetweenPegs > (TStimIndex)i) IsItPrev = true;
-                }
-                if (IsItPrev)
-                {
-                  i++;
+                  i += 28;
                   continue;
                 }
-                FindedPegs.Add((TStimIndex)i);
-                stims_to_remove.Add(stim);
-                break;
+                else
+                {
+                  bool IsItPrev = false;
+                  for (int j = 0; j < FindedPegs.Count(); j++)
+                  {
+                    if (FindedPegs[j] + MinimumLengthBetweenPegs > (TStimIndex)i) IsItPrev = true;
+                  }
+                  if (IsItPrev)
+                  {
+                    i++;
+                    continue;
+                  }
+                  FindedPegs.Add((TStimIndex)i);
+                  stims_to_remove.Add(stim);
+                  break;
+                }
               }
             }
           }
@@ -291,14 +297,20 @@ namespace MEAClosedLoop
       int x = FindedPegs.Count();
       #region Удаление найденных координат артефактов стимуляций из списка ожидаемых.
       #region  Добавим устаревшие на удаление.
-      foreach (TStimGroup _stim in m_expectedStims)
+      lock (LockStimList)
       {
-        if (_stim.stimTime < CurrentTime) stims_to_remove.Add(_stim);
+        foreach (TStimGroup _stim in m_expectedStims)
+        {
+          if (_stim.stimTime < CurrentTime) stims_to_remove.Add(_stim);
+        }
       }
       #endregion
-      foreach (TStimGroup _stim in stims_to_remove)
+      lock (LockStimList)
       {
-        if (m_expectedStims.Contains(_stim)) m_expectedStims.Remove(_stim);
+        foreach (TStimGroup _stim in stims_to_remove)
+        {
+          if (m_expectedStims.Contains(_stim)) m_expectedStims.Remove(_stim);
+        }
       }
       #endregion
       

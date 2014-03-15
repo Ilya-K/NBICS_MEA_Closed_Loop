@@ -15,13 +15,13 @@ namespace MEAClosedLoop
     private double STIM_TIME_PERCENT = 0.8;
 
     // Delay of stimulus introduced by signal processing time (in 40 us intervals)
-    private const Int16 STIM_TIME_DELAY = 4 * Param.MS;             // 4 ms
+    private const Int16 STIM_TIME_DELAY = 2 * Param.MS;             // 4 ms
 
     // Minimal allowed period for stimulation
     private const Int16 MIN_STIM_PERIOD = 400 * Param.MS;           // 0.4s = 10000
 
     // Number of SE to leave before the next expected pack
-    private const Int16 N_SE = 2;
+    private const Int16 N_SE = 1; //normally 2
 
     private CInputStream m_inputStream;
     private CStimulator m_stimulator;
@@ -31,18 +31,8 @@ namespace MEAClosedLoop
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
-
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
-
-    
-    Queue<CPack> PackSequence;
-
-    public void GetPack(CPack current_pack)
-    {
-      PackSequence.Enqueue(current_pack);
-    }
-
 
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator, CPackDetector packDetector)
     {
@@ -55,13 +45,11 @@ namespace MEAClosedLoop
       m_filter = filter;
 
       m_stimulus = m_stimulator.GetStimulus();
-      m_packDetector = new CPackDetector(m_filter, false);
+      m_packDetector = packDetector;
 
       m_stimTimer = new System.Timers.Timer();
       m_stimTimer.Elapsed += StimTimer;
 
-      PackSequence = new Queue<CPack>();
-      m_packDetector.PackArrived += GetPack;
 
       m_t = new Thread(FeedBackLoop);
       m_t.Start();
@@ -72,23 +60,15 @@ namespace MEAClosedLoop
       m_stop = true;
     }
 
-    private CPack WaitPack()
-    {
-      while (true)
-      {
-        if (PackSequence.Count > 0) return PackSequence.Dequeue();
-      }
-    }
-
     private void FeedBackLoop()
     {
       CCalcExpWndSE m_se = new CCalcExpWndSE(10); // Mean over ~30 samples
       
       // Wait one full pack first of all
-      CPack prevPack = WaitPack();
+      CPack prevPack = m_packDetector.WaitPack();
       if (!prevPack.EOP)
       {
-        CPack tempPack = WaitPack();
+        CPack tempPack = m_packDetector.WaitPack();
         prevPack.Length = (Int32)(tempPack.Start - prevPack.Start);
       }
 
@@ -99,9 +79,9 @@ namespace MEAClosedLoop
 
       while (!m_stop)
       {
-        CPack currSemiPack = WaitPack();
+        CPack currSemiPack = m_packDetector.WaitPack();
         // [TODO] May be it would be useful to use timeout and give control back sometimes
-        // while (null == (currSemiPack = WaitPack(500))) { }; // Just don't know what to do here
+        // while (null == (currSemiPack = m_packDetector.WaitPack(500))) { }; // Just don't know what to do here
 
         // Handle the situation when a single pack is divided into two parts: Start and End
         // The Start part has already been processed at the previous step
@@ -112,19 +92,19 @@ namespace MEAClosedLoop
             currPack.Length = (Int32)(currSemiPack.Start - currPack.Start);
             prevPack = currPack;
             insidePack = false;
-
-            OnPackFound(currSemiPack);
+            // Distribute current pack to consumers
+            if(OnPackFound!=null) OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
-          OnPackFound(currPack);
-
+          // Distribute current pack to consumers
+          if (OnPackFound != null) OnPackFound(currPack);
         }
         else                                      // We've received Start of a long pack
         {
           insidePack = true;
         }
         currPack = currSemiPack;
-
+        
         // Calculate Mean and SE
         sePackPeriod = m_se.SE(currPack.Start - prevPack.Start);
         meanPackPeriod = m_se.Mean;
@@ -140,7 +120,7 @@ namespace MEAClosedLoop
         m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
         // 
-        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime);
+        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime + 1); // +1 - just for debug, to avoid null time
         m_stimTimer.Start();
 
         prevPack = currPack;

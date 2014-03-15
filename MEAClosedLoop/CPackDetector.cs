@@ -94,11 +94,6 @@ namespace MEAClosedLoop
     private bool m_inPack = false;
     private volatile bool m_kill = false;
 
-    public event AutoWaitPackDelegate PackArrived;
-    /*bool m_compabilityMode;
-    Queue<CPack> PackSequence; //for compability mode */
-    Thread PackCollectorThread;
-
     // [DEBUG]
     private TTime m_debugTimestamp;
     private int m_entryCount = 0;
@@ -106,8 +101,9 @@ namespace MEAClosedLoop
     private System.Timers.Timer m_dummyTimer;
     Int32 m_dummyPackTime = -1;
     Random m_rnd;
+    private bool m_inPackDbg = false;
 
-    public CPackDetector(CFiltering filteredStream, bool compabilityMode, List<int> channelList = null)
+    public CPackDetector(CFiltering filteredStream, List<int> channelList = null)
     {
       if (filteredStream == null) throw new ArgumentNullException("filteredStream");
 
@@ -129,17 +125,17 @@ namespace MEAClosedLoop
       m_prevPacket[0] = new TData[0];                 // just to avoid NullReferenceException at the first packet
       m_filteredQueue = new Queue<TFltDataPacket>();
       m_notEmpty = new AutoResetEvent(false);
-      PackCollectorThread = new Thread(AutoWaitPack);
-      PackCollectorThread.Start();
-      
+
+      m_filteredStream.AddDataConsumer(ReceiveData);
+
 
       // [DEBUG]
-      /*
-      m_dummyTimer = new System.Timers.Timer(4000);
+      
+      m_dummyTimer = new System.Timers.Timer(400);
       m_dummyTimer.Elapsed += DummyTimer;
       m_dummyTimer.Start();
       m_rnd = new Random(123);
-      */
+      
     }
 
     private void DummyTimer(object o1, EventArgs e1)
@@ -150,6 +146,7 @@ namespace MEAClosedLoop
       }
     }
 
+    // Callback to readout data from the Filtered Stream
     private void ReceiveData(TFltDataPacket packet)
     {
       m_debugTimestamp = m_filteredStream.TimeStamp;
@@ -157,21 +154,10 @@ namespace MEAClosedLoop
       m_notEmpty.Set();
     }
 
-    /*
+    // Reads filtered packets from the queue and passes then to DetectPacks() until a pack is found
+    // [TODO] It is probably usefull to make timeout here and return null if no pack is found in given time
+    // public CPack WaitPack(int timeout = 0)
     public CPack WaitPack()
-    {
-      CPack pack = null;
-      do
-      {
-        m_entryCount2++;
-        pack = DetectPacks(m_filteredStream.WaitData());
-      } while (pack == null);
-
-      return pack;
-    }
-    */
-
-    private CPack WaitSinglePack() //ex. WaitPack
     {
       CPack pack = null;
       TFltDataPacket dataPacket = null;
@@ -192,7 +178,8 @@ namespace MEAClosedLoop
         } while (dataPacket == null);
 
         m_timestamp += (TTime)m_prevPacketLength;
-        if (m_debugTimestamp != m_timestamp) throw new Exception("Wrong Timestamp");
+        //[DEBUG]
+        //if (m_debugTimestamp != m_timestamp) throw new Exception("Wrong Timestamp");
         m_prevPacketLength = dataPacket[dataPacket.Keys.ElementAt(0)].Length;
 
         pack = DetectPacks(dataPacket);
@@ -203,16 +190,6 @@ namespace MEAClosedLoop
     public void Dismiss()
     {
       m_kill = true;
-    }
-
-    private void AutoWaitPack()
-    {
-      CPack current_pack;
-      while (true)
-      {
-        current_pack = WaitSinglePack();
-        PackArrived(current_pack);
-      }
     }
 
     // Алгоритм поиска пачек.
@@ -231,17 +208,41 @@ namespace MEAClosedLoop
       #region DEBUG
       m_entryCount++;
       // [DEBUG]
-      /*
+      
 
       CPack debugPack = null;
       if (m_dummyPackTime >= 0)
       {
-        debugPack = new CPack((TTime)m_dummyPackTime, 0, null);
+        if (m_inPackDbg)
+        {
+          TFltDataPacket packData = new TFltDataPacket(m_activeChannelList.Count);
+
+          // Fill packData with active channels keys
+          foreach (int channel in m_activeChannelList) packData[channel] = new TData[200];
+
+          packData.Keys.AsParallel().ForAll(channel =>
+          {
+            // Process the first packet
+            int length = 200;
+            int j = 0;
+            for (int i = 0; i < length; ++i)
+            {
+              packData[channel][j++] = i - 100;
+            }
+          });
+
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 200, packData);
+        }
+        else
+        {
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 0, null);
+        }
         m_dummyPackTime = -1;
-      }
+        m_inPackDbg = !m_inPackDbg;
+     }
 
       return debugPack;
-      */
+      
       #endregion // DEBUG
 
       int currPacketLength = packet[packet.Keys.ElementAt(0)].Length;

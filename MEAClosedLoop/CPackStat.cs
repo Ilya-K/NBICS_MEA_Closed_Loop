@@ -94,7 +94,7 @@ namespace MEAClosedLoop
         if (CollectingDataThread == null)
         {
           CollectingDataThread = new Thread(CollectPacks);
-          CollectingDataThread.Start();
+          //CollectingDataThread.Start();
         }
         else
         {
@@ -240,26 +240,23 @@ namespace MEAClosedLoop
     private void AddPack(CPack pack_to_add)
     {
       int InputCount = 0;
-      while (true)
+      lock (PacklListBlock)
       {
-        lock (PacklListBlock)
+        switch (CurrentState)
         {
-          switch (CurrentState)
-          {
-            case state.BeforeStimulation:
-              {
-                PackListBefore.Add(pack_to_add);
-              }
-              StatProgressBar.BeginInvoke(SetVal, null, 1);
-              DistribGrath.BeginInvoke(UpdateDistribGrath);
-              InputCount++;
-              break;
-            case state.AfterStimulation:
-              {
-                PackListAfter.Add(pack_to_add);
-              }
-              break;
-          }
+          case state.BeforeStimulation:
+            {
+              PackListBefore.Add(pack_to_add);
+            }
+            StatProgressBar.BeginInvoke(SetVal, null, 1);
+            DistribGrath.BeginInvoke(UpdateDistribGrath);
+            InputCount++;
+            break;
+          case state.AfterStimulation:
+            {
+              PackListAfter.Add(pack_to_add);
+            }
+            break;
         }
       }
     }
