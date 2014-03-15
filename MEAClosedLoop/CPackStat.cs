@@ -151,7 +151,6 @@ namespace MEAClosedLoop
             i * 5 + 4,
             e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height);
           if (PackLengthDestrib[i] > PackLengthDestrib[maxInd]) maxInd = i;
-
         }
         //Draw Average
         pen.Color = Color.Red;
@@ -161,9 +160,9 @@ namespace MEAClosedLoop
         if (DoDrawStartStimTime)
         {
           e.Graphics.DrawLine(pen,
-            (float)StimStartPosition / 25,
+            (float)StimStartPosition / 25,// ms
             0,
-            (float)StimStartPosition / 25,
+            (float)StimStartPosition / 25,// ms
             e.ClipRectangle.Height);
         }
       }
@@ -286,18 +285,28 @@ namespace MEAClosedLoop
     }
     #endregion
     #region Обработка скрола ползунка времени стимуляции
+    private void StimPadding_TextChanged(object sender, EventArgs e)
+    {
+      DoDrawStartStimTime = true;
+      double i = StimStartPosition;
+      double.TryParse(StimPadding.Text, out i);
+      //StimStartPosition = i;
+      //trackBar1.Value = (int)StimStartPosition * 5 / 25;
+      //DistribGrath.Refresh();
+    }
     private void trackBar1_Scroll(object sender, EventArgs e)
     {
       DoDrawStartStimTime = true;
       //2000p - 20sec - maximum
       StimStartPosition = trackBar1.Value * 25 / 5;
+      StimPadding.Text = StimStartPosition.ToString();
       DistribGrath.Refresh();
     }
     #endregion
     #region Кнопка отображения опций стимуляции
     private void button1_Click(object sender, EventArgs e)
     {
-      StimParams paramswindow = new StimParams(25);
+      StimParams paramswindow = new StimParams(WAIT_PACK_WINDOW_LENGTH);
       paramswindow.ShowDialog();
       if (paramswindow.DoUpdateParams)
       {
@@ -347,7 +356,7 @@ namespace MEAClosedLoop
       BeforeStimulation,
       AfterStimulation
     }
-
+    #region Отрисовка графика вероятности появления пачек
     private void PackCountGraph_Paint(object sender, PaintEventArgs e)
     {
       //Главное условие отрисовки
@@ -378,8 +387,8 @@ namespace MEAClosedLoop
                 bool IsInWindow = false;
                 foreach (TStimIndex stim in StimList)
                 {
-                  if (PackListAfter[i].Start - (TAbsStimIndex) stim > 0 
-                    && PackListAfter[i].Start - (TAbsStimIndex) stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH)
+                  if (PackListAfter[i].Start - (TAbsStimIndex)stim > 0
+                    && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH)
                   {
                     IsInWindow = true;
                     break;
@@ -393,10 +402,23 @@ namespace MEAClosedLoop
           //отрисовка массива
           Pen pen = new Pen(Color.Red);
           if (GistoGraphPoints.Count() > 1)
-            e.Graphics.DrawLines(pen, GistoGraphPoints);
+          {
+            try
+            {
+              e.Graphics.DrawLines(pen, GistoGraphPoints);
+            }
+            catch (Exception ex)
+            {
+              //Do noth
+            }
+
+          }
         }
       }
     }
+    #endregion
+
+
   }
 
 }

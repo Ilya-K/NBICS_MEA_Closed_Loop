@@ -65,6 +65,8 @@
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.StimPadding = new System.Windows.Forms.TextBox();
+      this.label15 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -151,6 +153,8 @@
       // 
       // StimParams
       // 
+      this.StimParams.Controls.Add(this.label15);
+      this.StimParams.Controls.Add(this.StimPadding);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
       this.StimParams.Location = new System.Drawing.Point(12, 277);
@@ -459,6 +463,23 @@
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
       // 
+      // StimPadding
+      // 
+      this.StimPadding.Location = new System.Drawing.Point(213, 23);
+      this.StimPadding.Name = "StimPadding";
+      this.StimPadding.Size = new System.Drawing.Size(111, 20);
+      this.StimPadding.TabIndex = 5;
+      this.StimPadding.TextChanged += new System.EventHandler(this.StimPadding_TextChanged);
+      // 
+      // label15
+      // 
+      this.label15.AutoSize = true;
+      this.label15.Location = new System.Drawing.Point(331, 26);
+      this.label15.Name = "label15";
+      this.label15.Size = new System.Drawing.Size(100, 13);
+      this.label15.TabIndex = 6;
+      this.label15.Text = "(в миллисекундах)";
+      // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -535,5 +556,7 @@
     private System.Windows.Forms.Label label13;
     private System.Windows.Forms.Label label12;
     private System.Windows.Forms.NumericUpDown MinutesWindow;
+    private System.Windows.Forms.Label label15;
+    private System.Windows.Forms.TextBox StimPadding;
   }
 }
