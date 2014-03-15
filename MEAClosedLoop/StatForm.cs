@@ -16,15 +16,19 @@ namespace MEAClosedLoop
   public partial class StatForm : Form
   {
     private const int DEFAULT_CH = 5;
-    private const int STAT_BUF_LEN = 30 * 1000 * Param.MS;
+    private const int STAT_BUF_LEN = 10 * 1000 * Param.MS;
     private CFiltering m_dataStream;
     private TData[] m_data;
     private TData[] m_SE500;
-    private TData[] m_sumSE;
+    private TData[] m_SE500SE;
+    private TData[] m_avgSE2;
     private Point[] m_dataPoints;
     private Point[] m_SE500Points;
-    private Point[] m_sumSEPoints;
+    private Point[] m_SE500SEPoints;
+    private Point[] m_avgSE2Points;
     private CCalcExpWndSE m_calcSE500 = new CCalcExpWndSE(167);
+    private CCalcExpWndSE m_calcSE500SE = new CCalcExpWndSE(167);
+    private CExpAvg m_calcSE2Avg = new CExpAvg(100);
 
     private int m_channel; // [TODO]: It's not a true channel name, but just an index in a Dic. Correct some day.
     private int m_prevDataPanelWidth;
@@ -39,9 +43,12 @@ namespace MEAClosedLoop
 
       m_data = new TData[STAT_BUF_LEN];
       m_SE500 = new TData[STAT_BUF_LEN];
+      m_SE500SE = new TData[STAT_BUF_LEN];
+      m_avgSE2 = new TData[STAT_BUF_LEN];
       m_dataPoints = new Point[panel_Data.Width * 2];
       m_SE500Points = new Point[panel_Data.Width * 2];
-      m_sumSEPoints = new Point[panel_Data.Width * 2];
+      m_SE500SEPoints = new Point[panel_Data.Width * 2];
+      m_avgSE2Points = new Point[panel_Data.Width * 2];
 
       m_dataStream = fltStream;
 
@@ -76,6 +83,8 @@ namespace MEAClosedLoop
       {
         m_data[m_time] = data[m_channel][i];
         m_SE500[m_time] = m_calcSE500.SE(data[m_channel][i]);
+        m_SE500SE[m_time] = m_calcSE500SE.SE(m_SE500[m_time]);
+        m_avgSE2[m_time] = m_calcSE2Avg.Add(m_SE500SE[m_time]);
         m_time++;
       }
 
@@ -109,7 +118,8 @@ namespace MEAClosedLoop
       {
         m_dataPoints = new Point[width * 2];
         m_SE500Points = new Point[width * 2];
-        m_sumSEPoints = new Point[width * 2];
+        m_SE500SEPoints = new Point[width * 2];
+        m_avgSE2Points = new Point[width * 2];
         UpdateStoredPoints(0);
 
         m_prevDataPanelWidth = width;
@@ -121,13 +131,21 @@ namespace MEAClosedLoop
       int drawLength = Math.Min(e.ClipRectangle.Width, (int)(dataLength / dataPointsPerPixel) - start + 1);
       Point[] dataPoints = new Point[drawLength * 2];
       Point[] se500Points = new Point[drawLength * 2];
+      Point[] se500SEPoints = new Point[drawLength * 2];
+      Point[] avgSE2Points = new Point[drawLength * 2];
       Array.Copy(m_dataPoints, start * 2, dataPoints, 0, drawLength * 2);
       Array.Copy(m_SE500Points, start * 2, se500Points, 0, drawLength * 2);
+      Array.Copy(m_SE500SEPoints, start * 2, se500SEPoints, 0, drawLength * 2);
+      Array.Copy(m_avgSE2Points, start * 2, avgSE2Points, 0, drawLength * 2);
 
       Pen penB = new Pen(Color.Blue, 1);
       e.Graphics.DrawLines(penB, dataPoints);
       Pen penR = new Pen(Color.Red, 1);
       e.Graphics.DrawLines(penR, se500Points);
+      Pen penY = new Pen(Color.Yellow, 1);
+      e.Graphics.DrawLines(penY, avgSE2Points);
+      Pen penG = new Pen(Color.Green, 1);
+      e.Graphics.DrawLines(penG, se500SEPoints);
     }
 
     private void panel_Stat1_Paint(object sender, PaintEventArgs e)
@@ -152,6 +170,8 @@ namespace MEAClosedLoop
         int xNew = (int)((dataStart + i) / dataPointsPerPixel);
         int yData = (int)(height / 2 - m_data[dataStart + i] / 20);
         int ySE500 = (int)(height / 2 - m_SE500[dataStart + i] / 20);
+        int ySE500SE = (int)(4 * height / 5 - m_SE500SE[dataStart + i] / 2);
+        int ySE2Avg = (int)(4 * height / 7 - m_avgSE2[dataStart + i] / 2);
         if (xNew > x)
         {
           x = xNew;
@@ -159,14 +179,21 @@ namespace MEAClosedLoop
           m_dataPoints[2 * x + 1] = new Point(x, yData);
           m_SE500Points[2 * x] = new Point(x, ySE500);
           m_SE500Points[2 * x + 1] = new Point(x, ySE500);
-
+          m_SE500SEPoints[2 * x] = new Point(x, ySE500SE);
+          m_SE500SEPoints[2 * x + 1] = new Point(x, ySE500SE);
+          m_avgSE2Points[2 * x] = new Point(x, ySE2Avg);
+          m_avgSE2Points[2 * x + 1] = new Point(x, ySE2Avg);
         }
         else
         {
           m_dataPoints[2 * x].Y = Math.Min(m_dataPoints[2 * x].Y, yData);
           m_dataPoints[2 * x + 1].Y = Math.Max(m_dataPoints[2 * x + 1].Y, yData);
-          m_SE500Points[2 * x].Y = Math.Min(m_dataPoints[2 * x].Y, ySE500);
-          m_SE500Points[2 * x + 1].Y = Math.Max(m_dataPoints[2 * x + 1].Y, ySE500);
+          m_SE500Points[2 * x].Y = Math.Min(m_SE500Points[2 * x].Y, ySE500);
+          m_SE500Points[2 * x + 1].Y = Math.Max(m_SE500Points[2 * x + 1].Y, ySE500);
+          m_SE500SEPoints[2 * x].Y = Math.Min(m_SE500SEPoints[2 * x].Y, ySE500SE);
+          m_SE500SEPoints[2 * x + 1].Y = Math.Max(m_SE500SEPoints[2 * x + 1].Y, ySE500SE);
+          m_avgSE2Points[2 * x].Y = Math.Min(m_avgSE2Points[2 * x].Y, ySE2Avg);
+          m_avgSE2Points[2 * x + 1].Y = Math.Max(m_avgSE2Points[2 * x + 1].Y, ySE2Avg);
         }
       }
     }
