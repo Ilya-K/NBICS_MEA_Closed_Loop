@@ -373,14 +373,17 @@ namespace MEAClosedLoop
           {
             for (int j = 0; j < GistoGraphPoints.Count(); j++)
             {
-              if ((TTime)j * dT > PackListAfter[i].Start)
-                GistoGraphPoints[j].Y -= 4;
+              if ((TTime)j * dT > PackListAfter[i].Start - PackListAfter[0].Start)
+              {
+                GistoGraphPoints[j].Y -= 10;
+                break;
+              }
             }
           }
           //отрисовка массива
           Pen pen = new Pen(Color.Red);
-          if(GistoGraphPoints.Count() > 1)
-          e.Graphics.DrawLines(pen, GistoGraphPoints);
+          if (GistoGraphPoints.Count() > 1)
+            e.Graphics.DrawLines(pen, GistoGraphPoints);
         }
       }
     }

@@ -94,6 +94,8 @@ namespace MEAClosedLoop
 //      lock (m_chDataLock1)
       {
           // [TODO] указать реальный размер данных
+        if (data != null)
+        {
           int dataLength = data.Count();
           Point[] points = new Point[dataLength];
           for (int i = 0; i < dataLength; i++)
@@ -101,8 +103,9 @@ namespace MEAClosedLoop
             points[i] = new Point(i * width / dataLength, (int)(height - i) /*(int)data[i]*/);
           }
           Pen pen = new Pen(Color.Blue, 1);
-          e.Graphics.DrawLines(pen, points);
-       
+          if(points.Count() > 1) e.Graphics.DrawLines(pen, points);
+
+        }
       }
     }
 
