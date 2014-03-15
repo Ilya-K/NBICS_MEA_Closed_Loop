@@ -375,7 +375,17 @@ namespace MEAClosedLoop
             {
               if ((TTime)j * dT > PackListAfter[i].Start - PackListAfter[0].Start)
               {
-                GistoGraphPoints[j].Y -= 10;
+                bool IsInWindow = false;
+                foreach (TStimIndex stim in StimList)
+                {
+                  if (PackListAfter[i].Start - (TAbsStimIndex) stim > 0 
+                    && PackListAfter[i].Start - (TAbsStimIndex) stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH)
+                  {
+                    IsInWindow = true;
+                    break;
+                  }
+                }
+                if (IsInWindow) GistoGraphPoints[j].Y -= 10;
                 break;
               }
             }
