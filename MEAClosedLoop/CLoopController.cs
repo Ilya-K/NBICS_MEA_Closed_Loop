@@ -31,6 +31,10 @@ namespace MEAClosedLoop
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
+
+    public delegate void OnPackFoundDelegate(CPack pack);
+    public event OnPackFoundDelegate OnPackFound;
+
     
     Queue<CPack> PackSequence;
 
@@ -108,8 +112,12 @@ namespace MEAClosedLoop
             currPack.Length = (Int32)(currSemiPack.Start - currPack.Start);
             prevPack = currPack;
             insidePack = false;
+
+            OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
+          OnPackFound(currPack);
+
         }
         else                                      // We've received Start of a long pack
         {

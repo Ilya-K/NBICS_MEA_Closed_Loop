@@ -46,6 +46,7 @@
       this.RunStatButton.TabIndex = 0;
       this.RunStatButton.Text = "собрать статистику";
       this.RunStatButton.UseVisualStyleBackColor = true;
+      this.RunStatButton.Click += new System.EventHandler(this.RunStatButton_Click);
       // 
       // StatProgressBar
       // 

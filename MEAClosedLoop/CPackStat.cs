@@ -26,6 +26,7 @@ namespace MEAClosedLoop
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
+    private CLoopController LoopCtrl;
     public List<CPack> PackListBefore; //befor stim started
     public List<CPack> PackListAfter; // After stim started
     public List<CPack> PackListDetectReaction; // Лист пачек, которые считаются реакцией культуры
@@ -54,7 +55,7 @@ namespace MEAClosedLoop
     private double StimStartPosition;
     #endregion
     #region Конструктор
-    public CPackStat(CPackDetector _PackDetector, List<int> channelList)
+    public CPackStat(CPackDetector _PackDetector, CLoopController _LoopController, List<int> channelList)
     {
       InitializeComponent();
       CurrentState = state.BeforeStimulation;
@@ -62,6 +63,7 @@ namespace MEAClosedLoop
       PackListAfter = new List<CPack>();
       StimList = new List<TStimIndex>();
       PackDetector = _PackDetector;
+      LoopCtrl = _LoopController;
       StatProgressBar.Maximum = Minimum_Pack_Requered_Count;
       m_channelList = channelList;
 
@@ -99,14 +101,16 @@ namespace MEAClosedLoop
           //CollectingDataThread.Resume();
         }
 
-        PackDetector.PackArrived += AddPack;
+        //PackDetector.PackArrived += AddPack; 
+        LoopCtrl.OnPackFound += AddPack; //now from loop controller
       }
       else
       {
         DoStatCollection = false;
         CollectStatButton.Text = "Продолжить";
         //CollectingDataThread.Suspend();
-        PackDetector.PackArrived -= AddPack;
+        //PackDetector.PackArrived -= AddPack;
+        LoopCtrl.OnPackFound -= AddPack; //now from loop controller
       }
     }
     private void SetStatButtontext(string text)
