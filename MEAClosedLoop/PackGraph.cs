@@ -22,12 +22,12 @@ namespace MEAClosedLoop
 
   public class PackGraph
   {
-    public event StatFinishedDelegate statFinished;
 
     public double foundPackPercent;
     uint realMaxPackLength;
 
     List<TStimIndex> indexData;
+
 
     
     const int MAX_PACK_LENGTH = 12500; //500 ms 

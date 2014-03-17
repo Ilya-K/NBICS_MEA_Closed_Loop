@@ -18,6 +18,7 @@ namespace MEAClosedLoop
   using TAbsStimIndex = System.UInt64;
   using TRawData = UInt16;
   using TRawDataPacket = Dictionary<int, ushort[]>;
+  public delegate void DelegateSetProgress(object sender, int value);
   #endregion
   public partial class CPackStat : Form
   {
@@ -42,10 +43,9 @@ namespace MEAClosedLoop
     bool DoStimulation = false;
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
-    Thread CollectingDataThread;
 
 
-    public delegate void DelegateSetProgress(object sender, int value);
+    
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
     public event DelegateSetProgress SetVal;
