@@ -12,6 +12,7 @@ namespace MEAClosedLoop
   using TData = System.Double;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
   using TStimIndex = System.Int16;
+  using TAbsStimIndex = System.UInt64;
 
   public partial class StatForm : Form
   {
@@ -70,7 +71,7 @@ namespace MEAClosedLoop
       panel_Data.Invalidate(updateRegion);
     }
 
-    private void ArtifCallback(List<TStimIndex> stimul)
+    private void ArtifCallback(List<TAbsStimIndex> stimul)
     {
       
     }

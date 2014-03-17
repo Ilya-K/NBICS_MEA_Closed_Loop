@@ -12,6 +12,7 @@ namespace MEAClosedLoop
   using TData = System.Double;
   using TTime = System.UInt64;
   using TStimIndex = System.Int16;
+  using TAbsStimIndex = System.UInt64;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
 
@@ -39,6 +40,7 @@ namespace MEAClosedLoop
     public List<int> ChannelList { get { return m_inputStream.ChannelList; } }
     private TTime m_timeStamp = 0;
     private Int32 m_sentPacketLength = 0;
+    private TTime m_localTimeStamp = 0;
     private object m_timeLock = new object();
     public ulong TimeStamp { get { lock (m_timeLock) return m_timeStamp; } }
     private volatile bool m_kill;
@@ -48,7 +50,7 @@ namespace MEAClosedLoop
 
 
 
-    public delegate void StimulTimeDelegate(List<TStimIndex> stimul);
+    public delegate void StimulTimeDelegate(List<TAbsStimIndex> stimul);
     private List<StimulTimeDelegate> m_stimulCallback = null;
 
     private List<TStimIndex> m_noArtifacts = new List<TStimIndex>();
@@ -61,13 +63,13 @@ namespace MEAClosedLoop
     private const UInt16 MULTI_INNER_PERIOD = 10 * TIME_MULT; //!< Период между соседними стимулами внутри пачки
     private const UInt16 MULTI_PACK_PERIOD = 300 * TIME_MULT; //!< Период между пачками
     private const UInt16 MAX_TIME_NOISE = 9 * TIME_MULT; //!< Максимальный разброс приблизительного времени стимуляции
-    private const TTime MAX_FILE_LENGTH = 900000 * TIME_MULT; //!< Максимальная длина входного файла 
-   
+    private const TTime MAX_FILE_LENGTH = 9000000 * TIME_MULT; //!< Максимальная длина входного файла 
+
     TTime StartStimTime = 4210; // время начала стимуляций
     int StimType = 2;
     private List<TStimGroup> sl_groups; //!< Точный список моментов стимуляции
     //[DEBUG STIM LOAD VARIABLES /]
-    
+
     // [/DEBUG]
     public int m_Count = 0;
 
@@ -160,9 +162,9 @@ namespace MEAClosedLoop
 
       //m_filteredQueue = new Queue<TFltDataPacket>();
       //m_notEmpty = new AutoResetEvent(false);
-//      Thread t = new Thread(new ThreadStart(DoFiltering));
+      //      Thread t = new Thread(new ThreadStart(DoFiltering));
       m_kill = false;
-//      t.Start();
+      //      t.Start();
     }
 
     public void ConfigureSALPA()
@@ -221,13 +223,7 @@ namespace MEAClosedLoop
           filteredData[channel] = m_salpaFilters[channel].filter(packet[channel], parStimInd[channel]);
         });
       }
-      lock (m_stimulCallback)
-      {
-        if (m_stimulCallback.Count != 0)
-        {
-          foreach (StimulTimeDelegate consumer in m_stimulCallback) consumer(stimIndices);
-        }
-      }
+
       PushToButterworth(filteredData);
     }
 
@@ -282,10 +278,12 @@ namespace MEAClosedLoop
     }
     public void ReceiveData(TRawDataPacket currPacket)
     {
-      Stopwatch sw1 = new Stopwatch();
-      Stopwatch sw2 = new Stopwatch();
-      Stopwatch sw3 = new Stopwatch();
-      sw3.Start();
+      List<TAbsStimIndex> outputIndeces = new List<TAbsStimIndex>();
+      if (m_prevPacket == null)
+      {
+        //в прошлый раз пакет не задерживался - обновляем текущее время
+        m_localTimeStamp = m_inputStream.TimeStamp;
+      }
       if (m_salpaFilters == null)
       {
         PassBySalpa(currPacket);
@@ -300,11 +298,21 @@ namespace MEAClosedLoop
       }
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
       // Returns true if the current packet is requred (stimulation might be expected in the next packet)
-      sw1.Start();
-      if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
+      if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime)currPacketLength))
       {
         // Retuns null when we need to put off processing of the current packet until next packet arrived
         stimIndices = m_stimDetector.GetStims(currPacket);
+      }
+      if (stimIndices != null && stimIndices.Count > 0)
+      {
+        foreach (TStimIndex stim in stimIndices) outputIndeces.Add((TAbsStimIndex)stim + m_localTimeStamp);
+        lock (m_stimulCallback)
+        {
+          if (m_stimulCallback.Count != 0)
+          {
+            foreach (StimulTimeDelegate consumer in m_stimulCallback) consumer(outputIndeces);
+          }
+        }
       }
       if (m_prevPacket != null)                 // В прошлый раз чего-то не нашли, а теперь, может быть, нашли
       {
@@ -321,6 +329,7 @@ namespace MEAClosedLoop
       {
         m_prevPacket = currPacket;
       }
+
     }
 
     private void PushToButterworth(TFltDataPacket filteredData)

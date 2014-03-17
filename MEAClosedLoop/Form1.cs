@@ -666,13 +666,13 @@ namespace MEAClosedLoop
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {
       StatForm statForm = new StatForm(m_salpaFilter);
-      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
       statForm.Show();
     }
 
     private void PackStatButton_Click(object sender, EventArgs e)
     {
       m_statForm = new CPackStat(m_PackDetector, m_closedLoop, m_channelList);
+      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData); 
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;
       m_statForm.Top =  this.Location.Y;
