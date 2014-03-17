@@ -21,7 +21,9 @@ namespace MEAClosedLoop
     const int SUBPANEL_SPACE_Y = 2;
 
     public event LoadSelectionDelegate loadSelection;
-    
+
+    public System.Timers.Timer statCalcTimer;
+    public event StatFinishedDelegate statFinished;
 
     const int MAX_DETECTION_TIME = 200; //number of ms
     PackGraph dataGenerator;
@@ -42,6 +44,9 @@ namespace MEAClosedLoop
 
       dataGenerator = new PackGraph();
       m_LoopCtrl = LoopCtrl;
+
+      statCalcTimer = new System.Timers.Timer();
+      statCalcTimer.Elapsed += StatTimer;
       /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
       //getting filtered data
@@ -129,21 +134,25 @@ namespace MEAClosedLoop
     private void RunStatButton_Click(object sender, EventArgs e) //WTF?
     {
       int statType = StatTypeListBox.SelectedIndex;
-      TTime totalStatTime = (ulong)MinCountBox.Value * 60 * 25000;
+      ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
 
+      //StatProgressBar.Maximum = totalStatTime;
       dataGenerator.CollectStat(totalStatTime);
 
       switch (statType)
       {
         case 0:
           m_LoopCtrl.OnPackFound += dataGenerator.ProcessAmpStat;
-          dataGenerator.statFinished += StopAmpStat;
+          statFinished += StopAmpStat;
           break;
         case 1:
           m_LoopCtrl.OnPackFound += dataGenerator.ProcessFreqStat;
-          dataGenerator.statFinished += StopFreqStat;
+          statFinished += StopFreqStat;
           break;
       }
+      statCalcTimer.Interval = totalStatTime;
+      statCalcTimer.Start();
+
     }
     public void StopAmpStat()
     {
@@ -159,6 +168,10 @@ namespace MEAClosedLoop
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
       //TODO: redraw panels
       MessageBox.Show("подсчёт завершён");
+    }
+    private void StatTimer(object o1, EventArgs e1)
+    {
+      statFinished();
     }
   }
 }
