@@ -77,7 +77,7 @@ namespace MEAClosedLoop
     #region Клик по кнопке выбора канала
     private void GraphChannelSelectButton_Click(object sender, EventArgs e)
     {
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList);
+      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
       formShowWindows.loadSelection += ChannelChangeRequest;
       formShowWindows.Show();
     }
@@ -91,7 +91,7 @@ namespace MEAClosedLoop
       {
         DoStatCollection = true;
         CollectStatButton.Text = "Остановить";
-        if (CollectingDataThread == null)
+        /*if (CollectingDataThread == null)
         {
           CollectingDataThread = new Thread(CollectPacks);
           //CollectingDataThread.Start();
@@ -99,7 +99,7 @@ namespace MEAClosedLoop
         else
         {
           //CollectingDataThread.Resume();
-        }
+        }*/
 
         //PackDetector.PackArrived += AddPack; 
         LoopCtrl.OnPackFound += AddPack; //now from loop controller

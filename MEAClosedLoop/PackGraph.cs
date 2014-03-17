@@ -22,6 +22,8 @@ namespace MEAClosedLoop
 
   public class PackGraph
   {
+    public event StatFinishedDelegate statFinished;
+
     public double foundPackPercent;
     uint realMaxPackLength;
 
@@ -95,12 +97,13 @@ namespace MEAClosedLoop
     public void CollectStat(TTime statTime)
     {
     }
-    
-    public void ProcessAmpStat()
+
+    public void ProcessAmpStat(CPack pack_to_add)
     {
+
     }
 
-    public void ProcessFreqStat()
+    public void ProcessFreqStat(CPack pack_to_add)
     {
     }
   }
