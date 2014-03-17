@@ -13,6 +13,7 @@ namespace MEAClosedLoop
   using TTime = UInt64;
   public delegate void LoadSelectionDelegate(int sel);
   public delegate void StatFinishedDelegate();
+  public delegate void spbTimerDelegate();
 
   public partial class PackGraphForm : Form
   {
@@ -20,14 +21,19 @@ namespace MEAClosedLoop
     const int SUBPANEL_SPACE_X = 2;
     const int SUBPANEL_SPACE_Y = 2;
 
+    const int SPB_REFRESH_COOLDOWN = 5; //in seconds
+
     public event LoadSelectionDelegate loadSelection;
 
     public System.Timers.Timer statCalcTimer;
+    public System.Timers.Timer spb_timer;
+    public event spbTimerDelegate ItsTimeToMoveSPB;
     public event StatFinishedDelegate statFinished;
 
     const int MAX_DETECTION_TIME = 200; //number of ms
     PackGraph dataGenerator;
     CLoopController m_LoopCtrl;
+    public event DelegateSetProgress spb_SetVal;
 
     public PackGraphForm(List<int> channelList, CLoopController LoopCtrl)
     {
@@ -47,6 +53,11 @@ namespace MEAClosedLoop
 
       statCalcTimer = new System.Timers.Timer();
       statCalcTimer.Elapsed += StatTimer;
+      spb_SetVal += spb_UpdateProgressBar;
+      
+      spb_timer = new System.Timers.Timer();
+      ItsTimeToMoveSPB += spb_update;
+      spb_timer.Elapsed += spbTimerReset;
       /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
       //getting filtered data
@@ -93,6 +104,12 @@ namespace MEAClosedLoop
 
     }
 
+    void spb_UpdateProgressBar(object sender, int val)
+    {
+      if (StatProgressBar.Value < StatProgressBar.Maximum )
+        StatProgressBar.Value += val;
+    }
+
     private void channelPanel_Paint(object sender, PaintEventArgs e)
     {
       int width = ((Panel)sender).Width;
@@ -135,6 +152,8 @@ namespace MEAClosedLoop
     {
       int statType = StatTypeListBox.SelectedIndex;
       ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
+      int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
+      ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
 
       //StatProgressBar.Maximum = totalStatTime;
       dataGenerator.CollectStat(totalStatTime);
@@ -150,7 +169,10 @@ namespace MEAClosedLoop
           statFinished += StopFreqStat;
           break;
       }
+      spb_timer.Interval = spbRefreshTime;
+      StatProgressBar.Maximum = spbRefreshCount;
       statCalcTimer.Interval = totalStatTime;
+      spb_timer.Start();
       statCalcTimer.Start();
 
     }
@@ -160,18 +182,49 @@ namespace MEAClosedLoop
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
 
       //TODO: redraw panels
+      spb_timer.Stop();
+      //StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
+      //StatProgressBar.Hide();
+      //StatProgressBar.Value = 0;
+      //StatProgressBar.Invalidate();
       MessageBox.Show("подсчёт завершён");
+    }
+
+    public void spb_update()
+    {
+      StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
     }
 
     public void StopFreqStat()
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
       //TODO: redraw panels
+      spb_timer.Stop();
+      //StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
+      //StatProgressBar.EndInvoke(null);
+      //StatProgressBar.Value = 0;
+      //StatProgressBar.Invalidate();
+      //StatProgressBar.Hide();
       MessageBox.Show("подсчёт завершён");
     }
     private void StatTimer(object o1, EventArgs e1)
     {
       statFinished();
+    }
+    private void spbTimerReset(object o1, EventArgs e1) //TODO: redraw progress bar after completion
+    {
+      try
+      {
+        ItsTimeToMoveSPB();
+      }
+      catch
+      {
+        return;
+      }
+      if (StatProgressBar.Value < StatProgressBar.Maximum)
+      {
+        spb_timer.Start();
+      }
     }
   }
 }
