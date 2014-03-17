@@ -67,6 +67,8 @@ namespace MEAClosedLoop
     {
       InitializeComponent();
       prev2 = 0;
+      this.StartPosition = FormStartPosition.Manual;
+      this.Location = new Point(600, 250);
     }
 
     private void Form1_Load(object sender, EventArgs e)
@@ -671,6 +673,9 @@ namespace MEAClosedLoop
     private void PackStatButton_Click(object sender, EventArgs e)
     {
       m_statForm = new CPackStat(m_PackDetector, m_closedLoop, m_channelList);
+      m_statForm.StartPosition = FormStartPosition.Manual;
+      m_statForm.Left = this.Location.X + 300;
+      m_statForm.Top =  this.Location.Y;
       m_statForm.Show();
     }
 

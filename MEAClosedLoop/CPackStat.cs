@@ -23,6 +23,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
+    private const int Minimum_Pack_Requered_Count = 100;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -33,7 +34,6 @@ namespace MEAClosedLoop
     public List<TStimIndex> StimList;
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
-    private const int Minimum_Pack_Requered_Count = 600;
     private TTime StartStimulationTime = 0; // точка отсчета начала стимуляций. 
     private int Stat_Window_Minutes = 0;
     private int Stat_Window_Seconds = 10;
@@ -239,23 +239,22 @@ namespace MEAClosedLoop
     }
     private void AddPack(CPack pack_to_add)
     {
-      int InputCount = 0;
       lock (PacklListBlock)
       {
         switch (CurrentState)
         {
           case state.BeforeStimulation:
-            {
-              PackListBefore.Add(pack_to_add);
-            }
+            if (DoStatCollection) PackListBefore.Add(pack_to_add);
             StatProgressBar.BeginInvoke(SetVal, null, 1);
-            DistribGrath.BeginInvoke(UpdateDistribGrath);
-            InputCount++;
+            DistribGrath.Invalidate();
+            if (PackListBefore.Count >= Minimum_Pack_Requered_Count) DoStatCollection = false;
+
             break;
           case state.AfterStimulation:
-            {
-              PackListAfter.Add(pack_to_add);
-            }
+            
+            if(DoStimulation) PackListAfter.Add(pack_to_add);
+            PackCountGraph.Invalidate();
+
             break;
         }
       }
@@ -389,13 +388,14 @@ namespace MEAClosedLoop
                 foreach (TStimIndex stim in StimList)
                 {
                   if (PackListAfter[i].Start - (TAbsStimIndex)stim > 0
-                    && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH)
+                    && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH*25)
                   {
                     IsInWindow = true;
                     break;
                   }
                 }
-                if (IsInWindow) GistoGraphPoints[j].Y -= 10;
+                if (IsInWindow) 
+                  GistoGraphPoints[j].Y -= 10;
                 break;
               }
             }

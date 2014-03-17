@@ -120,7 +120,7 @@ namespace MEAClosedLoop
         m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
         // 
-        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime + 1); // +1 - just for debug, to avoid null time
+        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
         m_stimTimer.Start();
 
         prevPack = currPack;
