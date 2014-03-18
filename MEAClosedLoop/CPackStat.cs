@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 20;
+    private const int Minimum_Pack_Requered_Count = 50;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -38,6 +38,7 @@ namespace MEAClosedLoop
     private TTime StartStimulationTime = 0; // точка отсчета начала стимуляций. 
     private int Stat_Window_Minutes = 0;
     private int Stat_Window_Seconds = 10;
+    private int AveragePackPeriod = 0;
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
     bool DoStimulation = false;
@@ -45,7 +46,7 @@ namespace MEAClosedLoop
     state CurrentState;
 
 
-    
+
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
     public event DelegateSetProgress SetVal;
@@ -157,7 +158,7 @@ namespace MEAClosedLoop
         }
         //Draw Average
         pen.Color = Color.Red;
-        e.Graphics.DrawLine(pen, maxInd * 5 + 3, 0, maxInd * 5 + 3, e.ClipRectangle.Height);
+        e.Graphics.DrawLine(pen, AveragePackPeriod / (5 * 25000), 0, AveragePackPeriod / (5 * 25000), e.ClipRectangle.Height);
         //Draw Start Stim Time
         pen.Color = Color.Green;
         if (DoDrawStartStimTime)
@@ -274,6 +275,7 @@ namespace MEAClosedLoop
           Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
         }
         Stat.Calc();
+        this.AveragePackPeriod = (int) Stat.Value;
         this.SelectedAverageBox.Text = (Stat.Value / 25).ToString() + " мсек";
         this.SelectedSigmaBox.Text = (Stat.Sigma / 25).ToString() + " мсек";
         // Обновить график       

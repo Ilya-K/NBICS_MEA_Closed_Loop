@@ -36,6 +36,8 @@
       this.label2 = new System.Windows.Forms.Label();
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
       this.StimParams = new System.Windows.Forms.GroupBox();
+      this.label15 = new System.Windows.Forms.Label();
+      this.StimPadding = new System.Windows.Forms.TextBox();
       this.label10 = new System.Windows.Forms.Label();
       this.trackBar1 = new System.Windows.Forms.TrackBar();
       this.button1 = new System.Windows.Forms.Button();
@@ -65,8 +67,10 @@
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
-      this.StimPadding = new System.Windows.Forms.TextBox();
-      this.label15 = new System.Windows.Forms.Label();
+      this.label16 = new System.Windows.Forms.Label();
+      this.StatGraphXRange = new System.Windows.Forms.NumericUpDown();
+      this.label17 = new System.Windows.Forms.Label();
+      this.StatGraphYRange = new System.Windows.Forms.NumericUpDown();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -79,6 +83,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).BeginInit();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphXRange)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphYRange)).BeginInit();
       this.SuspendLayout();
       // 
       // Prepearing
@@ -157,12 +163,29 @@
       this.StimParams.Controls.Add(this.StimPadding);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
-      this.StimParams.Location = new System.Drawing.Point(12, 277);
+      this.StimParams.Location = new System.Drawing.Point(12, 324);
       this.StimParams.Name = "StimParams";
       this.StimParams.Size = new System.Drawing.Size(461, 107);
       this.StimParams.TabIndex = 11;
       this.StimParams.TabStop = false;
       this.StimParams.Text = "Выбор параметров стимуляции";
+      // 
+      // label15
+      // 
+      this.label15.AutoSize = true;
+      this.label15.Location = new System.Drawing.Point(331, 26);
+      this.label15.Name = "label15";
+      this.label15.Size = new System.Drawing.Size(100, 13);
+      this.label15.TabIndex = 6;
+      this.label15.Text = "(в миллисекундах)";
+      // 
+      // StimPadding
+      // 
+      this.StimPadding.Location = new System.Drawing.Point(213, 23);
+      this.StimPadding.Name = "StimPadding";
+      this.StimPadding.Size = new System.Drawing.Size(111, 20);
+      this.StimPadding.TabIndex = 5;
+      this.StimPadding.TextChanged += new System.EventHandler(this.StimPadding_TextChanged);
       // 
       // label10
       // 
@@ -226,6 +249,10 @@
       // 
       // StatResult
       // 
+      this.StatResult.Controls.Add(this.label17);
+      this.StatResult.Controls.Add(this.StatGraphYRange);
+      this.StatResult.Controls.Add(this.StatGraphXRange);
+      this.StatResult.Controls.Add(this.label16);
       this.StatResult.Controls.Add(this.label4);
       this.StatResult.Controls.Add(this.label3);
       this.StatResult.Controls.Add(this.SelectedSigmaBox);
@@ -234,7 +261,7 @@
       this.StatResult.Controls.Add(this.label1);
       this.StatResult.Location = new System.Drawing.Point(12, 62);
       this.StatResult.Name = "StatResult";
-      this.StatResult.Size = new System.Drawing.Size(461, 209);
+      this.StatResult.Size = new System.Drawing.Size(461, 256);
       this.StatResult.TabIndex = 10;
       this.StatResult.TabStop = false;
       this.StatResult.Text = "Результат сбора статистики";
@@ -242,7 +269,7 @@
       // label4
       // 
       this.label4.AutoSize = true;
-      this.label4.Location = new System.Drawing.Point(10, 182);
+      this.label4.Location = new System.Drawing.Point(5, 184);
       this.label4.Name = "label4";
       this.label4.Size = new System.Drawing.Size(38, 13);
       this.label4.TabIndex = 3;
@@ -251,7 +278,7 @@
       // label3
       // 
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(10, 156);
+      this.label3.Location = new System.Drawing.Point(2, 158);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(109, 13);
       this.label3.TabIndex = 3;
@@ -259,14 +286,14 @@
       // 
       // SelectedSigmaBox
       // 
-      this.SelectedSigmaBox.Location = new System.Drawing.Point(150, 182);
+      this.SelectedSigmaBox.Location = new System.Drawing.Point(142, 181);
       this.SelectedSigmaBox.Name = "SelectedSigmaBox";
       this.SelectedSigmaBox.Size = new System.Drawing.Size(174, 20);
       this.SelectedSigmaBox.TabIndex = 2;
       // 
       // SelectedAverageBox
       // 
-      this.SelectedAverageBox.Location = new System.Drawing.Point(150, 156);
+      this.SelectedAverageBox.Location = new System.Drawing.Point(142, 155);
       this.SelectedAverageBox.Name = "SelectedAverageBox";
       this.SelectedAverageBox.Size = new System.Drawing.Size(174, 20);
       this.SelectedAverageBox.TabIndex = 2;
@@ -274,9 +301,9 @@
       // DistribGrath
       // 
       this.DistribGrath.BackColor = System.Drawing.SystemColors.Window;
-      this.DistribGrath.Location = new System.Drawing.Point(10, 37);
+      this.DistribGrath.Location = new System.Drawing.Point(0, 51);
       this.DistribGrath.Name = "DistribGrath";
-      this.DistribGrath.Size = new System.Drawing.Size(444, 101);
+      this.DistribGrath.Size = new System.Drawing.Size(449, 101);
       this.DistribGrath.TabIndex = 1;
       this.DistribGrath.TabStop = false;
       this.DistribGrath.Paint += new System.Windows.Forms.PaintEventHandler(this.DistribGrath_Paint);
@@ -284,7 +311,7 @@
       // label1
       // 
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(7, 20);
+      this.label1.Location = new System.Drawing.Point(5, 27);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(126, 13);
       this.label1.TabIndex = 0;
@@ -305,9 +332,9 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(12, 498);
+      this.PackProbability.Location = new System.Drawing.Point(12, 545);
       this.PackProbability.Name = "PackProbability";
-      this.PackProbability.Size = new System.Drawing.Size(461, 222);
+      this.PackProbability.Size = new System.Drawing.Size(461, 158);
       this.PackProbability.TabIndex = 9;
       this.PackProbability.TabStop = false;
       this.PackProbability.Text = "Вероятность пачки";
@@ -368,7 +395,7 @@
       // SecondCount
       // 
       this.SecondCount.AutoSize = true;
-      this.SecondCount.Location = new System.Drawing.Point(326, 193);
+      this.SecondCount.Location = new System.Drawing.Point(434, 127);
       this.SecondCount.Name = "SecondCount";
       this.SecondCount.Size = new System.Drawing.Size(19, 13);
       this.SecondCount.TabIndex = 5;
@@ -377,7 +404,7 @@
       // label8
       // 
       this.label8.AutoSize = true;
-      this.label8.Location = new System.Drawing.Point(278, 193);
+      this.label8.Location = new System.Drawing.Point(386, 127);
       this.label8.Name = "label8";
       this.label8.Size = new System.Drawing.Size(42, 13);
       this.label8.TabIndex = 4;
@@ -386,7 +413,7 @@
       // MinuteCount
       // 
       this.MinuteCount.AutoSize = true;
-      this.MinuteCount.Location = new System.Drawing.Point(253, 193);
+      this.MinuteCount.Location = new System.Drawing.Point(361, 127);
       this.MinuteCount.Name = "MinuteCount";
       this.MinuteCount.Size = new System.Drawing.Size(19, 13);
       this.MinuteCount.TabIndex = 5;
@@ -395,7 +422,7 @@
       // label7
       // 
       this.label7.AutoSize = true;
-      this.label7.Location = new System.Drawing.Point(210, 193);
+      this.label7.Location = new System.Drawing.Point(318, 127);
       this.label7.Name = "label7";
       this.label7.Size = new System.Drawing.Size(37, 13);
       this.label7.TabIndex = 4;
@@ -404,7 +431,7 @@
       // HourCount
       // 
       this.HourCount.AutoSize = true;
-      this.HourCount.Location = new System.Drawing.Point(185, 193);
+      this.HourCount.Location = new System.Drawing.Point(293, 127);
       this.HourCount.Name = "HourCount";
       this.HourCount.Size = new System.Drawing.Size(19, 13);
       this.HourCount.TabIndex = 5;
@@ -413,7 +440,7 @@
       // label6
       // 
       this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(143, 193);
+      this.label6.Location = new System.Drawing.Point(251, 127);
       this.label6.Name = "label6";
       this.label6.Size = new System.Drawing.Size(36, 13);
       this.label6.TabIndex = 4;
@@ -422,7 +449,7 @@
       // label5
       // 
       this.label5.AutoSize = true;
-      this.label5.Location = new System.Drawing.Point(33, 193);
+      this.label5.Location = new System.Drawing.Point(141, 127);
       this.label5.Name = "label5";
       this.label5.Size = new System.Drawing.Size(96, 13);
       this.label5.TabIndex = 3;
@@ -444,7 +471,7 @@
       this.groupBox1.Controls.Add(this.numericUpDown1);
       this.groupBox1.Controls.Add(this.button1);
       this.groupBox1.Controls.Add(this.GraphChannelSelectButton);
-      this.groupBox1.Location = new System.Drawing.Point(12, 390);
+      this.groupBox1.Location = new System.Drawing.Point(12, 437);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(460, 52);
       this.groupBox1.TabIndex = 12;
@@ -456,42 +483,56 @@
       this.groupBox2.Controls.Add(this.label9);
       this.groupBox2.Controls.Add(this.StimType);
       this.groupBox2.Controls.Add(this.StartStimButton);
-      this.groupBox2.Location = new System.Drawing.Point(12, 448);
+      this.groupBox2.Location = new System.Drawing.Point(12, 495);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(461, 44);
       this.groupBox2.TabIndex = 13;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
       // 
-      // StimPadding
+      // label16
       // 
-      this.StimPadding.Location = new System.Drawing.Point(213, 23);
-      this.StimPadding.Name = "StimPadding";
-      this.StimPadding.Size = new System.Drawing.Size(111, 20);
-      this.StimPadding.TabIndex = 5;
-      this.StimPadding.TextChanged += new System.EventHandler(this.StimPadding_TextChanged);
+      this.label16.AutoSize = true;
+      this.label16.Location = new System.Drawing.Point(157, 27);
+      this.label16.Name = "label16";
+      this.label16.Size = new System.Drawing.Size(40, 13);
+      this.label16.TabIndex = 4;
+      this.label16.Text = "по икс";
       // 
-      // label15
+      // StatGraphXRange
       // 
-      this.label15.AutoSize = true;
-      this.label15.Location = new System.Drawing.Point(331, 26);
-      this.label15.Name = "label15";
-      this.label15.Size = new System.Drawing.Size(100, 13);
-      this.label15.TabIndex = 6;
-      this.label15.Text = "(в миллисекундах)";
+      this.StatGraphXRange.Location = new System.Drawing.Point(203, 25);
+      this.StatGraphXRange.Name = "StatGraphXRange";
+      this.StatGraphXRange.Size = new System.Drawing.Size(40, 20);
+      this.StatGraphXRange.TabIndex = 5;
+      // 
+      // label17
+      // 
+      this.label17.AutoSize = true;
+      this.label17.Location = new System.Drawing.Point(271, 27);
+      this.label17.Name = "label17";
+      this.label17.Size = new System.Drawing.Size(51, 13);
+      this.label17.TabIndex = 6;
+      this.label17.Text = "по игрек";
+      // 
+      // StatGraphYRange
+      // 
+      this.StatGraphYRange.Location = new System.Drawing.Point(328, 25);
+      this.StatGraphYRange.Name = "StatGraphYRange";
+      this.StatGraphYRange.Size = new System.Drawing.Size(40, 20);
+      this.StatGraphYRange.TabIndex = 5;
       // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(516, 749);
+      this.ClientSize = new System.Drawing.Size(529, 741);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.StimParams);
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
       this.Controls.Add(this.Prepearing);
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
       this.Name = "CPackStat";
       this.Text = "CPackStat";
       this.Load += new System.EventHandler(this.CPackStat_Load);
@@ -513,6 +554,8 @@
       this.groupBox1.PerformLayout();
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphXRange)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphYRange)).EndInit();
       this.ResumeLayout(false);
 
     }
@@ -558,5 +601,9 @@
     private System.Windows.Forms.NumericUpDown MinutesWindow;
     private System.Windows.Forms.Label label15;
     private System.Windows.Forms.TextBox StimPadding;
+    private System.Windows.Forms.Label label17;
+    private System.Windows.Forms.NumericUpDown StatGraphYRange;
+    private System.Windows.Forms.NumericUpDown StatGraphXRange;
+    private System.Windows.Forms.Label label16;
   }
 }
