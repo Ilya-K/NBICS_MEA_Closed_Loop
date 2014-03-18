@@ -129,7 +129,7 @@ namespace MEAClosedLoop
       Pen pen = new Pen(Color.Blue);
       pen.Width = 1;
       int maxInd = 0;
-      int[] PackLengthDestrib = new int[(int)((int)(StatGraphXRange.Value)/dt)];
+      int[] PackLengthDestrib = new int[(int)((int)(StatGraphXRange.Value) / dt)];
       //set as 0
       for (int i = 0; i < PackLengthDestrib.Length; i++)
       {
@@ -154,9 +154,9 @@ namespace MEAClosedLoop
         {
           e.Graphics.DrawLine(pen,
             (float)i * dt * HorisondalProportion,
-            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height /((float)StatGraphYRange.Value)),
+            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height / ((float)StatGraphYRange.Value)),
             (float)(i + 1) * dt * HorisondalProportion + dt,
-            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height /((float)StatGraphYRange.Value)));
+            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height / ((float)StatGraphYRange.Value)));
           if (PackLengthDestrib[i] > PackLengthDestrib[maxInd]) maxInd = i;
         }
         //Draw Average
@@ -278,7 +278,7 @@ namespace MEAClosedLoop
           Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
         }
         Stat.Calc();
-        this.AveragePackPeriod =  (int)Stat.Value / 25; //милли секунд
+        this.AveragePackPeriod = (int)Stat.Value / 25; //милли секунд
         this.SelectedAverageBox.Text = (Stat.Value / 25).ToString() + " мсек";
         this.SelectedSigmaBox.Text = (Stat.Sigma / 25).ToString() + " мсек";
         // Обновить график       
@@ -394,13 +394,13 @@ namespace MEAClosedLoop
             foreach (TStimIndex stim in StimList)
             {
               //<DEBUG>
-              if (PackListAfter[i].Start - (TAbsStimIndex)stim < 800000)
+              if (Math.Abs((float)(PackListAfter[i].Start - (TAbsStimIndex)stim)) < 6000)
               {
                 int xxx = 0;
               }
               //</DEBUG>
               if (PackListAfter[i].Start - (TAbsStimIndex)stim > 0
-                && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH * 250
+                && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)200000//WAIT_PACK_WINDOW_LENGTH * 25
                 ) // 
               {
                 PackListDetectReaction.Add(PackListAfter[i]);
