@@ -45,6 +45,10 @@
       this.StimType = new System.Windows.Forms.ComboBox();
       this.StartStimButton = new System.Windows.Forms.Button();
       this.StatResult = new System.Windows.Forms.GroupBox();
+      this.label17 = new System.Windows.Forms.Label();
+      this.StatGraphYRange = new System.Windows.Forms.NumericUpDown();
+      this.StatGraphXRange = new System.Windows.Forms.NumericUpDown();
+      this.label16 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
       this.SelectedSigmaBox = new System.Windows.Forms.TextBox();
@@ -67,15 +71,15 @@
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
-      this.label16 = new System.Windows.Forms.Label();
-      this.StatGraphXRange = new System.Windows.Forms.NumericUpDown();
-      this.label17 = new System.Windows.Forms.Label();
-      this.StatGraphYRange = new System.Windows.Forms.NumericUpDown();
+      this.label18 = new System.Windows.Forms.Label();
+      this.label19 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
       this.StatResult.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphYRange)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphXRange)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.DistribGrath)).BeginInit();
       this.PackProbability.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.SecondsWindow)).BeginInit();
@@ -83,8 +87,6 @@
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).BeginInit();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.StatGraphXRange)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.StatGraphYRange)).BeginInit();
       this.SuspendLayout();
       // 
       // Prepearing
@@ -249,6 +251,8 @@
       // 
       // StatResult
       // 
+      this.StatResult.Controls.Add(this.label19);
+      this.StatResult.Controls.Add(this.label18);
       this.StatResult.Controls.Add(this.label17);
       this.StatResult.Controls.Add(this.StatGraphYRange);
       this.StatResult.Controls.Add(this.StatGraphXRange);
@@ -265,6 +269,60 @@
       this.StatResult.TabIndex = 10;
       this.StatResult.TabStop = false;
       this.StatResult.Text = "Результат сбора статистики";
+      // 
+      // label17
+      // 
+      this.label17.AutoSize = true;
+      this.label17.Location = new System.Drawing.Point(304, 27);
+      this.label17.Name = "label17";
+      this.label17.Size = new System.Drawing.Size(51, 13);
+      this.label17.TabIndex = 6;
+      this.label17.Text = "по игрек";
+      // 
+      // StatGraphYRange
+      // 
+      this.StatGraphYRange.Location = new System.Drawing.Point(361, 25);
+      this.StatGraphYRange.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+      this.StatGraphYRange.Minimum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+      this.StatGraphYRange.Name = "StatGraphYRange";
+      this.StatGraphYRange.Size = new System.Drawing.Size(46, 20);
+      this.StatGraphYRange.TabIndex = 5;
+      this.StatGraphYRange.Value = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+      this.StatGraphYRange.ValueChanged += new System.EventHandler(this.StatGraphYRange_ValueChanged);
+      // 
+      // StatGraphXRange
+      // 
+      this.StatGraphXRange.Location = new System.Drawing.Point(197, 25);
+      this.StatGraphXRange.Name = "StatGraphXRange";
+      this.StatGraphXRange.Size = new System.Drawing.Size(35, 20);
+      this.StatGraphXRange.TabIndex = 5;
+      this.StatGraphXRange.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+      this.StatGraphXRange.ValueChanged += new System.EventHandler(this.StatGraphXRange_ValueChanged);
+      // 
+      // label16
+      // 
+      this.label16.AutoSize = true;
+      this.label16.Location = new System.Drawing.Point(157, 27);
+      this.label16.Name = "label16";
+      this.label16.Size = new System.Drawing.Size(40, 13);
+      this.label16.TabIndex = 4;
+      this.label16.Text = "по икс";
       // 
       // label4
       // 
@@ -490,37 +548,23 @@
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
       // 
-      // label16
+      // label18
       // 
-      this.label16.AutoSize = true;
-      this.label16.Location = new System.Drawing.Point(157, 27);
-      this.label16.Name = "label16";
-      this.label16.Size = new System.Drawing.Size(40, 13);
-      this.label16.TabIndex = 4;
-      this.label16.Text = "по икс";
+      this.label18.AutoSize = true;
+      this.label18.Location = new System.Drawing.Point(244, 27);
+      this.label18.Name = "label18";
+      this.label18.Size = new System.Drawing.Size(42, 13);
+      this.label18.TabIndex = 7;
+      this.label18.Text = "секунд";
       // 
-      // StatGraphXRange
+      // label19
       // 
-      this.StatGraphXRange.Location = new System.Drawing.Point(203, 25);
-      this.StatGraphXRange.Name = "StatGraphXRange";
-      this.StatGraphXRange.Size = new System.Drawing.Size(40, 20);
-      this.StatGraphXRange.TabIndex = 5;
-      // 
-      // label17
-      // 
-      this.label17.AutoSize = true;
-      this.label17.Location = new System.Drawing.Point(271, 27);
-      this.label17.Name = "label17";
-      this.label17.Size = new System.Drawing.Size(51, 13);
-      this.label17.TabIndex = 6;
-      this.label17.Text = "по игрек";
-      // 
-      // StatGraphYRange
-      // 
-      this.StatGraphYRange.Location = new System.Drawing.Point(328, 25);
-      this.StatGraphYRange.Name = "StatGraphYRange";
-      this.StatGraphYRange.Size = new System.Drawing.Size(40, 20);
-      this.StatGraphYRange.TabIndex = 5;
+      this.label19.AutoSize = true;
+      this.label19.Location = new System.Drawing.Point(413, 27);
+      this.label19.Name = "label19";
+      this.label19.Size = new System.Drawing.Size(36, 13);
+      this.label19.TabIndex = 8;
+      this.label19.Text = "пачек";
       // 
       // CPackStat
       // 
@@ -544,6 +588,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
       this.StatResult.ResumeLayout(false);
       this.StatResult.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphYRange)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.StatGraphXRange)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.DistribGrath)).EndInit();
       this.PackProbability.ResumeLayout(false);
       this.PackProbability.PerformLayout();
@@ -554,8 +600,6 @@
       this.groupBox1.PerformLayout();
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.StatGraphXRange)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.StatGraphYRange)).EndInit();
       this.ResumeLayout(false);
 
     }
@@ -605,5 +649,7 @@
     private System.Windows.Forms.NumericUpDown StatGraphYRange;
     private System.Windows.Forms.NumericUpDown StatGraphXRange;
     private System.Windows.Forms.Label label16;
+    private System.Windows.Forms.Label label19;
+    private System.Windows.Forms.Label label18;
   }
 }

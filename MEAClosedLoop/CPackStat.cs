@@ -53,7 +53,8 @@ namespace MEAClosedLoop
     public event DelegateUpdateDistribGrath UpdateDistribGrath;
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
 
-    private double StimStartPosition;
+    private float StimStartPosition;
+    private TStimIndex StimStartIndex;
     #endregion
     #region Конструктор
     public CPackStat(CPackDetector _PackDetector, CLoopController _LoopController, List<int> channelList)
@@ -121,16 +122,18 @@ namespace MEAClosedLoop
     #region Перерисовка поля статистики пачек
     private void DistribGrath_Paint(object sender, PaintEventArgs e)
     {
+      float dt = (float)0.05;//sec, is optimal time window to collect packs for gistgrath// derived from Ilia Sokolov experiment's
+      float HorisondalProportion = ((float)e.ClipRectangle.Width) / ((int)StatGraphXRange.Value); // from s to px
+      float dp = dt * 25000; // dt in points
+      //summ time Length = dt*n sec, n = TimeLength/dt
       Pen pen = new Pen(Color.Blue);
       pen.Width = 1;
       int maxInd = 0;
-      int[] PackLengthDestrib = new int[400];
+      int[] PackLengthDestrib = new int[(int)((int)(StatGraphXRange.Value)/dt)];
       //set as 0
       for (int i = 0; i < PackLengthDestrib.Length; i++)
       {
-        //dt = 0.05 sec
-        //summ time Length = 10 sec
-        PackLengthDestrib[i] = 0;//50 / (1 + (i - 25) * (i - 25) / 10);
+        PackLengthDestrib[i] = 3;
       }
       lock (PacklListBlock)
       {
@@ -138,8 +141,8 @@ namespace MEAClosedLoop
         {
           for (int j = 0; j < PackLengthDestrib.Length; j++)
           {
-            if (PackListBefore[i + 1].Start - PackListBefore[i].Start > (TAbsStimIndex)j * 1250
-              && PackListBefore[i + 1].Start - PackListBefore[i].Start < (TAbsStimIndex)(j + 1) * 1250)
+            if (PackListBefore[i + 1].Start - PackListBefore[i].Start > (TAbsStimIndex)j * dp
+              && PackListBefore[i + 1].Start - PackListBefore[i].Start < (TAbsStimIndex)(j + 1) * dp)
             {
               PackLengthDestrib[j] += 1;
               break;
@@ -150,23 +153,23 @@ namespace MEAClosedLoop
         for (int i = 0; i < PackLengthDestrib.Length; i++)
         {
           e.Graphics.DrawLine(pen,
-            i * 5,
-            e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height,
-            i * 5 + 4,
-            e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height);
+            (float)i * dt * HorisondalProportion,
+            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height /((float)StatGraphYRange.Value)),
+            (float)(i + 1) * dt * HorisondalProportion + dt,
+            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height /((float)StatGraphYRange.Value)));
           if (PackLengthDestrib[i] > PackLengthDestrib[maxInd]) maxInd = i;
         }
         //Draw Average
         pen.Color = Color.Red;
-        e.Graphics.DrawLine(pen, AveragePackPeriod / (5 * 25000), 0, AveragePackPeriod / (5 * 25000), e.ClipRectangle.Height);
+        e.Graphics.DrawLine(pen, (float)AveragePackPeriod * HorisondalProportion / 1000, (float)0, (float)AveragePackPeriod * HorisondalProportion / 1000, (float)e.ClipRectangle.Height);
         //Draw Start Stim Time
         pen.Color = Color.Green;
         if (DoDrawStartStimTime)
         {
           e.Graphics.DrawLine(pen,
-            (float)StimStartPosition / 25,// ms
+            (float)StimStartPosition * HorisondalProportion,
             0,
-            (float)StimStartPosition / 25,// ms
+            (float)StimStartPosition * HorisondalProportion,
             e.ClipRectangle.Height);
         }
       }
@@ -188,7 +191,7 @@ namespace MEAClosedLoop
     }
 
     #endregion
-    #region Функция для заргрузки информации об пачках, исполняется в отдельном потоке
+    #region Функция для загрузки информации об пачках, исполняется в отдельном потоке
     private void CollectPacks() //old, random
     {
       TTime InputCount = 0;
@@ -275,7 +278,7 @@ namespace MEAClosedLoop
           Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
         }
         Stat.Calc();
-        this.AveragePackPeriod = (int) Stat.Value;
+        this.AveragePackPeriod =  (int)Stat.Value / 25; //милли секунд
         this.SelectedAverageBox.Text = (Stat.Value / 25).ToString() + " мсек";
         this.SelectedSigmaBox.Text = (Stat.Sigma / 25).ToString() + " мсек";
         // Обновить график       
@@ -304,7 +307,7 @@ namespace MEAClosedLoop
     {
       DoDrawStartStimTime = true;
       //2000p - 20sec - maximum
-      StimStartPosition = trackBar1.Value * 25 / 5;
+      StimStartPosition = ((float)((int)StatGraphXRange.Value) * trackBar1.Value) / trackBar1.Maximum; // in Seconds
       StimPadding.Text = StimStartPosition.ToString();
       DistribGrath.Refresh();
     }
@@ -438,7 +441,14 @@ namespace MEAClosedLoop
     }
     #endregion
 
+    private void StatGraphXRange_ValueChanged(object sender, EventArgs e)
+    {
+      DistribGrath.Invalidate();
+    }
 
+    private void StatGraphYRange_ValueChanged(object sender, EventArgs e)
+    {
+      DistribGrath.Invalidate();
+    }
   }
-
 }
