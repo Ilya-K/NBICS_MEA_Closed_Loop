@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 50;
+    private const int Minimum_Pack_Requered_Count = 350;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -390,17 +390,10 @@ namespace MEAClosedLoop
           //ищем пачки, попадающие в окно после стимула
           for (int i = 0; i < PackListAfter.Count; i++)
           {
-            bool IsInWindow = false;
             foreach (TStimIndex stim in StimList)
             {
-              //<DEBUG>
-              if (Math.Abs((float)(PackListAfter[i].Start - (TAbsStimIndex)stim)) < 6000)
-              {
-                int xxx = 0;
-              }
-              //</DEBUG>
               if (PackListAfter[i].Start - (TAbsStimIndex)stim > 0
-                && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)200000//WAIT_PACK_WINDOW_LENGTH * 25
+                && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex) WAIT_PACK_WINDOW_LENGTH * 250
                 ) // 
               {
                 PackListDetectReaction.Add(PackListAfter[i]);
@@ -411,11 +404,6 @@ namespace MEAClosedLoop
                 // добавить и стимул и пачку на удаление, как нас не интересующие
               }
             }
-            if (IsInWindow)
-
-              //GistoGraphPoints[j].Y -= 10;
-              break;
-
           }
           // Заполним значения массива гистограммы соотвественно количеству стимулов в интервале окна подсчета
 

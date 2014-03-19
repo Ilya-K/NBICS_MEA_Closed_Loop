@@ -118,6 +118,7 @@ namespace MEAClosedLoop
     #region Data Display
     private void panel1_Paint(object sender, PaintEventArgs e)
     {
+      if (!checkBox1.Checked) return;
       int width = panel1.Width;
       int height = panel1.Height;
       double max = double.MinValue;
@@ -222,6 +223,8 @@ namespace MEAClosedLoop
 
     private void panel2_Paint(object sender, PaintEventArgs e)
     {
+
+      if (!checkBox2.Checked) return;
       int width = panel2.Width;
       int height = panel2.Height;
       double max = double.MinValue;

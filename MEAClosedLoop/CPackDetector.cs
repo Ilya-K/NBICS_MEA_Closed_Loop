@@ -134,7 +134,7 @@ namespace MEAClosedLoop
       m_dummyTimer = new System.Timers.Timer(400);
       m_dummyTimer.Elapsed += DummyTimer;
       m_dummyTimer.Start();
-      m_rnd = new Random(123);
+      m_rnd = new Random(DateTime.Now.Millisecond);
       
     }
 
