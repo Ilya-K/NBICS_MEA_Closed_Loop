@@ -8,44 +8,55 @@ namespace MEAClosedLoop
   using TTime = UInt64;
   using TPackMap = List<uint>;
   using TStimIndex = System.Int16;
+  using Timeline = Queue<ProcessedPack>;
 
   public struct TPack
   {
     public List<bool> data;
-    public TTime stimTime;
+    public int channel;
   }
 
-  public class Timeline
-  {
-
+  public struct ProcessedPack{
+    public TPackMap dataMap;
+    public TTime start;
   }
+
+
+
+  
 
   public class PackGraph
   {
-
+    public enum state
+    {
+      Amp,
+      Freq
+    }
     public double foundPackPercent;
     uint realMaxPackLength;
-
-    List<TStimIndex> indexData;
-
-
+    //List<TStimIndex> indexData;
+    private Queue<CPack> RawAmpData, RawFreqData;
+    Timeline processed_data;
+    state GraphType;
+    public uint totalTime;
     
     const int MAX_PACK_LENGTH = 12500; //500 ms 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
     const int STAT_ITERATION_LENGTH = 125; //5 ms
+    const double SPIKE_TRESHOLD = 10; //TODO: vary this  parameter
 
 
 
-    private TPackMap SpikesInPack(TPack input)
+    private TPackMap SpikesInPack(TPack input, uint iterationLength)
     {
       TPackMap output = new TPackMap();
       uint TimeIterator, TimePartIterator;
       uint packCount;
 
-      for (TimeIterator = 0; TimeIterator < input.data.Count(); TimeIterator += STAT_ITERATION_LENGTH)
+      for (TimeIterator = 0; TimeIterator < input.data.Count(); TimeIterator += iterationLength)
       {
         packCount = 0;
-        for (TimePartIterator = TimeIterator; TimePartIterator <= TimeIterator + STAT_ITERATION_LENGTH; TimePartIterator++)
+        for (TimePartIterator = TimeIterator; TimePartIterator <= TimeIterator + iterationLength; TimePartIterator++)
         {
           if (input.data[(int)TimePartIterator])
             packCount++;
@@ -53,58 +64,107 @@ namespace MEAClosedLoop
         output.Add(packCount);
       }
       
-      if (TimeIterator > realMaxPackLength)
+      /*if (TimeIterator > realMaxPackLength)
       {
         realMaxPackLength = TimeIterator;
+      }*/
+
+      return output;
+    }
+
+    private TPack CPack2TPack(CPack input)
+    {
+      TPack output = new TPack();
+
+      for (int packIterator = 0; packIterator < input.Length; packIterator++)
+      {
+        foreach (int channel in input.Data.Keys)
+        {
+          output.channel = channel;
+          output.data[packIterator] = ((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
+        }
       }
 
       return output;
     }
 
 
-    public TPackMap ProcessPackStat() //now from all channels
+    public void ProcessPackStat(int timeUnitSegment) //now from all channels
     {
-      TPackMap current_spikes, output = new TPackMap(MAX_PACK_LENGTH);
-     /* double foundPackIterator = 100.0 / (double)all_packs.Count();
+      uint iterationLength = totalTime / (uint)timeUnitSegment;
 
-      
-      foreach (TPack PackIterator in all_packs)
+      //Filling timeline
+      if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
       {
-        current_spikes = SpikesInPack(PackIterator);
-        if (current_spikes.Count() == 0) //no pack after stimulation
-        {
-          continue;
+        //Something went wrong
+      }
+      else
+      {
+        if (RawFreqData.Count > 0)
+        { //freq stat
+          GraphType = state.Freq;
+          foreach (CPack current_cpack in RawFreqData)
+          {
+            ProcessedPack processed_pack_to_add = new ProcessedPack();
+            processed_pack_to_add.dataMap = SpikesInPack(CPack2TPack(current_cpack), iterationLength);
+            processed_pack_to_add.start = current_cpack.Start;
+            processed_data.Enqueue(processed_pack_to_add);
+          }
         }
-        foundPackPercent += foundPackIterator;
-        for(int i=0; i<current_spikes.Count(); i++){
-          output[i] += current_spikes[i];
+        if (RawAmpData.Count > 0)
+        { //amp stat
+          GraphType = state.Amp;
         }
       }
-
-      if (realMaxPackLength == 0)
-      {
-        //something goes wrong
-      }*/
-      return output;
     }
     
     public PackGraph()
     {
       foundPackPercent = 0;
       realMaxPackLength = 0;
+
+      RawAmpData = new Queue<CPack>();
+      RawFreqData = new Queue<CPack>();
+      processed_data = new Timeline();
+
     }
 
-    public void CollectStat(TTime statTime)
-    {
-    }
 
     public void ProcessAmpStat(CPack pack_to_add)
     {
-
+      RawAmpData.Enqueue(pack_to_add);
     }
 
     public void ProcessFreqStat(CPack pack_to_add)
     {
+      RawFreqData.Enqueue(pack_to_add);
+
+    }
+    public Queue<uint> PrepareData(int channel) //TODO: proper time convertions
+    {
+      Queue<uint> output = new Queue<uint>();
+      uint nextPackTime = (uint)processed_data.Peek().start; //here //minimum 1 pack required
+      ProcessedPack currentPack;
+
+      for (int timeIterator = 0; (timeIterator < totalTime) && (processed_data.Count > 0); timeIterator++)
+      {
+        if (timeIterator < (uint)processed_data.Peek().start)
+        { //filling free space
+          output.Enqueue(0);
+          continue;
+        }
+        else
+        {
+          currentPack = processed_data.Dequeue();
+          timeIterator += currentPack.dataMap.Count;
+          foreach (uint dataPoint in currentPack.dataMap)
+          {
+            output.Enqueue(dataPoint);
+          }
+        }
+      }
+
+      return output;
     }
   }
 }

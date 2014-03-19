@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
-  using TPackMap = List<uint>;
+  using TPackMap = List<int>;
   using TTime = UInt64;
   public delegate void LoadSelectionDelegate(int sel);
   public delegate void StatFinishedDelegate();
@@ -17,7 +17,7 @@ namespace MEAClosedLoop
 
   public partial class PackGraphForm : Form
   {
-    TPackMap data;
+    Queue<uint> data;
     const int SUBPANEL_SPACE_X = 2;
     const int SUBPANEL_SPACE_Y = 2;
 
@@ -34,6 +34,8 @@ namespace MEAClosedLoop
     PackGraph dataGenerator;
     CLoopController m_LoopCtrl;
     public event DelegateSetProgress spb_SetVal;
+
+    private Point[][] pointsToDraw;
 
     public PackGraphForm(List<int> channelList, CLoopController LoopCtrl)
     {
@@ -58,6 +60,8 @@ namespace MEAClosedLoop
       spb_timer = new System.Timers.Timer();
       ItsTimeToMoveSPB += spb_update;
       spb_timer.Elapsed += spbTimerReset;
+
+      data = new Queue<uint>();
       /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
       //getting filtered data
@@ -100,7 +104,8 @@ namespace MEAClosedLoop
 
       }
 
-      this.Invalidate();
+      dataGenerator.ProcessPackStat(panelWidth);
+      //this.Invalidate();
 
     }
 
@@ -115,22 +120,24 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
 
+      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
+      data = dataGenerator.PrepareData(currentPanelIndex);
 
-
-      //      lock (m_chDataLock1)
+      //lock (m_chDataLock1) <- TODO
       {
         // [TODO] указать реальный размер данных
         if (data != null)
         {
-          int dataLength = data.Count();
-          Point[] points = new Point[dataLength];
+          int dataLength = pointsToDraw[currentPanelIndex].Length;
           for (int i = 0; i < dataLength; i++)
           {
-            points[i] = new Point(i * width / dataLength, (int)(height - i) /*(int)data[i]*/);
+            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, (int)data.Dequeue());
           }
           Pen pen = new Pen(Color.Blue, 1);
-          if (points.Count() > 1) e.Graphics.DrawLines(pen, points);
-
+          if (pointsToDraw.Count() > 1)
+          {
+            e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
+          }
         }
       }
     }
@@ -148,7 +155,7 @@ namespace MEAClosedLoop
 
     }
 
-    private void RunStatButton_Click(object sender, EventArgs e) //WTF?
+    private void RunStatButton_Click(object sender, EventArgs e)
     {
       int statType = StatTypeListBox.SelectedIndex;
       ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
@@ -156,7 +163,7 @@ namespace MEAClosedLoop
       ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
 
       //StatProgressBar.Maximum = totalStatTime;
-      dataGenerator.CollectStat(totalStatTime);
+      //dataGenerator.CollectStat(totalStatTime);
 
       switch (statType)
       {
@@ -180,13 +187,8 @@ namespace MEAClosedLoop
     {
 
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
-
-      //TODO: redraw panels
       spb_timer.Stop();
-      //StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
-      //StatProgressBar.Hide();
-      //StatProgressBar.Value = 0;
-      //StatProgressBar.Invalidate();
+      this.Invalidate();
       MessageBox.Show("подсчёт завершён");
     }
 
@@ -198,13 +200,9 @@ namespace MEAClosedLoop
     public void StopFreqStat()
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
-      //TODO: redraw panels
       spb_timer.Stop();
-      //StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
-      //StatProgressBar.EndInvoke(null);
-      //StatProgressBar.Value = 0;
-      //StatProgressBar.Invalidate();
-      //StatProgressBar.Hide();
+      this.Invalidate();
+
       MessageBox.Show("подсчёт завершён");
     }
     private void StatTimer(object o1, EventArgs e1)
