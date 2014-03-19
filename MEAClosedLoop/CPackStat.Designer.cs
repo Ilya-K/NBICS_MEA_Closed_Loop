@@ -45,6 +45,8 @@
       this.StimType = new System.Windows.Forms.ComboBox();
       this.StartStimButton = new System.Windows.Forms.Button();
       this.StatResult = new System.Windows.Forms.GroupBox();
+      this.label19 = new System.Windows.Forms.Label();
+      this.label18 = new System.Windows.Forms.Label();
       this.label17 = new System.Windows.Forms.Label();
       this.StatGraphYRange = new System.Windows.Forms.NumericUpDown();
       this.StatGraphXRange = new System.Windows.Forms.NumericUpDown();
@@ -71,8 +73,6 @@
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
-      this.label18 = new System.Windows.Forms.Label();
-      this.label19 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -270,6 +270,24 @@
       this.StatResult.TabStop = false;
       this.StatResult.Text = "Результат сбора статистики";
       // 
+      // label19
+      // 
+      this.label19.AutoSize = true;
+      this.label19.Location = new System.Drawing.Point(413, 27);
+      this.label19.Name = "label19";
+      this.label19.Size = new System.Drawing.Size(36, 13);
+      this.label19.TabIndex = 8;
+      this.label19.Text = "пачек";
+      // 
+      // label18
+      // 
+      this.label18.AutoSize = true;
+      this.label18.Location = new System.Drawing.Point(244, 27);
+      this.label18.Name = "label18";
+      this.label18.Size = new System.Drawing.Size(42, 13);
+      this.label18.TabIndex = 7;
+      this.label18.Text = "секунд";
+      // 
       // label17
       // 
       this.label17.AutoSize = true;
@@ -305,6 +323,11 @@
       // StatGraphXRange
       // 
       this.StatGraphXRange.Location = new System.Drawing.Point(197, 25);
+      this.StatGraphXRange.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
       this.StatGraphXRange.Name = "StatGraphXRange";
       this.StatGraphXRange.Size = new System.Drawing.Size(35, 20);
       this.StatGraphXRange.TabIndex = 5;
@@ -547,24 +570,6 @@
       this.groupBox2.TabIndex = 13;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
-      // 
-      // label18
-      // 
-      this.label18.AutoSize = true;
-      this.label18.Location = new System.Drawing.Point(244, 27);
-      this.label18.Name = "label18";
-      this.label18.Size = new System.Drawing.Size(42, 13);
-      this.label18.TabIndex = 7;
-      this.label18.Text = "секунд";
-      // 
-      // label19
-      // 
-      this.label19.AutoSize = true;
-      this.label19.Location = new System.Drawing.Point(413, 27);
-      this.label19.Name = "label19";
-      this.label19.Size = new System.Drawing.Size(36, 13);
-      this.label19.TabIndex = 8;
-      this.label19.Text = "пачек";
       // 
       // CPackStat
       // 

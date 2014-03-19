@@ -131,7 +131,7 @@ namespace MEAClosedLoop
 
       // [DEBUG]
       
-      m_dummyTimer = new System.Timers.Timer(400);
+      m_dummyTimer = new System.Timers.Timer(1000);
       m_dummyTimer.Elapsed += DummyTimer;
       m_dummyTimer.Start();
       m_rnd = new Random(DateTime.Now.Millisecond);
@@ -142,7 +142,7 @@ namespace MEAClosedLoop
     {
       lock (m_dummyTimer)
       {
-        m_dummyPackTime = m_rnd.Next(2500);
+        m_dummyPackTime = m_rnd.Next(5000);
       }
     }
 

@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 350;
+    private const int Minimum_Pack_Requered_Count = 50;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -270,7 +270,7 @@ namespace MEAClosedLoop
     #region Подсчет статистики
     private void CalcStat()
     {
-      if (PackListBefore.Count - 1 > 0)
+      if (PackListBefore.Count > 1)
       {
         Average Stat = new Average();
         for (int i = 0; i < PackListBefore.Count() - 1; i++)
@@ -390,10 +390,11 @@ namespace MEAClosedLoop
           //ищем пачки, попадающие в окно после стимула
           for (int i = 0; i < PackListAfter.Count; i++)
           {
-            foreach (TStimIndex stim in StimList)
+            foreach (TAbsStimIndex stim in StimList)
             {
-              if (PackListAfter[i].Start - (TAbsStimIndex)stim > 0
-                && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex) WAIT_PACK_WINDOW_LENGTH * 250
+              if (PackListAfter[i].Start > stim
+                && PackListAfter[i].Start < stim + (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH * 25
+                && !PackListDetectReaction.Contains(PackListAfter[i])
                 ) // 
               {
                 PackListDetectReaction.Add(PackListAfter[i]);
