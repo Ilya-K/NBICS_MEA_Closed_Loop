@@ -13,25 +13,38 @@ namespace MEAClosedLoop
   public class CPackDetector
   {
     // Алгоритм выделения спайк-трэйнов
-    // Считаем дисперсию сигнала в экспоненциальном окне с временем релаксации 167 точек.
+    // Считаем дисперсию сигнала в экспоненциальном окне с временем релаксации 250 точек (10 мс, окно ~20 мс).
     // Считаем шум стационарным, т.е. дисперсия шума должна меняться слабо и медленно. Поэтому любое быстрое увеличение дисперсии сигнала будем считать началом пачки.
     // Для того чтобы обнаружить изменение дисперсии шума будем считать дисперсию дисперсии шума D[D[data]] в том же экспоненциальном окне.
     // Если дисперсия сигнала D[data] превысит среднюю дисперсию шума E[D[data]] на 
 
     private class CSpikeTrainDetector
     {
+      private const TData ZERO_LEVEL = 1;       // Approximately 1 bit
       private const TData THRESH1 = 0.14;
       private const TData THRESH2 = 1.0;
       private const TData DECAY = 0.98;
+      private const int ZERO_COUNT = 3;         // How many sequental zero points have got to consider signal = 0;
+
+      private enum State
+      {
+        Zero = 0,
+        Noise = 1,
+        Pack = 2
+      }
+      private State m_state;
 
       private TTime m_absTime = 0;
       private Int16 m_channel;
       
       // Short term mean and variance calculator
-      private CCalcExpWndSE m_se = new CCalcExpWndSE((20 * Param.MS) / 3);      // 3*tau = 20ms (500 samples)
+      private CCalcExpWndSE m_se = new CCalcExpWndSE((20 * Param.MS) / 2);      // 2*tau = 20ms (500 samples)
       
-      // Long term mean and variance calculator
-      private CCalcExpWndSE m_seLT = new CCalcExpWndSE((2000 * Param.MS) / 3);  // 3*tau = 2s (50000 samples)
+      // Long term mean and variance calculator. Used to estimate noise level
+      private CCalcExpWndSE m_noiseSE = new CCalcExpWndSE((2000 * Param.MS) / 2);  // 2*tau = 2s (50000 samples)
+
+      // Long term mean and variance calculator. Used to estimate signal variance inside packs
+      private CCalcExpWndSE m_packSE = new CCalcExpWndSE((2000 * Param.MS) / 2);  // 2*tau = 2s (50000 samples)
       
       // Moving average with exponential window
       private CExpAvg m_expAvg = new CExpAvg(167);                              // Window width ~500 packets (50s)
@@ -39,10 +52,13 @@ namespace MEAClosedLoop
       private TData m_hpf = 0;      // High Pass Filter
       private TData m_maOld = 0;
       private bool m_packFound = false;
+      private int m_zeroCount; 
 
       public CSpikeTrainDetector(Int16 channel)
       {
         m_channel = channel;
+        m_state = State.Zero;
+        m_zeroCount = ZERO_COUNT;
       }
 
       public CSpikeTrainFrame FindSpikeTrains(TData[] data)
@@ -51,14 +67,45 @@ namespace MEAClosedLoop
 
         int size = data.Length;
 
-        TData ma = m_expAvg.Add(m_se.SE(data[0]) - m_seLT.SE(data[0]));
+        TData ma = m_expAvg.Add(m_se.SE(data[0]) - m_noiseSE.SE(data[0]));
         TData diff = ma - m_maOld;
         m_maOld = ma;
         m_hpf = (Math.Abs(diff) > THRESH1) ? m_hpf + diff : m_hpf * DECAY;
 
-        for (int i = 1; i < data.Length; i++)
+        for (int i = 0; i < data.Length; i++)
         {
-          TData delta = m_se.SE(data[i]) - m_seLT.SE(data[i]);
+          if (Math.Abs(data[i]) < ZERO_LEVEL)
+          {
+            if (--m_zeroCount == 0) m_state = State.Zero;
+          }
+          else
+          {
+            m_zeroCount = ZERO_COUNT;
+          }
+
+          switch (m_state)
+          {
+            case State.Zero:
+              if (Math.Abs(data[i]) > ZERO_LEVEL)
+              {
+                m_state = State.Noise;
+                m_zeroCount = ZERO_COUNT;
+              }
+              break;
+
+            case State.Noise:
+              TData noiseSE = m_noiseSE.SE(data[i]);
+
+              break;
+
+            case State.Pack:
+              TData packSE = m_packSE.SE(data[i]);
+
+
+              break;
+          }
+
+          TData delta = m_se.SE(data[i]) - m_noiseSE.SE(data[i]);
           ma = m_expAvg.Add(delta);
           diff = ma - m_maOld;
           m_maOld = ma;
@@ -79,6 +126,7 @@ namespace MEAClosedLoop
         m_absTime += (TTime)size;
         return spikeTrain;
       }
+
     }
 
     private Dictionary<int, CSpikeTrainDetector> m_spikeTraintDet;
