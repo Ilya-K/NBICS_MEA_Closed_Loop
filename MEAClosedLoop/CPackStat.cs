@@ -53,7 +53,7 @@ namespace MEAClosedLoop
     public event DelegateUpdateDistribGrath UpdateDistribGrath;
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
 
-    private float StimStartPosition;
+    private double StimStartPosition;
     private TStimIndex StimStartIndex;
     #endregion
     #region Конструктор
@@ -71,7 +71,8 @@ namespace MEAClosedLoop
 
       SetVal += UpdateProgressBar;
       UpdateDistribGrath += DistribGrath.Refresh;
-      UpdateDistribGrath += CalcStat;
+      UpdateDistribGrath += PreCalcStat;
+      UpdateDistribGrath += CurrentCalcStat;
       SetCollectStatButtonText += SetStatButtontext;
     }
     #endregion
@@ -191,7 +192,7 @@ namespace MEAClosedLoop
     }
 
     #endregion
-    #region Функция для загрузки информации об пачках, исполняется в отдельном потоке
+    #region CallBack Функция для загрузки информации об пачках
     private void CollectPacks() //old, random
     {
       TTime InputCount = 0;
@@ -242,6 +243,7 @@ namespace MEAClosedLoop
     }
     private void AddPack(CPack pack_to_add)
     {
+      
       lock (PacklListBlock)
       {
         switch (CurrentState)
@@ -260,7 +262,7 @@ namespace MEAClosedLoop
 
             if (DoStimulation) PackListAfter.Add(pack_to_add);
             PackCountGraph.Invalidate();
-
+            DistribGrath.BeginInvoke(UpdateDistribGrath);
             break;
         }
       }
@@ -268,28 +270,66 @@ namespace MEAClosedLoop
 
     #endregion
     #region Подсчет статистики
-    private void CalcStat()
+    private void PreCalcStat()
     {
       if (PackListBefore.Count > 1)
       {
-        Average Stat = new Average();
-        for (int i = 0; i < PackListBefore.Count() - 1; i++)
+        lock (PacklListBlock)
         {
-          Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+          Average Stat = new Average();
+          for (int i = 0; i < PackListBefore.Count() - 1; i++)
+          {
+            Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+          }
+          Stat.Calc();
+          this.AveragePackPeriod = (int)Stat.Value / 25; //милли секунд
+          this.SelectedAverageBox.Text = String.Format("{0:0.###}", (Stat.Value / 25));
+          this.SelectedSigmaBox.Text = String.Format("{0:0.###}", (Stat.Sigma / 25));
+          // Обновить график       
+          this.DistribGrath.Refresh();
         }
-        Stat.Calc();
-        this.AveragePackPeriod = (int)Stat.Value / 25; //милли секунд
-        this.SelectedAverageBox.Text = (Stat.Value / 25).ToString() + " мсек";
-        this.SelectedSigmaBox.Text = (Stat.Sigma / 25).ToString() + " мсек";
-        // Обновить график       
-        this.DistribGrath.Refresh();
       }
+
     }
+    private void CurrentCalcStat()
+    {
+
+      if(PackListBefore.Count < 2 && PackListAfter.Count < 2) return;
+
+      TAbsStimIndex CurrentTime = (PackListAfter.Count >= 2) ? PackListAfter.Last().Start : PackListBefore.Last().Start;
+      TAbsStimIndex TimeDelay = (TAbsStimIndex)StatWindowMinCount.Value * 60 * 25000 + (TAbsStimIndex)StatWindowSecCount.Value * 25000;
+      Average Stat = new Average();
+      
+
+      lock (PacklListBlock)
+      {
+        if (PackListBefore.Count > 1)
+        {
+          for (int i = 0; i < PackListBefore.Count() - 1; i++)
+          {
+            if (PackListBefore[i].Start + TimeDelay > CurrentTime)
+              Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+          }
+        }
+        if (PackListAfter.Count > 1)
+        {
+          for (int i = 0; i < PackListAfter.Count() - 1; i++)
+          {
+            if (PackListAfter[i].Start + TimeDelay > CurrentTime)
+              Stat.AddValueElem(PackListAfter[i + 1].Start - PackListAfter[i].Start);
+          }
+        }
+      }
+      Stat.Calc();
+      this.CurrentAverage.Text = String.Format("{0:0.###}", (Stat.Value / 25));
+      this.CurrentSigma.Text = String.Format("{0:0.###}", (Stat.Sigma / 25));
+    }
+
     #endregion
     #region Обработка события обновления прогресс бара
     void UpdateProgressBar(object sender, int val)
     {
-      if (StatProgressBar.Value < StatProgressBar.Maximum - 1)
+      if (StatProgressBar.Value + val <= StatProgressBar.Maximum )
         StatProgressBar.Value += val;
     }
     #endregion
@@ -299,16 +339,16 @@ namespace MEAClosedLoop
       DoDrawStartStimTime = true;
       double i = StimStartPosition;
       double.TryParse(StimPadding.Text, out i);
-      //StimStartPosition = i;
-      //trackBar1.Value = (int)StimStartPosition * 5 / 25;
+      StimStartPosition = i;
+      trackBar1.Value = (int) (StimStartPosition * trackBar1.Maximum / (int)(StatGraphXRange.Value));
       //DistribGrath.Refresh();
     }
     private void trackBar1_Scroll(object sender, EventArgs e)
     {
       DoDrawStartStimTime = true;
       //2000p - 20sec - maximum
-      StimStartPosition = ((float)((int)StatGraphXRange.Value) * trackBar1.Value) / trackBar1.Maximum; // in Seconds
-      StimPadding.Text = StimStartPosition.ToString();
+       // in Seconds
+      StimPadding.Text = String.Format("{0:0.###}", StimStartPosition);
       DistribGrath.Refresh();
     }
     #endregion
@@ -384,7 +424,7 @@ namespace MEAClosedLoop
           Point[] GistoGraphPoints = new Point[(int)(CurrentTime * 25000 / dT)];
           for (int j = 0; j < GistoGraphPoints.Count(); j++)
           {
-            GistoGraphPoints[j].Y = e.ClipRectangle.Height - 10;
+            GistoGraphPoints[j].Y = e.ClipRectangle.Height;
             GistoGraphPoints[j].X = j * e.ClipRectangle.Width / GistoGraphPoints.Count();
           }
           //ищем пачки, попадающие в окно после стимула
@@ -394,7 +434,7 @@ namespace MEAClosedLoop
             {
               foreach (TAbsStimIndex stim in StimList)
               {
-                if (PackListAfter[i].Start > stim 
+                if (PackListAfter[i].Start > stim
                   && PackListAfter[i].Start < stim + (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH * 25
                   && !PackListDetectReaction.Contains(PackListAfter[i])
                   ) // 
@@ -406,7 +446,7 @@ namespace MEAClosedLoop
                 {
                   // добавить и стимул и пачку на удаление, как нас не интересующие
                 }
-              }  
+              }
             }
           }
           // Заполним значения массива гистограммы соотвественно количеству стимулов в интервале окна подсчета
@@ -447,5 +487,16 @@ namespace MEAClosedLoop
     {
       PackCountGraph.Invalidate();
     }
+
+    private void DistribGrath_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void StatWindowCount_ValueChanged(object sender, EventArgs e)
+    {
+      this.CurrentCalcStat();
+    }
+
   }
 }
