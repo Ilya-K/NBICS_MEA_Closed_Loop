@@ -73,6 +73,8 @@
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.groupBox4 = new System.Windows.Forms.GroupBox();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -87,6 +89,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).BeginInit();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
+      this.groupBox3.SuspendLayout();
       this.SuspendLayout();
       // 
       // Prepearing
@@ -165,9 +168,9 @@
       this.StimParams.Controls.Add(this.StimPadding);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
-      this.StimParams.Location = new System.Drawing.Point(12, 324);
+      this.StimParams.Location = new System.Drawing.Point(11, 406);
       this.StimParams.Name = "StimParams";
-      this.StimParams.Size = new System.Drawing.Size(461, 107);
+      this.StimParams.Size = new System.Drawing.Size(461, 74);
       this.StimParams.TabIndex = 11;
       this.StimParams.TabStop = false;
       this.StimParams.Text = "Выбор параметров стимуляции";
@@ -200,13 +203,15 @@
       // 
       // trackBar1
       // 
+      this.trackBar1.AutoSize = false;
       this.trackBar1.Location = new System.Drawing.Point(5, 51);
       this.trackBar1.Maximum = 2000;
       this.trackBar1.Name = "trackBar1";
-      this.trackBar1.Size = new System.Drawing.Size(448, 45);
+      this.trackBar1.Size = new System.Drawing.Size(448, 22);
       this.trackBar1.SmallChange = 20;
       this.trackBar1.TabIndex = 3;
       this.trackBar1.TickFrequency = 15;
+      this.trackBar1.TickStyle = System.Windows.Forms.TickStyle.None;
       this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
       // 
       // button1
@@ -251,21 +256,19 @@
       // 
       // StatResult
       // 
+      this.StatResult.Controls.Add(this.groupBox4);
+      this.StatResult.Controls.Add(this.groupBox3);
       this.StatResult.Controls.Add(this.label19);
       this.StatResult.Controls.Add(this.label18);
       this.StatResult.Controls.Add(this.label17);
       this.StatResult.Controls.Add(this.StatGraphYRange);
       this.StatResult.Controls.Add(this.StatGraphXRange);
       this.StatResult.Controls.Add(this.label16);
-      this.StatResult.Controls.Add(this.label4);
-      this.StatResult.Controls.Add(this.label3);
-      this.StatResult.Controls.Add(this.SelectedSigmaBox);
-      this.StatResult.Controls.Add(this.SelectedAverageBox);
       this.StatResult.Controls.Add(this.DistribGrath);
       this.StatResult.Controls.Add(this.label1);
       this.StatResult.Location = new System.Drawing.Point(12, 62);
       this.StatResult.Name = "StatResult";
-      this.StatResult.Size = new System.Drawing.Size(461, 256);
+      this.StatResult.Size = new System.Drawing.Size(461, 338);
       this.StatResult.TabIndex = 10;
       this.StatResult.TabStop = false;
       this.StatResult.Text = "Результат сбора статистики";
@@ -350,7 +353,7 @@
       // label4
       // 
       this.label4.AutoSize = true;
-      this.label4.Location = new System.Drawing.Point(5, 184);
+      this.label4.Location = new System.Drawing.Point(12, 42);
       this.label4.Name = "label4";
       this.label4.Size = new System.Drawing.Size(38, 13);
       this.label4.TabIndex = 3;
@@ -359,7 +362,7 @@
       // label3
       // 
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(2, 158);
+      this.label3.Location = new System.Drawing.Point(9, 16);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(109, 13);
       this.label3.TabIndex = 3;
@@ -367,14 +370,14 @@
       // 
       // SelectedSigmaBox
       // 
-      this.SelectedSigmaBox.Location = new System.Drawing.Point(142, 181);
+      this.SelectedSigmaBox.Location = new System.Drawing.Point(149, 39);
       this.SelectedSigmaBox.Name = "SelectedSigmaBox";
       this.SelectedSigmaBox.Size = new System.Drawing.Size(174, 20);
       this.SelectedSigmaBox.TabIndex = 2;
       // 
       // SelectedAverageBox
       // 
-      this.SelectedAverageBox.Location = new System.Drawing.Point(142, 155);
+      this.SelectedAverageBox.Location = new System.Drawing.Point(149, 13);
       this.SelectedAverageBox.Name = "SelectedAverageBox";
       this.SelectedAverageBox.Size = new System.Drawing.Size(174, 20);
       this.SelectedAverageBox.TabIndex = 2;
@@ -413,9 +416,9 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(12, 545);
+      this.PackProbability.Location = new System.Drawing.Point(11, 594);
       this.PackProbability.Name = "PackProbability";
-      this.PackProbability.Size = new System.Drawing.Size(461, 158);
+      this.PackProbability.Size = new System.Drawing.Size(461, 146);
       this.PackProbability.TabIndex = 9;
       this.PackProbability.TabStop = false;
       this.PackProbability.Text = "Вероятность пачки";
@@ -544,6 +547,7 @@
       this.PackCountGraph.Size = new System.Drawing.Size(449, 75);
       this.PackCountGraph.TabIndex = 2;
       this.PackCountGraph.TabStop = false;
+      this.PackCountGraph.Click += new System.EventHandler(this.PackCountGraph_Click);
       this.PackCountGraph.Paint += new System.Windows.Forms.PaintEventHandler(this.PackCountGraph_Paint);
       // 
       // groupBox1
@@ -552,7 +556,7 @@
       this.groupBox1.Controls.Add(this.numericUpDown1);
       this.groupBox1.Controls.Add(this.button1);
       this.groupBox1.Controls.Add(this.GraphChannelSelectButton);
-      this.groupBox1.Location = new System.Drawing.Point(12, 437);
+      this.groupBox1.Location = new System.Drawing.Point(11, 486);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(460, 52);
       this.groupBox1.TabIndex = 12;
@@ -564,18 +568,40 @@
       this.groupBox2.Controls.Add(this.label9);
       this.groupBox2.Controls.Add(this.StimType);
       this.groupBox2.Controls.Add(this.StartStimButton);
-      this.groupBox2.Location = new System.Drawing.Point(12, 495);
+      this.groupBox2.Location = new System.Drawing.Point(11, 544);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(461, 44);
       this.groupBox2.TabIndex = 13;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
       // 
+      // groupBox3
+      // 
+      this.groupBox3.Controls.Add(this.label3);
+      this.groupBox3.Controls.Add(this.SelectedAverageBox);
+      this.groupBox3.Controls.Add(this.SelectedSigmaBox);
+      this.groupBox3.Controls.Add(this.label4);
+      this.groupBox3.Location = new System.Drawing.Point(5, 158);
+      this.groupBox3.Name = "groupBox3";
+      this.groupBox3.Size = new System.Drawing.Size(393, 69);
+      this.groupBox3.TabIndex = 9;
+      this.groupBox3.TabStop = false;
+      this.groupBox3.Text = "Статистика до стимуляции";
+      // 
+      // groupBox4
+      // 
+      this.groupBox4.Location = new System.Drawing.Point(5, 234);
+      this.groupBox4.Name = "groupBox4";
+      this.groupBox4.Size = new System.Drawing.Size(393, 98);
+      this.groupBox4.TabIndex = 10;
+      this.groupBox4.TabStop = false;
+      this.groupBox4.Text = "Статистика текущая";
+      // 
       // CPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(529, 741);
+      this.ClientSize = new System.Drawing.Size(489, 741);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.StimParams);
@@ -605,6 +631,8 @@
       this.groupBox1.PerformLayout();
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
+      this.groupBox3.ResumeLayout(false);
+      this.groupBox3.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -656,5 +684,7 @@
     private System.Windows.Forms.Label label16;
     private System.Windows.Forms.Label label19;
     private System.Windows.Forms.Label label18;
+    private System.Windows.Forms.GroupBox groupBox3;
+    private System.Windows.Forms.GroupBox groupBox4;
   }
 }

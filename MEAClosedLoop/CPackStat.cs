@@ -390,20 +390,23 @@ namespace MEAClosedLoop
           //ищем пачки, попадающие в окно после стимула
           for (int i = 0; i < PackListAfter.Count; i++)
           {
-            foreach (TAbsStimIndex stim in StimList)
+            lock (StimListBlock)
             {
-              if (PackListAfter[i].Start > stim
-                && PackListAfter[i].Start < stim + (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH * 25
-                && !PackListDetectReaction.Contains(PackListAfter[i])
-                ) // 
+              foreach (TAbsStimIndex stim in StimList)
               {
-                PackListDetectReaction.Add(PackListAfter[i]);
-                break;
-              }
-              else
-              {
-                // добавить и стимул и пачку на удаление, как нас не интересующие
-              }
+                if (PackListAfter[i].Start > stim 
+                  && PackListAfter[i].Start < stim + (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH * 25
+                  && !PackListDetectReaction.Contains(PackListAfter[i])
+                  ) // 
+                {
+                  PackListDetectReaction.Add(PackListAfter[i]);
+                  break;
+                }
+                else
+                {
+                  // добавить и стимул и пачку на удаление, как нас не интересующие
+                }
+              }  
             }
           }
           // Заполним значения массива гистограммы соотвественно количеству стимулов в интервале окна подсчета
@@ -438,6 +441,11 @@ namespace MEAClosedLoop
     private void StatGraphYRange_ValueChanged(object sender, EventArgs e)
     {
       DistribGrath.Invalidate();
+    }
+
+    private void PackCountGraph_Click(object sender, EventArgs e)
+    {
+      PackCountGraph.Invalidate();
     }
   }
 }
