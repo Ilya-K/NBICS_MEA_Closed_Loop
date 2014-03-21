@@ -347,7 +347,7 @@ namespace MEAClosedLoop
     {
       DoDrawStartStimTime = true;
       //2000p - 20sec - maximum
-       // in Seconds
+      StimStartPosition = ((float)((int)StatGraphXRange.Value) * trackBar1.Value) / trackBar1.Maximum; // in Seconds
       StimPadding.Text = String.Format("{0:0.###}", StimStartPosition);
       DistribGrath.Refresh();
     }
