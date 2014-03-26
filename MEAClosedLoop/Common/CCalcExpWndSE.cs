@@ -9,26 +9,45 @@ namespace MEAClosedLoop
   public class CCalcExpWndSE
   {
     private readonly int TAU;
-    private TData expMean = 0;       // mean(X) in exponential window
-    private TData exp2Mean = 0;      // mean(X^2) in exponential window
+    private int wuTAU;
+    private TData expMean = 0;        // mean(X) in exponential window
+    private TData exp2Mean = 0;       // mean(X^2) in exponential window
+    private TData se = 0;             // previously calculated SE(X)
     public TData Mean { get { return expMean; } }
+    public TData PrevSE { get { return se; } }
     public int Width { get { return TAU; } }
     private bool first = true;
 
     /// <summary>
     /// Create SE calculator.
-    /// Exponential multiplier decays to 1/e in tau samples, to 0.05 in 3*tau.
+    /// Exponential multiplier decays to 1/e in tau samples, to ~0.13 in 2*tau, to 0.05 in 3*tau.
     /// Multiplier to be used in exponential sum, m = (tau-1)/tau.
-    /// Consider 3*tau as a width of an exponential window.
+    /// Consider 2*tau as a width of an exponential window.
     /// </summary>
     /// <param name="p">Number of samples to decay weight function to 1/e</param>
     public CCalcExpWndSE(int tau)
     {
       TAU = tau;
+      expMean = 0;
+      exp2Mean = 0;
+      wuTAU = 1;
     }
 
     /// <summary>
-    /// Calculate Standard Error (SE) of sequental data over exponential window with width ~3*tau
+    /// Warm up SE calculator
+    /// </summary>
+    /// <param name="nextData">Next data point to take into account</param>
+    /// <returns>Current Variance</returns>
+    public TData WarmUp(TData nextData)
+    {
+      expMean = expMean - (expMean - nextData) / wuTAU;
+      exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / wuTAU;
+      ++wuTAU;
+      return exp2Mean - expMean * expMean;
+    }
+
+    /// <summary>
+    /// Calculate Standard Error (SE) of sequental data over exponential window with width ~2*tau
     /// </summary>
     /// <param name="nextData">Next data point to take into account</param>
     /// <returns>Current SE</returns>
@@ -44,12 +63,33 @@ namespace MEAClosedLoop
       exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
 
       // SE = sqrt(mean(X^2) - (mean(X))^2)
-      return Math.Sqrt(exp2Mean - expMean * expMean);
+      se = Math.Sqrt(exp2Mean - expMean * expMean);
+      return se; 
       //return Math.Sqrt(Math.Abs(exp2Avg - expAvg * expAvg));
     }
 
     /// <summary>
-    /// Calculate Standard Error (SE) of sequental data over exponential window with width ~3*tau
+    /// Calculate variance of sequental data over exponential window with width ~2*tau
+    /// </summary>
+    /// <param name="nextData">Next data point to take into account</param>
+    /// <returns>Current Variance</returns>
+    public TData Var(TData nextData)
+    {
+      if (first)
+      {
+        expMean = nextData;
+        exp2Mean = nextData * nextData;
+        first = false;
+      }
+      expMean = expMean - (expMean - nextData) / TAU;
+      exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
+
+      // Var = mean(X^2) - (mean(X))^2
+      return exp2Mean - expMean * expMean;
+    }
+
+    /// <summary>
+    /// Calculate Standard Error (SE) of sequental data over exponential window with width ~2*tau
     /// </summary>
     /// <param name="nextData">Next data point to take into account</param>
     /// <returns>Current SE</returns>
@@ -65,8 +105,30 @@ namespace MEAClosedLoop
       exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
 
       // SE = sqrt(mean(X^2) - (mean(X))^2)
-      return Math.Sqrt(exp2Mean - expMean * expMean);
+
+      se = Math.Sqrt(exp2Mean - expMean * expMean); 
+      return se; 
       //return Math.Sqrt(Math.Abs(exp2Avg - expAvg * expAvg));
+    }
+
+    /// <summary>
+    /// Calculate variance of sequental data over exponential window with width ~2*tau
+    /// </summary>
+    /// <param name="nextData">Next data point to take into account</param>
+    /// <returns>Current Variance</returns>
+    public TData Var(UInt64 nextData)
+    {
+      if (first)
+      {
+        expMean = nextData;
+        exp2Mean = nextData * nextData;
+        first = false;
+      }
+      expMean = expMean - (expMean - nextData) / TAU;
+      exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
+
+      // Var = mean(X^2) - (mean(X))^2
+      return exp2Mean - expMean * expMean;
     }
 
     public void Reset()

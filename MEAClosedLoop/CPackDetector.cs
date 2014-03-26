@@ -23,42 +23,62 @@ namespace MEAClosedLoop
       private const TData ZERO_LEVEL = 1;       // Approximately 1 bit
       private const TData THRESH1 = 0.14;
       private const TData THRESH2 = 1.0;
+      private const TData SPIKE_THRESH = 3.5;   // *sigma 
       private const TData DECAY = 0.98;
+      private const int PRE_DETECT_TIME = 10 * Param.MS;
       private const int ZERO_COUNT = 3;         // How many sequental zero points have got to consider signal = 0;
+      private const int MAX_SPIKE_QUEUE = 10;   // Length of queue for pre-train spikes
 
       private enum State
       {
         Zero = 0,
-        Noise = 1,
-        Pack = 2
+        Noise,
+        Pack,
+        WarmUp
       }
       private State m_state;
 
       private TTime m_absTime = 0;
+      private TTime m_endTime = 0;
       private Int16 m_channel;
       
       // Short term mean and variance calculator
-      private CCalcExpWndSE m_se = new CCalcExpWndSE((20 * Param.MS) / 2);      // 2*tau = 20ms (500 samples)
-      
+      private CCalcExpWndSE m_calcShortSE = new CCalcExpWndSE((20 * Param.MS) / 2);       // 2*tau = 20ms (500 samples)
+
+      // Second order mean and variance of the short term variance of a signal
+      private CCalcExpWndSE m_calcShortSE2 = new CCalcExpWndSE((2000 * Param.MS) / 2);    // 2*tau = 2s (50000 samples)
+
       // Long term mean and variance calculator. Used to estimate noise level
-      private CCalcExpWndSE m_noiseSE = new CCalcExpWndSE((2000 * Param.MS) / 2);  // 2*tau = 2s (50000 samples)
+      private CCalcExpWndSE m_calcNoiseSE = new CCalcExpWndSE((2000 * Param.MS) / 2);     // 2*tau = 2s (50000 samples)
 
       // Long term mean and variance calculator. Used to estimate signal variance inside packs
-      private CCalcExpWndSE m_packSE = new CCalcExpWndSE((2000 * Param.MS) / 2);  // 2*tau = 2s (50000 samples)
-      
+      private CCalcExpWndSE m_calcPackSE = new CCalcExpWndSE((2000 * Param.MS) / 2);      // 2*tau = 2s (50000 samples)
+
+      // Moving average of the long term variance with exponential window ~2s
+      private CCalcExpWndSE m_calcNoiseSE2 = new CCalcExpWndSE((2000 * Param.MS) / 2);    // 2*tau = 2s (50000 samples)
+
       // Moving average with exponential window
       private CExpAvg m_expAvg = new CExpAvg(167);                              // Window width ~500 packets (50s)
       
       private TData m_hpf = 0;      // High Pass Filter
       private TData m_maOld = 0;
       private bool m_packFound = false;
-      private int m_zeroCount; 
+      private bool m_warmedUp = false;
+      private bool m_inSpike = false;
+      private int m_zeroCount;
+      private int m_warmUpCount;
+      private TData[] m_prevPacket;
+      private Queue<TTime> m_preSpikes;
 
       public CSpikeTrainDetector(Int16 channel)
       {
         m_channel = channel;
-        m_state = State.Zero;
+        m_state = State.WarmUp;
         m_zeroCount = ZERO_COUNT;
+        m_warmUpCount = 500;
+        m_prevPacket = new TData[PRE_DETECT_TIME];
+        m_prevPacket.PopulateArray<TData>(0);
+        m_preSpikes = new Queue<TTime>(MAX_SPIKE_QUEUE);
       }
 
       public CSpikeTrainFrame FindSpikeTrains(TData[] data)
@@ -66,14 +86,15 @@ namespace MEAClosedLoop
         CSpikeTrainFrame spikeTrain = null;
 
         int size = data.Length;
-
-        TData ma = m_expAvg.Add(m_se.SE(data[0]) - m_noiseSE.SE(data[0]));
+        /*
+        TData ma = m_expAvg.Add(m_calcShortSE.SE(data[0]) - m_calcNoiseSE.SE(data[0]));
         TData diff = ma - m_maOld;
         m_maOld = ma;
         m_hpf = (Math.Abs(diff) > THRESH1) ? m_hpf + diff : m_hpf * DECAY;
-
-        for (int i = 0; i < data.Length; i++)
+        */
+        for (int i = 0; i < size; i++)
         {
+          // Check if signal is 0
           if (Math.Abs(data[i]) < ZERO_LEVEL)
           {
             if (--m_zeroCount == 0) m_state = State.Zero;
@@ -85,27 +106,115 @@ namespace MEAClosedLoop
 
           switch (m_state)
           {
+            // We fall into this state when data is close to 0 for ZERO_COUNT (3) subsequent samples
             case State.Zero:
               if (Math.Abs(data[i]) > ZERO_LEVEL)
               {
-                m_state = State.Noise;
+                // Yes, I know that we'll skip the current sample, but it is probably irrelevant anyway, for we've just recovered from 0-clamping
+                m_state = (m_warmedUp) ? State.Noise : State.WarmUp;
                 m_zeroCount = ZERO_COUNT;
               }
               break;
 
+            // Here we process a noisy input signal
             case State.Noise:
-              TData noiseSE = m_noiseSE.SE(data[i]);
+              TData shortSE = m_calcShortSE.SE(data[i]);
+              TData seOfShortSE = m_calcShortSE2.PrevSE;                                  // Changes slowly (~2s)
+              TData meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // the previous mean
 
+              // Remember position of several spike-like events
+              if (Math.Abs(data[i]) > SPIKE_THRESH * m_calcNoiseSE.PrevSE)
+              {
+                if (!m_inSpike)
+                {
+                  m_inSpike = true;
+                  if (m_preSpikes.Count >= MAX_SPIKE_QUEUE)
+                  {
+                    m_preSpikes.Dequeue();
+                  }
+                  m_preSpikes.Enqueue(m_absTime + (TTime)i);
+                }
+              }
+              else
+              {
+                m_inSpike = false;
+              }
+
+              // Check start of spike-train criteria
+              if (shortSE > meanOfNoiseSE + 3 * seOfShortSE)
+              {
+                m_state = State.Pack;
+                m_inSpike = false;
+                TTime firstSpikeTime = 0;
+                
+                // Consider spike-train start at the time of the first spike in PRE_DETECT_TIME interval before meeting of spike-train criteria
+                while (m_preSpikes.Count > 0)
+                {
+                  firstSpikeTime = m_preSpikes.Dequeue();
+                  if (firstSpikeTime + PRE_DETECT_TIME > m_absTime + (TTime)i) break;
+                }
+                if (firstSpikeTime == 0) firstSpikeTime = m_absTime + (TTime)i;
+                if (spikeTrain == null) 
+                {
+                  spikeTrain = new CSpikeTrainFrame(m_channel, m_absTime + (TTime)i);         // Create SpikeTrain only when its start is detected
+                }
+                else
+                {
+                  spikeTrain.EOP = false;     // if a new spike-train started right after the previous one, just continue the previous one
+                }
+                m_calcPackSE.SE(data[i]);
+                break;
+              }
+
+              // Calculate long term noise 
+              TData noiseSE = m_calcNoiseSE.SE(data[i]);
+              m_calcNoiseSE2.SE(noiseSE);
+              m_calcShortSE2.SE(shortSE);
               break;
 
+            // We fall here when start of a pack is detected, so we should look for its end
             case State.Pack:
-              TData packSE = m_packSE.SE(data[i]);
+              TData packSE = m_calcPackSE.SE(data[i]);
+              shortSE = m_calcShortSE.SE(data[i]);
 
+              meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // mean SE of the stationary noise
 
+              if (shortSE < m_calcNoiseSE2.Mean + m_calcNoiseSE2.PrevSE)
+              {
+                m_endTime = m_absTime + (TTime)i;
+              }
+
+              if (shortSE < m_calcNoiseSE2.Mean)
+              {
+                m_state = State.Noise;
+                spikeTrain.Length = (int)(m_endTime + (TTime)i - spikeTrain.Start);
+              }
+              break;
+
+            // This state is used only once in the begining to "warm up" statistic calculators 
+            case State.WarmUp:
+              for (int t = 0; t < data.Length; t++)
+              {
+                if (Math.Abs(data[i]) > ZERO_LEVEL)
+                {
+                  --m_warmUpCount;
+                  TData shortSEwu = Math.Sqrt(m_calcShortSE.WarmUp(data[t]));
+                  TData noiseSEwu = Math.Sqrt(m_calcNoiseSE.WarmUp(data[t]));
+                  TData packSEwu = Math.Sqrt(m_calcNoiseSE.WarmUp(data[t] * 2));      // Consider signal at least 2 times higher than noise
+                  m_calcNoiseSE2.WarmUp(noiseSEwu);
+                }
+                if (m_warmUpCount == 0)
+                {
+                  m_warmedUp = true;
+                  m_state = State.Noise;
+                  break;
+                }
+              }
               break;
           }
 
-          TData delta = m_se.SE(data[i]) - m_noiseSE.SE(data[i]);
+          /*
+          TData delta = m_calcShortSE.SE(data[i]) - m_calcNoiseSE.SE(data[i]);
           ma = m_expAvg.Add(delta);
           diff = ma - m_maOld;
           m_maOld = ma;
@@ -121,9 +230,11 @@ namespace MEAClosedLoop
           {
 
           }
+           */
         }
 
         m_absTime += (TTime)size;
+        m_prevPacket = data;
         return spikeTrain;
       }
 
