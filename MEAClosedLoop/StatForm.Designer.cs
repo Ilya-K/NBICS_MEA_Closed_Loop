@@ -43,7 +43,7 @@
       this.panel_Data.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.panel_Data.Location = new System.Drawing.Point(12, 41);
       this.panel_Data.Name = "panel_Data";
-      this.panel_Data.Size = new System.Drawing.Size(1171, 145);
+      this.panel_Data.Size = new System.Drawing.Size(1171, 296);
       this.panel_Data.TabIndex = 14;
       this.panel_Data.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_Data_Paint);
       this.panel_Data.Resize += new System.EventHandler(this.panel_Data_Resize);
@@ -55,6 +55,7 @@
       this.cb_Channel.Name = "cb_Channel";
       this.cb_Channel.Size = new System.Drawing.Size(113, 21);
       this.cb_Channel.TabIndex = 18;
+      this.cb_Channel.SelectedIndexChanged += new System.EventHandler(this.cb_Channel_SelectedIndexChanged);
       // 
       // panel_Stat1
       // 
@@ -62,10 +63,11 @@
                   | System.Windows.Forms.AnchorStyles.Right)));
       this.panel_Stat1.BackColor = System.Drawing.SystemColors.Window;
       this.panel_Stat1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.panel_Stat1.Location = new System.Drawing.Point(12, 205);
+      this.panel_Stat1.Location = new System.Drawing.Point(12, 343);
       this.panel_Stat1.Name = "panel_Stat1";
       this.panel_Stat1.Size = new System.Drawing.Size(1171, 145);
       this.panel_Stat1.TabIndex = 19;
+      this.panel_Stat1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_Stat1_Paint);
       // 
       // bt_Start
       // 

@@ -11,6 +11,7 @@ namespace MEAClosedLoop
   public static class Param
   {
     public const int DAQ_FREQ = 25000;
+    public const int DEF_PACKET_LENGTH = 2500;        
     public const int MS = DAQ_FREQ / 1000;            // Number of ticks in 1 ms. Multiplier to convert ms to ticks
     public const int PRE_SPIKE = 8 * MS;              // (200)  How many points to store before the first spike in a train
     public const int POST_SPIKE = 200 * MS;           // (5000) How many points to store after the last spike in a train

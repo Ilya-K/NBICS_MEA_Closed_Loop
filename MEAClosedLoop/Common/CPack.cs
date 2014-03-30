@@ -11,10 +11,12 @@ namespace MEAClosedLoop
   using TSpikesBinary =  Dictionary<int, bool[]>;
   
   // Pack events can be of two types:
-  // S: Start, T: Stop
-  // Length < 0 indicates T type of a pack event
-  // In this case Start means end of a pack.
-
+  // S: Start, EOP = false; T: Stop, EOP = true
+  // Length > 0 indicates T type of a pack event
+  // In this case Start time means time of the pack end.
+  // Data contains Param.PRE_SPIKE samples before the first spike and Param.POST_SPIKE samples after the EOP
+  // But Start points the real start of the pack, i.e. the absolute time of the first spike in the pack
+  
   public class CPack
   {
     private TTime start;
