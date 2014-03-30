@@ -31,8 +31,7 @@ namespace MEAClosedLoop
     private CRasterPlot m_rasterPlotter;
     private CStimulator m_stimulator;
     private CPackStat m_statForm;
-    private CPackDetector m_PackDetector;
-    //private CPackDetector m_ClosedLoopPackDetector;
+
     private volatile bool m_killDataLoop;
     List<int> m_channelList;
     Thread m_dataLoopThread;
@@ -79,6 +78,7 @@ namespace MEAClosedLoop
       SetDefaultChannels();
     }
 
+    /*
     private void DataLoop()
     {
       do
@@ -86,6 +86,7 @@ namespace MEAClosedLoop
         m_rasterPlotter.AddData(m_spikeDetector.WaitData());
       } while (!m_killDataLoop);
     }
+    */
 
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -223,7 +224,6 @@ namespace MEAClosedLoop
 
     private void panel2_Paint(object sender, PaintEventArgs e)
     {
-
       if (!checkBox2.Checked) return;
       int width = panel2.Width;
       int height = panel2.Height;
@@ -324,16 +324,16 @@ namespace MEAClosedLoop
         {
           if (m_selectedDAQ == m_fileIdx)
           {
-            m_inputStream = new CInputStream(m_fileOpened, m_channelList, 2500);
+            m_inputStream = new CInputStream(m_fileOpened, m_channelList, Param.DEF_PACKET_LENGTH);
           }
           else
           {
-            m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500);
+            m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
           }
         }
 
         // (int)SpikeFiltOrder.Value, 25000, Convert.ToDouble(SpikeLowCut.Value), Convert.ToDouble(SpikeHighCut.Value), DATA_BUF_LEN
-        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DAQ_FREQ / 10); // [TODO] Eliminate data buffer length
+        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DEF_PACKET_LENGTH); // [TODO] Eliminate data buffer length
 
         // [TODO] Get rid of thresholds here. Should be calculated in SALPA dynamically
         int[] thresholds = new int[60];
@@ -349,19 +349,16 @@ namespace MEAClosedLoop
         CStimDetectShift m_stimDetector = new CStimDetectShift(); //new CStimDetector(15, 20, 35, 150);
 
         m_salpaFilter = new CFiltering(m_inputStream, m_stimDetector, parSALPA, null);
-        
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
-        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
-        m_PackDetector = new CPackDetector(m_salpaFilter);
-        
-        
+        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DEF_PACKET_LENGTH, 2);
+
         m_DAQConfigured = true;
+        
         PackStatButton.Enabled = true;
         buttonStatWindow.Enabled = true;
-
       }
     }
 
@@ -449,9 +446,9 @@ namespace MEAClosedLoop
         try
         {
           if (m_inputStream != null) m_inputStream.Kill();
-          // m_inputStream = new CInputStream(ofd.FileName, new List<int>(new int[]{0, 1, 2, 3, 4, 5, 6, 10, 12, 15, 17, 20, 23, 25, 27, 30, 35, 40, 50, 55, 59}), 2500);
-          m_inputStream = new CInputStream(ofd.FileName, m_channelList, 2500);
-          //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500);
+          // m_inputStream = new CInputStream(ofd.FileName, new List<int>(new int[]{0, 1, 2, 3, 4, 5, 6, 10, 12, 15, 17, 20, 23, 25, 27, 30, 35, 40, 50, 55, 59}), Param.DEF_PACKET_LENGTH);
+          m_inputStream = new CInputStream(ofd.FileName, m_channelList, Param.DEF_PACKET_LENGTH);
+          //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
 
           
           m_fileOpened = ofd.FileName;
@@ -572,7 +569,7 @@ namespace MEAClosedLoop
       {
         // Configure Input Stream here
         m_channelList = new List<int>(new int[] { 0, 1, 3 });
-        m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, 2500);
+        m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, Param.DEF_PACKET_LENGTH);
       }
       
       if (m_stimulator == null)
@@ -608,7 +605,7 @@ namespace MEAClosedLoop
           // [/DEBUG] 
         }
 
-        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator, m_PackDetector);
+        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
 
       m_inputStream.Start();
@@ -659,22 +656,15 @@ namespace MEAClosedLoop
       m_integral1 = 0;
     }
 
- /*   Dictionary<int, bool[]> GetBoolData()
-    {
-      Dictionary<int, bool[]> output = new Dictionary<int, bool[]>();
-      //TODO: make proper output
-      return output;
-    }*/
-
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {
-      StatForm statForm = new StatForm(m_salpaFilter);
+      StatForm statForm = new StatForm(m_salpaFilter, m_closedLoop);
       statForm.Show();
     }
 
     private void PackStatButton_Click(object sender, EventArgs e)
     {
-      m_statForm = new CPackStat(m_PackDetector, m_closedLoop, m_channelList);
+      m_statForm = new CPackStat(m_closedLoop, m_channelList);
       m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData); 
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;

@@ -24,7 +24,6 @@ namespace MEAClosedLoop
             FileStimConfigPath = ConfigPath;
             LoadConfig();
         }
-
         public bool LoadConfig()
         {
             XmlTextReader reader = new XmlTextReader(FileStimConfigPath);
