@@ -1,8 +1,11 @@
-﻿using System;
+﻿#define DEBUG_SPIKETRAINS
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
 using System.Text;
+
 
 namespace MEAClosedLoop
 {
@@ -12,6 +15,9 @@ namespace MEAClosedLoop
 
   public class CPackDetector
   {
+    private const int MAX_LEADING_SPIKETRAIN = 20 * Param.MS;     // Насколько один спайк-трэйн может выдаваться вперёд пачки.
+    // В текущем алгоритме не может быть больше 100 - Param.PRE_SPIKE = 92 мс (2300 отсчетов)
+
     // Алгоритм выделения спайк-трэйнов
     // Считаем дисперсию сигнала в экспоненциальном окне с временем релаксации 250 точек (10 мс, окно ~20 мс).
     // Считаем шум стационарным, т.е. дисперсия шума должна меняться слабо и медленно. Поэтому любое быстрое увеличение дисперсии сигнала будем считать началом пачки.
@@ -20,20 +26,21 @@ namespace MEAClosedLoop
 
     private class CSpikeTrainDetector
     {
-      private const TData ZERO_LEVEL = 1;       // Approximately 1 bit
+      private const TData ZERO_LEVEL = 1;                   // Approximately 1 bit
       private const TData THRESH1 = 0.14;
       private const TData THRESH2 = 1.0;
-      private const TData SPIKE_THRESH = 3.5;   // *sigma 
+      private const TData SPIKE_THRESH = 3.5;               // *sigma 
       private const TData DECAY = 0.98;
-      private const int PRE_DETECT_TIME = 10 * Param.MS;
-      private const int ZERO_COUNT = 3;         // How many sequental zero points have got to consider signal = 0;
-      private const int MAX_SPIKE_QUEUE = 10;   // Length of queue for pre-train spikes
+      private const int PRE_DETECT_TIME = 10 * Param.MS;    // Интервал перед выполнением критерия начала спайк-трэйна, в которм будем искать первый спайк
+      private const int ZERO_COUNT = 3;                     // How many sequental zero points have got to consider signal = 0;
+      private const int MAX_SPIKE_QUEUE = 10;               // Length of queue for pre-train spikes
+      private readonly CSpikeTrainFrame CONTINUE_TRAIN;     // A return value inside a spike-train
 
       private enum State
       {
         Zero = 0,
         Noise,
-        Pack,
+        Train,
         WarmUp
       }
       private State m_state;
@@ -69,6 +76,29 @@ namespace MEAClosedLoop
       private int m_warmUpCount;
       private TData[] m_prevPacket;
       private Queue<TTime> m_preSpikes;
+      private TTime m_trainStartTime;
+
+      // [DEBUG]
+#if DEBUG_SPIKETRAINS
+      private List<CSpikeTrainFrame> m_dbgTrainList = new List<CSpikeTrainFrame>();
+      public List<CSpikeTrainFrame> GetSpikeTrainListDbg()
+      {
+        lock(m_dbgTrainList) return new List<CSpikeTrainFrame>(m_dbgTrainList);
+      }
+      public void ClearSpikeTrainListDbg()
+      {
+        lock (m_dbgTrainList)
+        {
+          if (m_dbgTrainList.Count == 0) return;
+          CSpikeTrainFrame lastOne = m_dbgTrainList[m_dbgTrainList.Count - 1];
+          m_dbgTrainList.Clear();
+          if (m_dbgTrainList.Count % 2 == 0)
+          {
+            m_dbgTrainList.Add(lastOne);
+          }
+        }
+      }
+#endif
 
       public CSpikeTrainDetector(Int16 channel)
       {
@@ -79,6 +109,7 @@ namespace MEAClosedLoop
         m_prevPacket = new TData[PRE_DETECT_TIME];
         m_prevPacket.PopulateArray<TData>(0);
         m_preSpikes = new Queue<TTime>(MAX_SPIKE_QUEUE);
+        CONTINUE_TRAIN = new CSpikeTrainFrame(channel, 0);
       }
 
       public CSpikeTrainFrame FindSpikeTrains(TData[] data)
@@ -97,7 +128,16 @@ namespace MEAClosedLoop
           // Check if signal is 0
           if (Math.Abs(data[i]) < ZERO_LEVEL)
           {
-            if (--m_zeroCount == 0) m_state = State.Zero;
+            if (--m_zeroCount == 0)
+            {
+              // If we are in the spike-train, finalize it
+              if (m_state == State.Train)
+              {
+                if (spikeTrain == null) spikeTrain = new CSpikeTrainFrame(m_channel, m_trainStartTime);
+                spikeTrain.Length = (int)(m_absTime + (TTime)i - spikeTrain.Start);
+              }
+              m_state = State.Zero;
+            }
           }
           else
           {
@@ -143,11 +183,11 @@ namespace MEAClosedLoop
               // Check start of spike-train criteria
               if (shortSE > meanOfNoiseSE + 3 * seOfShortSE)
               {
-                m_state = State.Pack;
+                m_state = State.Train;
                 m_inSpike = false;
                 TTime firstSpikeTime = 0;
                 
-                // Consider spike-train start at the time of the first spike in PRE_DETECT_TIME interval before meeting of spike-train criteria
+                // Consider spike-train starts at the time of the first spike in PRE_DETECT_TIME interval before meeting of spike-train criteria
                 while (m_preSpikes.Count > 0)
                 {
                   firstSpikeTime = m_preSpikes.Dequeue();
@@ -156,11 +196,20 @@ namespace MEAClosedLoop
                 if (firstSpikeTime == 0) firstSpikeTime = m_absTime + (TTime)i;
                 if (spikeTrain == null) 
                 {
-                  spikeTrain = new CSpikeTrainFrame(m_channel, m_absTime + (TTime)i);         // Create SpikeTrain only when its start is detected
+                  spikeTrain = new CSpikeTrainFrame(m_channel, firstSpikeTime);         // Create SpikeTrain only when its start is detected
+                  m_trainStartTime = firstSpikeTime;
+                  // [DEBUG]
+#if DEBUG_SPIKETRAINS
+                  lock(m_dbgTrainList) m_dbgTrainList.Add(spikeTrain);
+#endif
                 }
                 else
                 {
-                  spikeTrain.EOP = false;     // if a new spike-train started right after the previous one, just continue the previous one
+                  spikeTrain.EOP = false;     // If a new spike-train has started right after the previous one, just continue the previous one
+#if DEBUG_SPIKETRAINS
+                  CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, firstSpikeTime);
+                  lock (m_dbgTrainList) m_dbgTrainList.Add(dbgSpikeTrain);
+#endif
                 }
                 m_calcPackSE.SE(data[i]);
                 break;
@@ -172,8 +221,8 @@ namespace MEAClosedLoop
               m_calcShortSE2.SE(shortSE);
               break;
 
-            // We fall here when start of a pack is detected, so we should look for its end
-            case State.Pack:
+            // We fall here when start of a train is detected, so we should look for its end
+            case State.Train:
               TData packSE = m_calcPackSE.SE(data[i]);
               shortSE = m_calcShortSE.SE(data[i]);
 
@@ -187,7 +236,17 @@ namespace MEAClosedLoop
               if (shortSE < m_calcNoiseSE2.Mean)
               {
                 m_state = State.Noise;
-                spikeTrain.Length = (int)(m_endTime + (TTime)i - spikeTrain.Start);
+                // Finalize current spike-train
+                if (spikeTrain == null) spikeTrain = new CSpikeTrainFrame(m_channel, m_trainStartTime);
+                spikeTrain.Length = (int)(m_endTime - spikeTrain.Start);
+#if DEBUG_SPIKETRAINS
+                lock (m_dbgTrainList)
+                {
+                  TTime dbgStartTime = m_dbgTrainList[m_dbgTrainList.Count - 1].Start;
+                  CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, dbgStartTime);
+                  m_dbgTrainList.Add(dbgSpikeTrain);
+                }
+#endif
               }
               break;
 
@@ -233,6 +292,11 @@ namespace MEAClosedLoop
            */
         }
 
+        if ((m_state == State.Train) && (spikeTrain == null))
+        {
+          spikeTrain = CONTINUE_TRAIN;
+        }
+
         m_absTime += (TTime)size;
         m_prevPacket = data;
         return spikeTrain;
@@ -240,6 +304,7 @@ namespace MEAClosedLoop
 
     }
 
+    private readonly List<CSpikeTrainFrame> NO_SPIKETRAINS = new List<CSpikeTrainFrame>();
     private Dictionary<int, CSpikeTrainDetector> m_spikeTraintDet;
     private CFiltering m_filteredStream;
     private List<int> m_activeChannelList;
@@ -265,9 +330,23 @@ namespace MEAClosedLoop
     Int32 m_dummyPackTime = -1;
     Random m_rnd;
 
+#if DEBUG_SPIKETRAINS
+    public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainDebug()
+    {
+      Dictionary<int, List<CSpikeTrainFrame>> spikeTrainDbg = new Dictionary<int,List<CSpikeTrainFrame>>();
+      foreach (Int16 channel in m_activeChannelList)
+      {
+        spikeTrainDbg[channel] = m_spikeTraintDet[channel].GetSpikeTrainListDbg();
+        m_spikeTraintDet[channel].ClearSpikeTrainListDbg();
+      }
+      return spikeTrainDbg;
+    }
+#endif
+
     public CPackDetector(CFiltering filteredStream, List<int> channelList = null)
     {
       if (filteredStream == null) throw new ArgumentNullException("filteredStream");
+      if (MAX_LEADING_SPIKETRAIN + Param.PRE_SPIKE > Param.DEF_PACKET_LENGTH) throw new Exception("Wrong constans in the class Param.");
 
       m_filteredStream = filteredStream;
       if (channelList == null)
@@ -279,7 +358,7 @@ namespace MEAClosedLoop
       foreach (Int16 channel in m_activeChannelList) m_spikeTraintDet[channel] = new CSpikeTrainDetector(channel);
 
       m_packSpikeTrainList = new List<CSpikeTrainFrame>();
-      m_prevSpikeTrains = new List<CSpikeTrainFrame>();
+      m_prevSpikeTrains = NO_SPIKETRAINS;
       m_packDataList = new List<TFltDataPacket>();
       m_prevPacket = new TFltDataPacket();
       m_prevPacket[0] = new TData[0];                 // just to avoid NullReferenceException at the first packet
@@ -302,7 +381,7 @@ namespace MEAClosedLoop
     {
       lock (m_dummyTimer)
       {
-        m_dummyPackTime = m_rnd.Next(2500);
+        m_dummyPackTime = m_rnd.Next(Param.DEF_PACKET_LENGTH);
       }
     }
 
@@ -354,10 +433,13 @@ namespace MEAClosedLoop
     // Алгоритм поиска пачек.
     // Разделяется на 2 случая: мы вне пачки или внутри пачки.
     // В любом случае ищем начала спайк-трэйнов на активных электродах в текущем пакете.
-    // Считаем, что в одном пакете на одном электроде не может быть более одного спайк-трэйна.
-    // Если мы вне пачки, то если найден хотя бы один спайк трэйн, начинаем пачку.
-    //
-    //
+    // CSpikeTrainDetector возвращает null либо CSpikeTrainFrame, который содержит только время начала и длину спайк-трэйна.
+    // Если длина равна нулю - спайк-трэйн ещё не закончился и будет продолжен в следующем пакете.
+    // Если пришло начало спайк-трейна, то в следующих пакетах, должны приходить пустые CSpikeTrainFrame-ы пока не буден найден конец.
+    // В одном пакете на одном электроде не может быть более одного спайк-трэйна.
+    // Если мы вне пачки, то если найден хотя бы один спайк трэйн, запомним его, чтобы начать с него пачку, если что.
+    // Но если в следующем пакете не будет найдено продолжения на длугих электродах, то пачку дискардим.
+    // Когда на всех электродах закончились спайк-трэйны и не начались новые в течение времени Param.POST_SPIKE (200 мс), то пачка закончилась.
     //
     // DetectPacks может возвращать S-Pack (Start), null или T-Pack (Tail).
     // null означает середину или отсутствие пачки
@@ -391,18 +473,25 @@ namespace MEAClosedLoop
       m_activeChannelList.AsParallel().ForAll(channel => spikeTrains[channel] = m_spikeTraintDet[channel].FindSpikeTrains(packet[channel]));
 
       // Select found spike-trains
-      var spikeTrainList = spikeTrains.Values.Where(any => any != null).ToList();
+      var spikeTrainList = spikeTrains.Values.Where(el => el != null).ToList();
 
       // Check if spikeTrains contains at least one spike-train
       if (spikeTrainList.Count > 0)
+      #region Process Spike-trains
       {
         // Check if all spike-trains finish here
         bool packContinues = spikeTrainList.Any(el => !el.EOP);
 
         if (m_inPack)
         {
-          // Throws an exception if some spike-trains have been lost. Should never happen.
-          ConsistencyCheck(m_prevSpikeTrains, spikeTrainList);
+          if (m_lastSpikeTime == 0)                          // There were some unfinished spike-trains in the previous packet
+          {
+            // Throws an exception if some spike-trains have been lost. Should never happen.
+            if (m_prevSpikeTrains.Where(el => !el.EOP).Any(el_prev => !spikeTrainList.Any(el_new => el_new.Channel == el_prev.Channel)))
+            {
+              throw new Exception("Something is wrong in Spike-train Detector. Spike-train has been lost.");
+            }
+          }
           m_prevSpikeTrains = spikeTrainList;
           m_packDataList.Add(packet);
 
@@ -412,29 +501,22 @@ namespace MEAClosedLoop
         else                                                // Outside a pack
         {
           // Here we should decide whether to start a new pack or not
-          if (spikeTrainList.Count > 1)                     // If there are more than one spike-train, just start the new pack
+          // If there are more than one spike-train, just start a new pack immediately
+          if (spikeTrainList.Count > 1)
           {
             Int32 prevPacketLength = m_prevPacket[m_prevPacket.Keys.ElementAt(0)].Length;
             m_firstSpikeTime = spikeTrainList.Min(el => el.Start);
-            if (m_prevSpikeTrains.Count > 0)                // Account for a single spike-train in the previous packet if it was there
-            {
-              TTime prevSpikeTrainTime = spikeTrainList.Min(el => el.Start);
 
-              if (prevSpikeTrainTime + (TTime)prevPacketLength >= m_timestamp + Param.PRE_SPIKE)
-              {
-                m_packDataList.Add(m_prevPacket);
-                m_firstSpikeTime = prevSpikeTrainTime;
-              }
-              else                                          // Something wrong has happened, but we won't care about this.
-              {
-                // This could happen if we have strong spontaneous activity at one channel. And also the first packet could fall here
-                // So just start a new pack from the current packet
-              }
+            // Account for a single spike-train in the previous packet if it was there
+            if (m_prevSpikeTrains.Count == 1)
+            {
+              m_firstSpikeTime = m_prevSpikeTrains[0].Start;
+              m_packDataList.Add(m_prevPacket);
             }
             m_packDataList.Add(packet);
 
-            TTime firstPacketTime = m_timestamp - ((m_firstSpikeTime > m_timestamp) ? 0 : (TTime)prevPacketLength);
-
+            // Calculate pack start relatively to the first data packet start
+            TTime firstPacketTime = m_timestamp - ((m_firstSpikeTime >= m_timestamp) ? 0 : (TTime)prevPacketLength);
             if (m_firstSpikeTime < firstPacketTime) throw new Exception("Pack start has been detected before data start"); // Never should happen
             m_packDataStart = (Int32)(m_firstSpikeTime - firstPacketTime);
 
@@ -445,21 +527,23 @@ namespace MEAClosedLoop
             m_prevSpikeTrains = spikeTrainList;
             return pack;
           }
-          // Else, we have only one spike-train. Just remember it for the better times
-          m_prevSpikeTrains = spikeTrainList;
+          // Else, we have only one spike-train. So, check if it has been started not too early and remember it for the better times
+          m_prevSpikeTrains = (spikeTrainList[0].Start + MAX_LEADING_SPIKETRAIN > m_timestamp + (TTime)currPacketLength) ? spikeTrainList : NO_SPIKETRAINS;
           // Remember the current packet in case we find start of a pack in the next packet
           m_prevPacket = packet;
         }
       }
+      #endregion
       else                                                  // spikeTrainList == 0, we haven't found any spike-train in the current packet
+      #region Process abscence of Spike-trains
       {
         m_prevPacket = packet;
-        m_prevSpikeTrains = spikeTrainList;
+        m_prevSpikeTrains = NO_SPIKETRAINS;
 
         if (m_inPack)
         {
           // If there are unfinished spike-trains, throw the exception
-          if (m_lastSpikeTime == 0) throw new Exception("Something is wrong in Spike-train Detector. Spike-train has been lost.");
+          if (m_lastSpikeTime == 0) throw new Exception("Something is wrong in the Spike-train Detector. Spike-train has been lost.");
 
           // If we are in a pack and haven't got any spikes for POST_SPIKE time, terminate this pack
           if (m_timestamp + (TTime)currPacketLength > m_lastSpikeTime + Param.POST_SPIKE)
@@ -513,18 +597,8 @@ namespace MEAClosedLoop
         }
         // Else, we are not in pack, so just return null
       }
+      #endregion
       return null;
-    }
-
-    void ConsistencyCheck(List<CSpikeTrainFrame> prevSpikeTrains, List<CSpikeTrainFrame> spikeTrainList)
-    {
-      if (m_lastSpikeTime == 0)                             // There were some unfinished spike-trains in the previous packet
-      {
-        if (prevSpikeTrains.Where(el => !el.EOP).Any(el1 => !spikeTrainList.Any(el2 => el2.Channel == el1.Channel)))
-        {
-          throw new Exception("Something is wrong in Spike-train Detector. Spike-train has been lost.");
-        }
-      }
     }
 
     // [OBSOLETE] Moved to class CSpikeTrainFrameDetector

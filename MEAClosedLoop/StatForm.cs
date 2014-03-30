@@ -19,6 +19,7 @@ namespace MEAClosedLoop
     private const int STAT_BUF_LEN = 1 * 1000 * Param.MS;
     private const int MIN_PACK_LENGTH = 32;
     private CFiltering m_dataStream;
+    private CLoopController m_loopCtrl;
     private TData[] m_data;
     private List<int> m_packList;
     private TData[] m_SE500;
@@ -52,7 +53,7 @@ namespace MEAClosedLoop
     private int m_packTime = 0;
 
 
-    public StatForm(CFiltering fltStream)
+    public StatForm(CFiltering fltStream, CLoopController loopCtrl)
     {
       InitializeComponent();
 
@@ -74,6 +75,7 @@ namespace MEAClosedLoop
       m_avgSE2Points = new Point[panel_Data.Width * 2];
 
       m_dataStream = fltStream;
+      if (loopCtrl != null) 
 
       foreach (int channel in m_dataStream.ChannelList)
       {

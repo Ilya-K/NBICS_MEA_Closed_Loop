@@ -318,16 +318,16 @@ namespace MEAClosedLoop
         {
           if (m_selectedDAQ == m_fileIdx)
           {
-            m_inputStream = new CInputStream(m_fileOpened, m_channelList, 2500);
+            m_inputStream = new CInputStream(m_fileOpened, m_channelList, Param.DEF_PACKET_LENGTH);
           }
           else
           {
-            m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500);
+            m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
           }
         }
 
         // (int)SpikeFiltOrder.Value, 25000, Convert.ToDouble(SpikeLowCut.Value), Convert.ToDouble(SpikeHighCut.Value), DATA_BUF_LEN
-        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DAQ_FREQ / 10); // [TODO] Eliminate data buffer length
+        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DEF_PACKET_LENGTH); // [TODO] Eliminate data buffer length
 
         // [TODO] Get rid of thresholds here. Should be calculated in SALPA dynamically
         int[] thresholds = new int[60];
@@ -347,7 +347,7 @@ namespace MEAClosedLoop
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
-        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
+        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DEF_PACKET_LENGTH, 2);
 
         m_DAQConfigured = true;
         
@@ -439,9 +439,9 @@ namespace MEAClosedLoop
         try
         {
           if (m_inputStream != null) m_inputStream.Kill();
-          // m_inputStream = new CInputStream(ofd.FileName, new List<int>(new int[]{0, 1, 2, 3, 4, 5, 6, 10, 12, 15, 17, 20, 23, 25, 27, 30, 35, 40, 50, 55, 59}), 2500);
-          m_inputStream = new CInputStream(ofd.FileName, m_channelList, 2500);
-          //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500);
+          // m_inputStream = new CInputStream(ofd.FileName, new List<int>(new int[]{0, 1, 2, 3, 4, 5, 6, 10, 12, 15, 17, 20, 23, 25, 27, 30, 35, 40, 50, 55, 59}), Param.DEF_PACKET_LENGTH);
+          m_inputStream = new CInputStream(ofd.FileName, m_channelList, Param.DEF_PACKET_LENGTH);
+          //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
 
           
           m_fileOpened = ofd.FileName;
@@ -562,7 +562,7 @@ namespace MEAClosedLoop
       {
         // Configure Input Stream here
         m_channelList = new List<int>(new int[] { 0, 1, 3 });
-        m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, 2500);
+        m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, Param.DEF_PACKET_LENGTH);
       }
       
       if (m_stimulator == null)
@@ -674,7 +674,7 @@ namespace MEAClosedLoop
 
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {
-      StatForm statForm = new StatForm(m_salpaFilter);
+      StatForm statForm = new StatForm(m_salpaFilter, m_closedLoop);
       statForm.Show();
     }
 
