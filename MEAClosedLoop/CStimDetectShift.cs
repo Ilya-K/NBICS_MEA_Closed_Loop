@@ -39,7 +39,6 @@ namespace MEAClosedLoop
     private cases NextCase;
     private int CallCount;
     private object LockStimList = new object();
-    private object LockExpStimList = new object();
     public object LockExternalData = new object();
     private TRawDataPacket PrevPacket;
     private TTime CurrentTime;

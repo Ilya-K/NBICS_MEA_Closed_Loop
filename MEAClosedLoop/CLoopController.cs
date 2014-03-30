@@ -34,7 +34,7 @@ namespace MEAClosedLoop
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
 
-    public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator, CPackDetector packDetector)
+    public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
       if (inputStream == null) throw new ArgumentNullException("inputStream");
       if (filter == null) throw new ArgumentNullException("filter");
@@ -45,11 +45,10 @@ namespace MEAClosedLoop
       m_filter = filter;
 
       m_stimulus = m_stimulator.GetStimulus();
-      m_packDetector = packDetector;
+      m_packDetector = new CPackDetector(m_filter);
 
       m_stimTimer = new System.Timers.Timer();
       m_stimTimer.Elapsed += StimTimer;
-
 
       m_t = new Thread(FeedBackLoop);
       m_t.Start();
@@ -93,7 +92,7 @@ namespace MEAClosedLoop
             prevPack = currPack;
             insidePack = false;
             // Distribute current pack to consumers
-            if(OnPackFound!=null) OnPackFound(currSemiPack);
+            if (OnPackFound!=null) OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
           // Distribute current pack to consumers

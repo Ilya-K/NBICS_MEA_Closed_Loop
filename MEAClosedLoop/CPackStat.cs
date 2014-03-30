@@ -57,14 +57,13 @@ namespace MEAClosedLoop
     private TStimIndex StimStartIndex;
     #endregion
     #region Конструктор
-    public CPackStat(CPackDetector _PackDetector, CLoopController _LoopController, List<int> channelList)
+    public CPackStat(CLoopController _LoopController, List<int> channelList)
     {
       InitializeComponent();
       CurrentState = state.BeforeStimulation;
       PackListBefore = new List<CPack>();
       PackListAfter = new List<CPack>();
       StimList = new List<TAbsStimIndex>();
-      PackDetector = _PackDetector;
       LoopCtrl = _LoopController;
       StatProgressBar.Maximum = Minimum_Pack_Requered_Count + 1;
       m_channelList = channelList;
