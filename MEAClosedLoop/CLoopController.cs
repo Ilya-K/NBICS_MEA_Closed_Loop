@@ -15,13 +15,13 @@ namespace MEAClosedLoop
     private double STIM_TIME_PERCENT = 0.8;
 
     // Delay of stimulus introduced by signal processing time (in 40 us intervals)
-    private const Int16 STIM_TIME_DELAY = 4 * Param.MS;             // 4 ms
+    private const Int16 STIM_TIME_DELAY = 2 * Param.MS;             // 4 ms
 
     // Minimal allowed period for stimulation
     private const Int16 MIN_STIM_PERIOD = 400 * Param.MS;           // 0.4s = 10000
 
     // Number of SE to leave before the next expected pack
-    private const Int16 N_SE = 2;
+    private const Int16 N_SE = 1; //normally 2
 
     private CInputStream m_inputStream;
     private CStimulator m_stimulator;
@@ -34,7 +34,7 @@ namespace MEAClosedLoop
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
 
-    public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
+    public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator, CPackDetector packDetector)
     {
       if (inputStream == null) throw new ArgumentNullException("inputStream");
       if (filter == null) throw new ArgumentNullException("filter");
@@ -45,10 +45,11 @@ namespace MEAClosedLoop
       m_filter = filter;
 
       m_stimulus = m_stimulator.GetStimulus();
-      m_packDetector = new CPackDetector(m_filter);
+      m_packDetector = packDetector;
 
       m_stimTimer = new System.Timers.Timer();
       m_stimTimer.Elapsed += StimTimer;
+
 
       m_t = new Thread(FeedBackLoop);
       m_t.Start();
@@ -92,11 +93,11 @@ namespace MEAClosedLoop
             prevPack = currPack;
             insidePack = false;
             // Distribute current pack to consumers
-            OnPackFound(currSemiPack);
+            if(OnPackFound!=null) OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
           // Distribute current pack to consumers
-          OnPackFound(currPack);
+          if (OnPackFound != null) OnPackFound(currPack);
         }
         else                                      // We've received Start of a long pack
         {
@@ -119,7 +120,7 @@ namespace MEAClosedLoop
         m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
         // 
-        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime);
+        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
         m_stimTimer.Start();
 
         prevPack = currPack;

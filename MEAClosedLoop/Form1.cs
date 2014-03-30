@@ -25,11 +25,14 @@ namespace MEAClosedLoop
     private object m_chDataLock2 = new object();
     int m_viewChannel1;
     int m_viewChannel2;
-    CInputStream m_inputStream;
-    CFiltering m_salpaFilter;
-    CSpikeDetector m_spikeDetector;
-    CRasterPlot m_rasterPlotter;
-    CStimulator m_stimulator;
+    private CInputStream m_inputStream;
+    private CFiltering m_salpaFilter;
+    private CSpikeDetector m_spikeDetector;
+    private CRasterPlot m_rasterPlotter;
+    private CStimulator m_stimulator;
+    private CPackStat m_statForm;
+    private CPackDetector m_PackDetector;
+    //private CPackDetector m_ClosedLoopPackDetector;
     private volatile bool m_killDataLoop;
     List<int> m_channelList;
     Thread m_dataLoopThread;
@@ -64,6 +67,8 @@ namespace MEAClosedLoop
     {
       InitializeComponent();
       prev2 = 0;
+      this.StartPosition = FormStartPosition.Manual;
+      this.Location = new Point(600, 250);
     }
 
     private void Form1_Load(object sender, EventArgs e)
@@ -74,7 +79,6 @@ namespace MEAClosedLoop
       SetDefaultChannels();
     }
 
-    /*
     private void DataLoop()
     {
       do
@@ -82,7 +86,6 @@ namespace MEAClosedLoop
         m_rasterPlotter.AddData(m_spikeDetector.WaitData());
       } while (!m_killDataLoop);
     }
-    */
 
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -115,6 +118,7 @@ namespace MEAClosedLoop
     #region Data Display
     private void panel1_Paint(object sender, PaintEventArgs e)
     {
+      if (!checkBox1.Checked) return;
       int width = panel1.Width;
       int height = panel1.Height;
       double max = double.MinValue;
@@ -219,6 +223,8 @@ namespace MEAClosedLoop
 
     private void panel2_Paint(object sender, PaintEventArgs e)
     {
+
+      if (!checkBox2.Checked) return;
       int width = panel2.Width;
       int height = panel2.Height;
       double max = double.MinValue;
@@ -318,16 +324,16 @@ namespace MEAClosedLoop
         {
           if (m_selectedDAQ == m_fileIdx)
           {
-            m_inputStream = new CInputStream(m_fileOpened, m_channelList, Param.DEF_PACKET_LENGTH);
+            m_inputStream = new CInputStream(m_fileOpened, m_channelList, 2500);
           }
           else
           {
-            m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
+            m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500);
           }
         }
 
         // (int)SpikeFiltOrder.Value, 25000, Convert.ToDouble(SpikeLowCut.Value), Convert.ToDouble(SpikeHighCut.Value), DATA_BUF_LEN
-        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DEF_PACKET_LENGTH); // [TODO] Eliminate data buffer length
+        BFParams parBF = new BFParams(2, Param.DAQ_FREQ, 150.0, 2000.0, Param.DAQ_FREQ / 10); // [TODO] Eliminate data buffer length
 
         // [TODO] Get rid of thresholds here. Should be calculated in SALPA dynamically
         int[] thresholds = new int[60];
@@ -343,15 +349,19 @@ namespace MEAClosedLoop
         CStimDetectShift m_stimDetector = new CStimDetectShift(); //new CStimDetector(15, 20, 35, 150);
 
         m_salpaFilter = new CFiltering(m_inputStream, m_stimDetector, parSALPA, null);
+        
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
-        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DEF_PACKET_LENGTH, 2);
-
-        m_DAQConfigured = true;
+        //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DAQ_FREQ / 10, 2);
+        m_PackDetector = new CPackDetector(m_salpaFilter);
         
+        
+        m_DAQConfigured = true;
+        PackStatButton.Enabled = true;
         buttonStatWindow.Enabled = true;
+
       }
     }
 
@@ -439,9 +449,9 @@ namespace MEAClosedLoop
         try
         {
           if (m_inputStream != null) m_inputStream.Kill();
-          // m_inputStream = new CInputStream(ofd.FileName, new List<int>(new int[]{0, 1, 2, 3, 4, 5, 6, 10, 12, 15, 17, 20, 23, 25, 27, 30, 35, 40, 50, 55, 59}), Param.DEF_PACKET_LENGTH);
-          m_inputStream = new CInputStream(ofd.FileName, m_channelList, Param.DEF_PACKET_LENGTH);
-          //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
+          // m_inputStream = new CInputStream(ofd.FileName, new List<int>(new int[]{0, 1, 2, 3, 4, 5, 6, 10, 12, 15, 17, 20, 23, 25, 27, 30, 35, 40, 50, 55, 59}), 2500);
+          m_inputStream = new CInputStream(ofd.FileName, m_channelList, 2500);
+          //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, 2500);
 
           
           m_fileOpened = ofd.FileName;
@@ -562,7 +572,7 @@ namespace MEAClosedLoop
       {
         // Configure Input Stream here
         m_channelList = new List<int>(new int[] { 0, 1, 3 });
-        m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, Param.DEF_PACKET_LENGTH);
+        m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, 2500);
       }
       
       if (m_stimulator == null)
@@ -582,13 +592,6 @@ namespace MEAClosedLoop
       }
     }
 
-    // [DEBUG]
-    void TestCallback(CPack pack)
-    {
-
-    }
-    // [/DEBUG]
-
     private void buttonClosedLoop_Click(object sender, EventArgs e)
     {
       buttonStop.Enabled = true;
@@ -605,9 +608,7 @@ namespace MEAClosedLoop
           // [/DEBUG] 
         }
 
-        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
-        // [DEBUG]
-        m_closedLoop.OnPackFound += TestCallback;
+        m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator, m_PackDetector);
       }
 
       m_inputStream.Start();
@@ -658,24 +659,27 @@ namespace MEAClosedLoop
       m_integral1 = 0;
     }
 
-    Dictionary<int, bool[]> GetBoolData()
+ /*   Dictionary<int, bool[]> GetBoolData()
     {
       Dictionary<int, bool[]> output = new Dictionary<int, bool[]>();
       //TODO: make proper output
       return output;
-    }
-
-    private void buttonFindWindow_Click(object sender, EventArgs e)
-    {
-      TTime start_data = 0; //TODO: get time from CFiltering
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, GetBoolData(), start_data);
-      formShowWindows.Show();
-    }
+    }*/
 
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {
-      StatForm statForm = new StatForm(m_salpaFilter, m_closedLoop);
+      StatForm statForm = new StatForm(m_salpaFilter);
       statForm.Show();
+    }
+
+    private void PackStatButton_Click(object sender, EventArgs e)
+    {
+      m_statForm = new CPackStat(m_PackDetector, m_closedLoop, m_channelList);
+      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData); 
+      m_statForm.StartPosition = FormStartPosition.Manual;
+      m_statForm.Left = this.Location.X + 300;
+      m_statForm.Top =  this.Location.Y;
+      m_statForm.Show();
     }
 
   }
