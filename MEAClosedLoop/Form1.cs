@@ -32,6 +32,9 @@ namespace MEAClosedLoop
     private CStimulator m_stimulator;
     private CPackStat m_statForm;
 
+    private CDataRender m_dataRender;
+    private Thread dataRenderThread;
+
     private volatile bool m_killDataLoop;
     List<int> m_channelList;
     Thread m_dataLoopThread;
@@ -670,6 +673,25 @@ namespace MEAClosedLoop
       m_statForm.Left = this.Location.X + 300;
       m_statForm.Top =  this.Location.Y;
       m_statForm.Show();
+    }
+
+    private void showChannelData_Click(object sender, EventArgs e)
+    {
+      if (showChannelData.Text.Equals("Show"))
+      {
+        showChannelData.Text = "Hide";
+        dataRenderThread.Start();
+
+      }
+      if (showChannelData.Text.Equals("Hide"))
+      {
+        showChannelData.Text = "Show";
+      }
+    }
+    private void DrawDataFunction()
+    {
+
+      //Initialize GraphRender here
     }
 
   }

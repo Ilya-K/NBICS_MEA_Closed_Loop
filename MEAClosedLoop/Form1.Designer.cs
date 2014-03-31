@@ -56,6 +56,7 @@
       this.PackStatButton = new System.Windows.Forms.Button();
       this.checkBox1 = new System.Windows.Forms.CheckBox();
       this.checkBox2 = new System.Windows.Forms.CheckBox();
+      this.showChannelData = new System.Windows.Forms.Button();
       this.SuspendLayout();
       // 
       // panel1
@@ -332,11 +333,22 @@
       this.checkBox2.Text = "checkBox1";
       this.checkBox2.UseVisualStyleBackColor = true;
       // 
+      // showChannelData
+      // 
+      this.showChannelData.Location = new System.Drawing.Point(616, 362);
+      this.showChannelData.Name = "showChannelData";
+      this.showChannelData.Size = new System.Drawing.Size(87, 23);
+      this.showChannelData.TabIndex = 29;
+      this.showChannelData.Text = "Show";
+      this.showChannelData.UseVisualStyleBackColor = true;
+      this.showChannelData.Click += new System.EventHandler(this.showChannelData_Click);
+      // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(716, 604);
+      this.Controls.Add(this.showChannelData);
       this.Controls.Add(this.checkBox2);
       this.Controls.Add(this.checkBox1);
       this.Controls.Add(this.PackStatButton);
@@ -405,6 +417,7 @@
         private System.Windows.Forms.Button PackStatButton;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.Button showChannelData;
     }
 }
 
