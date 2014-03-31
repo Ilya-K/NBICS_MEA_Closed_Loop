@@ -16,7 +16,6 @@ namespace MEAClosedLoop
     public TData Mean { get { return expMean; } }
     public TData PrevSE { get { return se; } }
     public int Width { get { return TAU; } }
-    private bool first = true;
 
     /// <summary>
     /// Create SE calculator.
@@ -31,6 +30,11 @@ namespace MEAClosedLoop
       expMean = 0;
       exp2Mean = 0;
       wuTAU = 1;
+    }
+
+    public void WarmedUp()
+    {
+      se = Math.Sqrt(exp2Mean - expMean * expMean);
     }
 
     /// <summary>
@@ -53,12 +57,6 @@ namespace MEAClosedLoop
     /// <returns>Current SE</returns>
     public TData SE(TData nextData)
     {
-      if (first)
-      {
-        expMean = nextData;
-        exp2Mean = nextData * nextData;
-        first = false;
-      }
       expMean = expMean - (expMean - nextData) / TAU;
       exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
 
@@ -75,12 +73,6 @@ namespace MEAClosedLoop
     /// <returns>Current Variance</returns>
     public TData Var(TData nextData)
     {
-      if (first)
-      {
-        expMean = nextData;
-        exp2Mean = nextData * nextData;
-        first = false;
-      }
       expMean = expMean - (expMean - nextData) / TAU;
       exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
 
@@ -95,12 +87,6 @@ namespace MEAClosedLoop
     /// <returns>Current SE</returns>
     public TData SE(UInt64 nextData)
     {
-      if (first)
-      {
-        expMean = nextData;
-        exp2Mean = nextData * nextData;
-        first = false;
-      }
       expMean = expMean - (expMean - nextData) / TAU;
       exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
 
@@ -118,12 +104,6 @@ namespace MEAClosedLoop
     /// <returns>Current Variance</returns>
     public TData Var(UInt64 nextData)
     {
-      if (first)
-      {
-        expMean = nextData;
-        exp2Mean = nextData * nextData;
-        first = false;
-      }
       expMean = expMean - (expMean - nextData) / TAU;
       exp2Mean = exp2Mean - (exp2Mean - nextData * nextData) / TAU;
 
@@ -133,7 +113,9 @@ namespace MEAClosedLoop
 
     public void Reset()
     {
-      first = true;
+      expMean = 0;
+      exp2Mean = 0;
+      wuTAU = 1;
     }
   }
 }

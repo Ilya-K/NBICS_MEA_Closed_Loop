@@ -1,4 +1,5 @@
 ﻿#define DEBUG_SPIKETRAINS
+//#define RANDOM_PACKS
 
 using System;
 using System.Collections.Generic;
@@ -168,10 +169,7 @@ namespace MEAClosedLoop
                 if (!m_inSpike)
                 {
                   m_inSpike = true;
-                  if (m_preSpikes.Count >= MAX_SPIKE_QUEUE)
-                  {
-                    m_preSpikes.Dequeue();
-                  }
+                  if (m_preSpikes.Count >= MAX_SPIKE_QUEUE) m_preSpikes.Dequeue();
                   m_preSpikes.Enqueue(m_absTime + (TTime)i);
                 }
               }
@@ -254,18 +252,24 @@ namespace MEAClosedLoop
             case State.WarmUp:
               for (int t = 0; t < data.Length; t++)
               {
-                if (Math.Abs(data[i]) > ZERO_LEVEL)
+                if (Math.Abs(data[t]) > ZERO_LEVEL)
                 {
                   --m_warmUpCount;
                   TData shortSEwu = Math.Sqrt(m_calcShortSE.WarmUp(data[t]));
                   TData noiseSEwu = Math.Sqrt(m_calcNoiseSE.WarmUp(data[t]));
-                  TData packSEwu = Math.Sqrt(m_calcNoiseSE.WarmUp(data[t] * 2));      // Consider signal at least 2 times higher than noise
+                  TData packSEwu = Math.Sqrt(m_calcPackSE.WarmUp(data[t] * 2));      // Consider signal at least 2 times higher than noise
+                  m_calcShortSE2.SE(shortSEwu);
                   m_calcNoiseSE2.WarmUp(noiseSEwu);
                 }
                 if (m_warmUpCount == 0)
                 {
                   m_warmedUp = true;
                   m_state = State.Noise;
+                  m_calcShortSE.WarmedUp();
+                  m_calcNoiseSE.WarmedUp();
+                  m_calcPackSE.WarmedUp();
+                  m_calcNoiseSE2.WarmedUp();
+                  m_calcShortSE2.WarmedUp();
                   break;
                 }
               }
@@ -323,13 +327,13 @@ namespace MEAClosedLoop
     private volatile bool m_kill = false;
 
     // [DEBUG]
+#if RANDOM_PACKS
     private TTime m_debugTimestamp;
-    private int m_entryCount = 0;
-    private int m_entryCount2 = 0;
     private System.Timers.Timer m_dummyTimer;
     Int32 m_dummyPackTime = -1;
     Random m_rnd;
     private bool m_inPackDbg = false;
+#endif
 
 #if DEBUG_SPIKETRAINS
     public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainDebug()
@@ -358,7 +362,6 @@ namespace MEAClosedLoop
       m_spikeTraintDet = new Dictionary<int, CSpikeTrainDetector>(channelList.Count);
       foreach (Int16 channel in m_activeChannelList) m_spikeTraintDet[channel] = new CSpikeTrainDetector(channel);
 
-      m_rnd = new Random(DateTime.Now.Millisecond);
       m_packSpikeTrainList = new List<CSpikeTrainFrame>();
       m_prevSpikeTrains = NO_SPIKETRAINS;
       m_packDataList = new List<TFltDataPacket>();
@@ -371,15 +374,17 @@ namespace MEAClosedLoop
 
 
       // [DEBUG]
-      
+#if RANDOM_PACKS
       m_dummyTimer = new System.Timers.Timer(1000);
       m_dummyTimer.Elapsed += DummyTimer;
       m_dummyTimer.Start();
       //m_rnd = new Random(123);
       m_rnd = new Random(DateTime.Now.Millisecond);
-      
+#endif
     }
 
+      // [DEBUG]
+#if RANDOM_PACKS
     private void DummyTimer(object o1, EventArgs e1)
     {
       lock (m_dummyTimer)
@@ -387,11 +392,14 @@ namespace MEAClosedLoop
         m_dummyPackTime = m_rnd.Next(5000);
       }
     }
+#endif
 
     // Callback to readout data from the Filtered Stream
     private void ReceiveData(TFltDataPacket packet)
     {
+#if RANDOM_PACKS
       m_debugTimestamp = m_filteredStream.TimeStamp;
+#endif
       lock (m_filteredQueue) m_filteredQueue.Enqueue(packet);
       m_notEmpty.Set();
     }
@@ -450,11 +458,8 @@ namespace MEAClosedLoop
     
     private CPack DetectPacks(TFltDataPacket packet)
     {
-      #region DEBUG
-      m_entryCount++;
       // [DEBUG]
-      
-
+#if RANDOM_PACKS
       CPack debugPack = null;
       if (m_dummyPackTime >= 0)
       {
@@ -487,8 +492,7 @@ namespace MEAClosedLoop
      }
 
       return debugPack;
-      
-      #endregion // DEBUG
+#endif      
 
       int currPacketLength = packet[packet.Keys.ElementAt(0)].Length;
 
@@ -583,29 +587,42 @@ namespace MEAClosedLoop
 
             // Fill packData with active channels keys
             foreach (int channel in m_activeChannelList) packData[channel] = new TData[dataLength];
-            
+
+            // Process the first packet
+            TFltDataPacket firstDataPacket = m_packDataList[0];
+            m_packDataList.RemoveAt(0);
+            int firstPacketLength = firstDataPacket[firstDataPacket.Keys.ElementAt(0)].Length;
             packData.Keys.AsParallel().ForAll(channel => {
-              // Process the first packet
-              int length = m_packDataList[0][m_packDataList[0].Keys.ElementAt(0)].Length;
+              int length = firstPacketLength;
               int j = 0;
               for (int i = m_packDataStart; i < length; ++i)
               {
-                packData[channel][j++] = m_packDataList[0][channel][i];
+                packData[channel][j++] = firstDataPacket[channel][i];
               }
-              m_packDataList.RemoveAt(0);
-              
-              // Process all intermediate packets
-              m_packDataList.ForEach(dataPacket =>
+            });
+            int lastPosition = firstPacketLength - m_packDataStart;
+
+            // Process all intermediate packets
+            m_packDataList.ForEach(dataPacket =>
+            {
+              int packetLength = dataPacket[dataPacket.Keys.ElementAt(0)].Length;
+              packData.Keys.AsParallel().ForAll(channel =>
               {
-                length = dataPacket[dataPacket.Keys.ElementAt(0)].Length;
+                int length = packetLength;
+                int j = lastPosition;
                 for (int i = 0; i < length; ++i)
                 {
                   packData[channel][j++] = dataPacket[channel][i];
                 }
               });
+              lastPosition += packetLength;
+            });
 
-              // Process the last packet
-              length = dataLength - j;
+            // Process the last packet
+            packData.Keys.AsParallel().ForAll(channel =>
+            {
+              int length = dataLength - lastPosition;
+              int j = lastPosition;
               for (int i = 0; i < length; ++i)
               {
                 packData[channel][j++] = packet[channel][i];
