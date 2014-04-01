@@ -35,7 +35,7 @@ namespace MEAClosedLoop
     object DataPocketLock = new object(); // блокировка данных
     #endregion
     GraphicsDeviceManager graphics;
-    public TRawData[] DataPacket;
+    //public TRawData[] DataPacket;
     private CStimDetectShift detector;
     // эффект BasicEffect для кривой
     BasicEffect basicEffect;

@@ -17,7 +17,7 @@ namespace MEAClosedLoop
   }
 
   public struct ProcessedPack{
-    public TPackMap dataMap;
+    public Dictionary<int, TPackMap> dataMap;  // <channel, data>
     public TTime start;
   }
 
@@ -72,17 +72,18 @@ namespace MEAClosedLoop
       return output;
     }
 
-    private TPack CPack2TPack(CPack input)
+    private TPack CPack2TPack(CPack input, int channel)
     {
       TPack output = new TPack();
+      output.data = new List<bool>();
 
+      output.channel = channel;
       for (int packIterator = 0; packIterator < input.Length; packIterator++)
       {
-        foreach (int channel in input.Data.Keys)
-        {
-          output.channel = channel;
-          output.data[packIterator] = ((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
-        }
+
+          //output.data[packIterator] = ((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
+          output.data.Add((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
+        
       }
 
       return output;
@@ -97,16 +98,24 @@ namespace MEAClosedLoop
       if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
       {
         //Something went wrong
+          throw new Exception("Неверные данные!");
       }
       else
       {
+          if (RawAmpData.Count == 0 && RawFreqData.Count == 0)
+          {
+              throw new Exception("Пачек не найдено");
+          }
         if (RawFreqData.Count > 0)
         { //freq stat
           GraphType = state.Freq;
           foreach (CPack current_cpack in RawFreqData)
           {
             ProcessedPack processed_pack_to_add = new ProcessedPack();
-            processed_pack_to_add.dataMap = SpikesInPack(CPack2TPack(current_cpack), iterationLength);
+            foreach (int channel in current_cpack.Data.Keys)
+            {
+                processed_pack_to_add.dataMap[channel] = SpikesInPack(CPack2TPack(current_cpack, channel), iterationLength);
+            }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
           }
@@ -143,8 +152,10 @@ namespace MEAClosedLoop
     public Queue<uint> PrepareData(int channel) //TODO: proper time convertions
     {
       Queue<uint> output = new Queue<uint>();
-      uint nextPackTime = (uint)processed_data.Peek().start; //here //minimum 1 pack required
+      //uint nextPackTime = (uint)processed_data.Peek().start; //here //minimum 1 pack required
       ProcessedPack currentPack;
+
+      if (processed_data.Count == 0) return output;
 
       for (int timeIterator = 0; (timeIterator < totalTime) && (processed_data.Count > 0); timeIterator++)
       {
@@ -157,7 +168,7 @@ namespace MEAClosedLoop
         {
           currentPack = processed_data.Dequeue();
           timeIterator += currentPack.dataMap.Count;
-          foreach (uint dataPoint in currentPack.dataMap)
+          foreach (uint dataPoint in currentPack.dataMap[channel])
           {
             output.Enqueue(dataPoint);
           }
