@@ -49,7 +49,7 @@ namespace MEAClosedLoop
     const int MAX_PACK_LENGTH = 12500; //500 ms 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
     const int STAT_ITERATION_LENGTH = 125; //5 ms
-    const double SPIKE_TRESHOLD = 10; //TODO: vary this  parameter
+    //const double SPIKE_TRESHOLD = 300; //now in CPack
 
 
 
@@ -78,7 +78,7 @@ namespace MEAClosedLoop
       {
 
           //output.data[packIterator] = ((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
-          output.data.Add((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
+          output.data.Add((input.Data[channel])[packIterator] > input.NoiseLevel[channel]);
         
       }
 
@@ -110,7 +110,7 @@ namespace MEAClosedLoop
             ProcessedPack processed_pack_to_add = new ProcessedPack();
             foreach (int channel in current_cpack.Data.Keys)
             {
-                processed_pack_to_add.dataMap[channel] = SpikesInPack(CPack2TPack(current_cpack, channel));
+                processed_pack_to_add.dataMap[channel] = SpikesInPack(CPack2TPack(current_cpack, channel)); //TODO: fix here
             }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
@@ -145,32 +145,30 @@ namespace MEAClosedLoop
       RawFreqData.Enqueue(pack_to_add);
 
     }
-    public Queue<uint> PrepareData(int channel) //TODO: proper time convertions
+    private ulong UpdateCursorPosition(ulong prevPosition, uint val, ulong ticksInPoint)
     {
-      Queue<uint> output = new Queue<uint>();
-      //uint nextPackTime = (uint)processed_data.Peek().start; //here //minimum 1 pack required
-      ProcessedPack currentPack;
+      return (prevPosition + 1) * ticksInPoint > (ulong)val ? prevPosition : prevPosition + 1;
+    }
+    public uint[] PrepareData(int channel, int panelWidth, int panelHeight)
+    {
+      uint[] output = new uint[panelWidth];
+      ulong cursorPosition = 0;
+      ulong ticksInPoint = totalTime / (ulong)panelWidth;
+      double maxOutputVal;
 
       if (processed_data.Count == 0) return output;
 
-      for (int timeIterator = 0; ((ulong)timeIterator < totalTime) && (processed_data.Count > 0); timeIterator++)
+      output.PopulateArray<uint>(0);
+      for (ProcessedPack currentPack = processed_data.Dequeue(); processed_data.Count > 0; currentPack = processed_data.Dequeue())
       {
-        if (timeIterator < (uint)processed_data.Peek().start)
-        { //filling free space
-          output.Enqueue(0);
-          continue;
-        }
-        else
+        foreach (uint dataPoint in currentPack.dataMap[channel])
         {
-          currentPack = processed_data.Dequeue();
-          timeIterator += currentPack.dataMap.Count;
-          foreach (uint dataPoint in currentPack.dataMap[channel])
-          {
-            output.Enqueue(dataPoint);
-          }
+          cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint, ticksInPoint);
+          output[cursorPosition]++;
         }
       }
-
+      maxOutputVal = output.Max();
+      //if (maxOutputVal != 0) Array.ForEach(output, X => X = (uint)((double)X / maxOutputVal)); //normalization
       return output;
     }
   }

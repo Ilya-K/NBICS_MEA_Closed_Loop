@@ -17,7 +17,7 @@ namespace MEAClosedLoop
 
   public partial class PackGraphForm : Form
   {
-    Queue<uint> data;
+    uint[] data;
     const int SUBPANEL_SPACE_X = 2;
     const int SUBPANEL_SPACE_Y = 2;
 
@@ -64,7 +64,7 @@ namespace MEAClosedLoop
       ItsTimeToMoveSPB += spb_update;
       spb_timer.Elapsed += spbTimerReset;
 
-      data = new Queue<uint>();
+      data = null;
 
       pointsToDraw = new Point[channelList.Max() + 1][];
       timeUnitSegment = panelWidth;
@@ -107,17 +107,14 @@ namespace MEAClosedLoop
       int height = ((Panel)sender).Height;
 
       int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
-      data = dataGenerator.PrepareData(currentPanelIndex);
+      data = dataGenerator.PrepareData(currentPanelIndex, width, height);
 
-      if(data.Count > 0)
-      {
-        // [TODO] указать реальный размер данных
-        if (data != null)
+        if (data != null && data.Max() > 0)
         {
-          int dataLength = pointsToDraw[currentPanelIndex].Length;
+          int dataLength = /*pointsToDraw[currentPanelIndex].Length*/ data.Count<uint>();
           for (int i = 0; i < dataLength; i++)
           {
-            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, (int)data.Dequeue());
+            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, height - (int)data[i]);
           }
           Pen pen = new Pen(Color.Blue, 1);
           if (pointsToDraw.Count() > 1)
@@ -125,7 +122,7 @@ namespace MEAClosedLoop
             e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
           }
         }
-      }
+        data = null;
     }
 
     private void tmpPanel_Click(object sender, System.EventArgs e)
@@ -147,7 +144,7 @@ namespace MEAClosedLoop
       ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
       int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
       ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
-      dataGenerator.totalTime = totalStatTime * 25;
+      dataGenerator.totalTime = totalStatTime * Param.MS;
       //StatProgressBar.Maximum = totalStatTime;
       //dataGenerator.CollectStat(totalStatTime);
 
@@ -173,6 +170,7 @@ namespace MEAClosedLoop
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
       spb_timer.Stop();
+      statCalcTimer.Stop();
       drawResult();
       MessageBox.Show("подсчёт завершён");
     }
@@ -186,6 +184,7 @@ namespace MEAClosedLoop
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
       spb_timer.Stop();
+      statCalcTimer.Stop();
       drawResult();
 
       MessageBox.Show("подсчёт завершён");
