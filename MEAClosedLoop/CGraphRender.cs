@@ -139,7 +139,7 @@ namespace MEAClosedLoop
 
     protected override void Draw(GameTime gameTime)
     {
-      this.Initialize();
+      this.Initialize(); // костыль
       GraphicsDevice.Clear(Color.CornflowerBlue);
       if (detector.inner_data_to_display != null)
       {

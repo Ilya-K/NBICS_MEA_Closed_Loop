@@ -610,7 +610,8 @@ namespace MEAClosedLoop
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
-
+      showChannelData.Enabled = true;
+      HideChannelData.Enabled = true;
       m_inputStream.Start();
       buttonClosedLoop.Enabled = false;
       if (checkBox_Manual.Checked) m_inputStream.Pause();
@@ -677,21 +678,24 @@ namespace MEAClosedLoop
 
     private void showChannelData_Click(object sender, EventArgs e)
     {
-      if (showChannelData.Text.Equals("Show"))
-      {
-        showChannelData.Text = "Hide";
-        dataRenderThread.Start();
-
-      }
-      if (showChannelData.Text.Equals("Hide"))
-      {
-        showChannelData.Text = "Show";
-      }
+      dataRenderThread = new Thread(DrawDataFunction);
+      dataRenderThread.Start();
+      HideChannelData.Enabled = true;
+    
     }
     private void DrawDataFunction()
     {
-
+      m_dataRender = new CDataRender();
+      m_salpaFilter.AddDataConsumer(m_dataRender.RecivieFltData);
+      m_dataRender.Run();
       //Initialize GraphRender here
+
+
+    }
+
+    private void HideChannelData_Click(object sender, EventArgs e)
+    {
+      dataRenderThread.Suspend();
     }
 
   }
