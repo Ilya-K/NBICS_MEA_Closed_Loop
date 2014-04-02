@@ -39,8 +39,8 @@ namespace MEAClosedLoop
     GraphicsDeviceManager graphics;
     // эффект BasicEffect для кривой
     BasicEffect basicEffect;
-    // массив  вершин нашей кривой
-    VertexPositionColor[] vertices;
+    // массив массивов вершин нашей кривой
+    VertexPositionColor[][] vertices;
     #endregion
 
     public CDataRender()
@@ -57,7 +57,7 @@ namespace MEAClosedLoop
     }
     protected override void Initialize()
     {
-      (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Location = new System.Drawing.Point(0, 0);     
+      (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Location = new System.Drawing.Point(0, 0);
       basicEffect = new BasicEffect(graphics.GraphicsDevice);
       basicEffect.VertexColorEnabled = true;
       basicEffect.Projection = Matrix.CreateOrthographicOffCenter
@@ -97,25 +97,60 @@ namespace MEAClosedLoop
     }
     protected override void Draw(GameTime gameTime)
     {
+      if (DataPacket == null) return;
+
+      //Получаем размеры окна;
+      int WindowHeight = graphics.PreferredBackBufferHeight;
+      int WindowWidth = graphics.PreferredBackBufferWidth;
+
+
       GraphicsDevice.Clear(Color.CornflowerBlue);
       TFltData[] data_to_display;
-      lock (DataPacketLock)
-      {
-        int DebugChannelNum = 13;
-        data_to_display = DataPacket[DebugChannelNum];
-      }
-      vertices = new VertexPositionColor[data_to_display.Length];
-      //подготовка массива точек
 
-      for (int i = 0; i < data_to_display.Length; i++)
+      //создание массива векторов для каналов
+      List<Vector3> ChannelVectors = new List<Vector3>();
+      Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Count()];
+      foreach (int key in DataPacket.Keys)
       {
-        vertices[i].Position.X = ((float)i * DEFAULT_WINDOW_WIDTH) / data_to_display.Length;
-        vertices[i].Position.Y = DEFAULT_WINDOW_HEIGHT / 2 - (float)data_to_display[i];
-        vertices[i].Position.Z = 0;
+        ChannelVectors.Add(new Vector3());
       }
+
+      // сетка 8 x 8 клеток
+      // длина и ширина пропорциональны размеру главного окна
+      int CellWidth = WindowWidth / 8;
+      int CellHeght = WindowHeight / 8;
+
+      for (int i = 0; i < 8; i++)
+      {
+        for (int j = 0; j < 8 && i * 8 + j < ChannelvectorsArray.Length; j++)
+        {
+          ChannelvectorsArray[i * 8 + j] = new Vector3(i * CellWidth, j * CellHeght, 0);
+        }
+      }
+
+      int RealChannelIndx = 0;
+      vertices = new VertexPositionColor[DataPacket.Keys.Count][];
 
       basicEffect.CurrentTechnique.Passes[0].Apply();
-      graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices, 0, vertices.Count() - 2);
+      foreach (int key in DataPacket.Keys)
+      {
+        //подготовка массива массивов точек
+        lock (DataPacketLock)
+        {
+          int length = DataPacket[RealChannelIndx].Length;
+          data_to_display = new TFltData[length];
+        }
+        vertices[RealChannelIndx] = new VertexPositionColor[data_to_display.Length];
+      
+        for (int i = 0; i < data_to_display.Length; i++)
+        {
+          vertices[RealChannelIndx][i].Position.X = ChannelvectorsArray[RealChannelIndx].X + ((float)i * CellWidth) / data_to_display.Length;
+          vertices[RealChannelIndx][i].Position.Y = ChannelvectorsArray[RealChannelIndx].Y + CellHeght / 2 - (float)data_to_display[i];
+          vertices[RealChannelIndx][i].Position.Z = 0;
+        }
+        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices.Count() - 2);
+        RealChannelIndx++;
+      }
 
       base.Draw(gameTime);
     }
