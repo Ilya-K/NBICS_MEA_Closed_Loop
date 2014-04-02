@@ -72,7 +72,6 @@
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(259, 180);
       this.panel1.TabIndex = 13;
-      this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
       // 
       // buttonStartDAQ
       // 
@@ -141,7 +140,6 @@
       this.panel2.Name = "panel2";
       this.panel2.Size = new System.Drawing.Size(259, 180);
       this.panel2.TabIndex = 14;
-      this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
       // 
       // comboBox2
       // 

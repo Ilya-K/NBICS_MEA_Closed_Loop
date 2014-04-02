@@ -124,6 +124,7 @@ namespace MEAClosedLoop
       {
         for (int j = 0; j < 8 && i * 8 + j < ChannelvectorsArray.Length; j++)
         {
+          // переделать в сооствествие с номерами и расположениями каналов на MEA
           ChannelvectorsArray[i * 8 + j] = new Vector3(i * CellWidth, j * CellHeght, 0);
         }
       }
@@ -139,16 +140,21 @@ namespace MEAClosedLoop
         {
           int length = DataPacket[RealChannelIndx].Length;
           data_to_display = new TFltData[length];
+          for (int i = 0; i < length; i++)
+          {
+            data_to_display[i] = DataPacket[RealChannelIndx][i];
+          }
         }
         vertices[RealChannelIndx] = new VertexPositionColor[data_to_display.Length];
-      
+
         for (int i = 0; i < data_to_display.Length; i++)
         {
           vertices[RealChannelIndx][i].Position.X = ChannelvectorsArray[RealChannelIndx].X + ((float)i * CellWidth) / data_to_display.Length;
-          vertices[RealChannelIndx][i].Position.Y = ChannelvectorsArray[RealChannelIndx].Y + CellHeght / 2 - (float)data_to_display[i];
+          vertices[RealChannelIndx][i].Position.Y = ChannelvectorsArray[RealChannelIndx].Y + CellHeght / 2 - (float)data_to_display[i] / 20;
           vertices[RealChannelIndx][i].Position.Z = 0;
         }
-        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices.Count() - 2);
+        //if(RealChannelIndx == 13) 
+        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices[RealChannelIndx].Count() - 2);
         RealChannelIndx++;
       }
 
