@@ -22,6 +22,7 @@ namespace MEAClosedLoop
     const int SUBPANEL_SPACE_Y = 2;
 
     const int SPB_REFRESH_COOLDOWN = 5; //in seconds
+    const int DEFAULT_POINT_COUNT = 100; //in each pannel
 
     public event LoadSelectionDelegate loadSelection;
 
@@ -36,6 +37,8 @@ namespace MEAClosedLoop
     public event DelegateSetProgress spb_SetVal;
 
     private Point[][] pointsToDraw;
+    int timeUnitSegment;
+    Panel[] channelPanels;
 
     public PackGraphForm(List<int> channelList, CLoopController LoopCtrl)
     {
@@ -43,7 +46,7 @@ namespace MEAClosedLoop
       InitializeComponent();
       this.FormBorderStyle = FormBorderStyle.FixedSingle;
       this.MaximizeBox = false;
-      Panel[] channelPanels = new Panel[channelList.Count];
+      channelPanels = new Panel[channelList.Count];
 
       int formWidth = this.Size.Width;
       int formHeight = this.Size.Height;
@@ -62,28 +65,10 @@ namespace MEAClosedLoop
       spb_timer.Elapsed += spbTimerReset;
 
       data = new Queue<uint>();
-      /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
-      //getting filtered data
+      pointsToDraw = new Point[channelList.Max() + 1][];
+      timeUnitSegment = panelWidth;
       
-
-
-        //filling bool_data
-      int i;
-      TPack tmp = new TPack();
-      foreach (int channel in channelList)
-      {
-        tmp.stimTime = data_start;
-        for (i = 0; i < dict_bool_data.Count; i++)
-        {
-          tmp.data.Add(dict_bool_data[channel][i]);
-        }
-      }
-
-
-        data = dataGenerator.ProcessPackStat(bool_data); //тут всё переделывать >_<
-        //все данные по 1 каналу -> 1 кусок данных по всем каналам
-      */
       foreach (int channel in channelList)
       {
         int elName = MEA.AR_DECODE[channel];
@@ -96,6 +81,7 @@ namespace MEAClosedLoop
         tmpPanel.Size = new System.Drawing.Size(panelWidth, panelHeight);
         tmpPanel.BorderStyle = BorderStyle.FixedSingle;
         tmpPanel.BackColor = Color.White;
+        pointsToDraw[channel] = new Point[DEFAULT_POINT_COUNT];
         tmpPanel.Paint += channelPanel_Paint;
         tmpPanel.Name = elName.ToString();
         tmpPanel.Click += new EventHandler(tmpPanel_Click);
@@ -104,8 +90,8 @@ namespace MEAClosedLoop
 
       }
 
-      dataGenerator.ProcessPackStat(panelWidth);
-      //this.Invalidate();
+      
+      this.Invalidate();
 
     }
 
@@ -123,7 +109,7 @@ namespace MEAClosedLoop
       int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
       data = dataGenerator.PrepareData(currentPanelIndex);
 
-      //lock (m_chDataLock1) <- TODO
+      if(data.Count > 0)
       {
         // [TODO] указать реальный размер данных
         if (data != null)
@@ -185,10 +171,9 @@ namespace MEAClosedLoop
     }
     public void StopAmpStat()
     {
-
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
       spb_timer.Stop();
-      this.Invalidate();
+      drawResult();
       MessageBox.Show("подсчёт завершён");
     }
 
@@ -201,7 +186,7 @@ namespace MEAClosedLoop
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
       spb_timer.Stop();
-      this.Invalidate();
+      drawResult();
 
       MessageBox.Show("подсчёт завершён");
     }
@@ -223,6 +208,16 @@ namespace MEAClosedLoop
       {
         spb_timer.Start();
       }
+    }
+    private void drawResult()
+    {
+        dataGenerator.ProcessPackStat(timeUnitSegment);
+        foreach (Panel p in channelPanels)
+        {
+            p.Invalidate();
+            //MessageBox.Show("redraw");     
+        }
+        //this.Invalidate();
     }
   }
 }
