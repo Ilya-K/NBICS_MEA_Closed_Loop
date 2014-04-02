@@ -147,7 +147,7 @@ namespace MEAClosedLoop
       ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
       int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
       ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
-
+      dataGenerator.totalTime = totalStatTime * 25;
       //StatProgressBar.Maximum = totalStatTime;
       //dataGenerator.CollectStat(totalStatTime);
 

@@ -472,7 +472,8 @@ namespace MEAClosedLoop
             int j = 0;
             for (int i = 0; i < length; ++i)
             {
-              packData[channel][j++] = i - 100;
+              packData[channel][j] = packet[channel][j];
+              j++;
             }
           });
 

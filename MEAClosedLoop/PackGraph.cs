@@ -16,9 +16,15 @@ namespace MEAClosedLoop
     public int channel;
   }
 
-  public struct ProcessedPack{
+  public class ProcessedPack{
     public Dictionary<int, TPackMap> dataMap;  // <channel, data>
     public TTime start;
+
+    public ProcessedPack()
+    {
+      dataMap = new Dictionary<int, TPackMap>();
+      start = 0;
+    }
   }
 
 
@@ -38,7 +44,7 @@ namespace MEAClosedLoop
     private Queue<CPack> RawAmpData, RawFreqData;
     Timeline processed_data;
     state GraphType;
-    public uint totalTime;
+    public ulong totalTime;
     
     const int MAX_PACK_LENGTH = 12500; //500 ms 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
@@ -47,21 +53,15 @@ namespace MEAClosedLoop
 
 
 
-    private TPackMap SpikesInPack(TPack input, uint iterationLength)
+    private TPackMap SpikesInPack(TPack input)
     {
       TPackMap output = new TPackMap();
-      uint TimeIterator, TimePartIterator;
-      uint packCount;
+      uint TimeIterator;
 
-      for (TimeIterator = 0; TimeIterator < input.data.Count(); TimeIterator += iterationLength)
+      for (TimeIterator = 0; TimeIterator < input.data.Count(); TimeIterator ++)
       {
-        packCount = 0;
-        for (TimePartIterator = TimeIterator; TimePartIterator <= TimeIterator + iterationLength; TimePartIterator++)
-        {
-          if (input.data[(int)TimePartIterator])
-            packCount++;
-        }
-        output.Add(packCount);
+        if (input.data[(int)TimeIterator])
+          output.Add(TimeIterator);
       }
       
       /*if (TimeIterator > realMaxPackLength)
@@ -92,7 +92,7 @@ namespace MEAClosedLoop
 
     public void ProcessPackStat(int timeUnitSegment) //now from all channels
     {
-      uint iterationLength = totalTime / (uint)timeUnitSegment;
+      uint iterationLength = (uint)(totalTime / (ulong)timeUnitSegment);
 
       //Filling timeline
       if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
@@ -114,7 +114,7 @@ namespace MEAClosedLoop
             ProcessedPack processed_pack_to_add = new ProcessedPack();
             foreach (int channel in current_cpack.Data.Keys)
             {
-                processed_pack_to_add.dataMap[channel] = SpikesInPack(CPack2TPack(current_cpack, channel), iterationLength);
+                processed_pack_to_add.dataMap[channel] = SpikesInPack(CPack2TPack(current_cpack, channel));
             }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
@@ -157,7 +157,7 @@ namespace MEAClosedLoop
 
       if (processed_data.Count == 0) return output;
 
-      for (int timeIterator = 0; (timeIterator < totalTime) && (processed_data.Count > 0); timeIterator++)
+      for (int timeIterator = 0; ((ulong)timeIterator < totalTime) && (processed_data.Count > 0); timeIterator++)
       {
         if (timeIterator < (uint)processed_data.Peek().start)
         { //filling free space
