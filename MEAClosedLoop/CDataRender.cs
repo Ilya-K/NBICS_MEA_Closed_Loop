@@ -89,7 +89,7 @@ namespace MEAClosedLoop
       lock (DataPacketLock)
       {
         DataPacket = new TFltDataPacket(data);
-        DataPacketHistory.Add(DataPacket);
+        //DataPacketHistory.Add(DataPacket);
         int AnyExistsKey = DataPacket.Keys.First();
         summary_time_stamp += (TTime)DataPacket[AnyExistsKey].Length;
       }
@@ -118,14 +118,14 @@ namespace MEAClosedLoop
       // сетка 8 x 8 клеток
       // длина и ширина пропорциональны размеру главного окна
       int CellWidth = WindowWidth / 8;
-      int CellHeght = WindowHeight / 8;
+      int CellHeight = WindowHeight / 8;
 
       for (int i = 0; i < 8; i++)
       {
         for (int j = 0; j < 8 && i * 8 + j < ChannelvectorsArray.Length; j++)
         {
           // переделать в сооствествие с номерами и расположениями каналов на MEA
-          ChannelvectorsArray[i * 8 + j] = new Vector3(i * CellWidth, j * CellHeght, 0);
+          ChannelvectorsArray[i * 8 + j] = new Vector3((MEA.AR_DECODE[i * 8 + j] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i * 8 + j] % 10 - 1) *CellHeight, 0);
         }
       }
 
@@ -150,14 +150,32 @@ namespace MEAClosedLoop
         for (int i = 0; i < data_to_display.Length; i++)
         {
           vertices[RealChannelIndx][i].Position.X = ChannelvectorsArray[RealChannelIndx].X + ((float)i * CellWidth) / data_to_display.Length;
-          vertices[RealChannelIndx][i].Position.Y = ChannelvectorsArray[RealChannelIndx].Y + CellHeght / 2 - (float)data_to_display[i] / 20;
+          vertices[RealChannelIndx][i].Position.Y = ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2 - (float)data_to_display[i] / 20;
           vertices[RealChannelIndx][i].Position.Z = 0;
+          vertices[RealChannelIndx][i].Color = (Math.Abs(data_to_display[i]) > 120) ? Color.Red : Color.Black;
         }
         //if(RealChannelIndx == 13) 
-        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices[RealChannelIndx].Count() - 2);
+        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices[RealChannelIndx].Count() - 1);
         RealChannelIndx++;
       }
+      // отрисовка сетки каналов
+      VertexPositionColor[] HorizontalLinesPoints = new VertexPositionColor[2];
+      VertexPositionColor[] VericalLinesPoints = new VertexPositionColor[2];
+      for (int i = 1; i < 8; i++)
+      {
+        HorizontalLinesPoints[0].Position = new Vector3(0, i * CellHeight, 0);
+        HorizontalLinesPoints[0].Color = Color.Green;
+        HorizontalLinesPoints[1].Position = new Vector3(WindowWidth, i * CellHeight, 0);
+        HorizontalLinesPoints[1].Color = Color.Green;
 
+        VericalLinesPoints[0].Position = new Vector3(i * CellWidth, 0, 0);
+        VericalLinesPoints[0].Color = Color.Green;
+        VericalLinesPoints[1].Position = new Vector3(i * CellWidth, WindowHeight, 0);
+        VericalLinesPoints[1].Color = Color.Green;
+
+        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, HorizontalLinesPoints, 0, 1);
+        graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, VericalLinesPoints, 0, 1);
+      }
       base.Draw(gameTime);
     }
   }
