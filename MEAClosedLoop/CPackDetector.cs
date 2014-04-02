@@ -82,10 +82,12 @@ namespace MEAClosedLoop
       // [DEBUG]
 #if DEBUG_SPIKETRAINS
       private List<CSpikeTrainFrame> m_dbgTrainList = new List<CSpikeTrainFrame>();
+      
       public List<CSpikeTrainFrame> GetSpikeTrainListDbg()
       {
         lock(m_dbgTrainList) return new List<CSpikeTrainFrame>(m_dbgTrainList);
       }
+
       public void ClearSpikeTrainListDbg()
       {
         lock (m_dbgTrainList)
@@ -336,7 +338,7 @@ namespace MEAClosedLoop
 #endif
 
 #if DEBUG_SPIKETRAINS
-    public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainDebug()
+    public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainDbg()
     {
       Dictionary<int, List<CSpikeTrainFrame>> spikeTrainDbg = new Dictionary<int,List<CSpikeTrainFrame>>();
       foreach (Int16 channel in m_activeChannelList)

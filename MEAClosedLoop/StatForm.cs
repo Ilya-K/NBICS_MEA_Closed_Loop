@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUG_SPIKETRAINS
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -44,6 +45,10 @@ namespace MEAClosedLoop
     private CCalcExpWndSE m_calcSE1sSE = new CCalcExpWndSE(250);
     private CExpAvg m_calcSE2Avg = new CExpAvg(1000);
     private CExpAvg m_calcAvgSE125 = new CExpAvg(62);
+    private List<CPack> m_packs = new List<CPack>();
+#if DEBUG_SPIKETRAINS
+    private Dictionary<int, List<CSpikeTrainFrame>> m_dbgSpikeTrains;
+#endif
 
     private int m_channel; // [TODO]: It's not a true channel name, but just an index in a Dic. Correct some day.
     private int m_prevDataPanelWidth;
@@ -74,9 +79,13 @@ namespace MEAClosedLoop
       m_SE500SEPoints = new Point[panel_Data.Width * 2];
       m_SE1sSEPoints = new Point[panel_Data.Width * 2];
       m_avgSE2Points = new Point[panel_Data.Width * 2];
-
+      
       m_dataStream = fltStream;
-      if (loopCtrl != null) 
+      if (loopCtrl != null)
+      {
+        m_loopCtrl = loopCtrl;
+        m_loopCtrl.OnPackFound += PackCallback;
+      }
 
       foreach (int channel in m_dataStream.ChannelList)
       {
@@ -94,6 +103,14 @@ namespace MEAClosedLoop
       m_prevDataPanelWidth = panel_Data.Width;
     }
 
+    private void PackCallback(CPack pack)
+    {
+      m_packs.Add(pack);
+#if DEBUG_SPIKETRAINS
+      m_dbgSpikeTrains = m_loopCtrl.GetSpikeTrainsDbg();
+#endif
+    }
+    
     private void DataCallback(TFltDataPacket data)
     {
       if (!m_running) return;

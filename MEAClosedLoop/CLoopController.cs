@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUG_SPIKETRAINS
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,6 +59,13 @@ namespace MEAClosedLoop
     {
       m_stop = true;
     }
+
+#if DEBUG_SPIKETRAINS
+    public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainsDbg()
+    {
+      return m_packDetector.GetSpikeTrainDbg();
+    }
+#endif
 
     private void FeedBackLoop()
     {
