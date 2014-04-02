@@ -64,10 +64,6 @@ namespace MEAClosedLoop
           output.Add(TimeIterator);
       }
       
-      /*if (TimeIterator > realMaxPackLength)
-      {
-        realMaxPackLength = TimeIterator;
-      }*/
 
       return output;
     }
