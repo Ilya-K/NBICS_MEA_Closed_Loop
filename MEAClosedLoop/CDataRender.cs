@@ -29,9 +29,9 @@ namespace MEAClosedLoop
     #region стандартные значения
     private int DEFAULT_WINDOW_HEIGHT = 600;
     private int DEFAULT_WINDOW_WIDTH = 800;
-    int HistoryLength = 40;
-    private int MCHCompress = 10;
-    private int SCHCompress = 2;
+    int HistoryLength = 80;
+    private int MCHCompress = 15;
+    private int SCHCompress = 5;
     private int MCHYRange = 10;
     private int SCHYRange = 2;
     #endregion
