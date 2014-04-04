@@ -21,20 +21,17 @@ namespace MEAClosedLoop
   {
     private TTime start;
     private Int32 length;
-    private TData[] noiseLevel;
     private TFltDataPacket data;
     public TTime Start { get { return start; } }
-    public TData[] NoiseLevel { get { return noiseLevel; } }
     public Int32 Length { get { return length; } set { length = Length; } }
     public TFltDataPacket Data { get { return data; } }
     public bool EOP { get { return length != 0; } }
 
-    public CPack(TTime _start, Int32 _length, TFltDataPacket _data = null, TData[] _noiseLevel = null)
+    public CPack(TTime _start, Int32 _length, TFltDataPacket _data)
     {
       start = _start;
       length = _length;
       data = _data;
-      noiseLevel = _noiseLevel;
     }
   }
 }

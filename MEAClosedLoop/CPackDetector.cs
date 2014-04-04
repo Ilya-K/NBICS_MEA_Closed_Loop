@@ -456,36 +456,31 @@ namespace MEAClosedLoop
       
 
       CPack debugPack = null;
-      const int PACK_POINT_COUNT = 2000;
       if (m_dummyPackTime >= 0)
       {
-        TData[] dummyNoise = new TData[MEA.MAX_CHANNELS];
-        dummyNoise.PopulateArray(100);
-
         if (m_inPackDbg)
         {
           TFltDataPacket packData = new TFltDataPacket(m_activeChannelList.Count);
 
           // Fill packData with active channels keys
-          foreach (int channel in m_activeChannelList) packData[channel] = new TData[PACK_POINT_COUNT];
+          foreach (int channel in m_activeChannelList) packData[channel] = new TData[200];
 
           packData.Keys.AsParallel().ForAll(channel =>
           {
             // Process the first packet
-            int length = PACK_POINT_COUNT;
+            int length = 200;
             int j = 0;
             for (int i = 0; i < length; ++i)
             {
-              packData[channel][j] = packet[channel][j];
-              j++;
+              packData[channel][j++] = i - 100;
             }
           });
 
-          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, PACK_POINT_COUNT, packData, dummyNoise);
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 200, packData);
         }
         else
         {
-          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 0, null, dummyNoise);
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 0, null);
         }
         m_dummyPackTime = -1;
         m_inPackDbg = !m_inPackDbg;

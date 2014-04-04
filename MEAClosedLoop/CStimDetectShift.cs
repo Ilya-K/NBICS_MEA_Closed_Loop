@@ -1,4 +1,4 @@
-﻿//#define GRAPH
+﻿#define GRAPH
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -147,8 +147,7 @@ namespace MEAClosedLoop
       {
         #region Подготовка склеенного массива
         TRawDataPacket _DataPacket = new TRawDataPacket();
-//        for (int channel_index = 0; channel_index < 56; channel_index++)
-        foreach(int channel_index in DataPacket.Keys)
+        for (int channel_index = 0; channel_index < 56; channel_index++)
         {
           _DataPacket.Add(channel_index, new TRawData[PrevPacket[channel_index].Length + DataPacket[channel_index].Length]);
           //Копируем старый в новый
