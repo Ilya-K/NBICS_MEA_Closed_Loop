@@ -495,12 +495,13 @@ namespace MEAClosedLoop
       dataRenderThread = new Thread(DrawDataFunction);
       dataRenderThread.Start();
       HideChannelData.Enabled = true;
+    
     }
     private void DrawDataFunction()
     {
       m_dataRender = new CDataRender();
-      m_dataRender.IsMouseVisible = true;
       m_dataRender.Window.AllowUserResizing = true;
+      m_dataRender.IsMouseVisible = true;
       m_salpaFilter.AddDataConsumer(m_dataRender.RecivieFltData);
       m_dataRender.Run();
       //Initialize GraphRender here
