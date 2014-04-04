@@ -209,7 +209,8 @@ namespace MEAClosedLoop
       //sWatch.Start();
 
       TRawDataPacket data;
-      while (!m_freePacketPool.TryDequeue(out data)) ;
+      m_freePacketPool.TryDequeue(out data);
+
       try
       {
         int count = 0;
