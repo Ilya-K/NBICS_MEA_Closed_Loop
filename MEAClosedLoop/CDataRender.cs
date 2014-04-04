@@ -29,9 +29,13 @@ namespace MEAClosedLoop
     #region стандартные значения
     private int DEFAULT_WINDOW_HEIGHT = 600;
     private int DEFAULT_WINDOW_WIDTH = 800;
-    int HistoryLength = 80;
-    private int MCHCompress = 15;
-    private int SCHCompress = 5;
+    int HistoryLength = 20;
+    bool editFlagLeft = true;
+    bool editFlagRight = true;
+    bool editFlagUp = true;
+    bool editFlagDown = true;
+    private int MCHCompress = 10;
+    private int SCHCompress = 2;
     private int MCHYRange = 10;
     private int SCHYRange = 2;
     #endregion
@@ -51,7 +55,6 @@ namespace MEAClosedLoop
     bool IsDataUpdated;
 
     #endregion
-
     public CDataRender()
     {
       graphics = new GraphicsDeviceManager(this);
@@ -63,13 +66,12 @@ namespace MEAClosedLoop
       this.SelectedDrawMode = CDataRender.DrawMode.DrawMultiChannel;
       (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).DoubleClick += ChangeDrawMode;
       (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).KeyPress += CDataRender_KeyPress;
-      
+
       IsDataUpdated = false;
-     
+
       DataPacketHistory = new Queue<TFltDataPacket>(HistoryLength);
       System.Windows.Forms.MessageBox.Show("");
     }
-
     void CDataRender_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
     {
       if (e.KeyChar.Equals('w'))
@@ -111,9 +113,65 @@ namespace MEAClosedLoop
       // Allows the game to exit
       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
         this.Exit();
+      #region Изменение длины очереди
+      if (Keyboard.GetState().IsKeyDown(Keys.Left))
+      {
+        if (editFlagLeft)
+        {
+          editFlagLeft = false;
+          HistoryLength = (HistoryLength > 2) ? HistoryLength - 2 : HistoryLength;
+        }
+      }
+      if (Keyboard.GetState().IsKeyUp(Keys.Left)) editFlagLeft = true;
 
-      // TODO: Add your update logic here
+      if (Keyboard.GetState().IsKeyDown(Keys.Right))
+      {
+        if (editFlagRight)
+        {
+          editFlagRight = false;
+          HistoryLength += 2;
+        }
+      }
+      if (Keyboard.GetState().IsKeyUp(Keys.Right)) editFlagRight = true;
+      #endregion
+      #region Изменение пропорции по высоте
+      if (Keyboard.GetState().IsKeyDown(Keys.Up))
+      {
+        if (editFlagUp)
+        {
+          editFlagUp = false;
+          switch (this.SelectedDrawMode)
+          {
+            case DrawMode.DrawMultiChannel:
+              MCHYRange = (MCHYRange > 1) ? MCHYRange - 1 : MCHYRange;
+              break;
+            case DrawMode.DrawSingleChannel:
+              SCHYRange = (SCHYRange > 1) ? MCHYRange - 1 : MCHYRange;
+              break;
 
+          }
+        }
+      }
+      if (Keyboard.GetState().IsKeyUp(Keys.Up)) editFlagUp = true;
+
+      if (Keyboard.GetState().IsKeyDown(Keys.Down))
+      {
+        if (editFlagDown)
+        {
+          editFlagUp = false;
+          switch (this.SelectedDrawMode)
+          {
+            case DrawMode.DrawMultiChannel:
+              MCHYRange++;
+              break;
+            case DrawMode.DrawSingleChannel:
+              SCHYRange++;
+              break;
+          }
+        }
+      }
+      if (Keyboard.GetState().IsKeyUp(Keys.Down)) editFlagDown = true;
+      #endregion
       base.Update(gameTime);
     }
     public void RecivieFltData(TFltDataPacket data)
@@ -336,11 +394,11 @@ namespace MEAClosedLoop
                   for (int i = 0; i < data_to_display.Length; i++)
                   {
                     vertices[SingleChannelNum][i].Position.X = ((float)i * WindowWidth) / data_to_display.Length;
-                    vertices[SingleChannelNum][i].Position.Y = WindowHeight / 2 - (float)data_to_display[i] / SCHYRange;
+                    vertices[SingleChannelNum][i].Position.Y = WindowHeight / 2 - 10 * (float)data_to_display[i] / SCHYRange;
                     if (vertices[SingleChannelNum][i].Position.Y < 0) vertices[SingleChannelNum][i].Position.Y = 0;
                     if (vertices[SingleChannelNum][i].Position.Y > WindowHeight) vertices[SingleChannelNum][i].Position.Y = WindowHeight;
                     vertices[SingleChannelNum][i].Position.Z = 0;
-                    vertices[SingleChannelNum][i].Color = (Math.Abs(data_to_display[i]) > 120) ? Color.Red : Color.Blue;
+                    vertices[SingleChannelNum][i].Color = (Math.Abs(data_to_display[i]) > 100) ? Color.Red : Color.Blue;
                   }
                 }
               }
