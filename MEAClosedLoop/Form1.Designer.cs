@@ -57,6 +57,8 @@
       this.checkBox1 = new System.Windows.Forms.CheckBox();
       this.checkBox2 = new System.Windows.Forms.CheckBox();
       this.showChannelData = new System.Windows.Forms.Button();
+      this.DisplayData = new System.Windows.Forms.GroupBox();
+      this.DisplayData.SuspendLayout();
       this.SuspendLayout();
       // 
       // panel1
@@ -67,9 +69,8 @@
       this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.panel1.Location = new System.Drawing.Point(12, 105);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(238, 180);
+      this.panel1.Size = new System.Drawing.Size(259, 180);
       this.panel1.TabIndex = 13;
-      this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
       // 
       // buttonStartDAQ
       // 
@@ -98,7 +99,7 @@
       this.textBoxSpikes.Location = new System.Drawing.Point(327, 303);
       this.textBoxSpikes.Multiline = true;
       this.textBoxSpikes.Name = "textBoxSpikes";
-      this.textBoxSpikes.Size = new System.Drawing.Size(282, 173);
+      this.textBoxSpikes.Size = new System.Drawing.Size(222, 173);
       this.textBoxSpikes.TabIndex = 15;
       // 
       // textBoxStimules
@@ -114,7 +115,7 @@
       this.m_panelSpikeRaster.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.m_panelSpikeRaster.BackColor = System.Drawing.SystemColors.Window;
       this.m_panelSpikeRaster.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.m_panelSpikeRaster.Location = new System.Drawing.Point(504, 105);
+      this.m_panelSpikeRaster.Location = new System.Drawing.Point(525, 105);
       this.m_panelSpikeRaster.Name = "m_panelSpikeRaster";
       this.m_panelSpikeRaster.Size = new System.Drawing.Size(200, 180);
       this.m_panelSpikeRaster.TabIndex = 16;
@@ -136,9 +137,8 @@
       this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.panel2.Location = new System.Drawing.Point(258, 105);
       this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(238, 180);
+      this.panel2.Size = new System.Drawing.Size(259, 180);
       this.panel2.TabIndex = 14;
-      this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
       // 
       // comboBox2
       // 
@@ -335,7 +335,8 @@
       // 
       // showChannelData
       // 
-      this.showChannelData.Location = new System.Drawing.Point(616, 362);
+      this.showChannelData.Enabled = false;
+      this.showChannelData.Location = new System.Drawing.Point(61, 28);
       this.showChannelData.Name = "showChannelData";
       this.showChannelData.Size = new System.Drawing.Size(87, 23);
       this.showChannelData.TabIndex = 29;
@@ -343,12 +344,22 @@
       this.showChannelData.UseVisualStyleBackColor = true;
       this.showChannelData.Click += new System.EventHandler(this.showChannelData_Click);
       // 
+      // DisplayData
+      // 
+      this.DisplayData.Controls.Add(this.showChannelData);
+      this.DisplayData.Location = new System.Drawing.Point(555, 361);
+      this.DisplayData.Name = "DisplayData";
+      this.DisplayData.Size = new System.Drawing.Size(170, 100);
+      this.DisplayData.TabIndex = 30;
+      this.DisplayData.TabStop = false;
+      this.DisplayData.Text = "Display MChannel data";
+      // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(716, 604);
-      this.Controls.Add(this.showChannelData);
+      this.ClientSize = new System.Drawing.Size(737, 604);
+      this.Controls.Add(this.DisplayData);
       this.Controls.Add(this.checkBox2);
       this.Controls.Add(this.checkBox1);
       this.Controls.Add(this.PackStatButton);
@@ -382,6 +393,7 @@
       this.Text = "Form1";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
       this.Load += new System.EventHandler(this.Form1_Load);
+      this.DisplayData.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -418,6 +430,7 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Button showChannelData;
+        private System.Windows.Forms.GroupBox DisplayData;
     }
 }
 
