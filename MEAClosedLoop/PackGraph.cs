@@ -167,7 +167,7 @@ namespace MEAClosedLoop
       output.PopulateArray<uint>(0);
       for (ProcessedPack currentPack = local_data.Dequeue(); local_data.Count > 0; currentPack = local_data.Dequeue())
       {
-        lock (currentPack)
+        if (currentPack.dataMap.ContainsKey(channel))
         {
           foreach (uint dataPoint in currentPack.dataMap[channel])
           {
