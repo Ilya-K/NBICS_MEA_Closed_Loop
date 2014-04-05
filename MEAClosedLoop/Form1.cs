@@ -678,20 +678,8 @@ namespace MEAClosedLoop
 
     private void showChannelData_Click(object sender, EventArgs e)
     {
-      if (showChannelData.Text.Equals("Show"))
-      {
-        showChannelData.Text = "Hide";
-        dataRenderThread.Start();
-
-      }
-      if (showChannelData.Text.Equals("Hide"))
-      {
-        showChannelData.Text = "Show";
-      }
-
       dataRenderThread = new Thread(DrawDataFunction);
       dataRenderThread.Start();
-    
     }
     private void DrawDataFunction()
     {
@@ -702,11 +690,5 @@ namespace MEAClosedLoop
       m_dataRender.Run();
       //Initialize GraphRender here
     }
-
-    private void HideChannelData_Click(object sender, EventArgs e)
-    {
-      dataRenderThread.Suspend();
-    }
-
   }
 }
