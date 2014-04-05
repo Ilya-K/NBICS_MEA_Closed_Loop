@@ -122,12 +122,198 @@ namespace MEAClosedLoop
     #region Data Display
     private void panel1_Paint(object sender, PaintEventArgs e)
     {
+      if (!checkBox1.Checked) return;
+      int width = panel1.Width;
+      int height = panel1.Height;
+      double max = double.MinValue;
+      double min = double.MaxValue;
 
+      lock (m_chDataLock1)
+      {
+        if (m_channelData1 != null)
+        {
+          TData[] se = new TData[m_channelData1.Length];
+          TData[] seLT = new TData[m_channelData1.Length];
+          TData[] hpf = new TData[m_channelData1.Length];
+          TData[] ms = new TData[m_channelData1.Length];
+          TData[] me = new TData[m_channelData1.Length];
+          TData THRESH1 = 0.7;
+
+          for (int i = 0; i < m_channelData1.Length; i++)
+          {
+            se[i] = m_se1.SE(m_channelData1[i]);
+            seLT[i] = m_seLongTerm1.SE(m_channelData1[i]);
+            ms[i] = m_ms.Add((se[i] - seLT[i]) / 50.0);
+            me[i] = m_expAvg.Add((se[i] - seLT[i]) * 5.0);
+
+            //m_integral1 = m_integral1 + (se[i] - seLT[i]) / 100;
+            if (i > 0)
+            {
+              TData diff = me[i] - me[i - 1];
+              if (Math.Abs(diff) > THRESH1)
+              {
+                hpf[i] = hpf[i - 1] + diff;
+              }
+              else
+              {
+                hpf[i] = hpf[i-1] * 0.98;
+              }
+              m_hpf = hpf[i];
+            }
+            else
+            {
+              hpf[0] = m_hpf;
+            }
+
+            if (m_channelData1[i] > max)
+            {
+              max = m_channelData1[i];
+            }
+            if (m_channelData1[i] < min)
+            {
+              min = m_channelData1[i];
+            }
+          }
+          double delta = max - min;
+          double shift = 0;
+          if (delta < 200)
+          {
+            delta = 200;
+            shift = (delta - (max - min)) / 2;
+          }
+          Point[] points = new Point[m_channelData1.Length];
+          for (int i = 0; i < m_channelData1.Length; i++)
+          {
+            points[i] = new Point(i * width / m_channelData1.Length, (int)(height - (m_channelData1[i] - min + shift + 1) * height / (delta + 2)));
+          }
+          Pen pen = new Pen(Color.Blue, 1);
+          e.Graphics.DrawLines(pen, points);
+
+          // [DEBUG]
+          Point[] se_points = new Point[se.Length];
+          Point[] se_pointsLT = new Point[seLT.Length];
+          Point[] integral_points = new Point[se.Length];
+          Point[] ms_points = new Point[se.Length];
+          Point[] me_points = new Point[se.Length];
+          Point[] hpf_points = new Point[se.Length];
+
+          for (int i = 0; i < se.Length; i++)
+          {
+            se_points[i] = new Point(i * width / se.Length, (int)(height - (se[i] - min + shift + 1) * height / (delta + 2)));
+            se_pointsLT[i] = new Point(i * width / seLT.Length, (int)(height - (seLT[i] - min + shift + 1) * height / (delta + 2)));
+            integral_points[i] = new Point(i * width / se.Length, (int)(height - (m_integral1 - min + shift + 1) * height / (delta + 2)));
+            ms_points[i] = new Point(i * width / se.Length, (int)(height - (ms[i] - min + shift + 1) * height / (delta + 2)));
+            me_points[i] = new Point(i * width / se.Length, (int)(height - (me[i] - min + shift + 1) * height / (delta + 2)));
+            hpf_points[i] = new Point(i * width / se.Length, (int)(height - (hpf[i] - min + shift + 1) * height / (delta + 2)));
+          }
+          pen = new Pen(Color.Red, 1);
+          e.Graphics.DrawLines(pen, se_points);
+          pen = new Pen(Color.Green, 1);
+          e.Graphics.DrawLines(pen, se_pointsLT);
+          pen = new Pen(Color.Black, 1);
+          e.Graphics.DrawLines(pen, integral_points);
+          pen = new Pen(Color.Yellow, 1);
+          e.Graphics.DrawLines(pen, me_points);
+          pen = new Pen(Color.YellowGreen, 1);
+          e.Graphics.DrawLines(pen, ms_points);
+          pen = new Pen(Color.Wheat, 1);
+          e.Graphics.DrawLines(pen, hpf_points);
+          // [/Debug]
+
+          labelAmpl1.Text = (max - min).ToString();
+        }
+      }
     }
 
     private void panel2_Paint(object sender, PaintEventArgs e)
     {
+      if (!checkBox2.Checked) return;
+      int width = panel2.Width;
+      int height = panel2.Height;
+      double max = double.MinValue;
+      double min = double.MaxValue;
+      lock (m_chDataLock2)
+      {
+        if (m_channelData2 != null)
+        {
+          TData[] se = new TData[m_channelData2.Length];
+          TData[] seLT = new TData[m_channelData2.Length];
+          TData[] corr1 = new TData[m_channelData2.Length];
+          TData[] corr2 = new TData[m_channelData2.Length];
 
+          for (int i = 0; i < m_channelData2.Length; i++)
+          {
+            se[i] = m_se2.SE(m_channelData2[i]);
+            seLT[i] = m_seLongTerm2.SE(m_channelData2[i]);
+
+            TData corr2u;
+            if (i == 0)
+            {
+              corr1[i] = m_expAvgCorr1.Add(m_channelData2[i] - prev2);
+              corr2u = m_expAvgCorr2u.Add(m_channelData2[i] * prev2);
+            }
+            else
+            {
+              corr1[i] = m_expAvgCorr1.Add(m_channelData2[i] - m_channelData2[i - 1]);
+              corr2u = m_expAvgCorr2u.Add(m_channelData2[i] * m_channelData2[i - 1]);
+            }
+            TData corr2d = m_expAvgCorr2d.Add(m_channelData2[i] * m_channelData2[i]);
+            if (Math.Abs(corr2d) > Param.PRECISION) corr2[i] = corr2u / corr2d;
+
+
+
+            if (m_channelData2[i] > max)
+            {
+              max = m_channelData2[i];
+            }
+            if (m_channelData2[i] < min)
+            {
+              min = m_channelData2[i];
+            }
+          }
+          prev2 = m_channelData2[m_channelData2.Length - 1];
+
+          double delta = max - min;
+          double shift = 0;
+          if (delta < 200)
+          {
+            delta = 200;
+            shift = (delta - (max - min)) / 2;
+          }
+          Point[] points = new Point[m_channelData2.Length];
+          for (int i = 0; i < m_channelData2.Length; i++)
+          {
+            points[i] = new Point(i * width / m_channelData2.Length, (int)(height - (m_channelData2[i] - min + shift + 1) * height / (delta + 2)));
+          }
+          Pen pen = new Pen(Color.Blue, 1);
+          e.Graphics.DrawLines(pen, points);
+
+          // [DEBUG]
+          Point[] se_points = new Point[se.Length];
+          Point[] se_pointsLT = new Point[seLT.Length];
+          Point[] corr1_points = new Point[se.Length];
+          Point[] corr2_points = new Point[se.Length];
+
+          for (int i = 0; i < se.Length; i++)
+          {
+            se_points[i] = new Point(i * width / se.Length, (int)(height - (se[i] - min + shift + 1) * height / (delta + 2)));
+            se_pointsLT[i] = new Point(i * width / seLT.Length, (int)(height - (seLT[i] - min + shift + 1) * height / (delta + 2)));
+            corr1_points[i] = new Point(i * width / corr1.Length, (int)((height * 3) / 4 - corr1[i] * 5));
+            corr2_points[i] = new Point(i * width / corr2.Length, (int)(height  - corr2[i] * 30));
+          }
+          pen = new Pen(Color.Red, 1);
+          e.Graphics.DrawLines(pen, se_points);
+          pen = new Pen(Color.Green, 1);
+          e.Graphics.DrawLines(pen, se_pointsLT);
+          pen = new Pen(Color.Red, 1);
+          e.Graphics.DrawLines(pen, corr1_points);
+          pen = new Pen(Color.Wheat, 1);
+          e.Graphics.DrawLines(pen, corr2_points);
+          // [/Debug]
+
+          labelAmpl2.Text = (max - min).ToString();
+        }
+      }
     }
     #endregion
 
@@ -425,6 +611,7 @@ namespace MEAClosedLoop
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
       showChannelData.Enabled = true;
+
       m_inputStream.Start();
       buttonClosedLoop.Enabled = false;
       if (checkBox_Manual.Checked) m_inputStream.Pause();
@@ -491,6 +678,17 @@ namespace MEAClosedLoop
 
     private void showChannelData_Click(object sender, EventArgs e)
     {
+      if (showChannelData.Text.Equals("Show"))
+      {
+        showChannelData.Text = "Hide";
+        dataRenderThread.Start();
+
+      }
+      if (showChannelData.Text.Equals("Hide"))
+      {
+        showChannelData.Text = "Show";
+      }
+
       dataRenderThread = new Thread(DrawDataFunction);
       dataRenderThread.Start();
     
@@ -503,8 +701,6 @@ namespace MEAClosedLoop
       m_salpaFilter.AddDataConsumer(m_dataRender.RecivieFltData);
       m_dataRender.Run();
       //Initialize GraphRender here
-
-
     }
 
     private void HideChannelData_Click(object sender, EventArgs e)
