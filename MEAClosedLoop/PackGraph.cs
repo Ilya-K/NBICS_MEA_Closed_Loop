@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
@@ -27,16 +28,13 @@ namespace MEAClosedLoop
     }
   }
 
-
-
-  
-
   public class PackGraph
   {
     public enum state
     {
       Amp,
-      Freq
+      Freq,
+      Both
     }
     public double foundPackPercent;
     uint realMaxPackLength;
@@ -49,7 +47,6 @@ namespace MEAClosedLoop
     const int MAX_PACK_LENGTH = 12500; //500 ms 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
     const int STAT_ITERATION_LENGTH = 125; //5 ms
-    //const double SPIKE_TRESHOLD = 300; //now in CPack
 
 
 
@@ -76,8 +73,6 @@ namespace MEAClosedLoop
       output.channel = channel;
       for (int packIterator = 0; packIterator < input.Length; packIterator++)
       {
-
-          //output.data[packIterator] = ((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
           output.data.Add((input.Data[channel])[packIterator] > input.NoiseLevel[channel]);
         
       }
@@ -89,39 +84,45 @@ namespace MEAClosedLoop
     public void ProcessPackStat(int timeUnitSegment) //now from all channels
     {
       uint iterationLength = (uint)(totalTime / (ulong)timeUnitSegment);
+      Queue<CPack> dataSource;
 
       //Filling timeline
       if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
       {
         //Something went wrong
-          throw new Exception("Неверные данные!");
+        GraphType = state.Both;
+        throw new Exception("Неверные данные!"); //или оба режима сразу...
       }
       else
       {
           if (RawAmpData.Count == 0 && RawFreqData.Count == 0)
           {
-              throw new Exception("Пачек не найдено");
+            MessageBox.Show("Пачек не найдено");
+            return;
           }
-        if (RawFreqData.Count > 0)
-        { //freq stat
-          GraphType = state.Freq;
-          TPack pack4debug;
-          foreach (CPack current_cpack in RawFreqData)
+          if (RawFreqData.Count > 0)
+          { //freq stat
+            GraphType = state.Freq;
+            dataSource = RawFreqData;
+          }
+          else //(RawAmpData.Count > 0)
+          { //amp stat
+            GraphType = state.Amp;
+            dataSource = RawAmpData;
+          }  
+        
+        TPack boolPack;
+          foreach (CPack current_cpack in dataSource)
           {
             ProcessedPack processed_pack_to_add = new ProcessedPack();
             foreach (int channel in current_cpack.Data.Keys)
             {
-              pack4debug = CPack2TPack(current_cpack, channel);
-              processed_pack_to_add.dataMap[channel] = SpikesInPack(pack4debug);
+              boolPack = CPack2TPack(current_cpack, channel);
+              processed_pack_to_add.dataMap[channel] = SpikesInPack(boolPack);
             }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
           }
-        }
-        if (RawAmpData.Count > 0)
-        { //amp stat
-          GraphType = state.Amp;
-        }
       }
     }
     
@@ -171,14 +172,21 @@ namespace MEAClosedLoop
         {
           foreach (uint dataPoint in currentPack.dataMap[channel])
           {
-            cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
-            output[cursorPosition]++;
+            switch (GraphType){
+              case state.Freq:
+                cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
+                output[cursorPosition]++;
+                break;
+              case state.Amp: //TODO: calc avg amp and stat here
+                break;
+            }
+          
           }
         }
       }
       maxOutputVal = output.Max();
       //if (maxOutputVal != 0) Array.ForEach(output, X => X = (uint)((double)X / maxOutputVal)); //normalization
-      return output;
+      return output; //TODO: general normalization
     }
   }
 }
