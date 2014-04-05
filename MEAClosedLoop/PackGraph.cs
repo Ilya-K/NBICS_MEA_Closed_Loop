@@ -105,12 +105,14 @@ namespace MEAClosedLoop
         if (RawFreqData.Count > 0)
         { //freq stat
           GraphType = state.Freq;
+          TPack pack4debug;
           foreach (CPack current_cpack in RawFreqData)
           {
             ProcessedPack processed_pack_to_add = new ProcessedPack();
             foreach (int channel in current_cpack.Data.Keys)
             {
-                processed_pack_to_add.dataMap[channel] = SpikesInPack(CPack2TPack(current_cpack, channel)); //TODO: fix here
+              pack4debug = CPack2TPack(current_cpack, channel);
+              processed_pack_to_add.dataMap[channel] = SpikesInPack(pack4debug);
             }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
@@ -145,7 +147,7 @@ namespace MEAClosedLoop
       RawFreqData.Enqueue(pack_to_add);
 
     }
-    private ulong UpdateCursorPosition(ulong prevPosition, uint val, ulong ticksInPoint)
+    private ulong UpdateCursorPosition(ulong prevPosition, UInt64 val, ulong ticksInPoint)
     {
       return (prevPosition + 1) * ticksInPoint > (ulong)val ? prevPosition : prevPosition + 1;
     }
@@ -163,7 +165,7 @@ namespace MEAClosedLoop
       {
         foreach (uint dataPoint in currentPack.dataMap[channel])
         {
-          cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint, ticksInPoint);
+          cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
           output[cursorPosition]++;
         }
       }
