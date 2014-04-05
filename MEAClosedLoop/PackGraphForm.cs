@@ -117,8 +117,10 @@ namespace MEAClosedLoop
             pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, height - (int)data[i]);
           }
           Pen pen = new Pen(Color.Blue, 1);
-          if (pointsToDraw.Count() > 1)
+          if (pointsToDraw.Count() > 3)
           {
+            pointsToDraw[currentPanelIndex][0] = new Point(0, 0);
+            pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
             e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
           }
         }
@@ -213,10 +215,9 @@ namespace MEAClosedLoop
         dataGenerator.ProcessPackStat(timeUnitSegment);
         foreach (Panel p in channelPanels)
         {
-            p.Invalidate();
-            //MessageBox.Show("redraw");     
+          p.Controls.Clear();
+          p.Invalidate();    
         }
-        //this.Invalidate();
     }
   }
 }
