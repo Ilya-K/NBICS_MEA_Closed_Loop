@@ -425,7 +425,6 @@ namespace MEAClosedLoop
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
       showChannelData.Enabled = true;
-      HideChannelData.Enabled = true;
       m_inputStream.Start();
       buttonClosedLoop.Enabled = false;
       if (checkBox_Manual.Checked) m_inputStream.Pause();
@@ -494,7 +493,6 @@ namespace MEAClosedLoop
     {
       dataRenderThread = new Thread(DrawDataFunction);
       dataRenderThread.Start();
-      HideChannelData.Enabled = true;
     
     }
     private void DrawDataFunction()
