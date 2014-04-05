@@ -157,16 +157,23 @@ namespace MEAClosedLoop
       ulong cursorPosition = 0;
       ulong ticksInPoint = totalTime / (ulong)panelWidth;
       double maxOutputVal;
-
-      if (processed_data.Count == 0) return output;
+      Timeline local_data;
+      lock (processed_data)
+      {
+        local_data = new Timeline(processed_data);
+      }
+      if (local_data.Count == 0) return output;
 
       output.PopulateArray<uint>(0);
-      for (ProcessedPack currentPack = processed_data.Dequeue(); processed_data.Count > 0; currentPack = processed_data.Dequeue())
+      for (ProcessedPack currentPack = local_data.Dequeue(); local_data.Count > 0; currentPack = local_data.Dequeue())
       {
-        foreach (uint dataPoint in currentPack.dataMap[channel])
+        lock (currentPack)
         {
-          cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
-          output[cursorPosition]++;
+          foreach (uint dataPoint in currentPack.dataMap[channel])
+          {
+            cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
+            output[cursorPosition]++;
+          }
         }
       }
       maxOutputVal = output.Max();
