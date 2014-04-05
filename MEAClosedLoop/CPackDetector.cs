@@ -27,7 +27,7 @@ namespace MEAClosedLoop
 
     private class CSpikeTrainDetector
     {
-      private const TData ZERO_LEVEL = 1;                   // Approximately 1 bit
+      private const TData ZERO_LEVEL = 0.1;                 // 10 times less than 1 bit
       private const TData THRESH1 = 0.14;
       private const TData THRESH2 = 1.0;
       private const TData SPIKE_THRESH = 3.5;               // *sigma 
@@ -117,7 +117,7 @@ namespace MEAClosedLoop
 
       public CSpikeTrainFrame FindSpikeTrains(TData[] data)
       {
-        CSpikeTrainFrame spikeTrain = null;
+        CSpikeTrainFrame spikeTrain = (m_state == State.Train) ? CONTINUE_TRAIN : null; // [TODO]
 
         int size = data.Length;
         /*
@@ -129,6 +129,7 @@ namespace MEAClosedLoop
         for (int i = 0; i < size; i++)
         {
           // Check if signal is 0
+          // If signal is 0 for ZERO_COUNT (def = 3) samples, consider electrode is blind or blanked
           if (Math.Abs(data[i]) < ZERO_LEVEL)
           {
             if (--m_zeroCount == 0)
@@ -186,7 +187,7 @@ namespace MEAClosedLoop
                 m_state = State.Train;
                 m_inSpike = false;
                 TTime firstSpikeTime = 0;
-                
+
                 // Consider spike-train starts at the time of the first spike in PRE_DETECT_TIME interval before meeting of spike-train criteria
                 while (m_preSpikes.Count > 0)
                 {
@@ -194,13 +195,13 @@ namespace MEAClosedLoop
                   if (firstSpikeTime + PRE_DETECT_TIME > m_absTime + (TTime)i) break;
                 }
                 if (firstSpikeTime == 0) firstSpikeTime = m_absTime + (TTime)i;
-                if (spikeTrain == null) 
+                if (spikeTrain == null)
                 {
                   spikeTrain = new CSpikeTrainFrame(m_channel, firstSpikeTime);         // Create SpikeTrain only when its start is detected
                   m_trainStartTime = firstSpikeTime;
                   // [DEBUG]
 #if DEBUG_SPIKETRAINS
-                  lock(m_dbgTrainList) m_dbgTrainList.Add(spikeTrain);
+                  lock (m_dbgTrainList) m_dbgTrainList.Add(spikeTrain);
 #endif
                 }
                 else
@@ -228,7 +229,7 @@ namespace MEAClosedLoop
 
               meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // mean SE of the stationary noise
 
-              if (shortSE < m_calcNoiseSE2.Mean + m_calcNoiseSE2.PrevSE)
+              if (shortSE >= m_calcNoiseSE2.Mean + m_calcNoiseSE2.PrevSE)
               {
                 m_endTime = m_absTime + (TTime)i;
               }
@@ -244,6 +245,7 @@ namespace MEAClosedLoop
                 {
                   TTime dbgStartTime = m_dbgTrainList[m_dbgTrainList.Count - 1].Start;
                   CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, dbgStartTime);
+                  dbgSpikeTrain.Length = spikeTrain.Length;
                   m_dbgTrainList.Add(dbgSpikeTrain);
                 }
 #endif

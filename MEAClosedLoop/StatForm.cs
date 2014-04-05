@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
+  using TTime = System.UInt64;
   using TData = System.Double;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
   using TStimIndex = System.Int16;
@@ -17,13 +18,15 @@ namespace MEAClosedLoop
 
   public partial class StatForm : Form
   {
-    private const int DEFAULT_CH = 5;
+    private const int DEFAULT_CH = 0;
     private const int STAT_BUF_LEN = 1 * 1000 * Param.MS;
     private const int MIN_PACK_LENGTH = 32;
     private CFiltering m_dataStream;
+    private TTime m_startTime = 0;
     private CLoopController m_loopCtrl;
     private TData[] m_data;
     private List<int> m_packList;
+    private List<int> m_packList2;
     private TData[] m_SE500;
     private TData[] m_SE1s;
     private TData[] m_avgSE125;
@@ -32,6 +35,7 @@ namespace MEAClosedLoop
     private TData[] m_avgSE2;
     private Point[] m_dataPoints;
     private Point[] m_packPoints;
+    private Point[] m_packPoints2;
     private Point[] m_SE500Points;
     private Point[] m_SE1sPoints;
     private Point[] m_SE1sSEPoints;
@@ -65,6 +69,7 @@ namespace MEAClosedLoop
 
       m_data = new TData[STAT_BUF_LEN];
       m_packList = new List<int>();
+      m_packList2 = new List<int>();
       m_SE500 = new TData[STAT_BUF_LEN];
       m_avgSE125 = new TData[STAT_BUF_LEN];
       m_SE1s = new TData[STAT_BUF_LEN];
@@ -73,6 +78,7 @@ namespace MEAClosedLoop
       m_avgSE2 = new TData[STAT_BUF_LEN];
       m_dataPoints = new Point[panel_Data.Width * 2];
       m_packPoints = new Point[panel_Data.Width * 2];
+      m_packPoints2 = new Point[panel_Data.Width * 2];
       m_SE500Points = new Point[panel_Data.Width * 2];
       m_SE1sPoints = new Point[panel_Data.Width * 2];
       m_avgSE125Points = new Point[panel_Data.Width * 2];
@@ -105,9 +111,21 @@ namespace MEAClosedLoop
 
     private void PackCallback(CPack pack)
     {
+       if (m_startTime == 0) m_startTime = m_dataStream.TimeStamp;
       m_packs.Add(pack);
 #if DEBUG_SPIKETRAINS
       m_dbgSpikeTrains = m_loopCtrl.GetSpikeTrainsDbg();
+      foreach (var spTrain in m_dbgSpikeTrains[m_channel])
+      {
+        if (spTrain.Start >= m_startTime)
+        {
+          lock (m_packList2)
+          {
+            m_packList2.Add((int)(spTrain.Start - m_startTime));
+            m_packList2.Add((int)(spTrain.Start - m_startTime) + spTrain.Length);
+          }
+        }
+      }
 #endif
     }
     
@@ -138,8 +156,11 @@ namespace MEAClosedLoop
           {
             if (!m_packStarted)
             {
-              m_packList.Add(m_time);
-              m_packList.Add(0);
+              lock (m_packList)
+              {
+                m_packList.Add(m_time);
+                m_packList.Add(0);
+              }
             }
             m_packStarted = true;
             m_avgSE2[m_time] = m_avgSE2[m_time - 1];
@@ -153,11 +174,14 @@ namespace MEAClosedLoop
           {
             if (m_packStarted == true)
             {
-              int packLength = m_packList[m_packList.Count - 1] - m_packList[m_packList.Count - 2];
-              if (packLength < MIN_PACK_LENGTH)
+              lock (m_packList)
               {
-                m_packList.RemoveAt(m_packList.Count - 1);
-                m_packList.RemoveAt(m_packList.Count - 1);
+                int packLength = m_packList[m_packList.Count - 1] - m_packList[m_packList.Count - 2];
+                if (packLength < MIN_PACK_LENGTH)
+                {
+                  m_packList.RemoveAt(m_packList.Count - 1);
+                  m_packList.RemoveAt(m_packList.Count - 1);
+                }
               }
             }
             m_packStarted = false;
@@ -165,7 +189,7 @@ namespace MEAClosedLoop
 
           if (m_packStarted)
           {
-            m_packList[m_packList.Count - 1] = m_time;
+            lock (m_packList) m_packList[m_packList.Count - 1] = m_time;
           }
 
         }
@@ -186,6 +210,7 @@ namespace MEAClosedLoop
       double dataPointsPerPixel = (double)STAT_BUF_LEN / width;
       Rectangle updateRegion = new Rectangle((int)(dataStart / dataPointsPerPixel), 0, (int)(dataLength / dataPointsPerPixel) + 1, height);
       panel_Data.Invalidate(updateRegion);
+      panel_Stat1.Invalidate(updateRegion);
     }
 
     private void ArtifCallback(List<TAbsStimIndex> stimul)
@@ -206,6 +231,7 @@ namespace MEAClosedLoop
       {
         m_dataPoints = new Point[width * 2];
         m_packPoints = new Point[width * 2];
+        m_packPoints2 = new Point[width * 2];
         m_SE500Points = new Point[width * 2];
         m_SE1sPoints = new Point[width * 2];
         m_SE500SEPoints = new Point[width * 2];
@@ -259,13 +285,33 @@ namespace MEAClosedLoop
 
     private void panel_Stat1_Paint(object sender, PaintEventArgs e)
     {
+      if (m_time == 0) return;
+      int dataLength = m_time;
 
+      int width = panel_Data.Width;
+      int height = panel_Data.Height;
+      double dataPointsPerPixel = (double)STAT_BUF_LEN / width;
+
+      int start = e.ClipRectangle.Left;
+      int drawLength = Math.Min(e.ClipRectangle.Width, (int)(dataLength / dataPointsPerPixel) - start + 1);
+      if (drawLength <= 0) return;
+
+      Point[] dataPoints = new Point[drawLength * 2];
+      Array.Copy(m_dataPoints, start * 2, dataPoints, 0, drawLength * 2);
+
+      Pen penB = new Pen(Color.Blue, 1);
+      e.Graphics.DrawLines(penB, dataPoints);
+      Pen penP = new Pen(Color.Purple, 1);
+      e.Graphics.DrawLines(penP, m_packPoints2);
     }
 
     private void UpdateStoredPoints(int dataStart)
     {
       if (m_time <= dataStart) return;
-      List<int> packList = new List<int>(m_packList);
+      List<int> packList;
+      List<int> packList2;
+      lock (m_packList) packList = new List<int>(m_packList);
+      lock (m_packList2) packList2 = new List<int>(m_packList2);
 
       int dataLength = m_time - dataStart;
       double dataPointsPerPixel = (double)STAT_BUF_LEN / panel_Data.Width;
@@ -330,10 +376,20 @@ namespace MEAClosedLoop
         {
           m_packPoints[2 * x] = m_dataPoints[2 * x];
           m_packPoints[2 * x + 1] = m_dataPoints[2 * x + 1];
-          if (dataStart + i == packList[1])
+          if (dataStart + i == packList[1])                       // EOP
           {
             packList.RemoveAt(0);
             packList.RemoveAt(0);
+          }
+        }
+        if ((packList2.Count > 0) && (dataStart + i >= packList2[0]))
+        {
+          m_packPoints2[2 * x] = m_dataPoints[2 * x];
+          m_packPoints2[2 * x + 1] = m_dataPoints[2 * x + 1];
+          if (dataStart + i == packList2[1])                       // EOP
+          {
+            packList2.RemoveAt(0);
+            packList2.RemoveAt(0);
           }
         }
       }
@@ -342,11 +398,15 @@ namespace MEAClosedLoop
     private void bt_Start_Click(object sender, EventArgs e)
     {
       m_time = 0;
+      m_startTime = 0;
       m_packList.Clear();
+      m_packList2.Clear();
       m_packPoints.PopulateArray<Point>(new Point());
+      m_packPoints2.PopulateArray<Point>(new Point());
       m_packStarted = false;
       m_running = true;
       panel_Data.Refresh();
+      panel_Stat1.Refresh();
     }
 
     private void bt_Stop_Click(object sender, EventArgs e)

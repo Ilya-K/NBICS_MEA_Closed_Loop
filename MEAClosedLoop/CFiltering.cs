@@ -38,7 +38,7 @@ namespace MEAClosedLoop
 
     public int NChannels { get { return m_inputStream.NChannels; } }
     public List<int> ChannelList { get { return m_inputStream.ChannelList; } }
-    private TTime m_timeStamp = 0;
+    private TTime m_timeStamp = 0;                                              // Start time of the last processed packet
     private Int32 m_sentPacketLength = 0;
     private TTime m_localTimeStamp = 0;
     private object m_timeLock = new object();
@@ -342,17 +342,18 @@ namespace MEAClosedLoop
         });
       }
 
-      lock (m_timeLock)
-      {
-        m_timeStamp += (TTime)m_sentPacketLength;
-        m_sentPacketLength = filteredData[filteredData.Keys.ElementAt(0)].Length;
-      }
       lock (m_consumerList)
       {
         if (m_consumerList.Count != 0)
         {
           foreach (ConsumerDelegate consumer in m_consumerList) consumer(filteredData);
         }
+      }
+
+      lock (m_timeLock)
+      {
+        m_timeStamp += (TTime)m_sentPacketLength;
+        m_sentPacketLength = filteredData[filteredData.Keys.ElementAt(0)].Length;
       }
 
       //lock (m_filteredQueue) m_filteredQueue.Enqueue(filteredData);

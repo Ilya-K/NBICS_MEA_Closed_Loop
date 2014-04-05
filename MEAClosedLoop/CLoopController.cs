@@ -73,16 +73,14 @@ namespace MEAClosedLoop
       
       // Wait one full pack first of all
       CPack prevPack = m_packDetector.WaitPack();
-      if (!prevPack.EOP)
-      {
-        CPack tempPack = m_packDetector.WaitPack();
-        prevPack.Length = (Int32)(tempPack.Start - prevPack.Start);
-      }
+      if (!prevPack.EOP) prevPack = m_packDetector.WaitPack();
 
       CPack currPack = prevPack;                  // Dummy assignment, just to shut up the compiler 
       bool insidePack = false;
       TData meanPackPeriod;
       TData sePackPeriod;
+
+      if (OnPackFound != null) OnPackFound(currPack);
 
       while (!m_stop)
       {
@@ -96,15 +94,15 @@ namespace MEAClosedLoop
         {
           if (insidePack)                         // We're inside of previously started pack
           {
-            currPack.Length = (Int32)(currSemiPack.Start - currPack.Start);
+            // currPack.Length = (Int32)(currSemiPack.Start - currPack.Start); // [Obsolete]
             prevPack = currPack;
             insidePack = false;
             // Distribute current pack to consumers
-            if (OnPackFound!=null) OnPackFound(currSemiPack);
+            if (OnPackFound != null) OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
           // Distribute current pack to consumers
-          if (OnPackFound != null) OnPackFound(currPack);
+          if (OnPackFound != null) OnPackFound(currSemiPack);
         }
         else                                      // We've received Start of a long pack
         {
