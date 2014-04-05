@@ -58,7 +58,6 @@
       this.checkBox2 = new System.Windows.Forms.CheckBox();
       this.showChannelData = new System.Windows.Forms.Button();
       this.DisplayData = new System.Windows.Forms.GroupBox();
-      this.HideChannelData = new System.Windows.Forms.Button();
       this.DisplayData.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -347,7 +346,6 @@
       // 
       // DisplayData
       // 
-      this.DisplayData.Controls.Add(this.HideChannelData);
       this.DisplayData.Controls.Add(this.showChannelData);
       this.DisplayData.Location = new System.Drawing.Point(555, 361);
       this.DisplayData.Name = "DisplayData";
@@ -355,17 +353,6 @@
       this.DisplayData.TabIndex = 30;
       this.DisplayData.TabStop = false;
       this.DisplayData.Text = "Display MChannel data";
-      // 
-      // HideChannelData
-      // 
-      this.HideChannelData.Enabled = false;
-      this.HideChannelData.Location = new System.Drawing.Point(61, 58);
-      this.HideChannelData.Name = "HideChannelData";
-      this.HideChannelData.Size = new System.Drawing.Size(87, 23);
-      this.HideChannelData.TabIndex = 30;
-      this.HideChannelData.Text = "Hide";
-      this.HideChannelData.UseVisualStyleBackColor = true;
-      this.HideChannelData.Click += new System.EventHandler(this.HideChannelData_Click);
       // 
       // Form1
       // 
@@ -444,7 +431,6 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Button showChannelData;
         private System.Windows.Forms.GroupBox DisplayData;
-        private System.Windows.Forms.Button HideChannelData;
     }
 }
 
