@@ -39,7 +39,6 @@ namespace MEAClosedLoop
     public int NChannels { get { return m_inputStream.NChannels; } }
     public List<int> ChannelList { get { return m_inputStream.ChannelList; } }
     private TTime m_timeStamp = 0;                                              // Start time of the last processed packet
-    private Int32 m_sentPacketLength = 0;
     private TTime m_localTimeStamp = 0;
     private object m_timeLock = new object();
     public ulong TimeStamp { get { lock (m_timeLock) return m_timeStamp; } }
@@ -352,8 +351,7 @@ namespace MEAClosedLoop
 
       lock (m_timeLock)
       {
-        m_timeStamp += (TTime)m_sentPacketLength;
-        m_sentPacketLength = filteredData[filteredData.Keys.ElementAt(0)].Length;
+        m_timeStamp += (TTime)filteredData[filteredData.Keys.ElementAt(0)].Length;
       }
 
       //lock (m_filteredQueue) m_filteredQueue.Enqueue(filteredData);

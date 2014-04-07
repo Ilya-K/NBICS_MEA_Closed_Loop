@@ -35,7 +35,7 @@ namespace MEAClosedLoop
       private const int PRE_DETECT_TIME = 10 * Param.MS;    // Интервал перед выполнением критерия начала спайк-трэйна, в которм будем искать первый спайк
       private const int ZERO_COUNT = 3;                     // How many sequental zero points have got to consider signal = 0;
       private const int MAX_SPIKE_QUEUE = 10;               // Length of queue for pre-train spikes
-      private readonly CSpikeTrainFrame CONTINUE_TRAIN;     // A return value inside a spike-train
+      private CSpikeTrainFrame m_continueTrain;             // The return value inside a spike-train
 
       private enum State
       {
@@ -95,7 +95,7 @@ namespace MEAClosedLoop
           if (m_dbgTrainList.Count == 0) return;
           CSpikeTrainFrame lastOne = m_dbgTrainList[m_dbgTrainList.Count - 1];
           m_dbgTrainList.Clear();
-          if (m_dbgTrainList.Count % 2 == 0)
+          if (!lastOne.EOP)
           {
             m_dbgTrainList.Add(lastOne);
           }
@@ -112,12 +112,12 @@ namespace MEAClosedLoop
         m_prevPacket = new TData[PRE_DETECT_TIME];
         m_prevPacket.PopulateArray<TData>(0);
         m_preSpikes = new Queue<TTime>(MAX_SPIKE_QUEUE);
-        CONTINUE_TRAIN = new CSpikeTrainFrame(channel, 0);
+        m_continueTrain = new CSpikeTrainFrame(m_channel, 0);
       }
 
       public CSpikeTrainFrame FindSpikeTrains(TData[] data)
       {
-        CSpikeTrainFrame spikeTrain = (m_state == State.Train) ? CONTINUE_TRAIN : null; // [TODO]
+        CSpikeTrainFrame spikeTrain = (m_state == State.Train) ? m_continueTrain : null;
 
         int size = data.Length;
         /*
@@ -137,8 +137,18 @@ namespace MEAClosedLoop
               // If we are in the spike-train, finalize it
               if (m_state == State.Train)
               {
-                if (spikeTrain == null) spikeTrain = new CSpikeTrainFrame(m_channel, m_trainStartTime);
                 spikeTrain.Length = (int)(m_absTime + (TTime)i - spikeTrain.Start);
+                m_continueTrain = null;
+#if DEBUG_SPIKETRAINS
+                lock (m_dbgTrainList)
+                {
+                  // We need to get the start time from the previous debug spike-train, becouse the real spike-trains might be joined.
+                  TTime dbgStartTime = m_dbgTrainList[m_dbgTrainList.Count - 1].Start;
+                  CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, dbgStartTime);
+                  dbgSpikeTrain.Length = (int)(m_absTime + (TTime)i - dbgStartTime);
+                  m_dbgTrainList.Add(dbgSpikeTrain);
+                }
+#endif
               }
               m_state = State.Zero;
             }
@@ -199,19 +209,14 @@ namespace MEAClosedLoop
                 {
                   spikeTrain = new CSpikeTrainFrame(m_channel, firstSpikeTime);         // Create SpikeTrain only when its start is detected
                   m_trainStartTime = firstSpikeTime;
-                  // [DEBUG]
-#if DEBUG_SPIKETRAINS
-                  lock (m_dbgTrainList) m_dbgTrainList.Add(spikeTrain);
-#endif
                 }
                 else
                 {
                   spikeTrain.EOP = false;     // If a new spike-train has started right after the previous one, just continue the previous one
-#if DEBUG_SPIKETRAINS
-                  CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, firstSpikeTime);
-                  lock (m_dbgTrainList) m_dbgTrainList.Add(dbgSpikeTrain);
-#endif
                 }
+#if DEBUG_SPIKETRAINS
+                lock (m_dbgTrainList) m_dbgTrainList.Add(new CSpikeTrainFrame(m_channel, firstSpikeTime));
+#endif
                 m_calcPackSE.SE(data[i]);
                 break;
               }
@@ -238,14 +243,15 @@ namespace MEAClosedLoop
               {
                 m_state = State.Noise;
                 // Finalize current spike-train
-                if (spikeTrain == null) spikeTrain = new CSpikeTrainFrame(m_channel, m_trainStartTime);
                 spikeTrain.Length = (int)(m_endTime - spikeTrain.Start);
+                m_continueTrain = null;
 #if DEBUG_SPIKETRAINS
                 lock (m_dbgTrainList)
                 {
+                  // We need to get the start time from the previous debug spike-train, becouse the real spike-trains might be joined.
                   TTime dbgStartTime = m_dbgTrainList[m_dbgTrainList.Count - 1].Start;
                   CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, dbgStartTime);
-                  dbgSpikeTrain.Length = spikeTrain.Length;
+                  dbgSpikeTrain.Length = (int)(m_endTime - dbgSpikeTrain.Start);
                   m_dbgTrainList.Add(dbgSpikeTrain);
                 }
 #endif
@@ -300,10 +306,7 @@ namespace MEAClosedLoop
            */
         }
 
-        if ((m_state == State.Train) && (spikeTrain == null))
-        {
-          spikeTrain = CONTINUE_TRAIN;
-        }
+        if ((spikeTrain != null) && !spikeTrain.EOP) m_continueTrain = new CSpikeTrainFrame(m_channel, spikeTrain.Start);
 
         m_absTime += (TTime)size;
         m_prevPacket = data;

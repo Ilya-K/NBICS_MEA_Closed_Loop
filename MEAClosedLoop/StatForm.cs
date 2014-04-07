@@ -111,7 +111,6 @@ namespace MEAClosedLoop
 
     private void PackCallback(CPack pack)
     {
-       if (m_startTime == 0) m_startTime = m_dataStream.TimeStamp;
       m_packs.Add(pack);
 #if DEBUG_SPIKETRAINS
       m_dbgSpikeTrains = m_loopCtrl.GetSpikeTrainsDbg();
@@ -121,17 +120,19 @@ namespace MEAClosedLoop
         {
           lock (m_packList2)
           {
-            m_packList2.Add((int)(spTrain.Start - m_startTime));
             m_packList2.Add((int)(spTrain.Start - m_startTime) + spTrain.Length);
           }
         }
       }
+      UpdateStoredPoints(0);
 #endif
     }
     
     private void DataCallback(TFltDataPacket data)
     {
       if (!m_running) return;
+      if (m_startTime == 0) 
+        m_startTime = m_dataStream.TimeStamp;
 
       int dataLength = data[data.Keys.First()].Length;
       if (m_time + dataLength > STAT_BUF_LEN)
@@ -210,7 +211,7 @@ namespace MEAClosedLoop
       double dataPointsPerPixel = (double)STAT_BUF_LEN / width;
       Rectangle updateRegion = new Rectangle((int)(dataStart / dataPointsPerPixel), 0, (int)(dataLength / dataPointsPerPixel) + 1, height);
       panel_Data.Invalidate(updateRegion);
-      panel_Stat1.Invalidate(updateRegion);
+      panel_Stat1.Invalidate();
     }
 
     private void ArtifCallback(List<TAbsStimIndex> stimul)
@@ -242,6 +243,7 @@ namespace MEAClosedLoop
 
         m_prevDataPanelWidth = width;
         panel_Data.Refresh();
+        panel_Stat1.Refresh();
         return;
       }
 
