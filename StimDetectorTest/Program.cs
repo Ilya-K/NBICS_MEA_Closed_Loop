@@ -198,7 +198,7 @@ namespace StimDetectorTest
               commonStimsCount = realStimIndices.Count();
             }
             List<TAbsStimIndex> ExcessStimIndices = new List<TAbsStimIndex>();
-            List<TAbsStimIndex> NotfoundedStimIndices = new List<TAbsStimIndex>();
+            List<TAbsStimIndex> NotfoundStimIndices = new List<TAbsStimIndex>();
             /*
             for (int i = 0; i < foundStimIndices.Count(); i++)
             {
@@ -223,7 +223,7 @@ namespace StimDetectorTest
               bool flag = false;
               for (int j = 0; j < realStimIndices.Count; j++)
               {
-                if (Math.Abs((Int64)(foundStimIndices[i] - realStimIndices[j])) < 6000)
+                if (Math.Abs((double)foundStimIndices[i] - (double)realStimIndices[j]) < 600)
                 {
                   flag = true;
                   break;
@@ -239,7 +239,7 @@ namespace StimDetectorTest
               bool flag = false;
               for (int j = 0; j < foundStimIndices.Count; j++)
               {
-                if (Math.Abs((Int64)(foundStimIndices[j] - realStimIndices[i])) < 260)
+                if (Math.Abs((double)foundStimIndices[j] - (double)realStimIndices[i]) < 260)
                 {
                   flag = true;
                   break;
@@ -247,16 +247,24 @@ namespace StimDetectorTest
               }
               if (!flag)
               {
-                NotfoundedStimIndices.Add(realStimIndices[i]);
+                NotfoundStimIndices.Add(realStimIndices[i]);
               }
             }
-            for (int i = 0; i < ExcessStimIndices.Count; i++)
+            using (System.IO.StreamWriter exessly_found_file = new System.IO.StreamWriter("D:\\MCS_Data\\ExFound.txt"))
             {
-              Console.WriteLine("Exessly Founded Stim Index {0} : {1}", i, ExcessStimIndices[i]);
+              for (int i = 0; i < ExcessStimIndices.Count; i++)
+              {
+                Console.WriteLine("Exessly Founded Stim Index {0} : {1}", i, ExcessStimIndices[i]);
+                exessly_found_file.WriteLine("{0}", ExcessStimIndices[i]);
+              }
             }
-            for (int i = 0; i < NotfoundedStimIndices.Count; i++)
+            using (System.IO.StreamWriter not_found_file = new System.IO.StreamWriter("D:\\MCS_Data\\NotFound.txt"))
             {
-              Console.WriteLine("NotFounded Stim Index {0} : {1}", i, NotfoundedStimIndices[i]);
+              for (int i = 0; i < NotfoundStimIndices.Count; i++)
+              {
+                Console.WriteLine("NotFounded Stim Index {0} : {1}", i, NotfoundStimIndices[i]);
+                not_found_file.WriteLine("{0}", NotfoundStimIndices[i]);
+              }
             }
 
             for (int i = 0; i < commonStimsCount; i++)

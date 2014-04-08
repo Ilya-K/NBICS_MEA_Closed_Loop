@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
-  using TPackMap = List<uint>;
+  using TPackMap = List<int>;
   using TTime = UInt64;
   public delegate void LoadSelectionDelegate(int sel);
   public delegate void StatFinishedDelegate();
@@ -17,11 +17,12 @@ namespace MEAClosedLoop
 
   public partial class PackGraphForm : Form
   {
-    TPackMap data;
+    uint[] data;
     const int SUBPANEL_SPACE_X = 2;
     const int SUBPANEL_SPACE_Y = 2;
 
     const int SPB_REFRESH_COOLDOWN = 5; //in seconds
+    const int DEFAULT_POINT_COUNT = 100; //in each pannel
 
     public event LoadSelectionDelegate loadSelection;
 
@@ -35,13 +36,17 @@ namespace MEAClosedLoop
     CLoopController m_LoopCtrl;
     public event DelegateSetProgress spb_SetVal;
 
+    private Point[][] pointsToDraw;
+    int timeUnitSegment;
+    Panel[] channelPanels;
+
     public PackGraphForm(List<int> channelList, CLoopController LoopCtrl)
     {
       //TODO: real-time getting data & list of stim indices
       InitializeComponent();
       this.FormBorderStyle = FormBorderStyle.FixedSingle;
       this.MaximizeBox = false;
-      Panel[] channelPanels = new Panel[channelList.Count];
+      channelPanels = new Panel[channelList.Count];
 
       int formWidth = this.Size.Width;
       int formHeight = this.Size.Height;
@@ -58,28 +63,12 @@ namespace MEAClosedLoop
       spb_timer = new System.Timers.Timer();
       ItsTimeToMoveSPB += spb_update;
       spb_timer.Elapsed += spbTimerReset;
-      /*List<TPack> bool_data = new List<TPack>(); //TODO: generate correct data in bool format
 
-      //getting filtered data
+      data = null;
+
+      pointsToDraw = new Point[channelList.Max() + 1][];
+      timeUnitSegment = panelWidth;
       
-
-
-        //filling bool_data
-      int i;
-      TPack tmp = new TPack();
-      foreach (int channel in channelList)
-      {
-        tmp.stimTime = data_start;
-        for (i = 0; i < dict_bool_data.Count; i++)
-        {
-          tmp.data.Add(dict_bool_data[channel][i]);
-        }
-      }
-
-
-        data = dataGenerator.ProcessPackStat(bool_data); //тут всё переделывать >_<
-        //все данные по 1 каналу -> 1 кусок данных по всем каналам
-      */
       foreach (int channel in channelList)
       {
         int elName = MEA.AR_DECODE[channel];
@@ -92,6 +81,7 @@ namespace MEAClosedLoop
         tmpPanel.Size = new System.Drawing.Size(panelWidth, panelHeight);
         tmpPanel.BorderStyle = BorderStyle.FixedSingle;
         tmpPanel.BackColor = Color.White;
+        pointsToDraw[channel] = new Point[DEFAULT_POINT_COUNT];
         tmpPanel.Paint += channelPanel_Paint;
         tmpPanel.Name = elName.ToString();
         tmpPanel.Click += new EventHandler(tmpPanel_Click);
@@ -100,6 +90,7 @@ namespace MEAClosedLoop
 
       }
 
+      
       this.Invalidate();
 
     }
@@ -115,24 +106,25 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
 
+      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
+      data = dataGenerator.PrepareData(currentPanelIndex, width, height);
 
-
-      //      lock (m_chDataLock1)
-      {
-        // [TODO] указать реальный размер данных
-        if (data != null)
+        if (data != null && data.Max() > 0)
         {
-          int dataLength = data.Count();
-          Point[] points = new Point[dataLength];
+          int dataLength = /*pointsToDraw[currentPanelIndex].Length*/ data.Count<uint>();
           for (int i = 0; i < dataLength; i++)
           {
-            points[i] = new Point(i * width / dataLength, (int)(height - i) /*(int)data[i]*/);
+            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, height - (int)data[i]);
           }
           Pen pen = new Pen(Color.Blue, 1);
-          if (points.Count() > 1) e.Graphics.DrawLines(pen, points);
-
+          if (pointsToDraw.Count() > 3)
+          {
+            pointsToDraw[currentPanelIndex][0] = new Point(0, 0);
+            pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
+            e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
+          }
         }
-      }
+        data = null;
     }
 
     private void tmpPanel_Click(object sender, System.EventArgs e)
@@ -148,15 +140,15 @@ namespace MEAClosedLoop
 
     }
 
-    private void RunStatButton_Click(object sender, EventArgs e) //WTF?
+    private void RunStatButton_Click(object sender, EventArgs e)
     {
       int statType = StatTypeListBox.SelectedIndex;
       ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
       int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
       ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
-
+      dataGenerator.totalTime = totalStatTime * Param.MS;
       //StatProgressBar.Maximum = totalStatTime;
-      dataGenerator.CollectStat(totalStatTime);
+      //dataGenerator.CollectStat(totalStatTime);
 
       switch (statType)
       {
@@ -178,15 +170,10 @@ namespace MEAClosedLoop
     }
     public void StopAmpStat()
     {
-
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
-
-      //TODO: redraw panels
       spb_timer.Stop();
-      //StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
-      //StatProgressBar.Hide();
-      //StatProgressBar.Value = 0;
-      //StatProgressBar.Invalidate();
+      statCalcTimer.Stop();
+      drawResult();
       MessageBox.Show("подсчёт завершён");
     }
 
@@ -198,13 +185,10 @@ namespace MEAClosedLoop
     public void StopFreqStat()
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
-      //TODO: redraw panels
       spb_timer.Stop();
-      //StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
-      //StatProgressBar.EndInvoke(null);
-      //StatProgressBar.Value = 0;
-      //StatProgressBar.Invalidate();
-      //StatProgressBar.Hide();
+      statCalcTimer.Stop();
+      drawResult();
+
       MessageBox.Show("подсчёт завершён");
     }
     private void StatTimer(object o1, EventArgs e1)
@@ -225,6 +209,15 @@ namespace MEAClosedLoop
       {
         spb_timer.Start();
       }
+    }
+    private void drawResult()
+    {
+        dataGenerator.ProcessPackStat(timeUnitSegment);
+        foreach (Panel p in channelPanels)
+        {
+          p.Controls.Clear();
+          p.Invalidate();    
+        }
     }
   }
 }

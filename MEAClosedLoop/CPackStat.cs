@@ -24,20 +24,21 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 100;
+    private const int Minimum_Pack_Requered_Count = 250;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
     private CLoopController LoopCtrl;
     public List<CPack> PackListBefore; //befor stim started
     public List<CPack> PackListAfter; // After stim started
-    public List<CPack> PackListDetectReaction; // Лист пачек, которые считаются реакцией культуры
-    public List<TStimIndex> StimList;
+    public List<CPack> PackListDetectReaction = new List<CPack>(); // Лист пачек, которые считаются реакцией культуры
+    public List<TAbsStimIndex> StimList;
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
     private TTime StartStimulationTime = 0; // точка отсчета начала стимуляций. 
     private int Stat_Window_Minutes = 0;
     private int Stat_Window_Seconds = 10;
+    private int AveragePackPeriod = 0;
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
     bool DoStimulation = false;
@@ -45,7 +46,7 @@ namespace MEAClosedLoop
     state CurrentState;
 
 
-    
+
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
     public event DelegateSetProgress SetVal;
@@ -53,23 +54,24 @@ namespace MEAClosedLoop
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
 
     private double StimStartPosition;
+    private TStimIndex StimStartIndex;
     #endregion
     #region Конструктор
-    public CPackStat(CPackDetector _PackDetector, CLoopController _LoopController, List<int> channelList)
+    public CPackStat(CLoopController _LoopController, List<int> channelList)
     {
       InitializeComponent();
       CurrentState = state.BeforeStimulation;
       PackListBefore = new List<CPack>();
       PackListAfter = new List<CPack>();
-      StimList = new List<TStimIndex>();
-      PackDetector = _PackDetector;
+      StimList = new List<TAbsStimIndex>();
       LoopCtrl = _LoopController;
-      StatProgressBar.Maximum = Minimum_Pack_Requered_Count;
+      StatProgressBar.Maximum = Minimum_Pack_Requered_Count + 1;
       m_channelList = channelList;
 
       SetVal += UpdateProgressBar;
       UpdateDistribGrath += DistribGrath.Refresh;
-      UpdateDistribGrath += CalcStat;
+      UpdateDistribGrath += PreCalcStat;
+      UpdateDistribGrath += CurrentCalcStat;
       SetCollectStatButtonText += SetStatButtontext;
     }
     #endregion
@@ -109,7 +111,6 @@ namespace MEAClosedLoop
         DoStatCollection = false;
         CollectStatButton.Text = "Продолжить";
         //CollectingDataThread.Suspend();
-        //PackDetector.PackArrived -= AddPack;
         LoopCtrl.OnPackFound -= AddPack; //now from loop controller
       }
     }
@@ -121,16 +122,18 @@ namespace MEAClosedLoop
     #region Перерисовка поля статистики пачек
     private void DistribGrath_Paint(object sender, PaintEventArgs e)
     {
+      float dt = (float)0.05;//sec, is optimal time window to collect packs for gistgrath// derived from Ilia Sokolov experiment's
+      float HorisondalProportion = ((float)e.ClipRectangle.Width) / ((int)StatGraphXRange.Value); // from s to px
+      float dp = dt * 25000; // dt in points
+      //summ time Length = dt*n sec, n = TimeLength/dt
       Pen pen = new Pen(Color.Blue);
       pen.Width = 1;
       int maxInd = 0;
-      int[] PackLengthDestrib = new int[400];
+      int[] PackLengthDestrib = new int[(int)((int)(StatGraphXRange.Value) / dt)];
       //set as 0
       for (int i = 0; i < PackLengthDestrib.Length; i++)
       {
-        //dt = 0.05 sec
-        //summ time Length = 10 sec
-        PackLengthDestrib[i] = 0;//50 / (1 + (i - 25) * (i - 25) / 10);
+        PackLengthDestrib[i] = 3;
       }
       lock (PacklListBlock)
       {
@@ -138,8 +141,8 @@ namespace MEAClosedLoop
         {
           for (int j = 0; j < PackLengthDestrib.Length; j++)
           {
-            if (PackListBefore[i + 1].Start - PackListBefore[i].Start > (TAbsStimIndex)j * 1250
-              && PackListBefore[i + 1].Start - PackListBefore[i].Start < (TAbsStimIndex)(j + 1) * 1250)
+            if (PackListBefore[i + 1].Start - PackListBefore[i].Start > (TAbsStimIndex)j * dp
+              && PackListBefore[i + 1].Start - PackListBefore[i].Start < (TAbsStimIndex)(j + 1) * dp)
             {
               PackLengthDestrib[j] += 1;
               break;
@@ -150,36 +153,36 @@ namespace MEAClosedLoop
         for (int i = 0; i < PackLengthDestrib.Length; i++)
         {
           e.Graphics.DrawLine(pen,
-            i * 5,
-            e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height,
-            i * 5 + 4,
-            e.ClipRectangle.Height - 1 - PackLengthDestrib[i] * 3 * 50 / e.ClipRectangle.Height);
+            (float)i * dt * HorisondalProportion,
+            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height / ((float)StatGraphYRange.Value)),
+            (float)(i + 1) * dt * HorisondalProportion + dt,
+            (float)(e.ClipRectangle.Height - PackLengthDestrib[i] * e.ClipRectangle.Height / ((float)StatGraphYRange.Value)));
           if (PackLengthDestrib[i] > PackLengthDestrib[maxInd]) maxInd = i;
         }
         //Draw Average
         pen.Color = Color.Red;
-        e.Graphics.DrawLine(pen, maxInd * 5 + 3, 0, maxInd * 5 + 3, e.ClipRectangle.Height);
+        e.Graphics.DrawLine(pen, (float)AveragePackPeriod * HorisondalProportion / 1000, (float)0, (float)AveragePackPeriod * HorisondalProportion / 1000, (float)e.ClipRectangle.Height);
         //Draw Start Stim Time
         pen.Color = Color.Green;
         if (DoDrawStartStimTime)
         {
           e.Graphics.DrawLine(pen,
-            (float)StimStartPosition / 25,// ms
+            (float)StimStartPosition * HorisondalProportion,
             0,
-            (float)StimStartPosition / 25,// ms
+            (float)StimStartPosition * HorisondalProportion,
             e.ClipRectangle.Height);
         }
       }
     }
     #endregion
     #region CallBack фукция для принятия информации об стмуляциях.
-    public void RecieveStimData(List<TStimIndex> stimlist)
+    public void RecieveStimData(List<TAbsStimIndex> stimlist)
     {
       lock (StimListBlock)
       {
         if (stimlist != null)
         {
-          foreach (TStimIndex stim in stimlist)
+          foreach (TAbsStimIndex stim in stimlist)
           {
             StimList.Add(stim);
           }
@@ -188,7 +191,7 @@ namespace MEAClosedLoop
     }
 
     #endregion
-    #region Функция для заргрузки информации об пачках, исполняется в отдельном потоке
+    #region CallBack Функция для загрузки информации об пачках
     private void CollectPacks() //old, random
     {
       TTime InputCount = 0;
@@ -239,6 +242,7 @@ namespace MEAClosedLoop
     }
     private void AddPack(CPack pack_to_add)
     {
+      
       lock (PacklListBlock)
       {
         switch (CurrentState)
@@ -246,15 +250,18 @@ namespace MEAClosedLoop
           case state.BeforeStimulation:
             if (DoStatCollection) PackListBefore.Add(pack_to_add);
             StatProgressBar.BeginInvoke(SetVal, null, 1);
-            DistribGrath.Invalidate();
-            if (PackListBefore.Count >= Minimum_Pack_Requered_Count) DoStatCollection = false;
-
+            DistribGrath.BeginInvoke(UpdateDistribGrath);
+            if (PackListBefore.Count >= Minimum_Pack_Requered_Count)
+            {
+              DoStatCollection = false;
+              CollectStatButton.BeginInvoke(SetCollectStatButtonText, "готово");
+            }
             break;
           case state.AfterStimulation:
-            
-            if(DoStimulation) PackListAfter.Add(pack_to_add);
-            PackCountGraph.Invalidate();
 
+            if (DoStimulation) PackListAfter.Add(pack_to_add);
+            PackCountGraph.Invalidate();
+            DistribGrath.BeginInvoke(UpdateDistribGrath);
             break;
         }
       }
@@ -262,25 +269,66 @@ namespace MEAClosedLoop
 
     #endregion
     #region Подсчет статистики
-    private void CalcStat()
+    private void PreCalcStat()
     {
-      Average Stat = new Average();
-      for (int i = 0; i < PackListBefore.Count() - 1; i++)
+      if (PackListBefore.Count > 1)
       {
-        Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+        lock (PacklListBlock)
+        {
+          Average Stat = new Average();
+          for (int i = 0; i < PackListBefore.Count() - 1; i++)
+          {
+            Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+          }
+          Stat.Calc();
+          this.AveragePackPeriod = (int)Stat.Value / 25; //милли секунд
+          this.SelectedAverageBox.Text = String.Format("{0:0.###}", (Stat.Value / 25));
+          this.SelectedSigmaBox.Text = String.Format("{0:0.###}", (Stat.Sigma / 25));
+          // Обновить график       
+          this.DistribGrath.Refresh();
+        }
       }
-      Stat.Calc();
-      this.SelectedAverageBox.Text = (Stat.Value / 25000).ToString() + " сек";
-      this.SelectedSigmaBox.Text = (Stat.Sigma / 25000).ToString() + " сек";
-      // Обновить график       
-      this.DistribGrath.Refresh();
 
     }
+    private void CurrentCalcStat()
+    {
+
+      if(PackListBefore.Count < 2 && PackListAfter.Count < 2) return;
+
+      TAbsStimIndex CurrentTime = (PackListAfter.Count >= 2) ? PackListAfter.Last().Start : PackListBefore.Last().Start;
+      TAbsStimIndex TimeDelay = (TAbsStimIndex)StatWindowMinCount.Value * 60 * 25000 + (TAbsStimIndex)StatWindowSecCount.Value * 25000;
+      Average Stat = new Average();
+      
+
+      lock (PacklListBlock)
+      {
+        if (PackListBefore.Count > 1)
+        {
+          for (int i = 0; i < PackListBefore.Count() - 1; i++)
+          {
+            if (PackListBefore[i].Start + TimeDelay > CurrentTime)
+              Stat.AddValueElem(PackListBefore[i + 1].Start - PackListBefore[i].Start);
+          }
+        }
+        if (PackListAfter.Count > 1)
+        {
+          for (int i = 0; i < PackListAfter.Count() - 1; i++)
+          {
+            if (PackListAfter[i].Start + TimeDelay > CurrentTime)
+              Stat.AddValueElem(PackListAfter[i + 1].Start - PackListAfter[i].Start);
+          }
+        }
+      }
+      Stat.Calc();
+      this.CurrentAverage.Text = String.Format("{0:0.###}", (Stat.Value / 25));
+      this.CurrentSigma.Text = String.Format("{0:0.###}", (Stat.Sigma / 25));
+    }
+
     #endregion
     #region Обработка события обновления прогресс бара
     void UpdateProgressBar(object sender, int val)
     {
-      if (StatProgressBar.Value < StatProgressBar.Maximum - 1)
+      if (StatProgressBar.Value + val <= StatProgressBar.Maximum )
         StatProgressBar.Value += val;
     }
     #endregion
@@ -290,16 +338,16 @@ namespace MEAClosedLoop
       DoDrawStartStimTime = true;
       double i = StimStartPosition;
       double.TryParse(StimPadding.Text, out i);
-      //StimStartPosition = i;
-      //trackBar1.Value = (int)StimStartPosition * 5 / 25;
+      StimStartPosition = i;
+      trackBar1.Value = (int) (StimStartPosition * trackBar1.Maximum / (int)(StatGraphXRange.Value));
       //DistribGrath.Refresh();
     }
     private void trackBar1_Scroll(object sender, EventArgs e)
     {
       DoDrawStartStimTime = true;
       //2000p - 20sec - maximum
-      StimStartPosition = trackBar1.Value * 25 / 5;
-      StimPadding.Text = StimStartPosition.ToString();
+      StimStartPosition = ((float)((int)StatGraphXRange.Value) * trackBar1.Value) / trackBar1.Maximum; // in Seconds
+      StimPadding.Text = String.Format("{0:0.###}", StimStartPosition);
       DistribGrath.Refresh();
     }
     #endregion
@@ -375,51 +423,79 @@ namespace MEAClosedLoop
           Point[] GistoGraphPoints = new Point[(int)(CurrentTime * 25000 / dT)];
           for (int j = 0; j < GistoGraphPoints.Count(); j++)
           {
-            GistoGraphPoints[j].Y = e.ClipRectangle.Height - 10;
+            GistoGraphPoints[j].Y = e.ClipRectangle.Height;
             GistoGraphPoints[j].X = j * e.ClipRectangle.Width / GistoGraphPoints.Count();
           }
+          //ищем пачки, попадающие в окно после стимула
           for (int i = 0; i < PackListAfter.Count; i++)
           {
-            for (int j = 0; j < GistoGraphPoints.Count(); j++)
+            lock (StimListBlock)
             {
-              if ((TTime)j * dT > PackListAfter[i].Start - PackListAfter[0].Start)
+              foreach (TAbsStimIndex stim in StimList)
               {
-                bool IsInWindow = false;
-                foreach (TStimIndex stim in StimList)
+                if (PackListAfter[i].Start > stim
+                  && PackListAfter[i].Start < stim + (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH * 25
+                  && !PackListDetectReaction.Contains(PackListAfter[i])
+                  ) // 
                 {
-                  if (PackListAfter[i].Start - (TAbsStimIndex)stim > 0
-                    && PackListAfter[i].Start - (TAbsStimIndex)stim < (TAbsStimIndex)WAIT_PACK_WINDOW_LENGTH*25)
-                  {
-                    IsInWindow = true;
-                    break;
-                  }
+                  PackListDetectReaction.Add(PackListAfter[i]);
+                  break;
                 }
-                if (IsInWindow) 
-                  GistoGraphPoints[j].Y -= 10;
-                break;
+                else
+                {
+                  // добавить и стимул и пачку на удаление, как нас не интересующие
+                }
+              }
+            }
+          }
+          // Заполним значения массива гистограммы соотвественно количеству стимулов в интервале окна подсчета
+
+          for (int i = 1; i < GistoGraphPoints.Count(); i++)
+          {
+            for (int jj = 0; jj < PackListDetectReaction.Count; jj++)
+            {
+              if (dT * (ulong)i > PackListDetectReaction[jj].Start - PackListAfter[0].Start
+                && dT * (ulong)(i - 1) < PackListDetectReaction[jj].Start - PackListAfter[0].Start)
+              {
+                GistoGraphPoints[i].Y /= 2;
               }
             }
           }
           //отрисовка массива
           Pen pen = new Pen(Color.Red);
-          if (GistoGraphPoints.Count() > 1)
+          if (GistoGraphPoints.Count() >= 2)
           {
-            try
-            {
-              e.Graphics.DrawLines(pen, GistoGraphPoints);
-            }
-            catch (Exception ex)
-            {
-              //Do noth
-            }
-
+            e.Graphics.DrawLines(pen, GistoGraphPoints);
           }
         }
       }
     }
     #endregion
 
+    private void StatGraphXRange_ValueChanged(object sender, EventArgs e)
+    {
+      DistribGrath.Invalidate();
+    }
+
+    private void StatGraphYRange_ValueChanged(object sender, EventArgs e)
+    {
+      DistribGrath.Invalidate();
+    }
+
+    private void PackCountGraph_Click(object sender, EventArgs e)
+    {
+      PackCountGraph.Invalidate();
+    }
+
+    private void DistribGrath_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void StatWindowCount_ValueChanged(object sender, EventArgs e)
+    {
+      this.CurrentCalcStat();
+    }
 
   }
-
 }

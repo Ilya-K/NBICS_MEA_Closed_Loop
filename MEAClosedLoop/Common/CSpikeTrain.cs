@@ -40,8 +40,6 @@ namespace MEAClosedLoop
   // SpikeTrainFrame doesn't contain data
   // Start means the start of a spike-train in the absolute time
   // Length == 0 means that spike-train hasn't been finished yet
-  // PRE_SPIKE points are stored in data before the start of a spike-train
-  // POST_SPIKE points are stored in data after the end of a spike-train
 
   public class CSpikeTrainFrame
   {
@@ -49,10 +47,10 @@ namespace MEAClosedLoop
     private Int32 length;
     private Int16 channel;
     public TTime Start { get { return start; } }
-    public Int32 Length { get { return length; } }
+    public Int32 Length { get { return length; } set { length = value; } }
     public Int16 Channel { get { return channel; } }
 
-    public bool EOP { get { return length > 0; } }
+    public bool EOP { get { return length > 0; } set { length = 0; } }
 
     public CSpikeTrainFrame(Int16 _channel, TTime _start)
     {

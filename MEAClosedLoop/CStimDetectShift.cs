@@ -39,7 +39,6 @@ namespace MEAClosedLoop
     private cases NextCase;
     private int CallCount;
     private object LockStimList = new object();
-    private object LockExpStimList = new object();
     public object LockExternalData = new object();
     private TRawDataPacket PrevPacket;
     private TTime CurrentTime;
@@ -287,7 +286,7 @@ namespace MEAClosedLoop
           }
         }
         #endregion
-      } 
+      }
       lock (LockExternalData)
       {
         inner_data_to_display = DataPacket;
@@ -313,7 +312,7 @@ namespace MEAClosedLoop
         }
       }
       #endregion
-      
+
       return FindedPegs;
 
     }
@@ -385,10 +384,9 @@ namespace MEAClosedLoop
   class Average
   {
     private List<double> values;
-    public double Value;
-    public double TripleSigma;
-    public double Sigma;
-    private double mean;
+    public double Value = 0;
+    public double TripleSigma = 0;
+    public double Sigma = 0;
     private bool first_point = true;
 
     public void AddValueElem(double ValueToAdd)
@@ -397,19 +395,22 @@ namespace MEAClosedLoop
     }
     public void Calc()
     {
-      double summ = 0;
-      for (int i = 0; i < values.Count; i++)
+      if (values != null && values.Count > 0)
       {
-        summ += values[i];
+        double summ = 0;
+        for (int i = 0; i < values.Count; i++)
+        {
+          summ += values[i];
+        }
+        Value = summ / values.Count;
+        double QuarteSumm = 0;
+        for (int i = 0; i < values.Count; i++)
+        {
+          QuarteSumm += Math.Pow(Value - values[i], 2);
+        }
+        Sigma = Math.Sqrt(QuarteSumm / values.Count);
+        TripleSigma = 3.5 * Sigma;
       }
-      Value = summ / values.Count;
-      double QuarteSumm = 0;
-      for (int i = 0; i < values.Count; i++)
-      {
-        QuarteSumm += Math.Pow(Value - values[i], 2);
-      }
-      Sigma = Math.Sqrt(QuarteSumm / values.Count);
-      TripleSigma = 3.5 * Sigma;
     }
     public bool IsInArea(double Value)
     {
