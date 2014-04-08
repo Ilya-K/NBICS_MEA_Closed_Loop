@@ -125,6 +125,18 @@ namespace MEAClosedLoop
           }
       }
     }
+
+    private uint PackAvgAmp(CPack input, int channel){
+      uint output=0;
+      uint i;
+
+      for (i = 1; i < input.Data[channel].Length + 1; i++)
+      {
+        output += Convert.ToUInt16(Math.Abs(input.Data[channel][i - 1]));
+      }
+      output /= i;
+      return output;
+    }
     
     public PackGraph()
     {
@@ -157,8 +169,10 @@ namespace MEAClosedLoop
       uint[] output = new uint[panelWidth];
       ulong cursorPosition = 0;
       ulong ticksInPoint = totalTime / (ulong)panelWidth;
-      double maxOutputVal;
+      //double maxOutputVal;
       Timeline local_data;
+      uint ampsPerPoint;
+      Queue<CPack>.Enumerator ampDataIterator = RawAmpData.GetEnumerator();
       lock (processed_data)
       {
         local_data = new Timeline(processed_data);
@@ -170,21 +184,33 @@ namespace MEAClosedLoop
       {
         if (currentPack.dataMap.ContainsKey(channel))
         {
+          ampsPerPoint = 0;
           foreach (uint dataPoint in currentPack.dataMap[channel])
           {
+            cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
             switch (GraphType){
               case state.Freq:
-                cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
                 output[cursorPosition]++;
                 break;
               case state.Amp: //TODO: calc avg amp and stat here
+                output[cursorPosition] += Convert.ToUInt16(Math.Abs(ampDataIterator.Current.Data[channel][dataPoint]))/*PackAvgAmp(ampDataIterator.Current, channel)*/;
+                if (UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint) > cursorPosition && ampsPerPoint != 0)
+                {
+                  output[cursorPosition] /= ampsPerPoint;
+                  ampsPerPoint = 0;
+                }
+                else
+                {
+                  ampsPerPoint++;
+                }
                 break;
             }
-          
           }
         }
+        if (GraphType == state.Amp)
+          ampDataIterator.MoveNext();
       }
-      maxOutputVal = output.Max();
+      //maxOutputVal = output.Max();
       //if (maxOutputVal != 0) Array.ForEach(output, X => X = (uint)((double)X / maxOutputVal)); //normalization
       return output; //TODO: general normalization
     }
