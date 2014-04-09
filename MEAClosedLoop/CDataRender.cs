@@ -29,12 +29,12 @@ namespace MEAClosedLoop
     #region стандартные значения
     private int DEFAULT_WINDOW_HEIGHT = 600;
     private int DEFAULT_WINDOW_WIDTH = 800;
-    int HistoryLength = 20;
+    int HistoryLength = 50;
     bool editFlagLeft = true;
     bool editFlagRight = true;
     bool editFlagUp = true;
     bool editFlagDown = true;
-    private int MCHCompress = 10;
+    private int MCHCompress = 2;
     private int SCHCompress = 2;
     private int MCHYRange = 10;
     private int SCHYRange = 2;
@@ -101,16 +101,12 @@ namespace MEAClosedLoop
 
       base.Initialize();
     }
-
     protected override void LoadContent()
     {
-
     }
-
     protected override void UnloadContent()
     {
     }
-
     protected override void Update(GameTime gameTime)
     {
       // Allows the game to exit
@@ -138,41 +134,34 @@ namespace MEAClosedLoop
       if (Keyboard.GetState().IsKeyUp(Keys.Right)) editFlagRight = true;
       #endregion
       #region Изменение пропорции по высоте
-      if (Keyboard.GetState().IsKeyDown(Keys.Up))
+      if (Keyboard.GetState().IsKeyDown(Keys.Up) && editFlagUp)
       {
-        if (editFlagUp)
+        editFlagUp = false;
+        switch (this.SelectedDrawMode)
         {
-          editFlagUp = false;
-          switch (this.SelectedDrawMode)
-          {
-            case DrawMode.DrawMultiChannel:
-              MCHYRange = (MCHYRange > 1) ? MCHYRange - 1 : MCHYRange;
-              break;
-            case DrawMode.DrawSingleChannel:
-              SCHYRange = (SCHYRange > 1) ? MCHYRange - 1 : MCHYRange;
-              break;
-
-          }
+          case DrawMode.DrawMultiChannel:
+            MCHYRange = (MCHYRange > 2) ? MCHYRange - 2 : MCHYRange;
+            break;
+          case DrawMode.DrawSingleChannel:
+            SCHYRange = (SCHYRange > 2) ? MCHYRange - 2 : MCHYRange;
+            break;
+        }
+      }
+      if (Keyboard.GetState().IsKeyDown(Keys.Down) && editFlagDown)
+      {
+        editFlagDown = false;
+        switch (this.SelectedDrawMode)
+        {
+          case DrawMode.DrawMultiChannel:
+            MCHYRange+=2;
+            break;
+          case DrawMode.DrawSingleChannel:
+            SCHYRange+=2;
+            break;
         }
       }
       if (Keyboard.GetState().IsKeyUp(Keys.Up)) editFlagUp = true;
 
-      if (Keyboard.GetState().IsKeyDown(Keys.Down))
-      {
-        if (editFlagDown)
-        {
-          editFlagUp = false;
-          switch (this.SelectedDrawMode)
-          {
-            case DrawMode.DrawMultiChannel:
-              MCHYRange++;
-              break;
-            case DrawMode.DrawSingleChannel:
-              SCHYRange++;
-              break;
-          }
-        }
-      }
       if (Keyboard.GetState().IsKeyUp(Keys.Down)) editFlagDown = true;
       #endregion
       base.Update(gameTime);
@@ -251,17 +240,19 @@ namespace MEAClosedLoop
 
       //Получаем размеры окна;
       int WindowHeight = graphics.PreferredBackBufferHeight;
-      int WindowWidth = graphics.PreferredBackBufferWidth;
+      //graphics.PreferredBackBufferFormat = SurfaceFormat.Color;
 
+      int WindowWidth = graphics.PreferredBackBufferWidth;
+      int FormWidth = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Width;
 
       TFltData[] data_to_display;
       switch (this.SelectedDrawMode)
       {
         case DrawMode.DrawMultiChannel:
 
-          //GraphicsDevice.Clear(Color.CornflowerBlue);
+          GraphicsDevice.Clear(Color.CornflowerBlue);
           basicEffect.CurrentTechnique.Passes[0].Apply();
-          
+
           //создание массива векторов для каналов
           List<Vector3> ChannelVectors = new List<Vector3>();
           Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Count()];
@@ -273,7 +264,6 @@ namespace MEAClosedLoop
           // длина и ширина пропорциональны размеру главного окна
           int CellWidth = WindowWidth / 8;
           int CellHeight = WindowHeight / 8;
-
           for (int i = 0; i < 8; i++)
           {
             for (int j = 0; j < 8 && i * 8 + j < ChannelvectorsArray.Length; j++)
@@ -289,8 +279,8 @@ namespace MEAClosedLoop
           foreach (int key in DataPacket.Keys)
           {
             //подготовка массива массивов точек
-
-            if (!IsDataUpdated)// && RealChannelIndx == 13)
+            IsDataUpdated = false;
+            if (!IsDataUpdated)
             {
               lock (DataPacketLock)
               {
@@ -301,6 +291,11 @@ namespace MEAClosedLoop
                 {
                   length += DataPacketHistory.ElementAt(i)[key].Length;
                 }
+                if (length == 0) length = 1;
+                MCHCompress = HistoryLength / 5;
+
+                //MCHCompress = length / (CellWidth);
+                //if (MCHCompress > 10) MCHCompress = 10;
                 data_to_display = new TFltData[length / MCHCompress];
                 int currentlength = 0;
                 for (int i = 0; i < DataPacketHistory.Count; i++)
@@ -317,21 +312,21 @@ namespace MEAClosedLoop
                     }
                     VertexPositionColor[] line = new VertexPositionColor[2];
                     line[0].Position.X = ((float)(currentlength + j * MCHCompress) * CellWidth) / length;
-                    line[0].Position.Y = max + CellHeight/2;
+                    line[0].Position.Y = max * MCHYRange / 100 + CellHeight / 2;
                     line[0].Position.Z = 0;
                     line[1].Position.X = line[0].Position.X;
-                    line[1].Position.Y = min + CellHeight/2;
+                    line[1].Position.Y = min * MCHYRange / 100 + CellHeight / 2;
                     line[1].Position.Z = 0;
                     if (line[0].Position.Y < 0) line[0].Position.Y = 0;
                     if (line[1].Position.Y > CellHeight) line[1].Position.Y = CellHeight;
-                    line[0].Position.X += ChannelvectorsArray[RealChannelIndx].X;
-                    line[0].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
+                    line[0].Position += ChannelvectorsArray[RealChannelIndx];
+                    //line[0].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
                     line[1].Position.X += ChannelvectorsArray[RealChannelIndx].X;
                     line[1].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
                     //if (RealChannelIndx == 33) 
                     graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
-            
-                  }  
+
+                  }
                   currentlength += DataPacketHistory.ElementAt(i)[key].Length;
                 }
 
