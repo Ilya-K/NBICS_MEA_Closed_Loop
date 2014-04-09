@@ -259,7 +259,9 @@ namespace MEAClosedLoop
       {
         case DrawMode.DrawMultiChannel:
 
-          GraphicsDevice.Clear(Color.CornflowerBlue);
+          //GraphicsDevice.Clear(Color.CornflowerBlue);
+          basicEffect.CurrentTechnique.Passes[0].Apply();
+          
           //создание массива векторов для каналов
           List<Vector3> ChannelVectors = new List<Vector3>();
           Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Count()];
@@ -283,7 +285,6 @@ namespace MEAClosedLoop
 
           if (!IsDataUpdated) vertices = new VertexPositionColor[DataPacket.Keys.Count][];
 
-          basicEffect.CurrentTechnique.Passes[0].Apply();
 
           foreach (int key in DataPacket.Keys)
           {
@@ -306,38 +307,53 @@ namespace MEAClosedLoop
                 {
                   for (int j = MCHCompress; j < DataPacketHistory.ElementAt(i)[key].Length / MCHCompress; j += MCHCompress)
                   {
-                    double max = 0;
-                    double average = 0;
+                    float max = float.MinValue;
+                    float min = float.MaxValue;
                     for (int z = 0; z < MCHCompress; z++)
                     {
-                      double t = DataPacketHistory.ElementAt(i)[RealChannelIndx][j - z];
-                      if (Math.Abs(t) > Math.Abs(max)) max = t;
-                      average += t / MCHCompress;
+                      float t = (float)DataPacketHistory.ElementAt(i)[RealChannelIndx][j - z];
+                      if (t > max) max = t;
+                      if (t < min) min = t;
                     }
-                    data_to_display[currentlength + j] = (max + average) / 2;
-                  }
-                  currentlength += DataPacketHistory.ElementAt(i)[key].Length / MCHCompress;
+                    VertexPositionColor[] line = new VertexPositionColor[2];
+                    line[0].Position.X = ((float)(currentlength + j * MCHCompress) * CellWidth) / length;
+                    line[0].Position.Y = max + CellHeight/2;
+                    line[0].Position.Z = 0;
+                    line[1].Position.X = line[0].Position.X;
+                    line[1].Position.Y = min + CellHeight/2;
+                    line[1].Position.Z = 0;
+                    if (line[0].Position.Y < 0) line[0].Position.Y = 0;
+                    if (line[1].Position.Y > CellHeight) line[1].Position.Y = CellHeight;
+                    line[0].Position.X += ChannelvectorsArray[RealChannelIndx].X;
+                    line[0].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
+                    line[1].Position.X += ChannelvectorsArray[RealChannelIndx].X;
+                    line[1].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
+                    //if (RealChannelIndx == 33) 
+                    graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
+            
+                  }  
+                  currentlength += DataPacketHistory.ElementAt(i)[key].Length;
                 }
 
                 vertices[RealChannelIndx] = new VertexPositionColor[data_to_display.Length];
 
                 for (int i = 0; i < data_to_display.Length; i++)
                 {
-                  vertices[RealChannelIndx][i].Position.X = ((float)i * CellWidth) / data_to_display.Length;
-                  vertices[RealChannelIndx][i].Position.Y = CellHeight / 2 - (float)data_to_display[i] / MCHYRange;
-                  if (vertices[RealChannelIndx][i].Position.Y < 0) vertices[RealChannelIndx][i].Position.Y = 0;
-                  if (vertices[RealChannelIndx][i].Position.Y > CellHeight) vertices[RealChannelIndx][i].Position.Y = CellHeight;
-                  vertices[RealChannelIndx][i].Position.X += ChannelvectorsArray[RealChannelIndx].X;
-                  vertices[RealChannelIndx][i].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
-                  vertices[RealChannelIndx][i].Position.Z = 0;
+                  //vertices[RealChannelIndx][i].Position.X = ((float)i * CellWidth) / data_to_display.Length;
+                  //vertices[RealChannelIndx][i].Position.Y = CellHeight / 2 - (float)data_to_display[i] / MCHYRange;
+                  //if (vertices[RealChannelIndx][i].Position.Y < 0) vertices[RealChannelIndx][i].Position.Y = 0;
+                  //if (vertices[RealChannelIndx][i].Position.Y > CellHeight) vertices[RealChannelIndx][i].Position.Y = CellHeight;
+                  //vertices[RealChannelIndx][i].Position.X += ChannelvectorsArray[RealChannelIndx].X;
+                  //vertices[RealChannelIndx][i].Position.Y += ChannelvectorsArray[RealChannelIndx].Y;
+                  //vertices[RealChannelIndx][i].Position.Z = 0;
 
-                  vertices[RealChannelIndx][i].Color = (Math.Abs(data_to_display[i]) > 120) ? Color.Red : Color.Black;
+                  //vertices[RealChannelIndx][i].Color = (Math.Abs(data_to_display[i]) > 120) ? Color.Red : Color.Black;
                 }
               }
             }
                 #endregion
             //if(RealChannelIndx == 13) 
-            graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices[RealChannelIndx].Count() - 1);
+            //graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vertices[RealChannelIndx], 0, vertices[RealChannelIndx].Count() - 1);
             RealChannelIndx++;
 
           }
