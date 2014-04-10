@@ -32,9 +32,10 @@ namespace MEAClosedLoop
       wuTAU = 1;
     }
 
-    public void WarmedUp()
+    public void WarmedUp(bool warmedUp = true)
     {
-      se = Math.Sqrt(exp2Mean - expMean * expMean);
+      if (warmedUp) se = Math.Sqrt(exp2Mean - expMean * expMean);
+      else wuTAU = 1;
     }
 
     /// <summary>

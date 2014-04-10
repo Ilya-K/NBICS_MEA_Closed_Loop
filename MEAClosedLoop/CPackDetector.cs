@@ -27,20 +27,27 @@ namespace MEAClosedLoop
 
     private class CSpikeTrainDetector
     {
-      private const TData ZERO_LEVEL = 0.01;                // 100 times less than 1 bit (Actually there is a strict zero after SALPA)
-      private const TData THRESH1 = 0.14;
-      private const TData THRESH2 = 1.0;
+      private const TData ZERO_LEVEL = 0.001;               // Actually there is a strict zero after SALPA
+      private const int ZERO_COUNT = 2;                     // How many sequental zero points have got to consider signal = 0;
+      private const TData BLIND_THRESH = 7;                 // Below this noise level (SE) we consider the channel to be blind
       private const TData SPIKE_THRESH = 3.5;               // *sigma 
       private const TData SE_THRESH = 3.5;                  // *sigma 
-      private const TData DECAY = 0.98;
       private const int PRE_DETECT_TIME = 10 * Param.MS;    // Интервал перед выполнением критерия начала спайк-трэйна, в которм будем искать первый спайк
-      private const int ZERO_COUNT = 2;                     // How many sequental zero points have got to consider signal = 0;
       private const int MAX_SPIKE_QUEUE = 5;                // Length of queue for pre-train spikes
+      private const int WARMUP_COUNT = 500;                 // How many points to use to warm up SE calculators
+      
+      /*
+      private const TData THRESH1 = 0.14;
+      private const TData THRESH2 = 1.0;
+      private const TData DECAY = 0.98;
+       */
+
       private CSpikeTrainFrame m_continueTrain;             // The return value inside a spike-train
 
       private enum State
       {
         Zero = 0,
+        Blind,
         Noise,
         Train,
         WarmUp
@@ -109,7 +116,7 @@ namespace MEAClosedLoop
         m_channel = channel;
         m_state = State.WarmUp;
         m_zeroCount = ZERO_COUNT;
-        m_warmUpCount = 500;
+        m_warmUpCount = WARMUP_COUNT;
         m_prevPacket = new TData[PRE_DETECT_TIME];
         m_prevPacket.PopulateArray<TData>(0);
         m_preSpikes = new Queue<TTime>(MAX_SPIKE_QUEUE);
@@ -119,14 +126,9 @@ namespace MEAClosedLoop
       public CSpikeTrainFrame FindSpikeTrains(TData[] data)
       {
         CSpikeTrainFrame spikeTrain = (m_state == State.Train) ? m_continueTrain : null;
+        bool skipThisPacket = false;
 
         int size = data.Length;
-        /*
-        TData ma = m_expAvg.Add(m_calcShortSE.SE(data[0]) - m_calcNoiseSE.SE(data[0]));
-        TData diff = ma - m_maOld;
-        m_maOld = ma;
-        m_hpf = (Math.Abs(diff) > THRESH1) ? m_hpf + diff : m_hpf * DECAY;
-        */
         for (int i = 0; i < size; i++)
         {
           // Check if signal is 0
@@ -164,9 +166,11 @@ namespace MEAClosedLoop
             m_zeroCount = ZERO_COUNT;
           }
 
+          TData shortSE, seOfShortSE, meanOfNoiseSE, noiseSE, packSE;
+
           switch (m_state)
           {
-            // We fall into this state when data is close to 0 for ZERO_COUNT (3) subsequent samples
+            // We fall into this state when data == 0 for ZERO_COUNT (def = 2) subsequent samples
             case State.Zero:
               if (Math.Abs(data[i]) > ZERO_LEVEL)
               {
@@ -176,11 +180,39 @@ namespace MEAClosedLoop
               }
               break;
 
+            // We fall into this state when data SE is less than BLIND_THRESH (def = 10) close to 0
+            case State.Blind:
+              shortSE = m_calcShortSE.SE(data[i]);
+              m_calcShortSE2.SE(shortSE);
+              if (m_calcShortSE2.Mean > BLIND_THRESH + m_calcShortSE2.PrevSE)     // Make some hysteresis for leaving blind state
+              {
+                m_calcShortSE.WarmedUp(false);
+                m_calcNoiseSE.WarmedUp(false);
+                m_calcPackSE.WarmedUp(false);
+                m_calcNoiseSE2.WarmedUp(false);
+                m_calcShortSE2.WarmedUp(false);
+                m_warmedUp = false;
+                m_warmUpCount = WARMUP_COUNT;
+                m_state = State.WarmUp;
+              }
+              break;
+
             // Here we process a noisy input signal
             case State.Noise:
-              TData shortSE = m_calcShortSE.SE(data[i]);
-              TData seOfShortSE = m_calcShortSE2.PrevSE;                                  // Changes slowly (~2s)
-              TData meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // the previous mean
+              shortSE = m_calcShortSE.SE(data[i]);
+              seOfShortSE = m_calcShortSE2.PrevSE;                                  // Changes slowly (~2s)
+              meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // the previous mean
+
+              if (m_calcShortSE2.Mean < BLIND_THRESH)
+              {
+                m_state = State.Blind;
+                if (m_inSpike)
+                {
+                  m_lastSpike = m_absTime + (TTime)i + 1;
+                  m_inSpike = false;
+                }
+                break;
+              }
 
               // Remember position of several spike-like events
               if (Math.Abs(data[i]) > SPIKE_THRESH * m_calcNoiseSE.PrevSE)
@@ -233,7 +265,7 @@ namespace MEAClosedLoop
               }
 
               // Calculate long term noise 
-              TData noiseSE = m_calcNoiseSE.SE(data[i]);
+              noiseSE = m_calcNoiseSE.SE(data[i]);
               m_calcNoiseSE2.SE(noiseSE);
               // Calculate SE of short term noise. Calculate it only here, not in State.Train
               m_calcShortSE2.SE(shortSE);
@@ -241,7 +273,7 @@ namespace MEAClosedLoop
 
             // We fall here when start of a train is detected, so we should look for its end
             case State.Train:
-              TData packSE = m_calcPackSE.SE(data[i]);
+              packSE = m_calcPackSE.SE(data[i]);
               shortSE = m_calcShortSE.SE(data[i]);
 
               meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // mean SE of the stationary noise
@@ -278,50 +310,38 @@ namespace MEAClosedLoop
 
             // This state is used only once in the begining to "warm up" statistic calculators 
             case State.WarmUp:
-              for (int t = 0; t < data.Length; t++)
+              // Start warming up from the current position i
+              for (int t = i; t < data.Length; t++)
               {
                 if (Math.Abs(data[t]) > ZERO_LEVEL)
                 {
                   --m_warmUpCount;
                   TData shortSEwu = Math.Sqrt(m_calcShortSE.WarmUp(data[t]));
                   TData noiseSEwu = Math.Sqrt(m_calcNoiseSE.WarmUp(data[t]));
-                  TData packSEwu = Math.Sqrt(m_calcPackSE.WarmUp(data[t] * 2));      // Consider signal at least 2 times higher than noise
+                  TData packSEwu = Math.Sqrt(m_calcPackSE.WarmUp(data[t] * 2));      // Consider signal to be at least 2 times higher than noise
                   m_calcShortSE2.SE(shortSEwu);
                   m_calcNoiseSE2.WarmUp(noiseSEwu);
                 }
                 if (m_warmUpCount == 0)
                 {
-                  m_warmedUp = true;
-                  m_state = State.Noise;
+                  m_warmUpCount = WARMUP_COUNT;
                   m_calcShortSE.WarmedUp();
                   m_calcNoiseSE.WarmedUp();
                   m_calcPackSE.WarmedUp();
                   m_calcNoiseSE2.WarmedUp();
                   m_calcShortSE2.WarmedUp();
+
+                  m_warmedUp = true;
+                  m_state = (m_calcShortSE2.Mean < BLIND_THRESH) ? State.Blind : State.Noise;
                   break;
                 }
               }
+              // If we have not managed to warm up calculators until the end of packet, just exit
+              if (!m_warmedUp) skipThisPacket = true;
               break;
           }
 
-          /*
-          TData delta = m_calcShortSE.SE(data[i]) - m_calcNoiseSE.SE(data[i]);
-          ma = m_expAvg.Add(delta);
-          diff = ma - m_maOld;
-          m_maOld = ma;
-          m_hpf = (Math.Abs(diff) > THRESH1) ? m_hpf + diff : m_hpf * DECAY;
-
-          if ((m_hpf > THRESH2) && !m_packFound)
-          {
-            m_packFound = true;
-            spikeTrain = new CSpikeTrainFrame(m_channel, m_absTime + (TTime)i);         // Create SpikeTrain only when its start is detected
-          }
-
-          if (m_packFound && (diff < 0))
-          {
-
-          }
-           */
+          if (skipThisPacket) break;
         }
 
         if ((spikeTrain != null) && !spikeTrain.EOP) m_continueTrain = new CSpikeTrainFrame(m_channel, spikeTrain.Start);
@@ -537,7 +557,8 @@ namespace MEAClosedLoop
       #region Process Spike-trains
       {
         // Check if all spike-trains finish here
-        bool packContinues = spikeTrainList.Any(el => !el.EOP);
+        bool trainContinues = spikeTrainList.Any(el => !el.EOP);
+        //bool trainContinues = (spikeTrainList.Count(el => !el.EOP) > 2);
 
         if (m_inPack)
         {
@@ -551,9 +572,6 @@ namespace MEAClosedLoop
           }
           m_prevSpikeTrains = spikeTrainList;
           m_packDataList.Add(packet);
-
-          // If the pack is going to be finished, remember the last spike time
-          m_lastSpikeTime = packContinues ? 0 : spikeTrainList.Max(el => el.Start + (TTime)el.Length);
         }
         else                                                // Outside a pack
         {
@@ -580,6 +598,8 @@ namespace MEAClosedLoop
             // Create a new S-Pack
             CPack pack = new CPack(m_firstSpikeTime, 0, null); // length == 0 means S-Pack
 
+            // If the pack is going to be finished, remember the last spike time
+            m_lastSpikeTime = trainContinues ? 0 : spikeTrainList.Max(el => el.Start + (TTime)el.Length);
             m_inPack = true;
             m_prevSpikeTrains = spikeTrainList;
             return pack;
@@ -589,13 +609,15 @@ namespace MEAClosedLoop
           // Remember the current packet in case we find start of a pack in the next packet
           m_prevPacket = packet;
         }
+        // If the pack is going to be finished, remember the last spike time
+        m_lastSpikeTime = trainContinues ? 0 : spikeTrainList.Max(el => el.Start + (TTime)el.Length);
       }
       #endregion
       else                                                  // spikeTrainList == 0, we haven't found any spike-train in the current packet
       #region Process abscence of Spike-trains
       {
         m_prevPacket = packet;
-        m_prevSpikeTrains = NO_SPIKETRAINS;
+        //m_prevSpikeTrains = NO_SPIKETRAINS;
 
         if (m_inPack)
         {
@@ -660,12 +682,17 @@ namespace MEAClosedLoop
             m_lastSpikeTime = 0;
             m_packDataList.Clear();
             m_inPack = false;
+            // [DEBUG]
+            m_prevSpikeTrains = NO_SPIKETRAINS;
             return pack;
           }
           // Else, just wait for the next packet
           m_packDataList.Add(packet);
         }
         // Else, we are not in pack, so just return null
+        
+        // [DEBUG]
+        m_prevSpikeTrains = NO_SPIKETRAINS;
       }
       #endregion
       return null;
