@@ -239,7 +239,7 @@ namespace StimDetectorTest
               bool flag = false;
               for (int j = 0; j < foundStimIndices.Count; j++)
               {
-                if (Math.Abs((double)foundStimIndices[j] - (double)realStimIndices[i]) < 260)
+                if (Math.Abs((double)foundStimIndices[j] - (double)realStimIndices[i]) < 240)
                 {
                   flag = true;
                   break;
