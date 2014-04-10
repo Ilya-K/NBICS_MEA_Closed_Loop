@@ -59,6 +59,7 @@ namespace MEAClosedLoop
     private volatile int m_time = 0;
     private int m_drawWidth = 0;
     private volatile bool m_running = false;
+    private volatile bool m_refreshPanel2 = false;
     private bool m_packStarted = false;
     private int m_packTime = 0;
 
@@ -124,7 +125,7 @@ namespace MEAClosedLoop
           }
         }
       }
-      UpdateStoredPoints(0);
+      UpdateStoredPoints2(0);
 #endif
     }
     
@@ -243,6 +244,7 @@ namespace MEAClosedLoop
 
         m_prevDataPanelWidth = width;
         panel_Data.Refresh();
+        m_refreshPanel2 = true;
         panel_Stat1.Refresh();
         return;
       }
@@ -294,8 +296,16 @@ namespace MEAClosedLoop
       int height = panel_Data.Height;
       double dataPointsPerPixel = (double)STAT_BUF_LEN / width;
 
+      if (m_refreshPanel2)
+      {
+        UpdateStoredPoints2(0);
+        m_refreshPanel2 = false;
+        panel_Stat1.Refresh();
+        return;
+      }
+
       int start = e.ClipRectangle.Left;
-      int drawLength = Math.Min(e.ClipRectangle.Width, (int)(dataLength / dataPointsPerPixel) - start + 1);
+      int drawLength = Math.Min(e.ClipRectangle.Width, (int)(dataLength / dataPointsPerPixel) - start); // +1
       if (drawLength <= 0) return;
 
       Point[] dataPoints = new Point[drawLength * 2];
@@ -311,9 +321,7 @@ namespace MEAClosedLoop
     {
       if (m_time <= dataStart) return;
       List<int> packList;
-      List<int> packList2;
       lock (m_packList) packList = new List<int>(m_packList);
-      lock (m_packList2) packList2 = new List<int>(m_packList2);
 
       int dataLength = m_time - dataStart;
       double dataPointsPerPixel = (double)STAT_BUF_LEN / panel_Data.Width;
@@ -329,6 +337,7 @@ namespace MEAClosedLoop
         packList.RemoveAt(0);
       }
       int x = start;
+      bool startNewPoint = (m_dataPoints[2 * x].X == 0);
       for (int i = 0; i < dataLength; ++i)
       {
         int xNew = (int)((dataStart + i) / dataPointsPerPixel);
@@ -339,9 +348,10 @@ namespace MEAClosedLoop
         int ySE500SE = (int)(4 * height / 5 - m_SE500SE[dataStart + i] / 2);
         int ySE1sSE = (int)(4 * height / 5 - (m_avgSE125[dataStart + i] - m_SE500[dataStart + i]) / 2);
         int ySE2Avg = (int)(4 * height / 7 - m_avgSE2[dataStart + i] / 2);
-        if (xNew > x)
+        if ((xNew > x) || startNewPoint)
         {
           x = xNew;
+          startNewPoint = false;
           m_dataPoints[2 * x] = new Point(x, yData);
           m_dataPoints[2 * x + 1] = new Point(x, yData);
           m_SE500Points[2 * x] = new Point(x, ySE500);
@@ -384,10 +394,50 @@ namespace MEAClosedLoop
             packList.RemoveAt(0);
           }
         }
+      }
+    }
+
+    private void UpdateStoredPoints2(int dataStart)
+    {
+      if (m_time <= dataStart) return;
+      List<int> packList2;
+      lock (m_packList2) packList2 = new List<int>(m_packList2);
+
+      int dataLength = m_time - dataStart;
+      double dataPointsPerPixel = (double)STAT_BUF_LEN / panel_Data.Width;
+      int start = (int)(dataStart / dataPointsPerPixel);
+
+      m_drawWidth = (dataLength * panel_Data.Width) / STAT_BUF_LEN + 1;
+      int height = panel_Data.Height;
+
+      while ((packList2.Count > 0) && (packList2[0] < dataStart))
+      {
+        if (packList2[1] > dataStart) break;
+        packList2.RemoveAt(0);
+        packList2.RemoveAt(0);
+      }
+      Point dataPoint0 = new Point();
+      Point dataPoint1 = new Point();
+      int x = start;
+      for (int i = 0; i < dataLength; ++i)
+      {
+        int xNew = (int)((dataStart + i) / dataPointsPerPixel);
+        int yData = (int)(height / 2 - m_data[dataStart + i] / 15);
+        if (xNew > x)
+        {
+          x = xNew;
+          dataPoint0 = new Point(x, yData);
+          dataPoint1 = new Point(x, yData);
+        }
+        else
+        {
+          dataPoint0.Y = Math.Min(m_dataPoints[2 * x].Y, yData);
+          dataPoint1.Y = Math.Max(m_dataPoints[2 * x + 1].Y, yData);
+        }
         if ((packList2.Count > 0) && (dataStart + i >= packList2[0]))
         {
-          m_packPoints2[2 * x] = m_dataPoints[2 * x];
-          m_packPoints2[2 * x + 1] = m_dataPoints[2 * x + 1];
+          m_packPoints2[2 * x] = dataPoint0;
+          m_packPoints2[2 * x + 1] = dataPoint1;
           if (dataStart + i == packList2[1])                       // EOP
           {
             packList2.RemoveAt(0);
@@ -418,7 +468,11 @@ namespace MEAClosedLoop
 
     private void panel_Data_Resize(object sender, EventArgs e)
     {
-      if (panel_Data.Width < m_prevDataPanelWidth) panel_Data.Refresh();
+      if (panel_Data.Width < m_prevDataPanelWidth)
+      {
+        panel_Data.Refresh();
+        panel_Stat1.Refresh();
+      }
     }
 
     private void StatForm_FormClosing(object sender, FormClosingEventArgs e)

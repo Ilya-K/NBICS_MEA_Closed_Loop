@@ -27,14 +27,15 @@ namespace MEAClosedLoop
 
     private class CSpikeTrainDetector
     {
-      private const TData ZERO_LEVEL = 0.1;                 // 10 times less than 1 bit
+      private const TData ZERO_LEVEL = 0.01;                // 100 times less than 1 bit (Actually there is a strict zero after SALPA)
       private const TData THRESH1 = 0.14;
       private const TData THRESH2 = 1.0;
       private const TData SPIKE_THRESH = 3.5;               // *sigma 
+      private const TData SE_THRESH = 3.5;                  // *sigma 
       private const TData DECAY = 0.98;
       private const int PRE_DETECT_TIME = 10 * Param.MS;    // Интервал перед выполнением критерия начала спайк-трэйна, в которм будем искать первый спайк
-      private const int ZERO_COUNT = 3;                     // How many sequental zero points have got to consider signal = 0;
-      private const int MAX_SPIKE_QUEUE = 10;               // Length of queue for pre-train spikes
+      private const int ZERO_COUNT = 2;                     // How many sequental zero points have got to consider signal = 0;
+      private const int MAX_SPIKE_QUEUE = 5;                // Length of queue for pre-train spikes
       private CSpikeTrainFrame m_continueTrain;             // The return value inside a spike-train
 
       private enum State
@@ -47,11 +48,10 @@ namespace MEAClosedLoop
       private State m_state;
 
       private TTime m_absTime = 0;
-      private TTime m_endTime = 0;
       private Int16 m_channel;
       
       // Short term mean and variance calculator
-      private CCalcExpWndSE m_calcShortSE = new CCalcExpWndSE((20 * Param.MS) / 2);       // 2*tau = 20ms (500 samples)
+      private CCalcExpWndSE m_calcShortSE = new CCalcExpWndSE((10 * Param.MS) / 2);       // 2*tau = 10ms (250 samples)
 
       // Second order mean and variance of the short term variance of a signal
       private CCalcExpWndSE m_calcShortSE2 = new CCalcExpWndSE((2000 * Param.MS) / 2);    // 2*tau = 2s (50000 samples)
@@ -78,6 +78,7 @@ namespace MEAClosedLoop
       private TData[] m_prevPacket;
       private Queue<TTime> m_preSpikes;
       private TTime m_trainStartTime;
+      private TTime m_lastSpike = 0;
 
       // [DEBUG]
 #if DEBUG_SPIKETRAINS
@@ -129,10 +130,10 @@ namespace MEAClosedLoop
         for (int i = 0; i < size; i++)
         {
           // Check if signal is 0
-          // If signal is 0 for ZERO_COUNT (def = 3) samples, consider electrode is blind or blanked
+          // If signal is 0 for ZERO_COUNT (def = 2) samples, consider electrode is blind or blanked
           if (Math.Abs(data[i]) < ZERO_LEVEL)
           {
-            if (--m_zeroCount == 0)
+            if (--m_zeroCount == 0)                                       // Zero count goes < 0 here, but it is not critical
             {
               // If we are in the spike-train, finalize it
               if (m_state == State.Train)
@@ -149,6 +150,11 @@ namespace MEAClosedLoop
                   m_dbgTrainList.Add(dbgSpikeTrain);
                 }
 #endif
+              }
+              if (m_inSpike)
+              {
+                m_lastSpike = m_absTime + (TTime)i + 1;
+                m_inSpike = false;
               }
               m_state = State.Zero;
             }
@@ -189,10 +195,11 @@ namespace MEAClosedLoop
               else
               {
                 m_inSpike = false;
+                m_lastSpike = m_absTime + (TTime)i + 1;
               }
 
               // Check start of spike-train criteria
-              if (shortSE > meanOfNoiseSE + 3 * seOfShortSE)
+              if (shortSE > meanOfNoiseSE + SE_THRESH * seOfShortSE)
               {
                 m_state = State.Train;
                 m_inSpike = false;
@@ -202,7 +209,11 @@ namespace MEAClosedLoop
                 while (m_preSpikes.Count > 0)
                 {
                   firstSpikeTime = m_preSpikes.Dequeue();
-                  if (firstSpikeTime + PRE_DETECT_TIME > m_absTime + (TTime)i) break;
+                  if (firstSpikeTime + PRE_DETECT_TIME > m_absTime + (TTime)i)
+                  {
+                    m_preSpikes.Clear();
+                    break;
+                  }
                 }
                 if (firstSpikeTime == 0) firstSpikeTime = m_absTime + (TTime)i;
                 if (spikeTrain == null)
@@ -224,6 +235,7 @@ namespace MEAClosedLoop
               // Calculate long term noise 
               TData noiseSE = m_calcNoiseSE.SE(data[i]);
               m_calcNoiseSE2.SE(noiseSE);
+              // Calculate SE of short term noise. Calculate it only here, not in State.Train
               m_calcShortSE2.SE(shortSE);
               break;
 
@@ -234,16 +246,22 @@ namespace MEAClosedLoop
 
               meanOfNoiseSE = m_calcNoiseSE2.Mean;                                  // mean SE of the stationary noise
 
-              if (shortSE >= m_calcNoiseSE2.Mean + m_calcNoiseSE2.PrevSE)
+              // Remember position of the last spike
+              if (Math.Abs(data[i]) > SPIKE_THRESH * m_calcNoiseSE.PrevSE)
               {
-                m_endTime = m_absTime + (TTime)i;
+                if (!m_inSpike) m_inSpike = true;
+              }
+              else
+              {
+                m_inSpike = false;
+                m_lastSpike = m_absTime + (TTime)i + 1;
               }
 
-              if (shortSE < m_calcNoiseSE2.Mean)
+              if (shortSE < meanOfNoiseSE)
               {
                 m_state = State.Noise;
                 // Finalize current spike-train
-                spikeTrain.Length = (int)(m_endTime - spikeTrain.Start);
+                spikeTrain.Length = (int)(m_lastSpike - spikeTrain.Start);
                 m_continueTrain = null;
 #if DEBUG_SPIKETRAINS
                 lock (m_dbgTrainList)
@@ -251,7 +269,7 @@ namespace MEAClosedLoop
                   // We need to get the start time from the previous debug spike-train, becouse the real spike-trains might be joined.
                   TTime dbgStartTime = m_dbgTrainList[m_dbgTrainList.Count - 1].Start;
                   CSpikeTrainFrame dbgSpikeTrain = new CSpikeTrainFrame(m_channel, dbgStartTime);
-                  dbgSpikeTrain.Length = (int)(m_endTime - dbgSpikeTrain.Start);
+                  dbgSpikeTrain.Length = (int)(m_lastSpike - dbgSpikeTrain.Start);
                   m_dbgTrainList.Add(dbgSpikeTrain);
                 }
 #endif
