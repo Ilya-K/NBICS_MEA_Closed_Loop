@@ -106,15 +106,30 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
 
-      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
-      data = dataGenerator.PrepareData(currentPanelIndex, width, height);
+      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];    
 
+      try
+      {
+        data = dataGenerator.PrepareData(currentPanelIndex, width, height);
         if (data != null && data.Max() > 0)
         {
-          int dataLength = /*pointsToDraw[currentPanelIndex].Length*/ data.Count<uint>();
+          int dataLength = data.Count<uint>();
+
+          //scaling data
+            double dataScale = (double)(height-1) / data.Max();
+            using (SolidBrush br = new SolidBrush(Color.Green))
+            {
+              StringFormat sf = new StringFormat();
+              sf.FormatFlags = StringFormatFlags.NoWrap;
+              e.Graphics.DrawString("x" + Math.Round(dataScale, 2).ToString(), this.Font, br, new Point(10, 10), sf);
+            }
+            data.Select(dataPoint => dataPoint = (uint)((double)dataPoint * dataScale));
+          
+
+          //drawing data
           for (int i = 0; i < dataLength; i++)
           {
-            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, height - (int)data[i]);
+            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, (data[i] < height) ? height - (int)data[i] : height);
           }
           Pen pen = new Pen(Color.Blue, 1);
           if (pointsToDraw.Count() > 3)
@@ -125,6 +140,12 @@ namespace MEAClosedLoop
           }
         }
         data = null;
+      }
+      catch (Exception ex)
+      {
+        throw ex;
+      }
+      
     }
 
     private void tmpPanel_Click(object sender, System.EventArgs e)
