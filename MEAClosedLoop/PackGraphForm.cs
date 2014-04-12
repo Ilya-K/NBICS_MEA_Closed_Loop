@@ -14,6 +14,8 @@ namespace MEAClosedLoop
   public delegate void LoadSelectionDelegate(int sel);
   public delegate void StatFinishedDelegate();
   public delegate void spbTimerDelegate();
+  public delegate void DelegateSetStatButtonText(string text);
+  public delegate void DelegateResetProgressBar(int val = 0);
 
   public partial class PackGraphForm : Form
   {
@@ -23,13 +25,15 @@ namespace MEAClosedLoop
 
     const int SPB_REFRESH_COOLDOWN = 5; //in seconds
     const int DEFAULT_POINT_COUNT = 100; //in each pannel
+    const int MIN_DRAWABLE_POINT_COUNT = 3;
 
     public event LoadSelectionDelegate loadSelection;
-
     public System.Timers.Timer statCalcTimer;
     public System.Timers.Timer spb_timer;
     public event spbTimerDelegate ItsTimeToMoveSPB;
     public event StatFinishedDelegate statFinished;
+    public event DelegateResetProgressBar ResetProgressBar;
+    public event DelegateSetStatButtonText SetStatButtonText;
 
     const int MAX_DETECTION_TIME = 200; //number of ms
     PackGraph dataGenerator;
@@ -47,6 +51,8 @@ namespace MEAClosedLoop
       this.FormBorderStyle = FormBorderStyle.FixedSingle;
       this.MaximizeBox = false;
       channelPanels = new Panel[channelList.Count];
+      SetStatButtonText += RunStatButtonText;
+      ResetProgressBar += spb_Set;
 
       int formWidth = this.Size.Width;
       int formHeight = this.Size.Height;
@@ -95,6 +101,16 @@ namespace MEAClosedLoop
 
     }
 
+    private void RunStatButtonText(string text)
+    {
+      RunStatButton.Text = text;
+    }
+
+    private void spb_Set(int val = 0)
+    {
+      StatProgressBar.Value = val;
+    }
+
     void spb_UpdateProgressBar(object sender, int val)
     {
       if (StatProgressBar.Value < StatProgressBar.Maximum )
@@ -105,45 +121,55 @@ namespace MEAClosedLoop
     {
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
+      int debug = 0;
 
-      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];    
+      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
+      debug = 1;
 
       try
       {
-        data = dataGenerator.PrepareData(currentPanelIndex, width, height);
-        if (data != null && data.Max() > 0)
+        data = dataGenerator.PrepareData(currentPanelIndex, width, height); //TODO: check data preparation
+        debug = 2;
+        if (data != null)
         {
+          if(data.Max() > 0){
           int dataLength = data.Count<uint>();
+          if (dataLength > MIN_DRAWABLE_POINT_COUNT)
+          {
 
-          //scaling data
-            double dataScale = (double)(height-1) / data.Max();
-            using (SolidBrush br = new SolidBrush(Color.Green))
+            //scaling data
+            double dataScale = (double)(height - 1) / data.Max();
+            data.Select(dataPoint => dataPoint = (uint)(Math.Abs((double)dataPoint * dataScale)));
+            debug = 3;
+
+            //drawing data
+            for (int i = 0; i < dataLength; i++)
+            {
+              pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, (data[i] < height) ? height - (int)data[i] : height);
+            }
+            debug = 4;
+            Pen pen = new Pen(Color.DodgerBlue, 1);
+            pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
+            e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
+
+            //drawing scale
+            using (SolidBrush br = new SolidBrush(Color.SpringGreen))
             {
               StringFormat sf = new StringFormat();
               sf.FormatFlags = StringFormatFlags.NoWrap;
               e.Graphics.DrawString("x" + Math.Round(dataScale, 2).ToString(), this.Font, br, new Point(10, 10), sf);
             }
-            data.Select(dataPoint => dataPoint = (uint)((double)dataPoint * dataScale));
-          
-
-          //drawing data
-          for (int i = 0; i < dataLength; i++)
-          {
-            pointsToDraw[currentPanelIndex][i] = new Point(i * width / dataLength, (data[i] < height) ? height - (int)data[i] : height);
-          }
-          Pen pen = new Pen(Color.Blue, 1);
-          if (pointsToDraw.Count() > 3)
-          {
-            pointsToDraw[currentPanelIndex][0] = new Point(0, 0);
-            pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
-            e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
           }
         }
         data = null;
       }
+        }
       catch (Exception ex)
       {
         throw ex;
+      }
+      finally{
+        ;
       }
       
     }
@@ -167,6 +193,7 @@ namespace MEAClosedLoop
       ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
       int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
       ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
+      dataGenerator.Reset();
       dataGenerator.totalTime = totalStatTime * Param.MS;
       //StatProgressBar.Maximum = totalStatTime;
       //dataGenerator.CollectStat(totalStatTime);
@@ -192,10 +219,7 @@ namespace MEAClosedLoop
     public void StopAmpStat()
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
-      spb_timer.Stop();
-      statCalcTimer.Stop();
-      drawResult();
-      MessageBox.Show("подсчёт завершён");
+      StatEnd();
     }
 
     public void spb_update()
@@ -206,17 +230,26 @@ namespace MEAClosedLoop
     public void StopFreqStat()
     {
       m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
+      StatEnd();
+    }
+    private void StatEnd()
+    {
       spb_timer.Stop();
       statCalcTimer.Stop();
       drawResult();
-
+      RunStatButton.BeginInvoke(SetStatButtonText, "пересчитать");
+      StatProgressBar.BeginInvoke(ResetProgressBar, 0);
+      StatProgressBar.Invalidate();
+      //TODO: allow result saving
+      statFinished = null;
       MessageBox.Show("подсчёт завершён");
     }
+
     private void StatTimer(object o1, EventArgs e1)
     {
       statFinished();
     }
-    private void spbTimerReset(object o1, EventArgs e1) //TODO: redraw progress bar after completion
+    private void spbTimerReset(object o1, EventArgs e1)
     {
       try
       {

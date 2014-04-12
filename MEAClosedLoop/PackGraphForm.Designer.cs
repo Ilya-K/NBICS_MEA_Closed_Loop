@@ -29,11 +29,11 @@
     private void InitializeComponent()
     {
       this.RunStatButton = new System.Windows.Forms.Button();
-      this.StatProgressBar = new System.Windows.Forms.ProgressBar();
       this.StatTypeListBox = new System.Windows.Forms.ListBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
-      this.timelabel = new System.Windows.Forms.Label();
       this.MinCountBox = new System.Windows.Forms.NumericUpDown();
+      this.timelabel = new System.Windows.Forms.Label();
+      this.StatProgressBar = new System.Windows.Forms.ProgressBar();
       this.groupBox1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.MinCountBox)).BeginInit();
       this.SuspendLayout();
@@ -47,14 +47,6 @@
       this.RunStatButton.Text = "собрать статистику";
       this.RunStatButton.UseVisualStyleBackColor = true;
       this.RunStatButton.Click += new System.EventHandler(this.RunStatButton_Click);
-      // 
-      // StatProgressBar
-      // 
-      this.StatProgressBar.Location = new System.Drawing.Point(544, 19);
-      this.StatProgressBar.Name = "StatProgressBar";
-      this.StatProgressBar.Size = new System.Drawing.Size(125, 23);
-      this.StatProgressBar.TabIndex = 1;
-      this.StatProgressBar.UseWaitCursor = true;
       // 
       // StatTypeListBox
       // 
@@ -76,18 +68,10 @@
       this.groupBox1.Controls.Add(this.RunStatButton);
       this.groupBox1.Location = new System.Drawing.Point(12, 0);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(675, 86);
+      this.groupBox1.Size = new System.Drawing.Size(756, 86);
       this.groupBox1.TabIndex = 4;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Анализ";
-      // 
-      // timelabel
-      // 
-      this.timelabel.Location = new System.Drawing.Point(140, 27);
-      this.timelabel.Name = "timelabel";
-      this.timelabel.Size = new System.Drawing.Size(78, 23);
-      this.timelabel.TabIndex = 5;
-      this.timelabel.Text = "время (мин.)";
       // 
       // MinCountBox
       // 
@@ -100,6 +84,22 @@
       this.MinCountBox.Name = "MinCountBox";
       this.MinCountBox.Size = new System.Drawing.Size(43, 20);
       this.MinCountBox.TabIndex = 4;
+      // 
+      // timelabel
+      // 
+      this.timelabel.Location = new System.Drawing.Point(140, 27);
+      this.timelabel.Name = "timelabel";
+      this.timelabel.Size = new System.Drawing.Size(78, 23);
+      this.timelabel.TabIndex = 5;
+      this.timelabel.Text = "время (мин.)";
+      // 
+      // StatProgressBar
+      // 
+      this.StatProgressBar.Location = new System.Drawing.Point(544, 19);
+      this.StatProgressBar.Name = "StatProgressBar";
+      this.StatProgressBar.Size = new System.Drawing.Size(125, 23);
+      this.StatProgressBar.TabIndex = 1;
+      this.StatProgressBar.UseWaitCursor = true;
       // 
       // PackGraphForm
       // 
@@ -118,11 +118,11 @@
 
     #endregion
 
-    private System.Windows.Forms.ProgressBar StatProgressBar;
     private System.Windows.Forms.ListBox StatTypeListBox;
     private System.Windows.Forms.GroupBox groupBox1;
     private System.Windows.Forms.NumericUpDown MinCountBox;
-    private System.Windows.Forms.Label timelabel;
     private System.Windows.Forms.Button RunStatButton;
+    private System.Windows.Forms.Label timelabel;
+    private System.Windows.Forms.ProgressBar StatProgressBar;
   }
 }

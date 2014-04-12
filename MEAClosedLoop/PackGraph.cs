@@ -149,6 +149,12 @@ namespace MEAClosedLoop
 
     }
 
+    public void Reset()
+    {
+      RawAmpData = new Queue<CPack>();
+      RawFreqData = new Queue<CPack>();
+      processed_data = new Timeline();
+    }
 
     public void ProcessAmpStat(CPack pack_to_add)
     {
@@ -166,9 +172,9 @@ namespace MEAClosedLoop
     }
     public uint[] PrepareData(int channel, int panelWidth, int panelHeight)
     {
-      uint[] output = new uint[panelWidth];
+      uint[] output = null;
       ulong cursorPosition = 0;
-      ulong ticksInPoint = totalTime / (ulong)panelWidth;
+      ulong ticksInPoint;
       //double maxOutputVal;
       Timeline local_data;
       uint ampsPerPoint;
@@ -177,42 +183,61 @@ namespace MEAClosedLoop
       {
         local_data = new Timeline(processed_data);
       }
-      if (local_data.Count == 0) return output;
-
+      output = new uint[panelWidth];
       output.PopulateArray<uint>(0);
-      for (ProcessedPack currentPack = local_data.Dequeue(); local_data.Count > 0; currentPack = local_data.Dequeue())
+      if (local_data.Count == 0 || panelWidth ==0)
+        return output;
+
+      ticksInPoint = totalTime / (ulong)panelWidth;
+      int debug_ldc = local_data.Count;
+      int debug = 0;
+      try
       {
-        if (currentPack.dataMap.ContainsKey(channel))
+        for (ProcessedPack currentPack = local_data.Dequeue(); local_data.Count > 0; currentPack = local_data.Dequeue())
         {
-          ampsPerPoint = 0;
-          foreach (uint dataPoint in currentPack.dataMap[channel])
+          debug++;
+          if (currentPack.dataMap.ContainsKey(channel))
           {
-            cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
-            switch (GraphType){
-              case state.Freq:
-                output[cursorPosition]++;
+            if (GraphType == state.Amp)
+            {
+              if (!ampDataIterator.MoveNext())
                 break;
-              case state.Amp: //TODO: calc avg amp and stat here
-                output[cursorPosition] += Convert.ToUInt16(Math.Abs(ampDataIterator.Current.Data[channel][dataPoint]))/*PackAvgAmp(ampDataIterator.Current, channel)*/;
-                if (UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint) > cursorPosition && ampsPerPoint != 0)
-                {
-                  output[cursorPosition] /= ampsPerPoint;
-                  ampsPerPoint = 0;
-                }
-                else
-                {
-                  ampsPerPoint++;
-                }
-                break;
+            }
+            ampsPerPoint = 0;
+            foreach (uint dataPoint in currentPack.dataMap[channel])
+            {
+              cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
+              switch (GraphType)
+              {
+                case state.Freq:
+                  if (cursorPosition < (ulong)panelWidth)
+                    output[cursorPosition]++;
+                  else return output;
+                  break;
+                case state.Amp: //TODO: calc avg amp and stat here
+                  if (cursorPosition < (ulong)panelWidth)
+                    output[cursorPosition] += Convert.ToUInt16(Math.Abs(ampDataIterator.Current.Data[channel][dataPoint]));
+                  else return output;
+                  if (UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint) > cursorPosition && ampsPerPoint != 0)
+                  {
+                    output[cursorPosition] /= ampsPerPoint;
+                    ampsPerPoint = 0;
+                  }
+                  else
+                  {
+                    ampsPerPoint++;
+                  }
+                  break;
+              }
             }
           }
         }
-        if (GraphType == state.Amp)
-          ampDataIterator.MoveNext();
       }
-      //maxOutputVal = output.Max();
-      //if (maxOutputVal != 0) Array.ForEach(output, X => X = (uint)((double)X / maxOutputVal)); //normalization
-      return output; //TODO: general normalization
+      catch(Exception ex)
+      {
+        throw ex;
+      }
+      return output;
     }
   }
 }
