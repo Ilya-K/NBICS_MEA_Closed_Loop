@@ -28,20 +28,20 @@ namespace MEAClosedLoop
     }
   }
 
+  public enum PackStatType
+  {
+    Amp,
+    Freq,
+    Both
+  }
+
   public class PackGraph
   {
-    public enum state
-    {
-      Amp,
-      Freq,
-      Both
-    }
+    
     public double foundPackPercent;
-    uint realMaxPackLength;
-    //List<TStimIndex> indexData;
     private Queue<CPack> RawAmpData, RawFreqData;
     Timeline processed_data;
-    state GraphType;
+    PackStatType GraphType;
     public ulong totalTime;
     
     const int MAX_PACK_LENGTH = 12500; //500 ms 
@@ -90,7 +90,7 @@ namespace MEAClosedLoop
       if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
       {
         //Something went wrong
-        GraphType = state.Both;
+        GraphType = PackStatType.Both;
         throw new Exception("Неверные данные!"); //или оба режима сразу...
       }
       else
@@ -102,12 +102,12 @@ namespace MEAClosedLoop
           }
           if (RawFreqData.Count > 0)
           { //freq stat
-            GraphType = state.Freq;
+            GraphType = PackStatType.Freq;
             dataSource = RawFreqData;
           }
           else //(RawAmpData.Count > 0)
           { //amp stat
-            GraphType = state.Amp;
+            GraphType = PackStatType.Amp;
             dataSource = RawAmpData;
           }  
         
@@ -141,7 +141,6 @@ namespace MEAClosedLoop
     public PackGraph()
     {
       foundPackPercent = 0;
-      realMaxPackLength = 0;
 
       RawAmpData = new Queue<CPack>();
       RawFreqData = new Queue<CPack>();
@@ -198,7 +197,7 @@ namespace MEAClosedLoop
           debug++;
           if (currentPack.dataMap.ContainsKey(channel))
           {
-            if (GraphType == state.Amp)
+            if (GraphType == PackStatType.Amp)
             {
               if (!ampDataIterator.MoveNext())
                 break;
@@ -209,12 +208,12 @@ namespace MEAClosedLoop
               cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
               switch (GraphType)
               {
-                case state.Freq:
+                case PackStatType.Freq:
                   if (cursorPosition < (ulong)panelWidth)
                     output[cursorPosition]++;
                   else return output;
                   break;
-                case state.Amp: //TODO: calc avg amp and stat here
+                case PackStatType.Amp: //TODO: calc avg amp and stat here
                   if (cursorPosition < (ulong)panelWidth)
                     output[cursorPosition] += Convert.ToUInt16(Math.Abs(ampDataIterator.Current.Data[channel][dataPoint]));
                   else return output;
