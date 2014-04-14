@@ -16,6 +16,7 @@ namespace MEAClosedLoop
   public delegate void spbTimerDelegate();
   public delegate void DelegateSetStatButtonText(string text);
   public delegate void DelegateResetProgressBar(int val = 0);
+  public delegate void DelegateLockUI(bool lockflag);
 
   public enum OnOffSwitch
   {
@@ -42,6 +43,7 @@ namespace MEAClosedLoop
     public event StatFinishedDelegate statFinished;
     public event DelegateResetProgressBar ResetProgressBar;
     public event DelegateSetStatButtonText SetStatButtonText;
+    public event DelegateLockUI DoLockUI;
 
     const int MAX_DETECTION_TIME = 200; //number of ms
     PackGraph dataGenerator;
@@ -62,6 +64,7 @@ namespace MEAClosedLoop
       channelPanels = new Panel[channelList.Count];
       SetStatButtonText += RunStatButtonText;
       ResetProgressBar += spb_Set;
+      DoLockUI += LockUI;
 
       int formWidth = this.Size.Width;
       int formHeight = this.Size.Height;
@@ -120,6 +123,14 @@ namespace MEAClosedLoop
       StatProgressBar.Value = val;
     }
 
+    private void LockStatTypeListBox(bool lockval)
+    {
+    }
+
+    private void LockMinCountBox(bool lockval)
+    {
+    }
+
     void spb_UpdateProgressBar(object sender, int val)
     {
       if (StatProgressBar.Value < StatProgressBar.Maximum )
@@ -158,11 +169,16 @@ namespace MEAClosedLoop
             e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
 
             //drawing scale
-            using (SolidBrush br = new SolidBrush(Color.SpringGreen))
+            using (SolidBrush textBrush = new SolidBrush(Color.Green), backgroundBrush = new SolidBrush(Color.White))
             {
               StringFormat sf = new StringFormat();
+              double roundedScale = Math.Round(dataScale, 2);
+              string scaleString = ((roundedScale != 0) ? "x" +roundedScale.ToString() : ">0.01");
               sf.FormatFlags = StringFormatFlags.NoWrap;
-              e.Graphics.DrawString("x" + Math.Round(dataScale, 2).ToString(), this.Font, br, new Point(10, 10), sf);
+              SizeF ScaleStringSize = new SizeF();
+              ScaleStringSize = e.Graphics.MeasureString(scaleString, this.Font, width, sf);
+              e.Graphics.FillRectangle(backgroundBrush, 10, 10, ScaleStringSize.Width, ScaleStringSize.Height);
+              e.Graphics.DrawString(scaleString, this.Font, textBrush, new Point(10, 10), sf);
             }
           }
         }
@@ -185,7 +201,6 @@ namespace MEAClosedLoop
 
     private void PackGraphForm_Load(object sender, EventArgs e)
     {
-
     }
 
     private void RunStatButton_Click(object sender, EventArgs e)
@@ -194,7 +209,7 @@ namespace MEAClosedLoop
       {
           PackGraphState = OnOffSwitch.On;
           RunStatButton.BeginInvoke(SetStatButtonText, "остановить");
-          LockUI(true);
+          this.BeginInvoke(DoLockUI, true);
           ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
           int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
           ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
@@ -257,7 +272,7 @@ namespace MEAClosedLoop
     {
       spb_timer.Stop();
       statCalcTimer.Stop();
-      LockUI(false);
+      this.BeginInvoke(DoLockUI, false);
       drawResult();
       RunStatButton.BeginInvoke(SetStatButtonText, "пересчитать");
       StatProgressBar.BeginInvoke(ResetProgressBar, 0);
