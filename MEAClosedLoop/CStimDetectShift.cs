@@ -25,9 +25,9 @@ namespace MEAClosedLoop
     private const TStimIndex default_offset = 8;
     private const TStimIndex start_offset = 16;
     private const TStimIndex GUARANTEED_EMPTY_SPACE = 240;
-    private const TStimIndex POST_SIGMA_CALC_DEPTH = 20;
+    private const TStimIndex POST_SIGMA_CALC_DEPTH = 12;
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 40;
-    public TAbsStimIndex MaximumShiftRange = 250;
+    public TAbsStimIndex MaximumShiftRange = 650;
     private TStimIndex MinimumLengthBetweenPegs = 10; // 250 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
     public bool FullResearch = false; //True for unoptimized research
