@@ -79,7 +79,8 @@ namespace MEAClosedLoop
       IsDataUpdated = false;
 
       DataPacketHistory = new Queue<TFltDataPacket>(HistoryLength);
-
+      FoundStimData = new Queue<TAbsStimIndex>();
+      ExpStimData = new Queue<TAbsStimIndex>();
       this.m_salpaFilter = salpaFilter;
       this.Window.AllowUserResizing = true;
       this.IsMouseVisible = true;
@@ -190,15 +191,17 @@ namespace MEAClosedLoop
     public void SetExpStimData(TStimGroup stim) { }
     public void RecieveStimData(List<TAbsStimIndex> stims) 
     {
-
       lock (DataPacketLock)
       {
+        //добавим в очередь пришедшие
         foreach (TAbsStimIndex stim in stims)
         {
           FoundStimData.Enqueue(stim);
         }
-        //while (FoundStimData.Peek() <   )
+        // удалим устаревшие найденные стимулы
+        while (FoundStimData.Count > 0 && FoundStimData.Peek() + HistoryTimeLength < summary_time_stamp)
         {
+          FoundStimData.Dequeue();
         }
 
       }
@@ -429,6 +432,7 @@ namespace MEAClosedLoop
             SCHCompress = (PointsPerPX < 1) ? 1 : (int)PointsPerPX;
             if (PointsPerPX <= 1)
             {
+              #region сплошная отрисовка
               //отрисовка без наложения линий - готовим сплошной массив и его рисуем
               schUncompVerices = new VertexPositionColor[data_to_display.Length];
               for (int i = 0; i < data_to_display.Length; i++)
@@ -441,9 +445,11 @@ namespace MEAClosedLoop
                 schUncompVerices[i].Color = (Math.Abs(data_to_display[i]) > 100) ? Color.Red : Color.Blue;
               }
               graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, schUncompVerices, 0, schUncompVerices.Count() - 1);
+              #endregion 
             }
             else
             {
+              #region отрисовка вертикальными линиями
               // отрисовка с наложением линий друг на друга - рисуем вертикальные линии от максимума до минимума
               // NOTE: наиболее частый случай
               int length = data_to_display.Length;
@@ -488,46 +494,27 @@ namespace MEAClosedLoop
                   line[1].Position.X += ((float)WindowWidth / (float)length);
 
                 graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
-
               }
+              #endregion
             }
-            //###### old
-            /*
-            foreach (int key in DataPacket.Keys)
+            #region Отрисовка стимулов и пачек
+            lock (DataPacketLock)
             {
-              if (key.Equals(SingleChannelNum))
+              foreach (TAbsStimIndex stim in FoundStimData)
               {
-                int length = 0;
-                for (int i = 0; i < DataPacketHistory.Count; i++)
-                {
-                  length += DataPacketHistory.ElementAt(i)[key].Length;
-                }
-                data_to_display = new TFltData[length / SCHCompress];
-
-                int currentlength = 0;
-                for (int i = 0; i < DataPacketHistory.Count; i++)
-                {
-                  for (int j = 0; j < DataPacketHistory.ElementAt(i)[key].Length; j += SCHCompress)
-                  {
-                    data_to_display[currentlength / SCHCompress + j / SCHCompress] = DataPacketHistory.ElementAt(i)[SingleChannelNum][j];
-                  }
-                  currentlength += DataPacketHistory.ElementAt(i)[key].Length;
-                }
-
-                vertices[SingleChannelNum] = new VertexPositionColor[data_to_display.Length];
-                for (int i = 0; i < data_to_display.Length; i++)
-                {
-                  vertices[SingleChannelNum][i].Position.X = ((float)i * WindowWidth) / data_to_display.Length;
-                  vertices[SingleChannelNum][i].Position.Y = WindowHeight / 2 - 10 * (float)data_to_display[i] * SCHYRange / 100;
-                  if (vertices[SingleChannelNum][i].Position.Y < 0) vertices[SingleChannelNum][i].Position.Y = 0;
-                  if (vertices[SingleChannelNum][i].Position.Y > WindowHeight) vertices[SingleChannelNum][i].Position.Y = WindowHeight;
-                  vertices[SingleChannelNum][i].Position.Z = 0;
-                  vertices[SingleChannelNum][i].Color = (Math.Abs(data_to_display[i]) > 100) ? Color.Red : Color.Blue;
-                }
+                VertexPositionColor[] stimline = new VertexPositionColor[2];
+                stimline[0].Position.X = WindowWidth * (1-(float)(summary_time_stamp - stim) / HistoryTimeLength);
+                stimline[0].Position.Y = 0;
+                stimline[0].Position.Z = 0;
+                stimline[0].Color = Color.Green;
+                stimline[1].Position = stimline[0].Position;
+                stimline[1].Position.Y = WindowHeight;
+                stimline[1].Color = Color.Gray;
+                graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, stimline, 0, 1);
               }
-            }
-             */
 
+            }
+            #endregion
           }
           IsDataUpdated = true;
           break;
