@@ -683,12 +683,10 @@ namespace MEAClosedLoop
     }
     private void DrawDataFunction()
     {
-      m_dataRender = new CDataRender();
-      m_dataRender.Window.AllowUserResizing = true;
-      m_dataRender.IsMouseVisible = true;
-      m_salpaFilter.AddDataConsumer(m_dataRender.RecivieFltData);
+      m_dataRender = new CDataRender(m_salpaFilter);
+  
+
       m_dataRender.Run();
-      //Initialize GraphRender here
     }
   }
 }

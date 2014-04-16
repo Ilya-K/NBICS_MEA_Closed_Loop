@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
 using MEAClosedLoop;
 using System.Windows;
+using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
   #region Definitions
@@ -43,7 +44,8 @@ namespace MEAClosedLoop
     TFltDataPacket DataPacket; //Данные для отрисовки фильтрованных данных
     Queue<TFltDataPacket> DataPacketHistory; // история данных
     object DataPacketLock = new object(); // блокировка данных
-    TTime summary_time_stamp = 0;
+    public TTime summary_time_stamp = 0;
+    CFiltering m_salpaFilter;
     GraphicsDeviceManager graphics;
     // эффект BasicEffect для кривой
     BasicEffect basicEffect;
@@ -59,7 +61,7 @@ namespace MEAClosedLoop
     bool IsDataUpdated;
 
     #endregion
-    public CDataRender()
+    public CDataRender(CFiltering salpaFilter)
     {
       graphics = new GraphicsDeviceManager(this);
 
@@ -73,6 +75,12 @@ namespace MEAClosedLoop
       IsDataUpdated = false;
 
       DataPacketHistory = new Queue<TFltDataPacket>(HistoryLength);
+
+      this.m_salpaFilter = salpaFilter;
+      this.Window.AllowUserResizing = true;
+      this.IsMouseVisible = true;
+
+      m_salpaFilter.AddDataConsumer(RecieveFltData);
     }
 
     protected override void Initialize()
@@ -152,7 +160,7 @@ namespace MEAClosedLoop
       #endregion
       base.Update(gameTime);
     }
-    public void RecivieFltData(TFltDataPacket data)
+    public void RecieveFltData(TFltDataPacket data)
     {
       lock (DataPacketLock)
       {
