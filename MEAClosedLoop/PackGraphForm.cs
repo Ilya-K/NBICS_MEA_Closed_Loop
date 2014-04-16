@@ -24,7 +24,7 @@ namespace MEAClosedLoop
     Off
   }
 
-  public partial class PackGraphForm : Form
+  public partial class PackGraphForm : Form //TODO: check sync
   {
     uint[] data;
     const int SUBPANEL_SPACE_X = 2;
@@ -33,7 +33,6 @@ namespace MEAClosedLoop
     const int SPB_REFRESH_COOLDOWN = 1; //in seconds
     const int DEFAULT_POINT_COUNT = 100; //in each pannel
     const int MIN_DRAWABLE_POINT_COUNT = 3;
-
     const int MAX_DATA_SCALE = 10;
 
     public event LoadSelectionDelegate loadSelection;
@@ -46,7 +45,7 @@ namespace MEAClosedLoop
     public event DelegateLockUI DoLockUI;
 
     const int MAX_DETECTION_TIME = 200; //number of ms
-    PackGraph dataGenerator;
+    PackGraph dataGenerator, comp_datagenerator;
     CLoopController m_LoopCtrl;
     public event DelegateSetProgress spb_SetVal;
     OnOffSwitch PackGraphState = OnOffSwitch.Off;
@@ -54,6 +53,8 @@ namespace MEAClosedLoop
     private Point[][] pointsToDraw;
     int timeUnitSegment;
     Panel[] channelPanels;
+
+    public bool compareMode;
 
     public PackGraphForm(List<int> channelList, CLoopController LoopCtrl)
     {
@@ -111,6 +112,19 @@ namespace MEAClosedLoop
       StatTypeListBox.SelectionMode = SelectionMode.One;
       this.Invalidate();
 
+      compareMode = false;
+    }
+
+    public void EnableCompareMode()
+    {
+      compareMode = true;
+      comp_datagenerator = new PackGraph();
+      this.BeginInvoke(DoLockUI, true);
+      PackGraphState = OnOffSwitch.Off;
+    }
+
+    private PackGraph CurrentDataGenerator(){
+      return (compareMode) ? comp_datagenerator : dataGenerator;
     }
 
     private void RunStatButtonText(string text)
@@ -156,7 +170,7 @@ namespace MEAClosedLoop
 
             //scaling data
             double dataScale = (double)(height - 1) / data.Max();
-            if(dataScale < MAX_DATA_SCALE)
+            if(dataScale < MAX_DATA_SCALE && dataScale > 0)
               data.Select(dataPoint => dataPoint = (uint)(Math.Abs((double)dataPoint * dataScale)));
 
             //drawing data
@@ -167,6 +181,38 @@ namespace MEAClosedLoop
             Pen pen = new Pen(Color.DodgerBlue, 1);
             pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
             e.Graphics.DrawLines(pen, pointsToDraw[currentPanelIndex]);
+
+            #region drawing data comparison if needed
+            if (compareMode)
+            {
+              data = comp_datagenerator.PrepareData(currentPanelIndex, width, height);
+              if (data != null)
+              {
+
+                if (data.Max() > 0)
+                {
+                  int comp_dataLength = data.Count<uint>();
+                  if (dataLength > MIN_DRAWABLE_POINT_COUNT)
+                  {
+
+                    //scaling compared data
+                    if (dataScale < MAX_DATA_SCALE && dataScale > 0)
+                      data.Select(dataPoint => dataPoint = (uint)(Math.Abs((double)dataPoint * dataScale)));
+
+                    //drawing compared data
+                    pointsToDraw[currentPanelIndex].PopulateArray<Point>(new Point(0, 0));
+                    for (int j = 0; j < dataLength; j++)
+                    {
+                      pointsToDraw[currentPanelIndex][j] = new Point(j * width / dataLength, (data[j] < height) ? height - (int)data[j] : height);
+                    }
+                    Pen comp_pen = new Pen(Color.LightPink, 1);
+                    pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
+                    e.Graphics.DrawLines(comp_pen, pointsToDraw[currentPanelIndex]);
+                  }
+                }
+              }
+            }
+            #endregion
 
             //drawing scale
             using (SolidBrush textBrush = new SolidBrush(Color.Green), backgroundBrush = new SolidBrush(Color.White))
@@ -184,7 +230,7 @@ namespace MEAClosedLoop
         }
         data = null;
       }
-        }
+     }
       catch (Exception ex)
       {
         throw ex;
@@ -196,7 +242,8 @@ namespace MEAClosedLoop
       string elName = (sender as Panel).Name;
       MessageBox.Show("канал выбран");
       loadSelection(MEA.EL_DECODE[Convert.ToInt32(elName)]);
-      this.Close();
+
+      this.Hide();
     }
 
     private void PackGraphForm_Load(object sender, EventArgs e)
@@ -213,16 +260,16 @@ namespace MEAClosedLoop
           ulong totalStatTime = (ulong)MinCountBox.Value * 60 * 1000; //in ms
           int spbRefreshCount = -1 + (int)MinCountBox.Value * 60 / SPB_REFRESH_COOLDOWN;
           ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
-          dataGenerator.Reset();
-          dataGenerator.totalTime = totalStatTime * Param.MS;
+          this.CurrentDataGenerator().Reset();
+          this.CurrentDataGenerator().totalTime = totalStatTime * Param.MS;
           switch (StatTypeListBox.SelectedIndex)
           {
             case 0:
-              m_LoopCtrl.OnPackFound += dataGenerator.ProcessAmpStat;
+              m_LoopCtrl.OnPackFound += this.CurrentDataGenerator().ProcessAmpStat;
               statFinished += StopAmpStat;
               break;
             case 1:
-              m_LoopCtrl.OnPackFound += dataGenerator.ProcessFreqStat;
+              m_LoopCtrl.OnPackFound += this.CurrentDataGenerator().ProcessFreqStat;
               statFinished += StopFreqStat;
               break;
           }
@@ -254,7 +301,7 @@ namespace MEAClosedLoop
 
     public void StopAmpStat()
     {
-      m_LoopCtrl.OnPackFound -= dataGenerator.ProcessAmpStat;
+      m_LoopCtrl.OnPackFound -= this.CurrentDataGenerator().ProcessAmpStat;
       StatEnd();
     }
 
@@ -265,7 +312,7 @@ namespace MEAClosedLoop
 
     public void StopFreqStat()
     {
-      m_LoopCtrl.OnPackFound -= dataGenerator.ProcessFreqStat;
+      m_LoopCtrl.OnPackFound -= this.CurrentDataGenerator().ProcessFreqStat;
       StatEnd();
     }
     private void StatEnd()
@@ -303,7 +350,7 @@ namespace MEAClosedLoop
     }
     private void drawResult()
     {
-        dataGenerator.ProcessPackStat(timeUnitSegment);
+        this.CurrentDataGenerator().ProcessPackStat(timeUnitSegment);
         foreach (Panel p in channelPanels)
         {
           p.Controls.Clear();

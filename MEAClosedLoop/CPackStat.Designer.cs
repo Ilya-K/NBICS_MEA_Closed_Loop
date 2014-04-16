@@ -85,6 +85,7 @@
       this.PackCountGraph = new System.Windows.Forms.PictureBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.compareButton = new System.Windows.Forms.Button();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -241,11 +242,11 @@
       // label9
       // 
       this.label9.AutoSize = true;
-      this.label9.Location = new System.Drawing.Point(34, 19);
+      this.label9.Location = new System.Drawing.Point(3, 19);
       this.label9.Name = "label9";
-      this.label9.Size = new System.Drawing.Size(89, 13);
+      this.label9.Size = new System.Drawing.Size(29, 13);
       this.label9.TabIndex = 2;
-      this.label9.Text = "Тип стимуляции";
+      this.label9.Text = "Тип:";
       // 
       // StimType
       // 
@@ -253,16 +254,16 @@
       this.StimType.FormattingEnabled = true;
       this.StimType.Items.AddRange(new object[] {
             "эмуляция"});
-      this.StimType.Location = new System.Drawing.Point(152, 16);
+      this.StimType.Location = new System.Drawing.Point(35, 16);
       this.StimType.Name = "StimType";
-      this.StimType.Size = new System.Drawing.Size(121, 21);
+      this.StimType.Size = new System.Drawing.Size(149, 21);
       this.StimType.TabIndex = 1;
       // 
       // StartStimButton
       // 
-      this.StartStimButton.Location = new System.Drawing.Point(320, 14);
+      this.StartStimButton.Location = new System.Drawing.Point(188, 14);
       this.StartStimButton.Name = "StartStimButton";
-      this.StartStimButton.Size = new System.Drawing.Size(133, 23);
+      this.StartStimButton.Size = new System.Drawing.Size(125, 24);
       this.StartStimButton.TabIndex = 0;
       this.StartStimButton.Text = "Начать стимуляцию";
       this.StartStimButton.UseVisualStyleBackColor = true;
@@ -734,6 +735,7 @@
       // 
       // groupBox2
       // 
+      this.groupBox2.Controls.Add(this.compareButton);
       this.groupBox2.Controls.Add(this.label9);
       this.groupBox2.Controls.Add(this.StimType);
       this.groupBox2.Controls.Add(this.StartStimButton);
@@ -743,6 +745,17 @@
       this.groupBox2.TabIndex = 13;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
+      // 
+      // compareButton
+      // 
+      this.compareButton.Enabled = false;
+      this.compareButton.Location = new System.Drawing.Point(320, 14);
+      this.compareButton.Name = "compareButton";
+      this.compareButton.Size = new System.Drawing.Size(133, 24);
+      this.compareButton.TabIndex = 11;
+      this.compareButton.Text = "Сравнить активность";
+      this.compareButton.UseVisualStyleBackColor = true;
+      this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
       // 
       // CPackStat
       // 
@@ -846,5 +859,6 @@
     private System.Windows.Forms.Label label24;
     private System.Windows.Forms.TextBox CurrentSigma;
     private System.Windows.Forms.Label label20;
+    private System.Windows.Forms.Button compareButton;
   }
 }

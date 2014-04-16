@@ -44,7 +44,7 @@ namespace MEAClosedLoop
     bool DoStimulation = false;
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
-
+    private PackGraphForm formShowWindows;
 
 
     public delegate void DelegateUpdateDistribGrath();
@@ -55,7 +55,6 @@ namespace MEAClosedLoop
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
 
     private double StimStartPosition;
-    private TStimIndex StimStartIndex;
     #endregion
     #region Конструктор
     public CPackStat(CLoopController _LoopController, List<int> channelList)
@@ -83,15 +82,21 @@ namespace MEAClosedLoop
       SecondsWindow.ValueChanged += StimReady;
       MinutesWindow.EnabledChanged += SetDefaultMinWindow;
       SecondsWindow.EnabledChanged += SetDefaultSecWindow;
+      formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
+      formShowWindows.loadSelection += ChannelChangeRequest;
     }
     #endregion
 
     #region Клик по кнопке выбора канала
     private void GraphChannelSelectButton_Click(object sender, EventArgs e)
     {
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
-      formShowWindows.loadSelection += ChannelChangeRequest;
-      formShowWindows.ShowDialog();
+      formShowWindows.Show();
+      formShowWindows.VisibleChanged += UnlockCompareButton;
+    }
+
+    private void UnlockCompareButton(Object sender, EventArgs e)
+    {
+      compareButton.Enabled = true;
     }
 
     private void GraphChannelSelected(Object sender, EventArgs e)
@@ -533,5 +538,11 @@ namespace MEAClosedLoop
       this.CurrentCalcStat();
     }
 
+    private void compareButton_Click(object sender, EventArgs e)
+    {
+      this.GraphChannelSelectButton.Enabled = false;
+      this.formShowWindows.EnableCompareMode();
+      formShowWindows.Show();
+    }
   }
 }

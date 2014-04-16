@@ -31,8 +31,8 @@
       this.RunStatButton = new System.Windows.Forms.Button();
       this.StatTypeListBox = new System.Windows.Forms.ListBox();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
-      this.MinCountBox = new System.Windows.Forms.NumericUpDown();
       this.timelabel = new System.Windows.Forms.Label();
+      this.MinCountBox = new System.Windows.Forms.NumericUpDown();
       this.StatProgressBar = new System.Windows.Forms.ProgressBar();
       this.groupBox1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.MinCountBox)).BeginInit();
@@ -73,6 +73,14 @@
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Анализ";
       // 
+      // timelabel
+      // 
+      this.timelabel.Location = new System.Drawing.Point(140, 27);
+      this.timelabel.Name = "timelabel";
+      this.timelabel.Size = new System.Drawing.Size(78, 23);
+      this.timelabel.TabIndex = 5;
+      this.timelabel.Text = "время (мин.)";
+      // 
       // MinCountBox
       // 
       this.MinCountBox.Location = new System.Drawing.Point(224, 24);
@@ -84,14 +92,6 @@
       this.MinCountBox.Name = "MinCountBox";
       this.MinCountBox.Size = new System.Drawing.Size(43, 20);
       this.MinCountBox.TabIndex = 4;
-      // 
-      // timelabel
-      // 
-      this.timelabel.Location = new System.Drawing.Point(140, 27);
-      this.timelabel.Name = "timelabel";
-      this.timelabel.Size = new System.Drawing.Size(78, 23);
-      this.timelabel.TabIndex = 5;
-      this.timelabel.Text = "время (мин.)";
       // 
       // StatProgressBar
       // 
@@ -106,6 +106,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(780, 964);
+      this.ControlBox = false;
       this.Controls.Add(this.groupBox1);
       this.Name = "PackGraphForm";
       this.Text = "PackGraphForm";

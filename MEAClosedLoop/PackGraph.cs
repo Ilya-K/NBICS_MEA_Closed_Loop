@@ -140,12 +140,7 @@ namespace MEAClosedLoop
     
     public PackGraph()
     {
-      foundPackPercent = 0;
-
-      RawAmpData = new Queue<CPack>();
-      RawFreqData = new Queue<CPack>();
-      processed_data = new Timeline();
-
+      this.Reset();
     }
 
     public void Reset()
