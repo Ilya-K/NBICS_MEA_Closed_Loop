@@ -203,6 +203,7 @@
       this.StimPadding.Name = "StimPadding";
       this.StimPadding.Size = new System.Drawing.Size(111, 20);
       this.StimPadding.TabIndex = 5;
+      this.StimPadding.Text = "0";
       this.StimPadding.TextChanged += new System.EventHandler(this.StimPadding_TextChanged);
       // 
       // label10
@@ -309,6 +310,7 @@
       // 
       this.CurrentAverage.Location = new System.Drawing.Point(126, 42);
       this.CurrentAverage.Name = "CurrentAverage";
+      this.CurrentAverage.ReadOnly = true;
       this.CurrentAverage.Size = new System.Drawing.Size(66, 20);
       this.CurrentAverage.TabIndex = 18;
       // 
@@ -325,6 +327,7 @@
       // 
       this.CurrentSigma.Location = new System.Drawing.Point(126, 65);
       this.CurrentSigma.Name = "CurrentSigma";
+      this.CurrentSigma.ReadOnly = true;
       this.CurrentSigma.Size = new System.Drawing.Size(66, 20);
       this.CurrentSigma.TabIndex = 2;
       // 
@@ -439,6 +442,7 @@
       // 
       this.SelectedAverageBox.Location = new System.Drawing.Point(126, 13);
       this.SelectedAverageBox.Name = "SelectedAverageBox";
+      this.SelectedAverageBox.ReadOnly = true;
       this.SelectedAverageBox.Size = new System.Drawing.Size(66, 20);
       this.SelectedAverageBox.TabIndex = 2;
       // 
@@ -446,6 +450,7 @@
       // 
       this.SelectedSigmaBox.Location = new System.Drawing.Point(126, 37);
       this.SelectedSigmaBox.Name = "SelectedSigmaBox";
+      this.SelectedSigmaBox.ReadOnly = true;
       this.SelectedSigmaBox.Size = new System.Drawing.Size(66, 20);
       this.SelectedSigmaBox.TabIndex = 2;
       // 

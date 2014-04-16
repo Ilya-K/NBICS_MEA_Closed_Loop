@@ -49,6 +49,7 @@ namespace MEAClosedLoop
 
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
+    public delegate void StatPrepare(bool val);
     public event DelegateSetProgress SetVal;
     public event DelegateUpdateDistribGrath UpdateDistribGrath;
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
@@ -342,7 +343,22 @@ namespace MEAClosedLoop
       double i = StimStartPosition;
       double.TryParse(StimPadding.Text, out i);
       StimStartPosition = i;
-      trackBar1.Value = (int) (StimStartPosition * trackBar1.Maximum / (int)(StatGraphXRange.Value));
+      int newTrackBarPosition = (int) (StimStartPosition * trackBar1.Maximum / (int)(StatGraphXRange.Value));
+      if (newTrackBarPosition > trackBar1.Maximum)
+      {
+        trackBar1.Value = trackBar1.Maximum;
+      }
+      else
+      {
+        if (newTrackBarPosition < trackBar1.Minimum)
+        {
+          trackBar1.Value = trackBar1.Minimum;
+        }
+        else
+        {
+          trackBar1.Value = newTrackBarPosition;
+        }
+      }
       //DistribGrath.Refresh();
     }
     private void trackBar1_Scroll(object sender, EventArgs e)
