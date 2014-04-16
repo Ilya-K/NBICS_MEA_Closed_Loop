@@ -41,8 +41,11 @@ namespace MEAClosedLoop
     private int SCHYRange = 120;
     #endregion
     #region внутренние данные
-    TFltDataPacket DataPacket; //Данные для отрисовки фильтрованных данных
+    TFltDataPacket DataPacket; //последний пришедший пакет
     Queue<TFltDataPacket> DataPacketHistory; // история данных
+    Queue<TAbsStimIndex> FoundStimData; // история найденных стимулов
+    Queue<TAbsStimIndex> ExpStimData; // история ожидаемых стимулов
+
     object DataPacketLock = new object(); // блокировка данных
     public TTime summary_time_stamp = 0;
     CFiltering m_salpaFilter;
@@ -52,14 +55,15 @@ namespace MEAClosedLoop
     // массив массивов вершин нашей кривой
     VertexPositionColor[][] vertices;
     // массив массивов вершин для режима одного канала со сверткой
-    VertexPositionColor[][] schCompVerices;
+    //VertexPositionColor[][] schCompVerices;
     // массив массивов вершин для режима одного канала без свертки
     VertexPositionColor[] schUncompVerices;
     object VertexPositionLock = new object();
     DrawMode SelectedDrawMode;
     int SingleChannelNum = MEA.AR_DECODE[20];
+    TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
-
+    
     #endregion
     public CDataRender(CFiltering salpaFilter)
     {
@@ -81,6 +85,7 @@ namespace MEAClosedLoop
       this.IsMouseVisible = true;
 
       m_salpaFilter.AddDataConsumer(RecieveFltData);
+      m_salpaFilter.AddStimulConsumer(RecieveStimData);
     }
 
     protected override void Initialize()
@@ -172,10 +177,31 @@ namespace MEAClosedLoop
         for (; DataPacketHistory.Count >= HistoryLength; DataPacketHistory.Dequeue()) ;
         int AnyExistsKey = DataPacket.Keys.First();
         //Текущее время (время на конец последнего пакета)
-        summary_time_stamp += (TTime)DataPacket[AnyExistsKey].Length;
+        summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[AnyExistsKey].Length;
+        HistoryTimeLength = 0;
+        for (int i = 0; i < DataPacketHistory.Count; i++)
+        {
+          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[SingleChannelNum].Length;
+        }
       }
       IsDataUpdated = false;
 
+    }
+    public void SetExpStimData(TStimGroup stim) { }
+    public void RecieveStimData(List<TAbsStimIndex> stims) 
+    {
+
+      lock (DataPacketLock)
+      {
+        foreach (TAbsStimIndex stim in stims)
+        {
+          FoundStimData.Enqueue(stim);
+        }
+        //while (FoundStimData.Peek() <   )
+        {
+        }
+
+      }
     }
     public void ChangeDrawMode(object sender, EventArgs e)
     {
