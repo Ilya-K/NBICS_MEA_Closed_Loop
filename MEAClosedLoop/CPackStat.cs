@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 250;
+    private const int Minimum_Pack_Requered_Count = 20;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -36,8 +36,8 @@ namespace MEAClosedLoop
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
     private TTime StartStimulationTime = 0; // точка отсчета начала стимуляций. 
-    private int Stat_Window_Minutes = 0;
-    private int Stat_Window_Seconds = 10;
+    private const int Stat_Window_Minutes = 0;
+    private const int Stat_Window_Seconds = 10;
     private int AveragePackPeriod = 0;
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
@@ -73,6 +73,15 @@ namespace MEAClosedLoop
       UpdateDistribGrath += PreCalcStat;
       UpdateDistribGrath += CurrentCalcStat;
       SetCollectStatButtonText += SetStatButtontext;
+      StimType.Enabled = false;
+      StartStimButton.Enabled = false;
+      numericUpDown1.ValueChanged += GraphChannelSelected;
+      MinutesWindow.Enabled = false;
+      SecondsWindow.Enabled = false;
+      MinutesWindow.ValueChanged += StimReady;
+      SecondsWindow.ValueChanged += StimReady;
+      MinutesWindow.EnabledChanged += SetDefaultMinWindow;
+      SecondsWindow.EnabledChanged += SetDefaultSecWindow;
     }
     #endregion
 
@@ -81,7 +90,13 @@ namespace MEAClosedLoop
     {
       PackGraphForm formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
       formShowWindows.loadSelection += ChannelChangeRequest;
-      formShowWindows.Show();
+      formShowWindows.ShowDialog();
+    }
+
+    private void GraphChannelSelected(Object sender, EventArgs e)
+    {
+      this.MinutesWindow.Enabled = true;
+      this.SecondsWindow.Enabled = true;
     }
     #endregion
 
@@ -92,25 +107,13 @@ namespace MEAClosedLoop
       if (!DoStatCollection)
       {
         DoStatCollection = true;
-        CollectStatButton.Text = "Остановить";
-        /*if (CollectingDataThread == null)
-        {
-          CollectingDataThread = new Thread(CollectPacks);
-          //CollectingDataThread.Start();
-        }
-        else
-        {
-          //CollectingDataThread.Resume();
-        }*/
-
-        //PackDetector.PackArrived += AddPack; 
+        CollectStatButton.Text = "Остановить"; 
         LoopCtrl.OnPackFound += AddPack; //now from loop controller
       }
       else
       {
         DoStatCollection = false;
         CollectStatButton.Text = "Продолжить";
-        //CollectingDataThread.Suspend();
         LoopCtrl.OnPackFound -= AddPack; //now from loop controller
       }
     }
@@ -362,21 +365,38 @@ namespace MEAClosedLoop
       }
     }
     #endregion
+
+    private void StimReady(Object sender, EventArgs e)
+    {
+      StimType.Enabled = true;
+      StartStimButton.Enabled = true;
+    }
+
     private void StartStimButton_Click(object sender, EventArgs e)
     {
       CurrentState = state.AfterStimulation;
       DoStatCollection = true;
       DoStimulation = true;
       //TODO: вызов функции, начинающей стимуляции.
+      DrawPackCountGraph((int)this.numericUpDown1.Value);
       PackCountGraph.Invalidate();
       PackCountGraph.Refresh();
     }
 
 
-    private void CPackStat_Load(object sender, EventArgs e)
+
+    private void SetDefaultMinWindow(object sender, EventArgs e)
     {
       MinutesWindow.Value = Stat_Window_Minutes;
+    }
+
+    private void SetDefaultSecWindow(object sender, EventArgs e)
+    {
       SecondsWindow.Value = Stat_Window_Seconds;
+    }
+
+    private void DrawPackCountGraph(int channel)
+    {
     }
 
     void ChannelChangeRequest(int number)

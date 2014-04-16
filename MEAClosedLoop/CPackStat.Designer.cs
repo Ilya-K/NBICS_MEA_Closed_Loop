@@ -594,9 +594,19 @@
             0,
             0,
             0});
+      this.SecondsWindow.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
       this.SecondsWindow.Name = "SecondsWindow";
       this.SecondsWindow.Size = new System.Drawing.Size(35, 20);
       this.SecondsWindow.TabIndex = 9;
+      this.SecondsWindow.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
       this.SecondsWindow.ValueChanged += new System.EventHandler(this.SecondsWindow_ValueChanged);
       // 
       // label13
@@ -742,7 +752,6 @@
       this.Controls.Add(this.Prepearing);
       this.Name = "CPackStat";
       this.Text = "CPackStat";
-      this.Load += new System.EventHandler(this.CPackStat_Load);
       this.Prepearing.ResumeLayout(false);
       this.Prepearing.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
