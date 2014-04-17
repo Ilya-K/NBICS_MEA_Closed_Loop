@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -43,6 +44,7 @@ namespace MEAClosedLoop
     #region внутренние данные
     TFltDataPacket DataPacket; //последний пришедший пакет
     Queue<TFltDataPacket> DataPacketHistory; // история данных
+    Queue<CPack> PacksHistory; // история пачек
     Queue<TAbsStimIndex> FoundStimData; // история найденных стимулов
     Queue<TAbsStimIndex> ExpStimData; // история ожидаемых стимулов
 
@@ -52,6 +54,10 @@ namespace MEAClosedLoop
     GraphicsDeviceManager graphics;
     // эффект BasicEffect для кривой
     BasicEffect basicEffect;
+    // спрайт для текстуры
+    SpriteBatch TextSprite;
+    SpriteFont mainFont;
+    Vector2 TextPosition;
     // массив массивов вершин нашей кривой
     VertexPositionColor[][] vertices;
     // массив массивов вершин для режима одного канала со сверткой
@@ -81,6 +87,8 @@ namespace MEAClosedLoop
       DataPacketHistory = new Queue<TFltDataPacket>(HistoryLength);
       FoundStimData = new Queue<TAbsStimIndex>();
       ExpStimData = new Queue<TAbsStimIndex>();
+      PacksHistory = new Queue<CPack>();
+
       this.m_salpaFilter = salpaFilter;
       this.Window.AllowUserResizing = true;
       this.IsMouseVisible = true;
@@ -103,6 +111,17 @@ namespace MEAClosedLoop
     }
     protected override void LoadContent()
     {
+      // Создали новый SpriteBatch, который может быть использован для прорисовки текстур.
+      TextSprite = new SpriteBatch(GraphicsDevice);
+      //Установим папку контента
+      //Content.RootDirectory = "C:\\Users\\Михаил\\Documents\\GitHub\\NBICS_MEA_Closed_Loop\\XNAContent\\";
+      string path = @"mainFont";
+      //StreamReader s = new StreamReader(path);
+      //string startPath = System.AppDomain.CurrentDomain.BaseDirectory; 
+      //ContentTypeReader<SpriteFont> typereader = new ContentTypeReader<SpriteFont>();
+      typereader asdf = new typereader();
+      string ss = Content.RootDirectory;
+      mainFont = Content.Load<SpriteFont>(path);
     }
     protected override void UnloadContent()
     {
@@ -188,7 +207,17 @@ namespace MEAClosedLoop
       IsDataUpdated = false;
 
     }
-    public void SetExpStimData(TStimGroup stim) { }
+    public void RecievePackData(CPack pack) 
+    {
+      lock(DataPacketLock)
+      {
+        PacksHistory.Enqueue(pack);
+        while (PacksHistory.Count > 0 && PacksHistory.Peek().Start + (uint)PacksHistory.Peek().Length  + HistoryTimeLength < summary_time_stamp)
+        {
+          PacksHistory.Dequeue();
+        }
+      }
+    }
     public void RecieveStimData(List<TAbsStimIndex> stims) 
     {
       lock (DataPacketLock)
@@ -203,9 +232,9 @@ namespace MEAClosedLoop
         {
           FoundStimData.Dequeue();
         }
-
       }
     }
+    public void SetExpStimData(TStimGroup stim) { }
     public void ChangeDrawMode(object sender, EventArgs e)
     {
       MouseState mousestate = Mouse.GetState();
@@ -260,6 +289,7 @@ namespace MEAClosedLoop
     {
       if (DataPacket == null) return;
       if (DataPacketHistory.Count == 0) return;
+
       //Получаем размеры окна;
       int WindowHeight = graphics.PreferredBackBufferHeight;
       //graphics.PreferredBackBufferFormat = SurfaceFormat.Color;
@@ -429,8 +459,8 @@ namespace MEAClosedLoop
               }
             }
             double PointsPerPX = ((double)data_to_display.Length) / FormWidth;
-            SCHCompress = (PointsPerPX < 1) ? 1 : (int)PointsPerPX;
-            if (PointsPerPX <= 1)
+            SCHCompress = (PointsPerPX < 3) ? 3 : (int)PointsPerPX;
+            if (PointsPerPX <= 3)
             {
               #region сплошная отрисовка
               //отрисовка без наложения линий - готовим сплошной массив и его рисуем
@@ -453,7 +483,7 @@ namespace MEAClosedLoop
               // отрисовка с наложением линий друг на друга - рисуем вертикальные линии от максимума до минимума
               // NOTE: наиболее частый случай
               int length = data_to_display.Length;
-              for (int i = SCHCompress; i < length - 1; i += SCHCompress)
+              for (int i = SCHCompress; i < length; i += SCHCompress)
               {
                 float max = float.MinValue;
                 float min = float.MaxValue;
@@ -470,6 +500,8 @@ namespace MEAClosedLoop
                 line[1].Position.X = line[0].Position.X;
                 line[1].Position.Y = min * SCHYRange / 100 + WindowHeight / 2;
                 line[1].Position.Z = 0;
+                line[0].Color = Color.DarkGray;
+                line[1].Color = Color.DarkGray;
                 if (line[0].Position.Y < 0) line[0].Position.Y = 0;
                 if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
                 //случай сплошного(длинного) нуля - горизонтальной прямой
@@ -479,14 +511,14 @@ namespace MEAClosedLoop
                 graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
                 //отрисовка соединяющей линии
 
-                for (int z = 0; z < SCHCompress; z++)
+                for (int z = 0; z < SCHCompress && -z + i + SCHCompress < length; z++)
                 {
-                  float t = (float)data_to_display[i + 1 - z];
+                  float t = (float)data_to_display[i + SCHCompress - z];
                   if (t > max) max = t;
                   if (t < min) min = t;
                 }
                 line[1].Position.X +=((float)WindowWidth / (float)length);
-                line[1].Position.Y = max * SCHYRange / 100 + WindowHeight / 2;
+                line[1].Position.Y = (max + min )* SCHYRange / 200 + WindowHeight / 2;
                 line[1].Position.Z = 0;
                 if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
                 //случай сплошного(длинного) нуля - горизонтальной прямой
@@ -506,14 +538,24 @@ namespace MEAClosedLoop
                 stimline[0].Position.X = WindowWidth * (1-(float)(summary_time_stamp - stim) / HistoryTimeLength);
                 stimline[0].Position.Y = 0;
                 stimline[0].Position.Z = 0;
-                stimline[0].Color = Color.Green;
+                stimline[0].Color = Color.Red;
                 stimline[1].Position = stimline[0].Position;
                 stimline[1].Position.Y = WindowHeight;
-                stimline[1].Color = Color.Gray;
+                stimline[1].Color = Color.Red;
                 graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, stimline, 0, 1);
               }
 
             }
+            #endregion
+
+            #region Отрисовка надписей
+            // Текущее время
+            string CurrentTime = "Текущее время " + (m_salpaFilter.TimeStamp/25000).ToString() + "секунд";
+            TextSprite.Begin();
+
+            TextPosition = new Vector2(20, 40);
+            TextSprite.DrawString(mainFont, CurrentTime, TextPosition, Color.LightGreen);
+            TextSprite.End();
             #endregion
           }
           IsDataUpdated = true;
@@ -522,11 +564,27 @@ namespace MEAClosedLoop
       }
       base.Draw(gameTime);
     }
+
+    private bool IsPackAtTime(float time)
+    {
+      foreach (CPack pack in PacksHistory)
+      {
+        if (pack.Start + (TTime)time * HistoryTimeLength < summary_time_stamp &&
+          pack.Start + (TTime)pack.Length + (TTime)time * HistoryTimeLength > summary_time_stamp)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
     private enum DrawMode
     {
       DrawSingleChannel,
       DrawMultiChannel
     }
+  }
+  public class typereader : ContentReader 
+  {
   }
 }
 

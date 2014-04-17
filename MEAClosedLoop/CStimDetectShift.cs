@@ -1,4 +1,4 @@
-﻿//#define GRAPH
+﻿#define GRAPH
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,13 +25,15 @@ namespace MEAClosedLoop
     private const TStimIndex default_offset = 8;
     private const TStimIndex start_offset = 16;
     private const TStimIndex GUARANTEED_EMPTY_SPACE = 240;
-    private const TStimIndex POST_SIGMA_CALC_DEPTH = 12;
+    private const TStimIndex POST_SIGMA_CALC_DEPTH = 14;
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 40;
     public TAbsStimIndex MaximumShiftRange = 250;
     private TStimIndex MinimumLengthBetweenPegs = 10; // 250 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
     public bool FullResearch = true; //True for unoptimized research
-    public int m_Artif_Channel = MEA.EL_DECODE[23];
+    public bool SkipStims = false; // не искать артефакты
+    public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия артефактов
+    public int m_Artif_Channel = MEA.EL_DECODE[12];
     #endregion
 
     #region Внутрение данные|
@@ -209,10 +211,9 @@ namespace MEAClosedLoop
         #region Поиск по всему пакету
         for (short i = (short)FILTER_DEPTH; i < DataPacket.Length - FILTER_DEPTH; i++)
         {
-
           if (TrueValidateSingleStimInT(DataPacket, i))
           {
-            FindedPegs.Add(i);
+            FindedPegs.Add((TStimIndex)i);
             lock (LockStimList)
             {
               foreach (TStimIndex stim in FindedPegs)
@@ -251,6 +252,7 @@ namespace MEAClosedLoop
               if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)i))
               {
                 bool IsBlankinkArtif = false;
+                // проверка: не является ли найденный артефакт пред блакинговым импульсом
                 TAbsStimIndex SubRightRange = (i + BLANK_ARTIF_PRE_MAX_LENGTH + (TAbsStimIndex)FILTER_DEPTH < (TAbsStimIndex)DataPacket.Length) ? i + BLANK_ARTIF_PRE_MAX_LENGTH : (TAbsStimIndex)DataPacket.Length - (TAbsStimIndex)FILTER_DEPTH - 1;
                 for (TAbsStimIndex j = i + 28; j < SubRightRange; j++)
                 {
@@ -312,9 +314,17 @@ namespace MEAClosedLoop
         }
       }
       #endregion
-
+      if (SkipStims) return new List<TStimIndex>();
+      if (SalpaShiftOptimization)
+      {
+        #region сдвиг на 32 точки влево
+        for (int i = 0; i < FindedPegs.Count; i++)
+        {
+          FindedPegs[i] -= 32;
+        }
+        #endregion
+      }
       return FindedPegs;
-
     }
     #endregion
     #region Упрощенная верификация артефакта в момент времени t
@@ -350,7 +360,7 @@ namespace MEAClosedLoop
           && pre_average.Value > 0
           && pre_average.Value < 65535
           //StableLinesFix
-          && Math.Abs(pre_average.Value - post_average.Value) > 220
+          && Math.Abs(pre_average.Value - post_average.Value) > 300
           //Blanking Fix
 
           && pre_average.Sigma < 35
