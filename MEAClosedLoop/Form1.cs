@@ -79,8 +79,8 @@ namespace MEAClosedLoop
       comboBox_DAQs_Click(null, null);
       comboBox_Stimulators_Click(null, null);
       SetDefaultChannels();
+      showChannelData.Click+=buttonClosedLoop_Click;
     }
-
     /*
     private void DataLoop()
     {
@@ -345,7 +345,7 @@ namespace MEAClosedLoop
           thresholds[i] = 1000 * 3;
         }
         // length_sams [75], asym_sams [10], blank_sams [75], ahead_sams [5], forcepeg_sams [10], thresholds[]
-        SALPAParams parSALPA = new SALPAParams(35, 10, 35, 5, 10, thresholds);
+        SALPAParams parSALPA = new SALPAParams(100, 10, 35, 5, 10, thresholds);
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
 
         // [TODO] Get parameters from the UI and save them in Settings
@@ -603,8 +603,9 @@ namespace MEAClosedLoop
         {
           // [TODO] Configure Stimulator
           // [DEBUG]
+          m_stimulator = new CStimulator(m_usbSTGList, (uint)m_selectedStim);
           // Fake stimulator
-          m_stimulator = new CStimulator();
+          //m_stimulator = new CStimulator();
           // [/DEBUG] 
         }
 
@@ -687,7 +688,6 @@ namespace MEAClosedLoop
       m_closedLoop.AddDataConsumer(m_dataRender.RecievePackData);
 
       m_dataRender.Run();
-
     }
   }
 }

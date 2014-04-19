@@ -363,13 +363,13 @@ namespace MEAClosedLoop
                   currentlength += DataPacketHistory.ElementAt(i)[key].Length;
                 }
               }
-              for (int i = 0; i < length; i += MCHCompress)
+              for (int i = MCHCompress; i < length; i += MCHCompress)
               {
                 float max = float.MinValue;
                 float min = float.MaxValue;
                 for (int z = 0; z < MCHCompress; z++)
                 {
-                  float t = (float)data_to_display[i + z];
+                  float t = (float)data_to_display[i - z];
                   if (t > max) max = t;
                   if (t < min) min = t;
                 }

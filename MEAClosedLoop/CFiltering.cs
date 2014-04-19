@@ -72,6 +72,8 @@ namespace MEAClosedLoop
 
     // [/DEBUG]
     public int m_Count = 0;
+    private Stopwatch sw1 = new Stopwatch();
+    private List<long> times = new List<long>();
 
     public void AddDataConsumer(ConsumerDelegate consumer)
     {
@@ -165,6 +167,9 @@ namespace MEAClosedLoop
       //      Thread t = new Thread(new ThreadStart(DoFiltering));
       m_kill = false;
       //      t.Start();
+      // [DEBUG]
+      sw1.Restart();
+      // [/DEBUG]
     }
 
     public void ConfigureSALPA()
@@ -278,6 +283,7 @@ namespace MEAClosedLoop
     }
     public void ReceiveData(TRawDataPacket currPacket)
     {
+      //times.Add(sw1.ElapsedMilliseconds);
       List<TAbsStimIndex> outputIndeces = new List<TAbsStimIndex>();
       if (m_prevPacket == null)
       {
@@ -293,7 +299,7 @@ namespace MEAClosedLoop
       List<TStimIndex> stimIndices = m_noArtifacts;
       if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
       {
-        m_stimDetector.SetExpectedStims(sl_groups[0]);
+        //m_stimDetector.SetExpectedStims(sl_groups[0]);
         sl_groups.RemoveAt(0);
       }
       // Check here if we need to call the Stimulus Artifact Detector for the current packet

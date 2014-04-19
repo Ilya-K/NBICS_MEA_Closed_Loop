@@ -64,6 +64,7 @@ namespace MEAClosedLoop
       m_stimulator = stimulator;
       m_filter = filter;
 
+      m_stimulator.DownloadDefaultShape(1, 1, 1, 10000);
       m_stimulus = m_stimulator.GetStimulus();
       m_packDetector = new CPackDetector(m_filter);
 
@@ -158,7 +159,8 @@ namespace MEAClosedLoop
 
     private void StimTimer(object o1, EventArgs e1)
     {
-      //[DEBUG] m_stimulator.Start();
+      //[DEBUG]
+      m_stimulator.Start();
     }
   }
 }
