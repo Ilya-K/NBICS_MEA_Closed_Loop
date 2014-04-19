@@ -684,9 +684,10 @@ namespace MEAClosedLoop
     private void DrawDataFunction()
     {
       m_dataRender = new CDataRender(m_salpaFilter);
-  
+      m_closedLoop.AddDataConsumer(m_dataRender.RecievePackData);
 
       m_dataRender.Run();
+
     }
   }
 }

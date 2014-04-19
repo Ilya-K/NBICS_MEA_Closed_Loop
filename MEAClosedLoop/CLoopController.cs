@@ -34,6 +34,26 @@ namespace MEAClosedLoop
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
 
+
+    public delegate void PackConsumerDelegate(CPack pack);
+    private List<PackConsumerDelegate> m_packConsumerList = null;
+    private object m_packConsumerListLock = new object();
+
+    public void AddDataConsumer(PackConsumerDelegate consumer)
+    {
+      if (m_packConsumerList == null) m_packConsumerList = new List<PackConsumerDelegate>();
+      lock (m_packConsumerListLock)
+      {
+        if (m_packConsumerList.Contains(consumer)) return;
+        m_packConsumerList.Add(consumer);
+      }
+    }
+    public void RemoveDataConsumer(PackConsumerDelegate consumer)
+    {
+      lock (m_packConsumerListLock) m_packConsumerList.Remove(consumer);
+      return;
+    }
+
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
       if (inputStream == null) throw new ArgumentNullException("inputStream");
@@ -123,7 +143,16 @@ namespace MEAClosedLoop
         m_stimTimer.Start();
 
         prevPack = currPack;
+        // Нагажу комментами на русском ;)
+        // Раздача законченных пачек подписчикам
 
+        lock (m_packConsumerListLock)
+        {
+          if (m_packConsumerList != null && m_packConsumerList.Count != 0)
+          {
+            foreach (PackConsumerDelegate consumer in m_packConsumerList) consumer(currPack);
+          }
+        }
       }
     }
 

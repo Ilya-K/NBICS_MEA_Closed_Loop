@@ -69,7 +69,7 @@ namespace MEAClosedLoop
     int SingleChannelNum = MEA.AR_DECODE[20];
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
-    
+
     #endregion
     public CDataRender(CFiltering salpaFilter)
     {
@@ -114,14 +114,15 @@ namespace MEAClosedLoop
       // Создали новый SpriteBatch, который может быть использован для прорисовки текстур.
       TextSprite = new SpriteBatch(GraphicsDevice);
       //Установим папку контента
-      //Content.RootDirectory = "C:\\Users\\Михаил\\Documents\\GitHub\\NBICS_MEA_Closed_Loop\\XNAContent\\";
       string path = @"mainFont";
       //StreamReader s = new StreamReader(path);
       //string startPath = System.AppDomain.CurrentDomain.BaseDirectory; 
       //ContentTypeReader<SpriteFont> typereader = new ContentTypeReader<SpriteFont>();
-      typereader asdf = new typereader();
-      string ss = Content.RootDirectory;
-      mainFont = Content.Load<SpriteFont>(path);
+      //typereader asdf = new typereader();
+      //string ss = Content.RootDirectory;  
+      //Content.RootDirectory = "C:\\Users\\Михаил\\Documents\\GitHub\\NBICS_MEA_Closed_Loop\\XNAContent\\";
+      //mainFont = Content.Load<SpriteFont>("mainFont");
+     
     }
     protected override void UnloadContent()
     {
@@ -207,18 +208,20 @@ namespace MEAClosedLoop
       IsDataUpdated = false;
 
     }
-    public void RecievePackData(CPack pack) 
+    public void RecievePackData(CPack pack)
     {
-      lock(DataPacketLock)
+      pack.Length += 1000;//DEBUG что бы пачки имели длину (ненулевую).  
+      lock (DataPacketLock)
       {
         PacksHistory.Enqueue(pack);
-        while (PacksHistory.Count > 0 && PacksHistory.Peek().Start + (uint)PacksHistory.Peek().Length  + HistoryTimeLength < summary_time_stamp)
+        while (PacksHistory.Count > 0 && PacksHistory.Peek().Start + (uint)PacksHistory.Peek().Length + HistoryTimeLength < summary_time_stamp)
         {
           PacksHistory.Dequeue();
         }
       }
     }
-    public void RecieveStimData(List<TAbsStimIndex> stims) 
+    
+    public void RecieveStimData(List<TAbsStimIndex> stims)
     {
       lock (DataPacketLock)
       {
@@ -459,8 +462,8 @@ namespace MEAClosedLoop
               }
             }
             double PointsPerPX = ((double)data_to_display.Length) / FormWidth;
-            SCHCompress = (PointsPerPX < 3) ? 3 : (int)PointsPerPX;
-            if (PointsPerPX <= 3)
+            SCHCompress = (PointsPerPX < 2) ? 2 : (int)PointsPerPX;
+            if (PointsPerPX <= 2)
             {
               #region сплошная отрисовка
               //отрисовка без наложения линий - готовим сплошной массив и его рисуем
@@ -473,9 +476,12 @@ namespace MEAClosedLoop
                 if (schUncompVerices[i].Position.Y > WindowHeight) schUncompVerices[i].Position.Y = WindowHeight;
                 schUncompVerices[i].Position.Z = 0;
                 schUncompVerices[i].Color = (Math.Abs(data_to_display[i]) > 100) ? Color.Red : Color.Blue;
+                if (IsPackAtTime(i))
+                  schUncompVerices[i].Color = Color.Red;
+
               }
               graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, schUncompVerices, 0, schUncompVerices.Count() - 1);
-              #endregion 
+              #endregion
             }
             else
             {
@@ -502,6 +508,9 @@ namespace MEAClosedLoop
                 line[1].Position.Z = 0;
                 line[0].Color = Color.DarkGray;
                 line[1].Color = Color.DarkGray;
+                if (IsPackAtTime(i))
+                  schUncompVerices[i].Color = Color.Red;
+
                 if (line[0].Position.Y < 0) line[0].Position.Y = 0;
                 if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
                 //случай сплошного(длинного) нуля - горизонтальной прямой
@@ -517,8 +526,8 @@ namespace MEAClosedLoop
                   if (t > max) max = t;
                   if (t < min) min = t;
                 }
-                line[1].Position.X +=((float)WindowWidth / (float)length);
-                line[1].Position.Y = (max + min )* SCHYRange / 200 + WindowHeight / 2;
+                line[1].Position.X += ((float)WindowWidth / (float)length);
+                line[1].Position.Y = (max + min) * SCHYRange / 200 + WindowHeight / 2;
                 line[1].Position.Z = 0;
                 if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
                 //случай сплошного(длинного) нуля - горизонтальной прямой
@@ -535,7 +544,7 @@ namespace MEAClosedLoop
               foreach (TAbsStimIndex stim in FoundStimData)
               {
                 VertexPositionColor[] stimline = new VertexPositionColor[2];
-                stimline[0].Position.X = WindowWidth * (1-(float)(summary_time_stamp - stim) / HistoryTimeLength);
+                stimline[0].Position.X = WindowWidth * (1 - (float)(summary_time_stamp - stim) / HistoryTimeLength);
                 stimline[0].Position.Y = 0;
                 stimline[0].Position.Z = 0;
                 stimline[0].Color = Color.Red;
@@ -550,11 +559,12 @@ namespace MEAClosedLoop
 
             #region Отрисовка надписей
             // Текущее время
-            string CurrentTime = "Текущее время " + (m_salpaFilter.TimeStamp/25000).ToString() + "секунд";
+            string CurrentTime = "Текущее время " + (m_salpaFilter.TimeStamp / 25000).ToString() + "секунд";
+            //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
             TextPosition = new Vector2(20, 40);
-            TextSprite.DrawString(mainFont, CurrentTime, TextPosition, Color.LightGreen);
+            //TextSprite.DrawString(mainFont, CurrentTime, TextPosition, Color.LightGreen);
             TextSprite.End();
             #endregion
           }
@@ -567,12 +577,15 @@ namespace MEAClosedLoop
 
     private bool IsPackAtTime(float time)
     {
-      foreach (CPack pack in PacksHistory)
+      lock (DataPacketLock)
       {
-        if (pack.Start + (TTime)time * HistoryTimeLength < summary_time_stamp &&
-          pack.Start + (TTime)pack.Length + (TTime)time * HistoryTimeLength > summary_time_stamp)
+        foreach (CPack pack in PacksHistory)
         {
-          return true;
+          if (pack.Start + (TTime)time < summary_time_stamp &&
+            pack.Start + (TTime)pack.Length + (TTime)time > summary_time_stamp)
+          {
+            return true;
+          }
         }
       }
       return false;
@@ -582,9 +595,6 @@ namespace MEAClosedLoop
       DrawSingleChannel,
       DrawMultiChannel
     }
-  }
-  public class typereader : ContentReader 
-  {
   }
 }
 

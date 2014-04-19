@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StimDetectorTest", "StimDet
 EndProject
 Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "XNAContent", "XNAContent\XNAContent.contentproj", "{8B13995E-64A5-4055-B49F-94AAC6842F4E}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Content", "Content\Content.contentproj", "{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}"
-EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = MEAClosedLoop.vsmdi
@@ -78,14 +76,6 @@ Global
 		{8B13995E-64A5-4055-B49F-94AAC6842F4E}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{8B13995E-64A5-4055-B49F-94AAC6842F4E}.Release|Win32.ActiveCfg = Debug|Any CPU
 		{8B13995E-64A5-4055-B49F-94AAC6842F4E}.Release|x86.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Release|Win32.ActiveCfg = Debug|Any CPU
-		{5EC5D529-5D67-42B7-A1DF-D983CE0921E1}.Release|x86.ActiveCfg = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

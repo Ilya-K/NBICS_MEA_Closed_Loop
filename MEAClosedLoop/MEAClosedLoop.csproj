@@ -179,7 +179,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="mainFont.spritefont" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
