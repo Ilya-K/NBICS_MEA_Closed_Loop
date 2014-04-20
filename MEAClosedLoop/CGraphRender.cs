@@ -46,8 +46,8 @@ namespace MEAClosedLoop
     {
       graphics = new GraphicsDeviceManager(this);
 
-      graphics.PreferredBackBufferWidth = 2200; // ширина приложения
-      graphics.PreferredBackBufferHeight = 1200; // высота приложения
+      graphics.PreferredBackBufferWidth = 800; // ширина приложения
+      graphics.PreferredBackBufferHeight = 500; // высота приложения
       graphics.IsFullScreen = false; // флаг полноэкранного приложения
       ;
       graphics.ApplyChanges(); // применяем параметры
@@ -74,12 +74,11 @@ namespace MEAClosedLoop
           vertices = new VertexPositionColor[detector.inner_data_to_display.Length];
           for (int i = 0; i < detector.inner_data_to_display.Length; i++)
           {
-            vertices[i].Position = new Vector3(i * x_range, (detector.inner_data_to_display[i] - 32768) / 10 + 500, 0);
+            vertices[i].Position = new Vector3(i * x_range, (detector.inner_data_to_display[i] - 32768) / 15 + 200, 0);
             vertices[i].Color = Color.Black;
           }
           arraylengh = detector.inner_data_to_display.Length - 1;
         }
-        // TODO: Add your initialization logic here
         if (detector.inner_found_indexes_to_display != null)
         {
           float x_range = (float)graphics.PreferredBackBufferWidth / detector.inner_data_to_display.Count();

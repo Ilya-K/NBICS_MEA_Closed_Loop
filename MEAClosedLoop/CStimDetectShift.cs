@@ -30,9 +30,9 @@ namespace MEAClosedLoop
     public TAbsStimIndex MaximumShiftRange = 250;
     private TStimIndex MinimumLengthBetweenPegs = 10; // 250 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
-    public bool FullResearch = true; //True for unoptimized research
+    public bool FullResearch = false; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
-    public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия артефактов
+    public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия удаления артефактов
     public int m_Artif_Channel = MEA.EL_DECODE[12];
     #endregion
 
@@ -138,11 +138,6 @@ namespace MEAClosedLoop
     public List<TStimIndex> GetStims(TRawDataPacket DataPacket)
     {
       CallCount++;
-      lock (LockExternalData)
-      {
-        //inner_data_to_display = DataPacket[m_Artif_Channel];
-      }
-      //Thread.Sleep(100);
       #region Определение ситуации с расположением артефактов в пакете
       //Случай, когда мы просим задержать пакет.
       if (IsNullReturned)

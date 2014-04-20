@@ -16,12 +16,14 @@ namespace MEAClosedLoop
     //private OnStg200xPollStatus m_pollHandler;
     private StimuliList m_stimuliList = new StimuliList();
     private bool m_configured = false;
+    public bool FakeStimulator = false;
 
     // [DEBUG]
     public CStimulator()
     {
       // Fake stimulator
       m_device = null;
+      FakeStimulator = true;
     }
     // [/DEBUG]
 
@@ -79,6 +81,7 @@ namespace MEAClosedLoop
 
     public void DownloadDefaultShape(int channel, int sync, uint count, uint period)
     {
+      if (FakeStimulator) return;
       // We have only 8 channels
       if ((channel < 1) || (channel > 8)) throw new ArgumentOutOfRangeException("(channel < 1) || (channel > 8)");
       if ((sync < 1) || (sync > 8)) throw new ArgumentOutOfRangeException("(sync < 1) || (sync > 8)");
@@ -220,6 +223,7 @@ namespace MEAClosedLoop
 
     public void Start()
     {
+      if (FakeStimulator) return;
       if (!m_configured) throw new InvalidOperationException("Waveform hasn't been loaded yet!");
       m_device.SendStart(1);  // Trigger 1
     }
@@ -246,6 +250,7 @@ namespace MEAClosedLoop
 
     private void SetupTrigger1(int channel, int sync, uint count)
     {
+      if (FakeStimulator) return;
       // Setup Trigger
       uint TriggerInputs = m_device.GetNumberOfTriggerInputs();
       uint[] channelmap = new uint[TriggerInputs];
@@ -268,6 +273,7 @@ namespace MEAClosedLoop
 
     private void SetupMemory(uint nSegs)
     {
+      if (FakeStimulator) return;
       if ((nSegs < 1) || (nSegs > 100)) throw new ArgumentOutOfRangeException("nSegs");
 
       uint memory = m_device.GetTotalMemory();                // obtain total memory available
