@@ -11,6 +11,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
+using winforms = System.Windows.Forms;
+using windraw = System.Drawing;
 using MEAClosedLoop;
 using System.Windows;
 using MEAClosedLoop.Common;
@@ -70,6 +72,9 @@ namespace MEAClosedLoop
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
 
+    windraw.Graphics gr;
+
+
     #endregion
     public CDataRender(CFiltering salpaFilter)
     {
@@ -81,6 +86,8 @@ namespace MEAClosedLoop
       graphics.ApplyChanges(); // применяем параметры
       this.SelectedDrawMode = CDataRender.DrawMode.DrawMultiChannel;
       (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).DoubleClick += ChangeDrawMode;
+
+      gr = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).FindForm().CreateGraphics();
 
       IsDataUpdated = false;
 
@@ -163,7 +170,7 @@ namespace MEAClosedLoop
             MCHYRange = (MCHYRange > 2) ? MCHYRange - 2 : MCHYRange;
             break;
           case DrawMode.DrawSingleChannel:
-            SCHYRange = (SCHYRange > 2) ? MCHYRange - 2 : MCHYRange;
+            SCHYRange = (SCHYRange > 2) ? SCHYRange - 2 : SCHYRange;
             break;
         }
       }
@@ -263,7 +270,7 @@ namespace MEAClosedLoop
             }
           }
           SingleChannelNum = (X + 1) * 10 + (Y + 1);
-
+          SCHYRange = MCHYRange;
           lock (DataPacketLock)
           {
             if (MEA.EL_DECODE[SingleChannelNum] >= 0)
@@ -279,7 +286,6 @@ namespace MEAClosedLoop
           lock (DataPacketLock)
           {
             this.SelectedDrawMode = DrawMode.DrawMultiChannel;
-
             IsDataUpdated = false;
           }
 
@@ -317,14 +323,10 @@ namespace MEAClosedLoop
           int CellWidth = WindowWidth / 8;
           int CellHeight = WindowHeight / 8;
 
-
           #region Вычисление векторов смещения для каналов
-          for (int i = 0; i < 8; i++)
+          for (int i = 0; i < DataPacket.Keys.Count; i++)
           {
-            for (int j = 0; j < 8 && i * 8 + j < ChannelvectorsArray.Length; j++)
-            {
-              ChannelvectorsArray[i * 8 + j] = new Vector3((MEA.AR_DECODE[i * 8 + j] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i * 8 + j] % 10 - 1) * CellHeight, 0);
-            }
+              ChannelvectorsArray[i] = new Vector3((MEA.AR_DECODE[i] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i] % 10 - 1) * CellHeight, 0);
           }
           #endregion
           int RealChannelIndx = 0;
@@ -334,6 +336,7 @@ namespace MEAClosedLoop
           {
             //подготовка массива массивов точек
             IsDataUpdated = false;
+
             if (!IsDataUpdated)
             {
               #region обновление массивов точек
@@ -365,6 +368,7 @@ namespace MEAClosedLoop
               }
               for (int i = (int)PointsPerPX; i < length; i += (int)PointsPerPX)
               {
+                #region Подготовка и отрисовка вертикальных линий
                 float max = float.MinValue;
                 float min = float.MaxValue;
                 for (int z = 0; z < (int)PointsPerPX; z++)
@@ -374,16 +378,22 @@ namespace MEAClosedLoop
                   if (t < min) min = t;
                 }
                 VertexPositionColor[] line = new VertexPositionColor[2];
+                line[0].Position = new Vector3(0, 0, 0);
+                line[1].Position = new Vector3(0, 0, 0);
                 line[0].Position.X = ((float)(i) * CellWidth) / length;
-                line[0].Position.Y = max * MCHYRange / 100 + CellHeight / 2;
-                line[0].Position.Z = 0;
+                line[0].Position.Y = max * MCHYRange / 200 + CellHeight / 2;
                 line[1].Position.X = line[0].Position.X;
-                line[1].Position.Y = min * MCHYRange / 100 + CellHeight / 2;
-                line[1].Position.Z = 0;
+                line[1].Position.Y = min * MCHYRange / 200 + CellHeight / 2;
                 if (line[0].Position.Y < 0) 
                   line[0].Position.Y = 0;
+                if (line[0].Position.Y > CellHeight)
+                  line[0].Position.Y = CellHeight;
+
                 if (line[1].Position.Y > CellHeight) 
                   line[1].Position.Y = CellHeight;
+                if (line[1].Position.Y < 0)
+                  line[1].Position.Y = 0;
+
                 line[0].Position += ChannelvectorsArray[RealChannelIndx];
                 line[1].Position += ChannelvectorsArray[RealChannelIndx];
                 line[0].Color = Color.DarkGreen;
@@ -400,15 +410,24 @@ namespace MEAClosedLoop
                   if (t < min) min = t;
                 }
                 line[1].Position.X += ((float)CellWidth / (float)length);
-                line[1].Position.Y = (max + min) * SCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
-                line[1].Position.Z = 0;
-                if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
+                line[1].Position.Y = max * SCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
+
                 //случай сплошного(длинного) нуля - горизонтальной прямой
-                if (line[1].Position.Equals(line[0].Position))
+                if (Math.Abs(line[1].Position.Y - line[1].Position.Y) < 5)
+                {
                   line[1].Position.X += ((float)WindowWidth / (float)length);
+                }
+                else
+                {
 
-                //graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
-
+                  if (line[1].Position.Y > CellHeight + ChannelvectorsArray[RealChannelIndx].Y)
+                    line[1].Position.Y = CellHeight + ChannelvectorsArray[RealChannelIndx].Y;
+                  if (line[1].Position.Y < ChannelvectorsArray[RealChannelIndx].Y)
+                    line[1].Position.Y = ChannelvectorsArray[RealChannelIndx].Y;
+                  if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
+                }
+                graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
+                #endregion
               }
             }
             #endregion
@@ -423,14 +442,14 @@ namespace MEAClosedLoop
           for (int i = 1; i < 8; i++)
           {
             HorizontalLinesPoints[0].Position = new Vector3(0, i * CellHeight, 0);
-            HorizontalLinesPoints[0].Color = Color.Green;
+            HorizontalLinesPoints[0].Color = Color.Black;
             HorizontalLinesPoints[1].Position = new Vector3(WindowWidth, i * CellHeight, 0);
-            HorizontalLinesPoints[1].Color = Color.Green;
+            HorizontalLinesPoints[1].Color = Color.Black;
 
             VericalLinesPoints[0].Position = new Vector3(i * CellWidth, 0, 0);
-            VericalLinesPoints[0].Color = Color.Green;
+            VericalLinesPoints[0].Color = Color.Black;
             VericalLinesPoints[1].Position = new Vector3(i * CellWidth, WindowHeight, 0);
-            VericalLinesPoints[1].Color = Color.Green;
+            VericalLinesPoints[1].Color = Color.Black;
 
             graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, HorizontalLinesPoints, 0, 1);
             graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, VericalLinesPoints, 0, 1);
@@ -479,7 +498,7 @@ namespace MEAClosedLoop
               if (schUncompVerices[i].Position.Y < 0) schUncompVerices[i].Position.Y = 0;
               if (schUncompVerices[i].Position.Y > WindowHeight) schUncompVerices[i].Position.Y = WindowHeight;
               schUncompVerices[i].Position.Z = 0;
-              schUncompVerices[i].Color = (Math.Abs(data_to_display[i]) > 100) ? Color.Red : Color.Blue;
+              schUncompVerices[i].Color = (Math.Abs(data_to_display[i]) > 120) ? Color.Red : Color.Blue;
               if (IsPackAtTime(i))
                 schUncompVerices[i].Color = Color.Red;
 
@@ -570,6 +589,9 @@ namespace MEAClosedLoop
           TextPosition = new Vector2(20, 40);
           //TextSprite.DrawString(mainFont, CurrentTime, TextPosition, Color.LightGreen);
           TextSprite.End();
+
+
+          gr.DrawString(CurrentTime, (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font, new windraw.SolidBrush(windraw.Color.Green), new windraw.Point(10, 10));
           #endregion
           break;
           #endregion

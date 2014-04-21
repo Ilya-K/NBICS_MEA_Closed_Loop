@@ -299,7 +299,7 @@ namespace MEAClosedLoop
       List<TStimIndex> stimIndices = m_noArtifacts;
       if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
       {
-        m_stimDetector.SetExpectedStims(sl_groups[0]);
+        //m_stimDetector.SetExpectedStims(sl_groups[0]);
         sl_groups.RemoveAt(0);
       }
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
