@@ -209,7 +209,7 @@ namespace MEAClosedLoop
         HistoryTimeLength = 0;
         for (int i = 0; i < DataPacketHistory.Count; i++)
         {
-          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[SingleChannelNum].Length;
+          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[MEA.EL_DECODE[SingleChannelNum]].Length;
         }
       }
       IsDataUpdated = false;
@@ -327,6 +327,7 @@ namespace MEAClosedLoop
           for (int i = 0; i < DataPacket.Keys.Count; i++)
           {
               ChannelvectorsArray[i] = new Vector3((MEA.AR_DECODE[i] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i] % 10 - 1) * CellHeight, 0);
+              
           }
           #endregion
           int RealChannelIndx = 0;
@@ -334,6 +335,10 @@ namespace MEAClosedLoop
           if (!IsDataUpdated) vertices = new VertexPositionColor[DataPacket.Keys.Count][][];
           foreach (int key in DataPacket.Keys)
           {
+            gr.DrawString((MEA.AR_DECODE[key]).ToString(),
+                (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font,
+                new windraw.SolidBrush(windraw.Color.White),
+                new windraw.Point((int)ChannelvectorsArray[key].X, (int)ChannelvectorsArray[key].Y));
             //подготовка массива массивов точек
             IsDataUpdated = false;
 
@@ -377,6 +382,7 @@ namespace MEAClosedLoop
                   if (t > max) max = t;
                   if (t < min) min = t;
                 }
+                
                 VertexPositionColor[] line = new VertexPositionColor[2];
                 line[0].Position = new Vector3(0, 0, 0);
                 line[1].Position = new Vector3(0, 0, 0);
@@ -587,11 +593,11 @@ namespace MEAClosedLoop
           TextSprite.Begin();
 
           TextPosition = new Vector2(20, 40);
-          //TextSprite.DrawString(mainFont, CurrentTime, TextPosition, Color.LightGreen);
           TextSprite.End();
 
-
+          
           gr.DrawString(CurrentTime, (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font, new windraw.SolidBrush(windraw.Color.Green), new windraw.Point(10, 10));
+          
           #endregion
           break;
           #endregion
