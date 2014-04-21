@@ -380,10 +380,14 @@ namespace MEAClosedLoop
                 line[1].Position.X = line[0].Position.X;
                 line[1].Position.Y = min * MCHYRange / 100 + CellHeight / 2;
                 line[1].Position.Z = 0;
-                if (line[0].Position.Y < 0) line[0].Position.Y = 0;
-                if (line[1].Position.Y > CellHeight) line[1].Position.Y = CellHeight;
+                if (line[0].Position.Y < 0) 
+                  line[0].Position.Y = 0;
+                if (line[1].Position.Y > CellHeight) 
+                  line[1].Position.Y = CellHeight;
                 line[0].Position += ChannelvectorsArray[RealChannelIndx];
                 line[1].Position += ChannelvectorsArray[RealChannelIndx];
+                line[0].Color = Color.DarkGreen;
+                line[1].Color = line[0].Color;
                 if (i == 5000)
                 {
                   //break point
@@ -403,7 +407,7 @@ namespace MEAClosedLoop
                 if (line[1].Position.Equals(line[0].Position))
                   line[1].Position.X += ((float)WindowWidth / (float)length);
 
-                graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
+                //graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
 
               }
             }
