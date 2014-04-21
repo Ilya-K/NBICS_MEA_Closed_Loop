@@ -58,6 +58,7 @@
       this.StatTypeListBox.Name = "StatTypeListBox";
       this.StatTypeListBox.Size = new System.Drawing.Size(120, 43);
       this.StatTypeListBox.TabIndex = 3;
+      this.StatTypeListBox.SelectedIndexChanged += new System.EventHandler(this.StatTypeListBox_SelectedIndexChanged);
       // 
       // groupBox1
       // 

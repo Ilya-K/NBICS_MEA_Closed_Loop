@@ -44,6 +44,7 @@ namespace MEAClosedLoop
     public event DelegateSetStatButtonText SetStatButtonText;
     public event DelegateLockUI DoLockUI;
 
+
     const int MAX_DETECTION_TIME = 200; //number of ms
     PackGraph dataGenerator, comp_datagenerator;
     CLoopController m_LoopCtrl;
@@ -55,10 +56,12 @@ namespace MEAClosedLoop
     Panel[] channelPanels;
 
     public bool compareMode;
+    
+    private object lockSelIndex = new object();
+    private int m_selectedIndex = 0;
 
     public PackGraphForm(List<int> channelList, CLoopController LoopCtrl)
     {
-      //TODO: real-time getting data & list of stim indices
       InitializeComponent();
       this.FormBorderStyle = FormBorderStyle.FixedSingle;
       this.MaximizeBox = false;
@@ -192,7 +195,7 @@ namespace MEAClosedLoop
                 if (data.Max() > 0)
                 {
                   int comp_dataLength = data.Count<uint>();
-                  if (dataLength > MIN_DRAWABLE_POINT_COUNT)
+                  if (comp_dataLength > MIN_DRAWABLE_POINT_COUNT)
                   {
 
                     //scaling compared data
@@ -201,12 +204,12 @@ namespace MEAClosedLoop
 
                     //drawing compared data
                     pointsToDraw[currentPanelIndex].PopulateArray<Point>(new Point(0, 0));
-                    for (int j = 0; j < dataLength; j++)
+                    for (int j = 0; j < comp_dataLength; j++)
                     {
                       pointsToDraw[currentPanelIndex][j] = new Point(j * width / dataLength, (data[j] < height) ? height - (int)data[j] : height);
                     }
                     Pen comp_pen = new Pen(Color.LightPink, 1);
-                    pointsToDraw[currentPanelIndex][dataLength - 1] = new Point(width, 0);
+                    pointsToDraw[currentPanelIndex][comp_dataLength - 1] = new Point(width, 0);
                     e.Graphics.DrawLines(comp_pen, pointsToDraw[currentPanelIndex]);
                   }
                 }
@@ -262,17 +265,10 @@ namespace MEAClosedLoop
           ulong spbRefreshTime = totalStatTime * SPB_REFRESH_COOLDOWN / 60;
           this.CurrentDataGenerator().Reset();
           this.CurrentDataGenerator().totalTime = totalStatTime * Param.MS;
-          switch (StatTypeListBox.SelectedIndex)
-          {
-            case 0:
-              m_LoopCtrl.OnPackFound += this.CurrentDataGenerator().ProcessAmpStat;
-              statFinished += StopAmpStat;
-              break;
-            case 1:
-              m_LoopCtrl.OnPackFound += this.CurrentDataGenerator().ProcessFreqStat;
-              statFinished += StopFreqStat;
-              break;
-          }
+
+              m_LoopCtrl.OnPackFound += this.CurrentDataGenerator().ProcessStat;
+              statFinished += StopStat;
+
           spb_timer.Interval = spbRefreshTime;
           StatProgressBar.Maximum = 59; //it's a kind of magic
           statCalcTimer.Interval = totalStatTime;
@@ -299,9 +295,9 @@ namespace MEAClosedLoop
       }
     }
 
-    public void StopAmpStat()
+    public void StopStat()
     {
-      m_LoopCtrl.OnPackFound -= this.CurrentDataGenerator().ProcessAmpStat;
+      m_LoopCtrl.OnPackFound -= this.CurrentDataGenerator().ProcessStat;
       StatEnd();
     }
 
@@ -310,17 +306,14 @@ namespace MEAClosedLoop
       StatProgressBar.BeginInvoke(spb_SetVal, null, 1);
     }
 
-    public void StopFreqStat()
-    {
-      m_LoopCtrl.OnPackFound -= this.CurrentDataGenerator().ProcessFreqStat;
-      StatEnd();
-    }
     private void StatEnd()
     {
       spb_timer.Stop();
       statCalcTimer.Stop();
       this.BeginInvoke(DoLockUI, false);
-      drawResult();
+      int selIndex;
+      lock (lockSelIndex) selIndex = m_selectedIndex;
+      drawResult(selIndex);  
       RunStatButton.BeginInvoke(SetStatButtonText, "пересчитать");
       StatProgressBar.BeginInvoke(ResetProgressBar, 0);
       StatProgressBar.Invalidate();
@@ -348,14 +341,20 @@ namespace MEAClosedLoop
         spb_timer.Start();
       }
     }
-    private void drawResult()
+    private void drawResult(int statTypeIndex)
     {
-        this.CurrentDataGenerator().ProcessPackStat(timeUnitSegment);
+        this.CurrentDataGenerator().ProcessPackStat(timeUnitSegment, statTypeIndex);
         foreach (Panel p in channelPanels)
         {
           p.Controls.Clear();
           p.Invalidate();    
         }
     }
+
+    private void StatTypeListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      lock (lockSelIndex) m_selectedIndex = StatTypeListBox.SelectedIndex;
+    }
+   
   }
 }

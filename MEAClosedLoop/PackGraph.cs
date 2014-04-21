@@ -39,7 +39,7 @@ namespace MEAClosedLoop
   {
     
     public double foundPackPercent;
-    private Queue<CPack> RawAmpData, RawFreqData;
+    private Queue<CPack> RawData;
     Timeline processed_data;
     PackStatType GraphType;
     public ulong totalTime;
@@ -81,39 +81,40 @@ namespace MEAClosedLoop
     }
 
 
-    public void ProcessPackStat(int timeUnitSegment) //now from all channels
+    public void ProcessPackStat(int timeUnitSegment, int statTypeIndex) //now from all channels
     {
       uint iterationLength = (uint)(totalTime / (ulong)timeUnitSegment);
-      Queue<CPack> dataSource;
 
       //Filling timeline
-      if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
+      
+      /*if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
       {
         //Something went wrong
         GraphType = PackStatType.Both;
         throw new Exception("Неверные данные!"); //или оба режима сразу...
       }
-      else
+      else*/
+
+      if (RawData.Count == 0)
       {
-          if (RawAmpData.Count == 0 && RawFreqData.Count == 0)
-          {
             MessageBox.Show("Пачек не найдено");
             return;
-          }
-          if (RawFreqData.Count > 0)
-          { //freq stat
-            GraphType = PackStatType.Freq;
-            dataSource = RawFreqData;
-          }
-          else //(RawAmpData.Count > 0)
-          { //amp stat
-            GraphType = PackStatType.Amp;
-            dataSource = RawAmpData;
-          }  
+      }
+      switch(statTypeIndex){
+        case 1: //freq stat
+          GraphType = PackStatType.Freq;
+          break;
+        case 0://amp stat
+          GraphType = PackStatType.Amp;
+          break;
+        default: //Something went wrong
+          GraphType = PackStatType.Both;
+          throw new Exception("Неверные данные!");
+      }
         
-        TPack boolPack;
-          foreach (CPack current_cpack in dataSource)
-          {
+      TPack boolPack;
+      foreach (CPack current_cpack in RawData)
+      {
             ProcessedPack processed_pack_to_add = new ProcessedPack();
             foreach (int channel in current_cpack.Data.Keys)
             {
@@ -122,7 +123,6 @@ namespace MEAClosedLoop
             }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
-          }
       }
     }
 
@@ -145,21 +145,15 @@ namespace MEAClosedLoop
 
     public void Reset()
     {
-      RawAmpData = new Queue<CPack>();
-      RawFreqData = new Queue<CPack>();
+      RawData = new Queue<CPack>();
       processed_data = new Timeline();
     }
 
-    public void ProcessAmpStat(CPack pack_to_add)
+    public void ProcessStat(CPack pack_to_add)
     {
-      RawAmpData.Enqueue(pack_to_add);
+      RawData.Enqueue(pack_to_add);
     }
 
-    public void ProcessFreqStat(CPack pack_to_add)
-    {
-      RawFreqData.Enqueue(pack_to_add);
-
-    }
     private ulong UpdateCursorPosition(ulong prevPosition, UInt64 val, ulong ticksInPoint)
     {
       return (prevPosition + 1) * ticksInPoint > (ulong)val ? prevPosition : prevPosition + 1;
@@ -172,15 +166,17 @@ namespace MEAClosedLoop
       //double maxOutputVal;
       Timeline local_data;
       uint ampsPerPoint;
-      Queue<CPack>.Enumerator ampDataIterator = RawAmpData.GetEnumerator();
+      Queue<CPack>.Enumerator ampDataIterator = RawData.GetEnumerator();
       lock (processed_data)
       {
         local_data = new Timeline(processed_data);
       }
-      output = new uint[panelWidth];
-      output.PopulateArray<uint>(0);
+      
       if (local_data.Count == 0 || panelWidth ==0)
         return output;
+      output = new uint[panelWidth];
+      output.PopulateArray<uint>(0);
+      TTime statStartTime = local_data.First<ProcessedPack>().start; //dummy assingment
 
       ticksInPoint = totalTime / (ulong)panelWidth;
       int debug_ldc = local_data.Count;
@@ -200,7 +196,7 @@ namespace MEAClosedLoop
             ampsPerPoint = 0;
             foreach (uint dataPoint in currentPack.dataMap[channel])
             {
-              cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint);
+              cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start - statStartTime, ticksInPoint);
               switch (GraphType)
               {
                 case PackStatType.Freq:
@@ -208,7 +204,7 @@ namespace MEAClosedLoop
                     output[cursorPosition]++;
                   else return output;
                   break;
-                case PackStatType.Amp: //TODO: calc avg amp and stat here
+                case PackStatType.Amp:
                   if (cursorPosition < (ulong)panelWidth)
                     output[cursorPosition] += Convert.ToUInt16(Math.Abs(ampDataIterator.Current.Data[channel][dataPoint]));
                   else return output;
