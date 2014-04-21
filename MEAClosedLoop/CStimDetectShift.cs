@@ -21,14 +21,14 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения класса
     public const int ErrorState = -3303;
-    private const TStimIndex FILTER_DEPTH = 16; 
+    private const TStimIndex FILTER_DEPTH = 22; 
     private const TStimIndex default_offset = 8;
     private const TStimIndex start_offset = 16;
-    private const TStimIndex GUARANTEED_EMPTY_SPACE = 240;
-    private const TStimIndex POST_SIGMA_CALC_DEPTH = 14;
+    private const TStimIndex GUARANTEED_EMPTY_SPACE = 245;
+    private const TStimIndex POST_SIGMA_CALC_DEPTH = 16;
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 40;
     public TAbsStimIndex MaximumShiftRange = 250;
-    private TStimIndex MinimumLengthBetweenPegs = 10; // 250 - for standart hiFreq Stim
+    private TStimIndex MinimumLengthBetweenPegs = 10; // 240 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
     public bool FullResearch = false; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
@@ -66,8 +66,6 @@ namespace MEAClosedLoop
       IsInNextBuffZone = false;
       Thread RawDataRender = new Thread(DrawCallFunc);
       RawDataRender.Start();
-      Thread.Sleep(2400);
-
     }
     #endregion
     #region Добавление ожидаемых стимулов в список
@@ -236,18 +234,32 @@ namespace MEAClosedLoop
         {
           foreach (TStimGroup stim in m_expectedStims)
           {
+            //DEBUG
+
+            if(CurrentTime == 355000)
+            {
+
+            }
+
+            // /DEBUG
             TAbsStimIndex rightRange = (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange) + (TAbsStimIndex)FILTER_DEPTH > (TAbsStimIndex)DataPacket.Length) ?
                     (TAbsStimIndex)DataPacket.Length : (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange));
-            TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0 && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ?
-                     0 : (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange);
+            TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0
+              && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ?
+                     0 : 
+                     (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange);
             if (FindedPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10)
-              leftRange += (TAbsStimIndex)GUARANTEED_EMPTY_SPACE;
+              leftRange = (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10;
             for (TAbsStimIndex i = leftRange; i < rightRange; i++)
             {
+              if (i == 1954)
+              { 
+              }
               if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)i))
               {
                 bool IsBlankinkArtif = false;
                 // проверка: не является ли найденный артефакт пред блакинговым импульсом
+                // 28 - минимальное количество точек, на которое может отстоять артефакт от импульса перед бланкингом
                 TAbsStimIndex SubRightRange = (i + BLANK_ARTIF_PRE_MAX_LENGTH + (TAbsStimIndex)FILTER_DEPTH < (TAbsStimIndex)DataPacket.Length) ? i + BLANK_ARTIF_PRE_MAX_LENGTH : (TAbsStimIndex)DataPacket.Length - (TAbsStimIndex)FILTER_DEPTH - 1;
                 for (TAbsStimIndex j = i + 28; j < SubRightRange; j++)
                 {
@@ -289,15 +301,13 @@ namespace MEAClosedLoop
         inner_data_to_display = DataPacket;
         inner_found_indexes_to_display = FindedPegs;
       }
-      //Thread.Sleep(150);
-      int x = FindedPegs.Count();
       #region Удаление найденных координат артефактов стимуляций из списка ожидаемых.
       #region  Добавим устаревшие на удаление.
       lock (LockStimList)
       {
         foreach (TStimGroup _stim in m_expectedStims)
         {
-          if (_stim.stimTime < CurrentTime) stims_to_remove.Add(_stim);
+          if (_stim.stimTime < CurrentTime + (TTime)DataPacket.Length) stims_to_remove.Add(_stim);
         }
       }
       #endregion

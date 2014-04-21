@@ -45,11 +45,10 @@ namespace MEAClosedLoop
     public CGraphRender()
     {
       graphics = new GraphicsDeviceManager(this);
-
       graphics.PreferredBackBufferWidth = 800; // ширина приложения
       graphics.PreferredBackBufferHeight = 500; // высота приложения
       graphics.IsFullScreen = false; // флаг полноэкранного приложения
-      ;
+      this.Window.AllowUserResizing = true;
       graphics.ApplyChanges(); // применяем параметры
 
 
@@ -133,7 +132,7 @@ namespace MEAClosedLoop
 
       // TODO: Add your update logic here
 
-      base.Update(gameTime);
+      //base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
