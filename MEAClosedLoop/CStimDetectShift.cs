@@ -33,10 +33,10 @@ namespace MEAClosedLoop
     public bool FullResearch = false; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
     public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия удаления артефактов
-    public int m_Artif_Channel = MEA.EL_DECODE[12];
+    public int m_Artif_Channel = MEA.EL_DECODE[25];
     #endregion
 
-    #region Внутрение данные|
+    #region Внутрение данные
     private cases CurrentCase;
     private cases NextCase;
     private int CallCount;
@@ -55,6 +55,7 @@ namespace MEAClosedLoop
     public List<TStimIndex> inner_found_indexes_to_display;
     //TestGraph GrafForm = new TestGraph();
     #endregion
+
     #region Конструктор
     public CStimDetectShift()
     {

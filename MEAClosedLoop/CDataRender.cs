@@ -43,6 +43,7 @@ namespace MEAClosedLoop
     private int MCHYRange = 8;
     private int SCHYRange = 120;
     #endregion
+
     #region внутренние данные
     TFltDataPacket DataPacket; //последний пришедший пакет
     Queue<TFltDataPacket> DataPacketHistory; // история данных
@@ -68,7 +69,8 @@ namespace MEAClosedLoop
     VertexPositionColor[] schUncompVerices;
     object VertexPositionLock = new object();
     DrawMode SelectedDrawMode;
-    int SingleChannelNum = MEA.AR_DECODE[20];
+    int SingleChannelNum = MEA.EL_DECODE[21];
+    int ZeroChannelNum = MEA.EL_DECODE[55];
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
 
@@ -76,6 +78,7 @@ namespace MEAClosedLoop
 
 
     #endregion
+
     public CDataRender(CFiltering salpaFilter)
     {
       graphics = new GraphicsDeviceManager(this);
@@ -116,6 +119,7 @@ namespace MEAClosedLoop
 
       base.Initialize();
     }
+
     protected override void LoadContent()
     {
       // Создали новый SpriteBatch, который может быть использован для прорисовки текстур.
@@ -131,9 +135,11 @@ namespace MEAClosedLoop
       //mainFont = Content.Load<SpriteFont>("mainFont");
 
     }
+
     protected override void UnloadContent()
     {
     }
+
     protected override void Update(GameTime gameTime)
     {
       // Allows the game to exit
@@ -193,6 +199,7 @@ namespace MEAClosedLoop
       #endregion
       base.Update(gameTime);
     }
+
     public void RecieveFltData(TFltDataPacket data)
     {
       lock (DataPacketLock)
@@ -209,12 +216,13 @@ namespace MEAClosedLoop
         HistoryTimeLength = 0;
         for (int i = 0; i < DataPacketHistory.Count; i++)
         {
-          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[MEA.EL_DECODE[SingleChannelNum]].Length;
+          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[SingleChannelNum].Length;
         }
       }
       IsDataUpdated = false;
 
     }
+
     public void RecievePackData(CPack pack)
     {
       pack.Length += 1000;//DEBUG что бы пачки имели длину (ненулевую).  
@@ -227,6 +235,7 @@ namespace MEAClosedLoop
         }
       }
     }
+
     public void RecieveStimData(List<TAbsStimIndex> stims)
     {
       lock (DataPacketLock)
@@ -243,7 +252,9 @@ namespace MEAClosedLoop
         }
       }
     }
+
     public void SetExpStimData(TStimGroup stim) { }
+
     public void ChangeDrawMode(object sender, EventArgs e)
     {
       MouseState mousestate = Mouse.GetState();
@@ -293,6 +304,7 @@ namespace MEAClosedLoop
 
       }
     }
+
     protected override void Draw(GameTime gameTime)
     {
       if (DataPacket == null) return;
@@ -326,8 +338,8 @@ namespace MEAClosedLoop
           #region Вычисление векторов смещения для каналов
           for (int i = 0; i < DataPacket.Keys.Count; i++)
           {
-              ChannelvectorsArray[i] = new Vector3((MEA.AR_DECODE[i] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i] % 10 - 1) * CellHeight, 0);
-              
+            ChannelvectorsArray[i] = new Vector3((MEA.AR_DECODE[i] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i] % 10 - 1) * CellHeight, 0);
+
           }
           #endregion
           int RealChannelIndx = 0;
@@ -382,7 +394,7 @@ namespace MEAClosedLoop
                   if (t > max) max = t;
                   if (t < min) min = t;
                 }
-                
+
                 VertexPositionColor[] line = new VertexPositionColor[2];
                 line[0].Position = new Vector3(0, 0, 0);
                 line[1].Position = new Vector3(0, 0, 0);
@@ -390,12 +402,12 @@ namespace MEAClosedLoop
                 line[0].Position.Y = max * MCHYRange / 200 + CellHeight / 2;
                 line[1].Position.X = line[0].Position.X;
                 line[1].Position.Y = min * MCHYRange / 200 + CellHeight / 2;
-                if (line[0].Position.Y < 0) 
+                if (line[0].Position.Y < 0)
                   line[0].Position.Y = 0;
                 if (line[0].Position.Y > CellHeight)
                   line[0].Position.Y = CellHeight;
 
-                if (line[1].Position.Y > CellHeight) 
+                if (line[1].Position.Y > CellHeight)
                   line[1].Position.Y = CellHeight;
                 if (line[1].Position.Y < 0)
                   line[1].Position.Y = 0;
@@ -416,8 +428,10 @@ namespace MEAClosedLoop
                   if (t < min) min = t;
                 }
                 line[1].Position.X += ((float)CellWidth / (float)length);
-                line[1].Position.Y = max * SCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
 
+                line[1].Position.Y = max * MCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
+                line[0].Position.Y = min * MCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
+             
                 //случай сплошного(длинного) нуля - горизонтальной прямой
                 if (Math.Abs(line[1].Position.Y - line[1].Position.Y) < 5)
                 {
@@ -426,17 +440,21 @@ namespace MEAClosedLoop
                 else
                 {
 
-                  if (line[1].Position.Y > CellHeight + ChannelvectorsArray[RealChannelIndx].Y)
-                    line[1].Position.Y = CellHeight + ChannelvectorsArray[RealChannelIndx].Y;
+                  if (line[1].Position.Y > CellHeight /2 + ChannelvectorsArray[RealChannelIndx].Y)
+                    line[1].Position.Y = CellHeight/2 + ChannelvectorsArray[RealChannelIndx].Y;
                   if (line[1].Position.Y < ChannelvectorsArray[RealChannelIndx].Y)
                     line[1].Position.Y = ChannelvectorsArray[RealChannelIndx].Y;
-                  if (line[1].Position.Y > WindowHeight) line[1].Position.Y = WindowHeight;
+
+                  if (line[0].Position.Y > CellHeight/2 + ChannelvectorsArray[RealChannelIndx].Y)
+                    line[0].Position.Y = CellHeight/2 + ChannelvectorsArray[RealChannelIndx].Y;
+                  if (line[0].Position.Y < ChannelvectorsArray[RealChannelIndx].Y)
+                    line[0].Position.Y = ChannelvectorsArray[RealChannelIndx].Y;
                 }
                 graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
                 #endregion
               }
             }
-            #endregion
+              #endregion
             RealChannelIndx++;
 
           }
@@ -461,6 +479,18 @@ namespace MEAClosedLoop
             graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, VericalLinesPoints, 0, 1);
           }
           #endregion
+          #region отрисовока надписей
+          lock (DataPacketLock)
+          {
+            foreach (int key in DataPacket.Keys)
+            {
+              gr.DrawString((MEA.AR_DECODE[key]).ToString(),
+                  (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font,
+                  new windraw.SolidBrush(windraw.Color.White),
+                  new windraw.Point((int)ChannelvectorsArray[key].X, (int)ChannelvectorsArray[key].Y));
+            }
+          }
+          #endregion
           break;
           #endregion
         case DrawMode.DrawSingleChannel:
@@ -483,7 +513,8 @@ namespace MEAClosedLoop
             {
               for (int j = 0; j < DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum].Length; j++)
               {
-                data_to_display[currentlength + j] = DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum][j];
+                data_to_display[currentlength + j] = DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum][j] -
+                  DataPacketHistory.ElementAt(PacketNum)[ZeroChannelNum][j];
               }
               currentlength += DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum].Length;
             }
@@ -500,7 +531,7 @@ namespace MEAClosedLoop
             for (int i = 0; i < data_to_display.Length; i++)
             {
               schUncompVerices[i].Position.X = ((float)i * WindowWidth) / data_to_display.Length;
-              schUncompVerices[i].Position.Y = WindowHeight / 2 - (float)data_to_display[i] * SCHYRange / 100;
+              schUncompVerices[i].Position.Y = WindowHeight / 2 + (float)data_to_display[i] * SCHYRange / 100;
               if (schUncompVerices[i].Position.Y < 0) schUncompVerices[i].Position.Y = 0;
               if (schUncompVerices[i].Position.Y > WindowHeight) schUncompVerices[i].Position.Y = WindowHeight;
               schUncompVerices[i].Position.Z = 0;
@@ -595,15 +626,16 @@ namespace MEAClosedLoop
           TextPosition = new Vector2(20, 40);
           TextSprite.End();
 
-          
+
           gr.DrawString(CurrentTime, (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font, new windraw.SolidBrush(windraw.Color.Green), new windraw.Point(10, 10));
-          
+
           #endregion
           break;
           #endregion
       }
       base.Draw(gameTime);
     }
+
     private bool IsPackAtTime(float time)
     {
       lock (DataPacketLock)
@@ -619,6 +651,7 @@ namespace MEAClosedLoop
       }
       return false;
     }
+
     private enum DrawMode
     {
       DrawSingleChannel,
