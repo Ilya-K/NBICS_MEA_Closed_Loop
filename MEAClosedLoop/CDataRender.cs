@@ -70,7 +70,7 @@ namespace MEAClosedLoop
     object VertexPositionLock = new object();
     DrawMode SelectedDrawMode;
     int SingleChannelNum = MEA.EL_DECODE[21];
-    int ZeroChannelNum = MEA.EL_DECODE[55];
+    int ZeroChannelNum = MEA.EL_DECODE[53];
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
 
@@ -318,6 +318,7 @@ namespace MEAClosedLoop
 
       int WindowWidth = graphics.PreferredBackBufferWidth;
       int FormWidth = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Width;
+      int FormHeight = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Height;
 
       TFltData[] data_to_display;
       switch (this.SelectedDrawMode)
@@ -347,10 +348,6 @@ namespace MEAClosedLoop
           if (!IsDataUpdated) vertices = new VertexPositionColor[DataPacket.Keys.Count][][];
           foreach (int key in DataPacket.Keys)
           {
-            gr.DrawString((MEA.AR_DECODE[key]).ToString(),
-                (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font,
-                new windraw.SolidBrush(windraw.Color.White),
-                new windraw.Point((int)ChannelvectorsArray[key].X, (int)ChannelvectorsArray[key].Y));
             //подготовка массива массивов точек
             IsDataUpdated = false;
 
@@ -431,7 +428,7 @@ namespace MEAClosedLoop
 
                 line[1].Position.Y = max * MCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
                 line[0].Position.Y = min * MCHYRange / 200 + ChannelvectorsArray[RealChannelIndx].Y + CellHeight / 2;
-             
+
                 //случай сплошного(длинного) нуля - горизонтальной прямой
                 if (Math.Abs(line[1].Position.Y - line[1].Position.Y) < 5)
                 {
@@ -440,13 +437,13 @@ namespace MEAClosedLoop
                 else
                 {
 
-                  if (line[1].Position.Y > CellHeight /2 + ChannelvectorsArray[RealChannelIndx].Y)
-                    line[1].Position.Y = CellHeight/2 + ChannelvectorsArray[RealChannelIndx].Y;
+                  if (line[1].Position.Y > CellHeight / 2 + ChannelvectorsArray[RealChannelIndx].Y)
+                    line[1].Position.Y = CellHeight / 2 + ChannelvectorsArray[RealChannelIndx].Y;
                   if (line[1].Position.Y < ChannelvectorsArray[RealChannelIndx].Y)
                     line[1].Position.Y = ChannelvectorsArray[RealChannelIndx].Y;
 
-                  if (line[0].Position.Y > CellHeight/2 + ChannelvectorsArray[RealChannelIndx].Y)
-                    line[0].Position.Y = CellHeight/2 + ChannelvectorsArray[RealChannelIndx].Y;
+                  if (line[0].Position.Y > CellHeight / 2 + ChannelvectorsArray[RealChannelIndx].Y)
+                    line[0].Position.Y = CellHeight / 2 + ChannelvectorsArray[RealChannelIndx].Y;
                   if (line[0].Position.Y < ChannelvectorsArray[RealChannelIndx].Y)
                     line[0].Position.Y = ChannelvectorsArray[RealChannelIndx].Y;
                 }
@@ -487,7 +484,7 @@ namespace MEAClosedLoop
               gr.DrawString((MEA.AR_DECODE[key]).ToString(),
                   (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font,
                   new windraw.SolidBrush(windraw.Color.White),
-                  new windraw.Point((int)ChannelvectorsArray[key].X, (int)ChannelvectorsArray[key].Y));
+                  new windraw.Point((int)(ChannelvectorsArray[key].X * ((float)FormWidth / WindowWidth)), (int)(ChannelvectorsArray[key].Y * ((float)FormHeight / WindowHeight))));
             }
           }
           #endregion
@@ -513,8 +510,7 @@ namespace MEAClosedLoop
             {
               for (int j = 0; j < DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum].Length; j++)
               {
-                data_to_display[currentlength + j] = DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum][j] -
-                  DataPacketHistory.ElementAt(PacketNum)[ZeroChannelNum][j];
+                data_to_display[currentlength + j] = DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum][j];
               }
               currentlength += DataPacketHistory.ElementAt(PacketNum)[SingleChannelNum].Length;
             }
