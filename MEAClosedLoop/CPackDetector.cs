@@ -485,7 +485,7 @@ namespace MEAClosedLoop
         }
         else
         {
-          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 0, null, dummyNoise);
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 3000, null, dummyNoise);
         }
         m_dummyPackTime = -1;
         m_inPackDbg = !m_inPackDbg;

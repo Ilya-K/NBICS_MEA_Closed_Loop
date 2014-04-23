@@ -117,6 +117,16 @@ namespace MEAClosedLoop
             continue;                             // Start of this pack has already been processed
           }
           // Distribute current pack to consumers
+          // Нагажу комментами на русском ;)
+        // Раздача законченных пачек подписчикам
+
+        lock (m_packConsumerListLock)
+        {
+          if (m_packConsumerList != null && m_packConsumerList.Count != 0)
+          {
+            foreach (PackConsumerDelegate consumer in m_packConsumerList) consumer(currPack);
+          }
+        }
           if (OnPackFound != null) OnPackFound(currPack);
         }
         else                                      // We've received Start of a long pack
@@ -145,16 +155,7 @@ namespace MEAClosedLoop
         m_stimTimer.Start();
 
         prevPack = currPack;
-        // Нагажу комментами на русском ;)
-        // Раздача законченных пачек подписчикам
-
-        lock (m_packConsumerListLock)
-        {
-          if (m_packConsumerList != null && m_packConsumerList.Count != 0)
-          {
-            foreach (PackConsumerDelegate consumer in m_packConsumerList) consumer(currPack);
-          }
-        }
+        
       }
     }
 
