@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -210,11 +211,11 @@ namespace MEAClosedLoop
         DataPacketHistory.Enqueue(DataPacket);
 
         //если очередь полна
-        for (; DataPacketHistory.Count >= HistoryLength; DataPacketHistory.Dequeue()) ;
+        for (; DataPacketHistory.Count >= HistoryLength; DataPacketHistory.Dequeue());
+
         int AnyExistsKey = DataPacket.Keys.First();
         //Текущее время (время на конец последнего пакета)
         //summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[AnyExistsKey].Length;
-        // для синхронизации обновляем время после первой отрисовки
         HistoryTimeLength = 0;
         for (int i = 0; i < DataPacketHistory.Count; i++)
         {
@@ -501,7 +502,7 @@ namespace MEAClosedLoop
             GraphicsDevice.Clear(Color.White);
             basicEffect.CurrentTechnique.Passes[0].Apply();
             IsDataUpdated = false;
-
+          
             lock (DataPacketLock)
             {
               #region Заполнение массива точек из истории
@@ -610,7 +611,7 @@ namespace MEAClosedLoop
               {
                 VertexPositionColor[] stimline = new VertexPositionColor[2];
                 stimline[0].Position.X = WindowWidth * (1 - (float)(summary_time_stamp - stim) / HistoryTimeLength);
-                stimline[0].Position.Y = WindowHeight / 2 - 250;
+                stimline[0].Position.Y = WindowHeight / 2 - 70;
                 stimline[0].Position.Z = 0;
                 stimline[0].Color = Color.Red;
                 stimline[1].Position = stimline[0].Position;
@@ -642,6 +643,7 @@ namespace MEAClosedLoop
         summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
       }
       base.Draw(gameTime);
+      Thread.Sleep(60);
     }
 
     private bool IsPackAtTime(float time)

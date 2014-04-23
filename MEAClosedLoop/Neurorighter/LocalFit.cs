@@ -145,6 +145,10 @@ namespace Neurorighter
       toPeg = false;
       //System.Console.Write(channel.ToString() + " on " + elecState.ToString() + ":");
 
+      if ((m_stimIndices != null) && (m_stimIndices.Count > 6))
+      {
+      }
+
       if (stimIndices != null) m_stimIndices.AddRange(stimIndices);
       bool stimIndexOutOfBuffer = false;
 
@@ -155,6 +159,9 @@ namespace Neurorighter
         t_nextPeg = t_limit;//if we don't have an upcoming peg
         while ((m_stimIndices.Count > 0) && !stimIndexOutOfBuffer)//look for a peg
         {
+          if ((m_stimIndices[0] + PRE + POST) == (t_ahead + t_stream))
+          {
+          }
           if ((m_stimIndices[0] + PRE + POST) < (t_ahead + t_stream))
           {
             m_stimIndices.RemoveAt(0); //pop off
@@ -172,7 +179,7 @@ namespace Neurorighter
               source[t_nextPeg] = railHigh + 0.01;//this is a hell of a hack, but I'm keeping with tradition- in order to force a peg, I just set the damn trace to railHigh where it should peg.
               toPeg = true;
             }
-            if ((m_stimIndices.Count > 0) && (m_stimIndices[0] > t_limit))
+            if ((m_stimIndices.Count > 0) && (m_stimIndices[0] >= bufferLength))
             {
               m_stimIndices = m_stimIndices.ConvertAll(stimIndex => (TStimIndex)(stimIndex - bufferLength));
               stimIndexOutOfBuffer = true;
