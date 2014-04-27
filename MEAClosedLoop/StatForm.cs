@@ -19,7 +19,7 @@ namespace MEAClosedLoop
   public partial class StatForm : Form
   {
     private const int DEFAULT_CH = 0;
-    private const int STAT_BUF_LEN = 1 * 1000 * Param.MS;
+    private const int STAT_BUF_LEN = 20 * 1000 * Param.MS;
     private const int MIN_PACK_LENGTH = 32;
     private CFiltering m_dataStream;
     private TTime m_startTime = 0;
@@ -125,6 +125,7 @@ namespace MEAClosedLoop
           }
         }
       }
+      if (m_dbgSpikeTrains[m_channel].Count % 2 == 1) m_packList2.RemoveAt(m_packList2.Count - 1);
       UpdateStoredPoints2(0);
 #endif
     }
