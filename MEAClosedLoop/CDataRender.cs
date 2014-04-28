@@ -73,8 +73,8 @@ namespace MEAClosedLoop
     VertexPositionColor[] schUncompVerices;
     object VertexPositionLock = new object();
     DrawMode SelectedDrawMode;
-    int SingleChannelNum = MEA.EL_DECODE[21];
-    int ZeroChannelNum = MEA.EL_DECODE[53];
+    int SingleChannelNum = MEA.NAME2IDX[21];
+    int ZeroChannelNum = MEA.NAME2IDX[53];
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
 
@@ -239,10 +239,10 @@ namespace MEAClosedLoop
                 //количество точек в очереди
                 int length = 0;
                 #region Вычисление векторов смещения для каналов
-                Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Count()];
-                for (int i = 0; i < DataPacket.Keys.Count; i++)
+                Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Max() + 1];
+                foreach (int i in DataPacket.Keys)
                 {
-                  ChannelvectorsArray[i] = new Vector3((MEA.AR_DECODE[i] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i] % 10 - 1) * CellHeight, 0);
+                  ChannelvectorsArray[i] = new Vector3((MEA.IDX2NAME[i] / 10 - 1) * CellWidth, (MEA.IDX2NAME[i] % 10 - 1) * CellHeight, 0);
                 }
                 #endregion
                 for (int i = 0; i < DataPacketHistory.Count; i++)
@@ -411,9 +411,9 @@ namespace MEAClosedLoop
           SCHYRange = MCHYRange;
           lock (DataPacketLock)
           {
-            if (MEA.EL_DECODE[SingleChannelNum] >= 0)
+            if (MEA.NAME2IDX[SingleChannelNum] >= 0)
             {
-              SingleChannelNum = MEA.EL_DECODE[SingleChannelNum];
+              SingleChannelNum = MEA.NAME2IDX[SingleChannelNum];
               this.SelectedDrawMode = DrawMode.DrawSingleChannel;
             }
             IsDataUpdated = false;
@@ -458,7 +458,7 @@ namespace MEAClosedLoop
             basicEffect.CurrentTechnique.Passes[0].Apply();
 
             //создание массива векторов для каналов
-            Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Count()];
+            Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Max() + 1];
 
             // сетка 8 x 8 клеток
             // длина и ширина пропорциональны размеру главного окна
@@ -466,9 +466,9 @@ namespace MEAClosedLoop
             int CellHeight = WindowHeight / 8;
 
             #region Вычисление векторов смещения для каналов
-            for (int i = 0; i < DataPacket.Keys.Count; i++)
+            foreach (int i in DataPacket.Keys)
             {
-              ChannelvectorsArray[i] = new Vector3((MEA.AR_DECODE[i] / 10 - 1) * CellWidth, (MEA.AR_DECODE[i] % 10 - 1) * CellHeight, 0);
+              ChannelvectorsArray[i] = new Vector3((MEA.IDX2NAME[i] / 10 - 1) * CellWidth, (MEA.IDX2NAME[i] % 10 - 1) * CellHeight, 0);
 
             }
             #endregion

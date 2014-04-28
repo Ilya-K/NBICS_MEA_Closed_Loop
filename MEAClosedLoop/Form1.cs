@@ -30,7 +30,7 @@ namespace MEAClosedLoop
     private CSpikeDetector m_spikeDetector;
     private CRasterPlot m_rasterPlotter;
     private CStimulator m_stimulator;
-    private bool FakeStimulator = true;
+    private bool FakeStimulator = false;
 
     private CPackStat m_statForm;
 

@@ -115,7 +115,7 @@ namespace MEAClosedLoop
       m_stimulCallback = new List<StimulTimeDelegate>();
 
       // [TODO] Allow user to choose stimulus artifact detection channel
-      //stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0];
+      stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0];
       ///[DEBUG STIM]
       sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
 

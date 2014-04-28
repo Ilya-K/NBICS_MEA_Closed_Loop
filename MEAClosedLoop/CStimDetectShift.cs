@@ -33,7 +33,7 @@ namespace MEAClosedLoop
     public bool FullResearch = false; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
     public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия удаления артефактов
-    public int m_Artif_Channel = MEA.EL_DECODE[25];
+    public int m_Artif_Channel = MEA.NAME2IDX[25];
     #endregion
 
     #region Внутрение данные

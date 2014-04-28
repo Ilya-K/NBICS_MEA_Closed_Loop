@@ -45,7 +45,7 @@ namespace MEAClosedLoop
       m_stimulator = stimulator;
       m_filter = filter;
 
-      m_stimulator.DownloadDefaultShape(1, 1, 1, 10000);
+      m_stimulator.DownloadDefaultShape(1, 1, 1, 200000);
       m_stimulus = m_stimulator.GetStimulus();
       m_packDetector = new CPackDetector(m_filter);
 
@@ -123,7 +123,7 @@ namespace MEAClosedLoop
 
         // Pass the next stimulation time to the StimDetector
         m_stimulus.stimTime = nextStimTime;
-        //m_filter.StimDetector.SetExpectedStims(m_stimulus);
+        m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
         // 
         m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time

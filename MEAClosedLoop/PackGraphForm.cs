@@ -93,7 +93,7 @@ namespace MEAClosedLoop
       
       foreach (int channel in channelList)
       {
-        int elName = MEA.AR_DECODE[channel];
+        int elName = MEA.IDX2NAME[channel];
 
         int x = elName / 10 - 1;
         int y = elName % 10 - 1;
@@ -159,7 +159,7 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
 
-      int currentPanelIndex = MEA.EL_DECODE[Convert.ToInt32((sender as Panel).Name)];
+      int currentPanelIndex = MEA.NAME2IDX[Convert.ToInt32((sender as Panel).Name)];
 
       try
       {
@@ -244,7 +244,7 @@ namespace MEAClosedLoop
     {
       string elName = (sender as Panel).Name;
       MessageBox.Show("канал выбран");
-      loadSelection(MEA.EL_DECODE[Convert.ToInt32(elName)]);
+      loadSelection(MEA.NAME2IDX[Convert.ToInt32(elName)]);
 
       this.Hide();
     }
