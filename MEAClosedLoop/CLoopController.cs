@@ -123,7 +123,7 @@ namespace MEAClosedLoop
 
         // Pass the next stimulation time to the StimDetector
         m_stimulus.stimTime = nextStimTime;
-        m_filter.StimDetector.SetExpectedStims(m_stimulus);
+        //m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
         // 
         m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time

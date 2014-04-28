@@ -208,7 +208,7 @@ namespace MEAClosedLoop
       {
         case DrawMode.DrawMultiChannel:
           // случай отрисовки всех каналов, подготовливаем массив точек
-          if (DebugCount % 5 == 0)
+          if (false)
           // надо заменить на обработку GameTime [но пока сойдет и так] - для фиксации фпс
           {
             lock (DataPacketLock)
@@ -313,7 +313,7 @@ namespace MEAClosedLoop
           lock (CurrentTimeCync)
           {
             lock (DataPacketLock)
-              summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+              summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
           }
           break;
       }
@@ -344,7 +344,7 @@ namespace MEAClosedLoop
       IsDataUpdated = false;
       lock (CurrentTimeCync)
       {
-        summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[DataPacket.Keys.First()].Length;
+        summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.First()].Length;
         DebugCount++;
       }
 
@@ -743,7 +743,7 @@ namespace MEAClosedLoop
 
             }
             #endregion
-            summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+            summary_time_stamp = m_salpaFilter.TimeStamp;// + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
 
             #region Отрисовка надписей
             // Текущее время

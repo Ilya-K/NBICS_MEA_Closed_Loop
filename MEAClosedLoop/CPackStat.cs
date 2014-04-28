@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 20;
+    private const int Minimum_Pack_Requered_Count = 220;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -543,6 +543,11 @@ namespace MEAClosedLoop
       this.GraphChannelSelectButton.Enabled = false;
       this.formShowWindows.EnableCompareMode();
       formShowWindows.Show();
+    }
+
+    private void CPackStat_Load(object sender, EventArgs e)
+    {
+
     }
   }
 }

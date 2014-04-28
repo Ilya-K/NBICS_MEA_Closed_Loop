@@ -770,6 +770,7 @@
       this.Controls.Add(this.Prepearing);
       this.Name = "CPackStat";
       this.Text = "CPackStat";
+      this.Load += new System.EventHandler(this.CPackStat_Load);
       this.Prepearing.ResumeLayout(false);
       this.Prepearing.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
