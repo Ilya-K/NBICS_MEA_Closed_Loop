@@ -48,7 +48,7 @@ namespace MEAClosedLoop
     private bool IsInCurrentZone;
     private bool IsNullReturned;
     public CGraphRender DataRender;
-    List<TStimIndex> FindedPegs;
+    List<TStimIndex> FoundPegs;
     public List<TStimGroup> m_expectedStims;
     public List<TStimGroup> inner_expectedStims_to_display;
     public TRawData[] inner_data_to_display;
@@ -198,7 +198,7 @@ namespace MEAClosedLoop
           }
         }
       }
-      FindedPegs = new List<TStimIndex>();
+      FoundPegs = new List<TStimIndex>();
       List<TStimGroup> stims_to_remove = new List<TStimGroup>();
       if (FullResearch)
       {
@@ -207,10 +207,10 @@ namespace MEAClosedLoop
         {
           if (TrueValidateSingleStimInT(DataPacket, i))
           {
-            FindedPegs.Add((TStimIndex)i);
+            FoundPegs.Add((TStimIndex)i);
             lock (LockStimList)
             {
-              foreach (TStimIndex stim in FindedPegs)
+              foreach (TStimIndex stim in FoundPegs)
               {
                 for (int exp_stim_num = 0; exp_stim_num < m_expectedStims.Count; exp_stim_num++)
                 {
@@ -249,8 +249,8 @@ namespace MEAClosedLoop
               && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ?
                      0 : 
                      (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange);
-            if (FindedPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10)
-              leftRange = (TAbsStimIndex)FindedPegs[FindedPegs.Count() - 1] + 10;
+            if (FoundPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FoundPegs[FoundPegs.Count() - 1] + 10)
+              leftRange = (TAbsStimIndex)FoundPegs[FoundPegs.Count() - 1] + 10;
             for (TAbsStimIndex i = leftRange; i < rightRange; i++)
             {
               if (i == 1954)
@@ -278,16 +278,16 @@ namespace MEAClosedLoop
                 else
                 {
                   bool IsItPrev = false;
-                  for (int j = 0; j < FindedPegs.Count(); j++)
+                  for (int j = 0; j < FoundPegs.Count(); j++)
                   {
-                    if (FindedPegs[j] + MinimumLengthBetweenPegs > (TStimIndex)i) IsItPrev = true;
+                    if (FoundPegs[j] + MinimumLengthBetweenPegs > (TStimIndex)i) IsItPrev = true;
                   }
                   if (IsItPrev)
                   {
                     i++;
                     continue;
                   }
-                  FindedPegs.Add((TStimIndex)i);
+                  FoundPegs.Add((TStimIndex)i);
                   stims_to_remove.Add(stim);
                   break;
                 }
@@ -300,7 +300,7 @@ namespace MEAClosedLoop
       lock (LockExternalData)
       {
         inner_data_to_display = DataPacket;
-        inner_found_indexes_to_display = FindedPegs;
+        inner_found_indexes_to_display = FoundPegs;
       }
       #region Удаление найденных координат артефактов стимуляций из списка ожидаемых.
       #region  Добавим устаревшие на удаление.
@@ -324,13 +324,13 @@ namespace MEAClosedLoop
       if (SalpaShiftOptimization)
       {
         #region сдвиг на 32 точки влево
-        for (int i = 0; i < FindedPegs.Count; i++)
+        for (int i = 0; i < FoundPegs.Count; i++)
         {
-          FindedPegs[i] -= 32;
+          FoundPegs[i] -= 32;
         }
         #endregion
       }
-      return FindedPegs;
+      return FoundPegs;
     }
     #endregion
     #region Упрощенная верификация артефакта в момент времени t
