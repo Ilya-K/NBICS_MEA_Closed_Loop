@@ -38,8 +38,7 @@ namespace MEAClosedLoop
 
     public int NChannels { get { return m_inputStream.NChannels; } }
     public List<int> ChannelList { get { return m_inputStream.ChannelList; } }
-    private TTime m_timeStamp = 0;
-    private Int32 m_sentPacketLength = 0;
+    private TTime m_timeStamp = 0;                                              // Start time of the last processed packet
     private TTime m_localTimeStamp = 0;
     private object m_timeLock = new object();
     public ulong TimeStamp { get { lock (m_timeLock) return m_timeStamp; } }
@@ -72,8 +71,6 @@ namespace MEAClosedLoop
 
     // [/DEBUG]
     public int m_Count = 0;
-    private Stopwatch sw1 = new Stopwatch();
-    private List<long> times = new List<long>();
 
     public void AddDataConsumer(ConsumerDelegate consumer)
     {
@@ -167,9 +164,6 @@ namespace MEAClosedLoop
       //      Thread t = new Thread(new ThreadStart(DoFiltering));
       m_kill = false;
       //      t.Start();
-      // [DEBUG]
-      sw1.Restart();
-      // [/DEBUG]
     }
 
     public void ConfigureSALPA()
@@ -283,7 +277,6 @@ namespace MEAClosedLoop
     }
     public void ReceiveData(TRawDataPacket currPacket)
     {
-      //times.Add(sw1.ElapsedMilliseconds);
       List<TAbsStimIndex> outputIndeces = new List<TAbsStimIndex>();
       if (m_prevPacket == null)
       {
@@ -348,17 +341,17 @@ namespace MEAClosedLoop
         });
       }
 
-      lock (m_timeLock)
-      {
-        m_timeStamp += (TTime)m_sentPacketLength;
-        m_sentPacketLength = filteredData[filteredData.Keys.ElementAt(0)].Length;
-      }
       lock (m_consumerList)
       {
         if (m_consumerList.Count != 0)
         {
           foreach (ConsumerDelegate consumer in m_consumerList) consumer(filteredData);
         }
+      }
+
+      lock (m_timeLock)
+      {
+        m_timeStamp += (TTime)filteredData[filteredData.Keys.ElementAt(0)].Length;
       }
 
       //lock (m_filteredQueue) m_filteredQueue.Enqueue(filteredData);

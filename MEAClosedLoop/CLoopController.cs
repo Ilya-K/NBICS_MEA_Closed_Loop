@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define DEBUG_SPIKETRAINS
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,26 +35,6 @@ namespace MEAClosedLoop
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
 
-
-    public delegate void PackConsumerDelegate(CPack pack);
-    private List<PackConsumerDelegate> m_packConsumerList = null;
-    private object m_packConsumerListLock = new object();
-
-    public void AddDataConsumer(PackConsumerDelegate consumer)
-    {
-      if (m_packConsumerList == null) m_packConsumerList = new List<PackConsumerDelegate>();
-      lock (m_packConsumerListLock)
-      {
-        if (m_packConsumerList.Contains(consumer)) return;
-        m_packConsumerList.Add(consumer);
-      }
-    }
-    public void RemoveDataConsumer(PackConsumerDelegate consumer)
-    {
-      lock (m_packConsumerListLock) m_packConsumerList.Remove(consumer);
-      return;
-    }
-
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
       if (inputStream == null) throw new ArgumentNullException("inputStream");
@@ -80,6 +61,13 @@ namespace MEAClosedLoop
       m_stop = true;
     }
 
+#if DEBUG_SPIKETRAINS
+    public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainsDbg()
+    {
+      return m_packDetector.GetSpikeTrainDbg();
+    }
+#endif
+
     private void FeedBackLoop()
     {
       CCalcExpWndSE m_se = new CCalcExpWndSE(10); // Mean over ~30 samples
@@ -88,8 +76,7 @@ namespace MEAClosedLoop
       CPack prevPack = m_packDetector.WaitPack();
       if (!prevPack.EOP)
       {
-        CPack tempPack = m_packDetector.WaitPack();
-        prevPack.Length = (Int32)(tempPack.Start - prevPack.Start);
+        prevPack = m_packDetector.WaitPack();
       }
 
       CPack currPack = prevPack;                  // Dummy assignment, just to shut up the compiler 
@@ -97,6 +84,7 @@ namespace MEAClosedLoop
       TData meanPackPeriod;
       TData sePackPeriod;
 
+      if (OnPackFound != null) OnPackFound(currPack);
       while (!m_stop)
       {
         CPack currSemiPack = m_packDetector.WaitPack();
@@ -107,27 +95,15 @@ namespace MEAClosedLoop
         // The Start part has already been processed at the previous step
         if (currSemiPack.EOP)                     // We've just received a pack with EndOfPack flag
         {
+          // Distribute current pack (with EOP) to consumers
+          if (OnPackFound != null) OnPackFound(currSemiPack);
           if (insidePack)                         // We're inside of previously started pack
           {
-            currPack.Length = (Int32)(currSemiPack.Start - currPack.Start);
+            currPack.Length = currSemiPack.Length;
             prevPack = currPack;
             insidePack = false;
-            // Distribute current pack to consumers
-            if (OnPackFound!=null) OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
-          // Distribute current pack to consumers
-          // Нагажу комментами на русском ;)
-        // Раздача законченных пачек подписчикам
-
-        lock (m_packConsumerListLock)
-        {
-          if (m_packConsumerList != null && m_packConsumerList.Count != 0)
-          {
-            foreach (PackConsumerDelegate consumer in m_packConsumerList) consumer(currPack);
-          }
-        }
-          if (OnPackFound != null) OnPackFound(currPack);
         }
         else                                      // We've received Start of a long pack
         {
@@ -147,15 +123,13 @@ namespace MEAClosedLoop
 
         // Pass the next stimulation time to the StimDetector
         m_stimulus.stimTime = nextStimTime;
-        
-        // m_filter.StimDetector.SetExpectedStims(m_stimulus);
+        m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
         // 
         m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
         m_stimTimer.Start();
 
         prevPack = currPack;
-        
       }
     }
 
