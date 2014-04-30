@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 50;
+    private const int Minimum_Pack_Requered_Count = 220;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -36,25 +36,25 @@ namespace MEAClosedLoop
     private Object StimListBlock = new Object();
     private Object PacklListBlock = new Object();
     private TTime StartStimulationTime = 0; // точка отсчета начала стимуляций. 
-    private int Stat_Window_Minutes = 0;
-    private int Stat_Window_Seconds = 10;
+    private const int Stat_Window_Minutes = 0;
+    private const int Stat_Window_Seconds = 10;
     private int AveragePackPeriod = 0;
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
     bool DoStimulation = false;
     List<int> m_channelList; //TODO: get channel list
     state CurrentState;
-
+    private PackGraphForm formShowWindows;
 
 
     public delegate void DelegateUpdateDistribGrath();
     public delegate void DelegateSetCollectStatButtonText(string text);
+    public delegate void StatPrepare(bool val);
     public event DelegateSetProgress SetVal;
     public event DelegateUpdateDistribGrath UpdateDistribGrath;
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
 
     private double StimStartPosition;
-    private TStimIndex StimStartIndex;
     #endregion
     #region Конструктор
     public CPackStat(CLoopController _LoopController, List<int> channelList)
@@ -73,15 +73,36 @@ namespace MEAClosedLoop
       UpdateDistribGrath += PreCalcStat;
       UpdateDistribGrath += CurrentCalcStat;
       SetCollectStatButtonText += SetStatButtontext;
+      StimType.Enabled = false;
+      StartStimButton.Enabled = false;
+      numericUpDown1.ValueChanged += GraphChannelSelected;
+      MinutesWindow.Enabled = false;
+      SecondsWindow.Enabled = false;
+      MinutesWindow.ValueChanged += StimReady;
+      SecondsWindow.ValueChanged += StimReady;
+      MinutesWindow.EnabledChanged += SetDefaultMinWindow;
+      SecondsWindow.EnabledChanged += SetDefaultSecWindow;
+      formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
+      formShowWindows.loadSelection += ChannelChangeRequest;
     }
     #endregion
 
     #region Клик по кнопке выбора канала
     private void GraphChannelSelectButton_Click(object sender, EventArgs e)
     {
-      PackGraphForm formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
-      formShowWindows.loadSelection += ChannelChangeRequest;
       formShowWindows.Show();
+      formShowWindows.VisibleChanged += UnlockCompareButton;
+    }
+
+    private void UnlockCompareButton(Object sender, EventArgs e)
+    {
+      compareButton.Enabled = true;
+    }
+
+    private void GraphChannelSelected(Object sender, EventArgs e)
+    {
+      this.MinutesWindow.Enabled = true;
+      this.SecondsWindow.Enabled = true;
     }
     #endregion
 
@@ -92,25 +113,13 @@ namespace MEAClosedLoop
       if (!DoStatCollection)
       {
         DoStatCollection = true;
-        CollectStatButton.Text = "Остановить";
-        /*if (CollectingDataThread == null)
-        {
-          CollectingDataThread = new Thread(CollectPacks);
-          //CollectingDataThread.Start();
-        }
-        else
-        {
-          //CollectingDataThread.Resume();
-        }*/
-
-        //PackDetector.PackArrived += AddPack; 
+        CollectStatButton.Text = "Остановить"; 
         LoopCtrl.OnPackFound += AddPack; //now from loop controller
       }
       else
       {
         DoStatCollection = false;
         CollectStatButton.Text = "Продолжить";
-        //CollectingDataThread.Suspend();
         LoopCtrl.OnPackFound -= AddPack; //now from loop controller
       }
     }
@@ -339,7 +348,22 @@ namespace MEAClosedLoop
       double i = StimStartPosition;
       double.TryParse(StimPadding.Text, out i);
       StimStartPosition = i;
-      trackBar1.Value = (int) (StimStartPosition * trackBar1.Maximum / (int)(StatGraphXRange.Value));
+      int newTrackBarPosition = (int) (StimStartPosition * trackBar1.Maximum / (int)(StatGraphXRange.Value));
+      if (newTrackBarPosition > trackBar1.Maximum)
+      {
+        trackBar1.Value = trackBar1.Maximum;
+      }
+      else
+      {
+        if (newTrackBarPosition < trackBar1.Minimum)
+        {
+          trackBar1.Value = trackBar1.Minimum;
+        }
+        else
+        {
+          trackBar1.Value = newTrackBarPosition;
+        }
+      }
       //DistribGrath.Refresh();
     }
     private void trackBar1_Scroll(object sender, EventArgs e)
@@ -362,21 +386,38 @@ namespace MEAClosedLoop
       }
     }
     #endregion
+
+    private void StimReady(Object sender, EventArgs e)
+    {
+      StimType.Enabled = true;
+      StartStimButton.Enabled = true;
+    }
+
     private void StartStimButton_Click(object sender, EventArgs e)
     {
       CurrentState = state.AfterStimulation;
       DoStatCollection = true;
       DoStimulation = true;
       //TODO: вызов функции, начинающей стимуляции.
+      DrawPackCountGraph((int)this.numericUpDown1.Value);
       PackCountGraph.Invalidate();
       PackCountGraph.Refresh();
     }
 
 
-    private void CPackStat_Load(object sender, EventArgs e)
+
+    private void SetDefaultMinWindow(object sender, EventArgs e)
     {
       MinutesWindow.Value = Stat_Window_Minutes;
+    }
+
+    private void SetDefaultSecWindow(object sender, EventArgs e)
+    {
       SecondsWindow.Value = Stat_Window_Seconds;
+    }
+
+    private void DrawPackCountGraph(int channel)
+    {
     }
 
     void ChannelChangeRequest(int number)
@@ -497,5 +538,16 @@ namespace MEAClosedLoop
       this.CurrentCalcStat();
     }
 
+    private void compareButton_Click(object sender, EventArgs e)
+    {
+      this.GraphChannelSelectButton.Enabled = false;
+      this.formShowWindows.EnableCompareMode();
+      formShowWindows.Show();
+    }
+
+    private void CPackStat_Load(object sender, EventArgs e)
+    {
+
+    }
   }
 }

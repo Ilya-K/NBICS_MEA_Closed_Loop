@@ -30,7 +30,12 @@ namespace MEAClosedLoop
     private CSpikeDetector m_spikeDetector;
     private CRasterPlot m_rasterPlotter;
     private CStimulator m_stimulator;
+    private bool FakeStimulator = false;
+
     private CPackStat m_statForm;
+
+    private CDataRender m_dataRender;
+    private Thread dataRenderThread;
 
     private volatile bool m_killDataLoop;
     List<int> m_channelList;
@@ -76,8 +81,8 @@ namespace MEAClosedLoop
       comboBox_DAQs_Click(null, null);
       comboBox_Stimulators_Click(null, null);
       SetDefaultChannels();
+      showChannelData.Click+=buttonClosedLoop_Click;
     }
-
     /*
     private void DataLoop()
     {
@@ -342,7 +347,8 @@ namespace MEAClosedLoop
           thresholds[i] = 1000 * 3;
         }
         // length_sams [75], asym_sams [10], blank_sams [75], ahead_sams [5], forcepeg_sams [10], thresholds[]
-        SALPAParams parSALPA = new SALPAParams(35, 10, 35, 5, 10, thresholds);
+        SALPAParams parSALPA = new SALPAParams(75, 10, 75, 5, 10, thresholds);
+
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
 
         // [TODO] Get parameters from the UI and save them in Settings
@@ -575,13 +581,23 @@ namespace MEAClosedLoop
       if (m_stimulator == null)
       {
         // Configure Stimulator here
-        m_stimulator = new CStimulator(m_usbSTGList, (uint)m_selectedStim);
+        if (!FakeStimulator)
+        {
+          m_stimulator = new CStimulator(m_usbSTGList, (uint)m_selectedStim);
+        }
+        else
+        {
+          m_stimulator = new CStimulator();
+        }
       }
 
       try
       {
-        FormCalibrate formCalib = new FormCalibrate(m_inputStream, m_stimulator);
-        formCalib.ShowDialog();
+        if (!FakeStimulator)
+        {
+          FormCalibrate formCalib = new FormCalibrate(m_inputStream, m_stimulator);
+          formCalib.ShowDialog();
+        }
       }
       catch (Exception ex)
       {
@@ -600,13 +616,22 @@ namespace MEAClosedLoop
         {
           // [TODO] Configure Stimulator
           // [DEBUG]
-          // Fake stimulator
-          m_stimulator = new CStimulator();
+          if (!FakeStimulator)
+          {
+            m_stimulator = new CStimulator(m_usbSTGList, (uint)m_selectedStim);
+          }
+          else
+          {
+            // Fake stimulator
+            m_stimulator = new CStimulator();
+          }
           // [/DEBUG] 
+
         }
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
+      showChannelData.Enabled = true;
 
       m_inputStream.Start();
       buttonClosedLoop.Enabled = false;
@@ -672,5 +697,18 @@ namespace MEAClosedLoop
       m_statForm.Show();
     }
 
+    private void showChannelData_Click(object sender, EventArgs e)
+    {
+      dataRenderThread = new Thread(DrawDataFunction);
+      dataRenderThread.Start();
+    }
+    private void DrawDataFunction()
+    {
+      m_dataRender = new CDataRender(m_salpaFilter);
+      m_closedLoop.OnPackFound += m_dataRender.RecievePackData;
+
+      m_dataRender.Run();
+
+    }
   }
 }

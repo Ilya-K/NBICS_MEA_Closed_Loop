@@ -45,6 +45,7 @@ namespace MEAClosedLoop
       m_stimulator = stimulator;
       m_filter = filter;
 
+      m_stimulator.DownloadDefaultShape(1, 1, 1, 200000);
       m_stimulus = m_stimulator.GetStimulus();
       m_packDetector = new CPackDetector(m_filter);
 
@@ -73,7 +74,10 @@ namespace MEAClosedLoop
       
       // Wait one full pack first of all
       CPack prevPack = m_packDetector.WaitPack();
-      if (!prevPack.EOP) prevPack = m_packDetector.WaitPack();
+      if (!prevPack.EOP)
+      {
+        prevPack = m_packDetector.WaitPack();
+      }
 
       CPack currPack = prevPack;                  // Dummy assignment, just to shut up the compiler 
       bool insidePack = false;
@@ -81,7 +85,6 @@ namespace MEAClosedLoop
       TData sePackPeriod;
 
       if (OnPackFound != null) OnPackFound(currPack);
-
       while (!m_stop)
       {
         CPack currSemiPack = m_packDetector.WaitPack();
@@ -92,17 +95,15 @@ namespace MEAClosedLoop
         // The Start part has already been processed at the previous step
         if (currSemiPack.EOP)                     // We've just received a pack with EndOfPack flag
         {
+          // Distribute current pack (with EOP) to consumers
+          if (OnPackFound != null) OnPackFound(currSemiPack);
           if (insidePack)                         // We're inside of previously started pack
           {
-            // currPack.Length = (Int32)(currSemiPack.Start - currPack.Start); // [Obsolete]
+            currPack.Length = currSemiPack.Length;
             prevPack = currPack;
             insidePack = false;
-            // Distribute current pack to consumers
-            if (OnPackFound != null) OnPackFound(currSemiPack);
             continue;                             // Start of this pack has already been processed
           }
-          // Distribute current pack to consumers
-          if (OnPackFound != null) OnPackFound(currSemiPack);
         }
         else                                      // We've received Start of a long pack
         {
@@ -129,13 +130,13 @@ namespace MEAClosedLoop
         m_stimTimer.Start();
 
         prevPack = currPack;
-
       }
     }
 
     private void StimTimer(object o1, EventArgs e1)
     {
-      //[DEBUG] m_stimulator.Start();
+      //[DEBUG]
+      m_stimulator.Start();
     }
   }
 }

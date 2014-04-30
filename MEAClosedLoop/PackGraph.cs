@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
@@ -16,154 +17,216 @@ namespace MEAClosedLoop
     public int channel;
   }
 
-  public struct ProcessedPack{
-    public TPackMap dataMap;
+  public class ProcessedPack{
+    public Dictionary<int, TPackMap> dataMap;  // <channel, data>
     public TTime start;
+
+    public ProcessedPack()
+    {
+      dataMap = new Dictionary<int, TPackMap>();
+      start = 0;
+    }
   }
 
-
-
-  
+  public enum PackStatType
+  {
+    Amp,
+    Freq,
+    Both
+  }
 
   public class PackGraph
   {
-    public enum state
-    {
-      Amp,
-      Freq
-    }
+    
     public double foundPackPercent;
-    uint realMaxPackLength;
-    //List<TStimIndex> indexData;
-    private Queue<CPack> RawAmpData, RawFreqData;
+    private Queue<CPack> RawData;
     Timeline processed_data;
-    state GraphType;
-    public uint totalTime;
+    PackStatType GraphType;
+    public ulong totalTime;
     
     const int MAX_PACK_LENGTH = 12500; //500 ms 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
     const int STAT_ITERATION_LENGTH = 125; //5 ms
-    const double SPIKE_TRESHOLD = 10; //TODO: vary this  parameter
 
 
 
-    private TPackMap SpikesInPack(TPack input, uint iterationLength)
+    private TPackMap SpikesInPack(TPack input)
     {
       TPackMap output = new TPackMap();
-      uint TimeIterator, TimePartIterator;
-      uint packCount;
+      uint TimeIterator;
 
-      for (TimeIterator = 0; TimeIterator < input.data.Count(); TimeIterator += iterationLength)
+      for (TimeIterator = 0; TimeIterator < input.data.Count(); TimeIterator ++)
       {
-        packCount = 0;
-        for (TimePartIterator = TimeIterator; TimePartIterator <= TimeIterator + iterationLength; TimePartIterator++)
-        {
-          if (input.data[(int)TimePartIterator])
-            packCount++;
-        }
-        output.Add(packCount);
+        if (input.data[(int)TimeIterator])
+          output.Add(TimeIterator);
       }
       
-      /*if (TimeIterator > realMaxPackLength)
-      {
-        realMaxPackLength = TimeIterator;
-      }*/
 
       return output;
     }
 
-    private TPack CPack2TPack(CPack input)
+    private TPack CPack2TPack(CPack input, int channel)
     {
       TPack output = new TPack();
+      output.data = new List<bool>();
 
+      output.channel = channel;
       for (int packIterator = 0; packIterator < input.Length; packIterator++)
       {
-        foreach (int channel in input.Data.Keys)
-        {
-          output.channel = channel;
-          output.data[packIterator] = ((input.Data[channel])[packIterator] > SPIKE_TRESHOLD);
-        }
+          output.data.Add((input.Data[channel])[packIterator] > input.NoiseLevel[channel]);
+        
       }
 
       return output;
     }
 
 
-    public void ProcessPackStat(int timeUnitSegment) //now from all channels
+    public void ProcessPackStat(int timeUnitSegment, int statTypeIndex) //now from all channels
     {
-      uint iterationLength = totalTime / (uint)timeUnitSegment;
+      uint iterationLength = (uint)(totalTime / (ulong)timeUnitSegment);
 
       //Filling timeline
-      if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
+      
+      /*if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
       {
         //Something went wrong
+        GraphType = PackStatType.Both;
+        throw new Exception("Неверные данные!"); //или оба режима сразу...
       }
-      else
+      else*/
+
+      if (RawData.Count == 0)
       {
-        if (RawFreqData.Count > 0)
-        { //freq stat
-          GraphType = state.Freq;
-          foreach (CPack current_cpack in RawFreqData)
-          {
+            MessageBox.Show("Пачек не найдено");
+            return;
+      }
+      switch(statTypeIndex){
+        case 1: //freq stat
+          GraphType = PackStatType.Freq;
+          break;
+        case 0://amp stat
+          GraphType = PackStatType.Amp;
+          break;
+        default: //Something went wrong
+          GraphType = PackStatType.Both;
+          throw new Exception("Неверные данные!");
+      }
+        
+      TPack boolPack;
+      foreach (CPack current_cpack in RawData)
+      {
             ProcessedPack processed_pack_to_add = new ProcessedPack();
-            processed_pack_to_add.dataMap = SpikesInPack(CPack2TPack(current_cpack), iterationLength);
+            foreach (int channel in current_cpack.Data.Keys)
+            {
+              boolPack = CPack2TPack(current_cpack, channel);
+              processed_pack_to_add.dataMap[channel] = SpikesInPack(boolPack);
+            }
             processed_pack_to_add.start = current_cpack.Start;
             processed_data.Enqueue(processed_pack_to_add);
-          }
-        }
-        if (RawAmpData.Count > 0)
-        { //amp stat
-          GraphType = state.Amp;
-        }
       }
+    }
+
+    private uint PackAvgAmp(CPack input, int channel){
+      uint output=0;
+      uint i;
+
+      for (i = 1; i < input.Data[channel].Length + 1; i++)
+      {
+        output += Convert.ToUInt16(Math.Abs(input.Data[channel][i - 1]));
+      }
+      output /= i;
+      return output;
     }
     
     public PackGraph()
     {
-      foundPackPercent = 0;
-      realMaxPackLength = 0;
+      this.Reset();
+    }
 
-      RawAmpData = new Queue<CPack>();
-      RawFreqData = new Queue<CPack>();
+    public void Reset()
+    {
+      RawData = new Queue<CPack>();
       processed_data = new Timeline();
-
     }
 
-
-    public void ProcessAmpStat(CPack pack_to_add)
+    public void ProcessStat(CPack pack_to_add)
     {
-      RawAmpData.Enqueue(pack_to_add);
+      RawData.Enqueue(pack_to_add);
     }
 
-    public void ProcessFreqStat(CPack pack_to_add)
+    private ulong UpdateCursorPosition(ulong prevPosition, UInt64 val, ulong ticksInPoint)
     {
-      RawFreqData.Enqueue(pack_to_add);
-
+      return (prevPosition + 1) * ticksInPoint > (ulong)val ? prevPosition : prevPosition + 1;
     }
-    public Queue<uint> PrepareData(int channel) //TODO: proper time convertions
+    public uint[] PrepareData(int channel, int panelWidth, int panelHeight)
     {
-      Queue<uint> output = new Queue<uint>();
-      uint nextPackTime = (uint)processed_data.Peek().start; //here //minimum 1 pack required
-      ProcessedPack currentPack;
-
-      for (int timeIterator = 0; (timeIterator < totalTime) && (processed_data.Count > 0); timeIterator++)
+      uint[] output = null;
+      ulong cursorPosition = 0;
+      ulong ticksInPoint;
+      //double maxOutputVal;
+      Timeline local_data;
+      uint ampsPerPoint;
+      Queue<CPack>.Enumerator ampDataIterator = RawData.GetEnumerator();
+      lock (processed_data)
       {
-        if (timeIterator < (uint)processed_data.Peek().start)
-        { //filling free space
-          output.Enqueue(0);
-          continue;
-        }
-        else
+        local_data = new Timeline(processed_data);
+      }
+      
+      if (local_data.Count == 0 || panelWidth ==0)
+        return output;
+      output = new uint[panelWidth];
+      output.PopulateArray<uint>(0);
+      TTime statStartTime = local_data.First<ProcessedPack>().start; //dummy assingment
+
+      ticksInPoint = totalTime / (ulong)panelWidth;
+      int debug_ldc = local_data.Count;
+      int debug = 0;
+      try
+      {
+        for (ProcessedPack currentPack = local_data.Dequeue(); local_data.Count > 0; currentPack = local_data.Dequeue())
         {
-          currentPack = processed_data.Dequeue();
-          timeIterator += currentPack.dataMap.Count;
-          foreach (uint dataPoint in currentPack.dataMap)
+          debug++;
+          if (currentPack.dataMap.ContainsKey(channel))
           {
-            output.Enqueue(dataPoint);
+            if (GraphType == PackStatType.Amp)
+            {
+              if (!ampDataIterator.MoveNext())
+                break;
+            }
+            ampsPerPoint = 0;
+            foreach (uint dataPoint in currentPack.dataMap[channel])
+            {
+              cursorPosition = UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start - statStartTime, ticksInPoint);
+              switch (GraphType)
+              {
+                case PackStatType.Freq:
+                  if (cursorPosition < (ulong)panelWidth)
+                    output[cursorPosition]++;
+                  else return output;
+                  break;
+                case PackStatType.Amp:
+                  if (cursorPosition < (ulong)panelWidth)
+                    output[cursorPosition] += Convert.ToUInt16(Math.Abs(ampDataIterator.Current.Data[channel][dataPoint]));
+                  else return output;
+                  if (UpdateCursorPosition(cursorPosition, dataPoint + currentPack.start, ticksInPoint) > cursorPosition && ampsPerPoint != 0)
+                  {
+                    output[cursorPosition] /= ampsPerPoint;
+                    ampsPerPoint = 0;
+                  }
+                  else
+                  {
+                    ampsPerPoint++;
+                  }
+                  break;
+              }
+            }
           }
         }
       }
-
+      catch(Exception ex)
+      {
+        throw ex;
+      }
       return output;
     }
   }

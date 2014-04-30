@@ -89,10 +89,10 @@ namespace MEAClosedLoop
       private Queue<TTime> m_preSpikes;
       private TTime m_trainStartTime;
       private TTime m_lastSpike = 0;
-      private TData MeanNoise { get { return m_calcNoiseSE2.Mean; } }
-      private TData SignalNoiseRatio { get { return m_calcPackSE.PrevSE / m_calcNoiseSE2.Mean; } }
       private float percentActive = 0;
       private float percentBlind = 0;
+      public TData MeanNoise { get { return m_calcNoiseSE2.Mean; } }
+      public TData SignalNoiseRatio { get { return m_calcPackSE.PrevSE / m_calcNoiseSE2.Mean; } }
 
       // [DEBUG]
 #if DEBUG_SPIKETRAINS
@@ -376,6 +376,7 @@ namespace MEAClosedLoop
 
     //private readonly List<CSpikeTrainFrame> NO_SPIKETRAINS = new List<CSpikeTrainFrame>();
     private Dictionary<int, CSpikeTrainDetector> m_spikeTraintDet;
+    private Dictionary<int,TData> m_noiseInPack;
     private CFiltering m_filteredStream;
     private List<int> m_activeChannelList;
     private List<CSpikeTrainFrame> m_packSpikeTrainList;
@@ -527,31 +528,36 @@ namespace MEAClosedLoop
       // [DEBUG]
 #if RANDOM_PACKS
       CPack debugPack = null;
+      const int PACK_POINT_COUNT = 2000;
       if (m_dummyPackTime >= 0)
       {
+        TData[] dummyNoise = new TData[MEA.MAX_CHANNELS];
+        dummyNoise.PopulateArray(100);
+
         if (m_inPackDbg)
         {
           TFltDataPacket packData = new TFltDataPacket(m_activeChannelList.Count);
 
           // Fill packData with active channels keys
-          foreach (int channel in m_activeChannelList) packData[channel] = new TData[200];
+          foreach (int channel in m_activeChannelList) packData[channel] = new TData[PACK_POINT_COUNT];
 
           packData.Keys.AsParallel().ForAll(channel =>
           {
             // Process the first packet
-            int length = 200;
+            int length = PACK_POINT_COUNT;
             int j = 0;
             for (int i = 0; i < length; ++i)
             {
-              packData[channel][j++] = i - 100;
+              packData[channel][j] = packet[channel][j];
+              j++;
             }
           });
 
-          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 200, packData);
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, PACK_POINT_COUNT, packData, dummyNoise);
         }
         else
         {
-          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 0, null);
+          debugPack = new CPack(m_timestamp + (TTime)m_dummyPackTime, 3000, null, dummyNoise);
         }
         m_dummyPackTime = -1;
         m_inPackDbg = !m_inPackDbg;
@@ -563,12 +569,20 @@ namespace MEAClosedLoop
       int currPacketLength = packet[packet.Keys.ElementAt(0)].Length;
 
       Dictionary<int, CSpikeTrainFrame> spikeTrains = new Dictionary<int, CSpikeTrainFrame>();
+      Dictionary<int, TData> noiseLevelDic = new Dictionary<int, TData>();
 
       // Fill keys to enable parallel foreach on the next step
-      foreach (int channel in m_activeChannelList) spikeTrains[channel] = null;
+      foreach (int channel in m_activeChannelList)
+      {
+        noiseLevelDic[channel] = 0;
+        spikeTrains[channel] = null;
+      }
       // Find spike-trains on all active electrodes
-
-      m_activeChannelList.AsParallel().ForAll(channel => spikeTrains[channel] = m_spikeTraintDet[channel].FindSpikeTrains(packet[channel]));
+      m_activeChannelList.AsParallel().ForAll(channel =>
+      {
+        noiseLevelDic[channel] = m_spikeTraintDet[channel].MeanNoise;
+        spikeTrains[channel] = m_spikeTraintDet[channel].FindSpikeTrains(packet[channel]);
+      });
 
       // Select found spike-trains
       var spikeTrainList = spikeTrains.Values.Where(el => el != null).ToList();
@@ -672,8 +686,11 @@ namespace MEAClosedLoop
               }
             });
 
+            TData[] noiseLevel = new TData[MEA.MAX_CHANNELS];
+            foreach (var chNoise in noiseLevelDic) noiseLevel[chNoise.Key] = chNoise.Value;
+            
             // Create a new T-Pack (EOP)
-            CPack pack = new CPack(m_firstSpikeTime, packLength, packData);
+            CPack pack = new CPack(m_firstSpikeTime, packLength, packData, noiseLevel);
 
             m_lastSpikeTime = 0;
             m_packDataList.Clear();
@@ -695,6 +712,9 @@ namespace MEAClosedLoop
 
               // If the pack is going to be finished, remember the last spike time
               m_lastSpikeTime = (numActiveTrainsLeft < MIN_TRAINS_TO_CONTINUE_PACK) ? finishedTrains.Max(el => el.Start + (TTime)el.Length) : 0;
+
+              // Store noise level at the beginning of a pack
+              m_noiseInPack = noiseLevelDic;
 
               m_sendNewPack = true;
               m_inPack = true;
@@ -734,8 +754,10 @@ namespace MEAClosedLoop
             m_inPack = true;
             m_prevPacket = packet;
 
+            // Store noise level at the beginning of a pack
+            m_noiseInPack = noiseLevelDic;
             // Create and return a new S-Pack
-            return new CPack(m_firstSpikeTime, 0, null); // length == 0 means S-Pack
+            return new CPack(m_firstSpikeTime, 0); // length == 0 means S-Pack
           }
         }
       }
@@ -747,7 +769,7 @@ namespace MEAClosedLoop
       {
         m_sendNewPack = false;
         // Create and return a new S-Pack
-        return new CPack(m_firstSpikeTime, 0, null); // length == 0 means S-Pack
+        return new CPack(m_firstSpikeTime, 0); // length == 0 means S-Pack
       }
       return null;
     }

@@ -298,7 +298,7 @@ namespace MEAClosedLoop
           s = strReader.ReadLine().Substring(START_CHANNEL_LIST);
           position += s.Length + START_CHANNEL_LIST + CRLF;
           string[] elNumbers = s.Split(new string[] { ";El_" }, MEA.MAX_CHANNELS, StringSplitOptions.RemoveEmptyEntries);
-          elArray = Array.ConvertAll(elNumbers, el => MEA.EL_DECODE[Int32.Parse(el)]);
+          elArray = Array.ConvertAll(elNumbers, el => MEA.NAME2IDX[Int32.Parse(el)]);
 
           // End Of Header
           if (strReader.ReadLine() == "EOH")

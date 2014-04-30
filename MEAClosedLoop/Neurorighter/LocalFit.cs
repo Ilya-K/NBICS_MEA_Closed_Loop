@@ -172,7 +172,7 @@ namespace Neurorighter
               source[t_nextPeg] = railHigh + 0.01;//this is a hell of a hack, but I'm keeping with tradition- in order to force a peg, I just set the damn trace to railHigh where it should peg.
               toPeg = true;
             }
-            if ((m_stimIndices.Count > 0) && (m_stimIndices[0] > t_limit))
+            if ((m_stimIndices.Count > 0) && (m_stimIndices[0] >= bufferLength))
             {
               m_stimIndices = m_stimIndices.ConvertAll(stimIndex => (TStimIndex)(stimIndex - bufferLength));
               stimIndexOutOfBuffer = true;
