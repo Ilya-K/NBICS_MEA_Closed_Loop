@@ -158,6 +158,45 @@ namespace MEAClosedLoop
     {
       return (prevPosition + 1) * ticksInPoint > (ulong)val ? prevPosition : prevPosition + 1;
     }
+
+    public uint[] PrepareShape(int channel, int panelWidth, int panelHeight, out double scale)
+    {
+      uint[] output = null;
+      double[] tmp_data = null;
+      int processedPacksNumber = 0;
+      scale = 1; //default
+
+      if (RawData.Count == 0 || panelWidth == 0)
+        return output;
+
+      output = new uint[panelWidth];
+      output.PopulateArray<uint>(0);
+      tmp_data = new double[MAX_PACK_LENGTH];
+      foreach (CPack currentPack in RawData)
+      {
+        if (currentPack.Data.ContainsKey(channel))
+        {
+          for (int i = 0; i < currentPack.Data[channel].Count<double>(); i++)
+          {
+            tmp_data[i] += currentPack.Data[channel][i];
+          }
+          processedPacksNumber++;
+        }
+      }
+
+      Array.ForEach(tmp_data, (x => x /= processedPacksNumber));
+      //TODO: generate output
+      if (tmp_data.Max() != 0)
+      {
+        scale = (double)panelHeight / tmp_data.Max();
+      }
+      else
+      {
+        return output;
+      }
+      return output;
+    }
+
     public uint[] PrepareData(int channel, int panelWidth, int panelHeight)
     {
       uint[] output = null;
