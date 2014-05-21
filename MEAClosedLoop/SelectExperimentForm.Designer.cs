@@ -30,45 +30,33 @@
     {
       this.components = new System.ComponentModel.Container();
       this.ExpTable = new System.Windows.Forms.DataGridView();
-      this.testDBDataSet = new MEAClosedLoop.TestDBDataSet();
-      this.testDBDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
       this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Target = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Author = new System.Windows.Forms.DataGridViewTextBoxColumn();
+      this.testDBDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
+      this.testDBDataSet = new MEAClosedLoop.TestDBDataSet();
       this.SelectButton = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.ExpTable)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.testDBDataSet)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.testDBDataSetBindingSource)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.testDBDataSet)).BeginInit();
       this.SuspendLayout();
       // 
       // ExpTable
       // 
       this.ExpTable.AllowUserToAddRows = false;
       this.ExpTable.AllowUserToDeleteRows = false;
-      this.ExpTable.AutoGenerateColumns = false;
       this.ExpTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
       this.ExpTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.id,
             this.Name,
             this.Target,
             this.Author});
-      this.ExpTable.DataSource = this.testDBDataSetBindingSource;
       this.ExpTable.Location = new System.Drawing.Point(13, 13);
       this.ExpTable.Name = "ExpTable";
       this.ExpTable.ReadOnly = true;
       this.ExpTable.Size = new System.Drawing.Size(773, 225);
       this.ExpTable.TabIndex = 0;
-      // 
-      // testDBDataSet
-      // 
-      this.testDBDataSet.DataSetName = "TestDBDataSet";
-      this.testDBDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-      // 
-      // testDBDataSetBindingSource
-      // 
-      this.testDBDataSetBindingSource.DataSource = this.testDBDataSet;
-      this.testDBDataSetBindingSource.Position = 0;
       // 
       // id
       // 
@@ -102,6 +90,16 @@
       this.Author.Name = "Author";
       this.Author.ReadOnly = true;
       // 
+      // testDBDataSetBindingSource
+      // 
+      this.testDBDataSetBindingSource.DataSource = this.testDBDataSet;
+      this.testDBDataSetBindingSource.Position = 0;
+      // 
+      // testDBDataSet
+      // 
+      this.testDBDataSet.DataSetName = "TestDBDataSet";
+      this.testDBDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+      // 
       // SelectButton
       // 
       this.SelectButton.Location = new System.Drawing.Point(13, 249);
@@ -122,8 +120,8 @@
       //this.Name = "SelectExperimentForm";
       this.Text = "SelectExperimentForm";
       ((System.ComponentModel.ISupportInitialize)(this.ExpTable)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.testDBDataSet)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.testDBDataSetBindingSource)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.testDBDataSet)).EndInit();
       this.ResumeLayout(false);
 
     }
