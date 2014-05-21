@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -25,7 +26,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -51,9 +51,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net40\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="McsNetUsb">
       <HintPath>.\McsNetUsb.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -61,19 +69,30 @@
     <Reference Include="Microsoft.Xna.Framework.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework.Storage, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Data.Services.Design" />
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppData\somedataDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>somedataDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="CDataRender.cs" />
     <Compile Include="CFiltering.cs" />
-    <Compile Include="CGraphRender.cs" />
+    <Compile Include="CArtifRender.cs" />
     <Compile Include="Common\CCalcSE_Block.cs" />
     <Compile Include="Common\CCalcSE_N.cs" />
     <Compile Include="CLoopController.cs" />
@@ -84,6 +103,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\CSpikeTrain.cs" />
+    <Compile Include="Common\DbContext.cs" />
     <Compile Include="Common\StimParams.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,6 +116,12 @@
     </Compile>
     <Compile Include="CPackStat.Designer.cs">
       <DependentUpon>CPackStat.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\FormCreateExpOpt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FormCreateExpOpt.Designer.cs">
+      <DependentUpon>FormCreateExpOpt.cs</DependentUpon>
     </Compile>
     <Compile Include="CStat.cs" />
     <Compile Include="CStimDetectShift.cs" />
@@ -118,6 +144,11 @@
     <Compile Include="FormCalibrate.Designer.cs">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201405201447452_creation.cs" />
+    <Compile Include="Migrations\201405201447452_creation.Designer.cs">
+      <DependentUpon>201405201447452_creation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Neurorighter\ButterworthFilter.cs" />
     <Compile Include="CInputStream.cs" />
     <Compile Include="Form1.cs">
@@ -139,17 +170,37 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CRawFileReader.cs" />
+    <Compile Include="Recorder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Recorder.Designer.cs">
+      <DependentUpon>Recorder.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectExperimentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectExperimentForm.Designer.cs">
+      <DependentUpon>SelectExperimentForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="StatForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StatForm.Designer.cs">
       <DependentUpon>StatForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="TestDBDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TestDBDataSet.xsd</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Common\StimParams.resx">
       <DependentUpon>StimParams.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CPackStat.resx">
       <DependentUpon>CPackStat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\FormCreateExpOpt.resx">
+      <DependentUpon>FormCreateExpOpt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
@@ -159,6 +210,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormCalibrate.resx">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201405201447452_creation.resx">
+      <DependentUpon>201405201447452_creation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PackGraphForm.resx">
       <DependentUpon>PackGraphForm.cs</DependentUpon>
@@ -173,12 +227,30 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Recorder.resx">
+      <DependentUpon>Recorder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectExperimentForm.resx">
+      <DependentUpon>SelectExperimentForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="StatForm.resx">
       <DependentUpon>StatForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="AppData\somedataDataSet.xsc">
+      <DependentUpon>somedataDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="AppData\somedataDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>somedataDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="AppData\somedataDataSet.xss">
+      <DependentUpon>somedataDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -188,16 +260,27 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="TestDBDataSet.xsc">
+      <DependentUpon>TestDBDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="TestDBDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>TestDBDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="TestDBDataSet.xss">
+      <DependentUpon>TestDBDataSet.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 и x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <ProductName>Клиентский профиль .NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -205,11 +288,28 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.4.0">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 4.0 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AppData\somedata.mdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppData\somedata_log.ldf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>somedata.mdf</DependentUpon>
+    </Content>
+    <Content Include="TestDB.sdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

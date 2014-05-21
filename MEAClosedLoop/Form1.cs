@@ -81,7 +81,7 @@ namespace MEAClosedLoop
       comboBox_DAQs_Click(null, null);
       comboBox_Stimulators_Click(null, null);
       SetDefaultChannels();
-      showChannelData.Click+=buttonClosedLoop_Click;
+      showChannelData.Click += buttonClosedLoop_Click;
     }
     /*
     private void DataLoop()
@@ -105,12 +105,12 @@ namespace MEAClosedLoop
       {
         m_channelData1 = data[m_viewChannel1];
       }
-      panel1.Invalidate();
+      //panel1.Invalidate();
       lock (m_chDataLock2)
       {
         m_channelData2 = data[m_viewChannel2];
       }
-      panel2.Invalidate();
+      //panel2.Invalidate();
 
       // [DEBUG]
       //label_refreshRate.Text = (1000.0 / (DateTime.Now - m_prevTime).Milliseconds).ToString();
@@ -124,9 +124,9 @@ namespace MEAClosedLoop
     #region Data Display
     private void panel1_Paint(object sender, PaintEventArgs e)
     {
-      if (!checkBox1.Checked) return;
-      int width = panel1.Width;
-      int height = panel1.Height;
+      //if (!checkBox1.Checked) return;
+      int width = 0;// panel1.Width;
+      int height = 0;// panel1.Height;
       double max = double.MinValue;
       double min = double.MaxValue;
 
@@ -158,7 +158,7 @@ namespace MEAClosedLoop
               }
               else
               {
-                hpf[i] = hpf[i-1] * 0.98;
+                hpf[i] = hpf[i - 1] * 0.98;
               }
               m_hpf = hpf[i];
             }
@@ -229,9 +229,9 @@ namespace MEAClosedLoop
 
     private void panel2_Paint(object sender, PaintEventArgs e)
     {
-      if (!checkBox2.Checked) return;
-      int width = panel2.Width;
-      int height = panel2.Height;
+      //if (!checkBox2.Checked) return;
+      int width = 1;// panel2.Width;
+      int height = 1;// panel2.Height;
       double max = double.MinValue;
       double min = double.MaxValue;
       lock (m_chDataLock2)
@@ -301,7 +301,7 @@ namespace MEAClosedLoop
             se_points[i] = new Point(i * width / se.Length, (int)(height - (se[i] - min + shift + 1) * height / (delta + 2)));
             se_pointsLT[i] = new Point(i * width / seLT.Length, (int)(height - (seLT[i] - min + shift + 1) * height / (delta + 2)));
             corr1_points[i] = new Point(i * width / corr1.Length, (int)((height * 3) / 4 - corr1[i] * 5));
-            corr2_points[i] = new Point(i * width / corr2.Length, (int)(height  - corr2[i] * 30));
+            corr2_points[i] = new Point(i * width / corr2.Length, (int)(height - corr2[i] * 30));
           }
           pen = new Pen(Color.Red, 1);
           e.Graphics.DrawLines(pen, se_points);
@@ -362,7 +362,7 @@ namespace MEAClosedLoop
         //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DEF_PACKET_LENGTH, 2);
 
         m_DAQConfigured = true;
-        
+
         PackStatButton.Enabled = true;
         buttonStatWindow.Enabled = true;
       }
@@ -456,7 +456,7 @@ namespace MEAClosedLoop
           m_inputStream = new CInputStream(ofd.FileName, m_channelList, Param.DEF_PACKET_LENGTH);
           //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
 
-          
+
           m_fileOpened = ofd.FileName;
           m_selectedDAQ = comboBox_DAQs.Items.Add(Path.GetFileNameWithoutExtension(m_fileOpened));
           comboBox_DAQs.SelectedIndex = m_selectedDAQ;
@@ -543,7 +543,7 @@ namespace MEAClosedLoop
         }
         m_selectedDAQ = sel;
       }
-      */ 
+      */
 
       // If a DAQ device has been selected, enable the sampling buttons
       buttonStartDAQ.Enabled = (m_selectedDAQ >= 0);
@@ -577,7 +577,7 @@ namespace MEAClosedLoop
         m_channelList = new List<int>(new int[] { 0, 1, 3 });
         m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, Param.DEF_PACKET_LENGTH);
       }
-      
+
       if (m_stimulator == null)
       {
         // Configure Stimulator here
@@ -690,10 +690,10 @@ namespace MEAClosedLoop
     private void PackStatButton_Click(object sender, EventArgs e)
     {
       m_statForm = new CPackStat(m_closedLoop, m_channelList);
-      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData); 
+      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;
-      m_statForm.Top =  this.Location.Y;
+      m_statForm.Top = this.Location.Y;
       m_statForm.Show();
     }
 
@@ -709,6 +709,12 @@ namespace MEAClosedLoop
 
       m_dataRender.Run();
 
+    }
+
+    private void OpenRecorder_Click(object sender, EventArgs e)
+    {
+      Recorder m_Recorder = new Recorder();
+      m_Recorder.Show();
     }
   }
 }

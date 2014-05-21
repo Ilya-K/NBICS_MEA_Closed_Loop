@@ -47,7 +47,7 @@ namespace MEAClosedLoop
     private bool IsInNextBuffZone;
     private bool IsInCurrentZone;
     private bool IsNullReturned;
-    public CGraphRender DataRender;
+    public CArtifRender DataRender;
     List<TStimIndex> FoundPegs;
     public List<TStimGroup> m_expectedStims;
     public List<TStimGroup> inner_expectedStims_to_display;
@@ -388,7 +388,7 @@ namespace MEAClosedLoop
     public void DrawCallFunc()
     {
 #if GRAPH
-      DataRender = new CGraphRender();
+      DataRender = new CArtifRender();
       DataRender.IsMouseVisible = true;
       DataRender.SetDataObj(this);
       DataRender.Run();
