@@ -9,7 +9,7 @@ namespace MEAClosedLoop.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
         protected override void Seed(MEAClosedLoop.Common.ExpDataContext context)

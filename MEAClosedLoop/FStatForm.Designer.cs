@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop
 {
-  partial class StatForm
+  partial class FStatForm
   {
     /// <summary>
     /// Required designer variable.

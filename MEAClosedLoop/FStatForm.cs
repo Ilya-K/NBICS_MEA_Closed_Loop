@@ -16,7 +16,7 @@ namespace MEAClosedLoop
   using TStimIndex = System.Int16;
   using TAbsStimIndex = System.UInt64;
 
-  public partial class StatForm : Form
+  public partial class FStatForm : Form
   {
     private const int DEFAULT_CH = 0;
     private const int STAT_BUF_LEN = 20 * 1000 * Param.MS;
@@ -64,7 +64,7 @@ namespace MEAClosedLoop
     private int m_packTime = 0;
 
 
-    public StatForm(CFiltering fltStream, CLoopController loopCtrl)
+    public FStatForm(CFiltering fltStream, CLoopController loopCtrl)
     {
       InitializeComponent();
 

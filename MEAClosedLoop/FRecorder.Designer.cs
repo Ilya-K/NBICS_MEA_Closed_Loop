@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop
 {
-  partial class Recorder
+  partial class FRecorder
   {
     /// <summary>
     /// Required designer variable.
@@ -38,7 +38,7 @@
       this.groupBox3 = new System.Windows.Forms.GroupBox();
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
-      this.button3 = new System.Windows.Forms.Button();
+      this.CreateMeasureButton = new System.Windows.Forms.Button();
       this.label4 = new System.Windows.Forms.Label();
       this.ManageMeasure = new System.Windows.Forms.Button();
       this.OpenExp = new System.Windows.Forms.Button();
@@ -84,6 +84,7 @@
       this.StartButton.TabIndex = 0;
       this.StartButton.Text = "start";
       this.StartButton.UseVisualStyleBackColor = true;
+      this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
       // 
       // StopButton
       // 
@@ -93,6 +94,7 @@
       this.StopButton.TabIndex = 1;
       this.StopButton.Text = "stop";
       this.StopButton.UseVisualStyleBackColor = true;
+      this.StopButton.Click += new System.EventHandler(this.StopButton_Click);
       // 
       // CreateDB
       // 
@@ -102,7 +104,7 @@
       this.CreateDB.TabIndex = 2;
       this.CreateDB.Text = "Create";
       this.CreateDB.UseVisualStyleBackColor = true;
-      this.CreateDB.Click += new System.EventHandler(this.CreateExp_Click);
+      this.CreateDB.Click += new System.EventHandler(this.CreateDB_Click);
       // 
       // button4
       // 
@@ -154,7 +156,7 @@
       this.groupBox3.Controls.Add(this.label6);
       this.groupBox3.Controls.Add(this.StopButton);
       this.groupBox3.Controls.Add(this.label5);
-      this.groupBox3.Controls.Add(this.button3);
+      this.groupBox3.Controls.Add(this.CreateMeasureButton);
       this.groupBox3.Controls.Add(this.StartButton);
       this.groupBox3.Controls.Add(this.label4);
       this.groupBox3.Location = new System.Drawing.Point(241, 9);
@@ -182,14 +184,15 @@
       this.label5.TabIndex = 5;
       this.label5.Text = "sec";
       // 
-      // button3
+      // CreateMeasureButton
       // 
-      this.button3.Location = new System.Drawing.Point(6, 19);
-      this.button3.Name = "button3";
-      this.button3.Size = new System.Drawing.Size(75, 23);
-      this.button3.TabIndex = 0;
-      this.button3.Text = "create";
-      this.button3.UseVisualStyleBackColor = true;
+      this.CreateMeasureButton.Location = new System.Drawing.Point(6, 19);
+      this.CreateMeasureButton.Name = "CreateMeasureButton";
+      this.CreateMeasureButton.Size = new System.Drawing.Size(75, 23);
+      this.CreateMeasureButton.TabIndex = 0;
+      this.CreateMeasureButton.Text = "create";
+      this.CreateMeasureButton.UseVisualStyleBackColor = true;
+      this.CreateMeasureButton.Click += new System.EventHandler(this.CreateMeasureButton_Click);
       // 
       // label4
       // 
@@ -255,7 +258,7 @@
       this.groupBox2.Controls.Add(this.button7);
       this.groupBox2.Controls.Add(this.button1);
       this.groupBox2.Controls.Add(this.button4);
-      this.groupBox2.Location = new System.Drawing.Point(13, 158);
+      this.groupBox2.Location = new System.Drawing.Point(13, 131);
       this.groupBox2.Margin = new System.Windows.Forms.Padding(0);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Padding = new System.Windows.Forms.Padding(0);
@@ -423,7 +426,7 @@
       // 
       // button11
       // 
-      this.button11.Location = new System.Drawing.Point(12, 306);
+      this.button11.Location = new System.Drawing.Point(12, 279);
       this.button11.Name = "button11";
       this.button11.Size = new System.Drawing.Size(180, 23);
       this.button11.TabIndex = 0;
@@ -437,9 +440,9 @@
             this.BDStatus,
             this.ExpStateLabel,
             this.toolStripStatusLabel2});
-      this.InfoBar.Location = new System.Drawing.Point(0, 353);
+      this.InfoBar.Location = new System.Drawing.Point(0, 320);
       this.InfoBar.Name = "InfoBar";
-      this.InfoBar.Size = new System.Drawing.Size(550, 22);
+      this.InfoBar.Size = new System.Drawing.Size(554, 22);
       this.InfoBar.TabIndex = 6;
       this.InfoBar.Text = "Info:";
       // 
@@ -470,17 +473,17 @@
       this.toolStripStatusLabel2.Size = new System.Drawing.Size(84, 17);
       this.toolStripStatusLabel2.Text = "not connected";
       // 
-      // Recorder
+      // FRecorder
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(550, 375);
+      this.ClientSize = new System.Drawing.Size(554, 342);
       this.Controls.Add(this.InfoBar);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.button11);
       this.Cursor = System.Windows.Forms.Cursors.Default;
-      this.Name = "Recorder";
+      this.Name = "FRecorder";
       this.Text = "Recorder";
       this.groupBox1.ResumeLayout(false);
       this.groupBox1.PerformLayout();
@@ -525,7 +528,7 @@
     private System.Windows.Forms.Label label7;
     private System.Windows.Forms.TextBox textBox2;
     private System.Windows.Forms.Button ManageMeasure;
-    private System.Windows.Forms.Button button3;
+    private System.Windows.Forms.Button CreateMeasureButton;
     private System.Windows.Forms.Button button11;
     private System.Windows.Forms.Button ManageExp;
     private System.Windows.Forms.TrackBar PlayPosition;

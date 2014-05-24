@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop
 {
-  partial class CPackStat
+  partial class FPackStat
   {
     /// <summary>
     /// Required designer variable.

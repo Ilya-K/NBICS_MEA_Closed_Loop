@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop
 {
-  partial class SelectExperimentForm
+  partial class FSelectExperiment
   {
     /// <summary>
     /// Required designer variable.
@@ -35,11 +35,9 @@
       this.Target = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Author = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.testDBDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
-      this.testDBDataSet = new MEAClosedLoop.TestDBDataSet();
       this.SelectButton = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.ExpTable)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.testDBDataSetBindingSource)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.testDBDataSet)).BeginInit();
       this.SuspendLayout();
       // 
       // ExpTable
@@ -92,13 +90,10 @@
       // 
       // testDBDataSetBindingSource
       // 
-      this.testDBDataSetBindingSource.DataSource = this.testDBDataSet;
       this.testDBDataSetBindingSource.Position = 0;
       // 
       // testDBDataSet
       // 
-      this.testDBDataSet.DataSetName = "TestDBDataSet";
-      this.testDBDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
       // 
       // SelectButton
       // 
@@ -121,7 +116,6 @@
       this.Text = "SelectExperimentForm";
       ((System.ComponentModel.ISupportInitialize)(this.ExpTable)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.testDBDataSetBindingSource)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.testDBDataSet)).EndInit();
       this.ResumeLayout(false);
 
     }
@@ -130,7 +124,6 @@
 
     private System.Windows.Forms.DataGridView ExpTable;
     private System.Windows.Forms.BindingSource testDBDataSetBindingSource;
-    private TestDBDataSet testDBDataSet;
     private System.Windows.Forms.DataGridViewTextBoxColumn id;
     private System.Windows.Forms.DataGridViewTextBoxColumn Name;
     private System.Windows.Forms.DataGridViewTextBoxColumn Target;

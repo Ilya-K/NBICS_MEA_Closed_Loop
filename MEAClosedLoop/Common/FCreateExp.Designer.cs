@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop
 {
-  partial class FormCreateExpOpt
+  partial class FCreateExpOpt
   {
     /// <summary>
     /// Required designer variable.
@@ -43,7 +43,7 @@
       this.Create.Location = new System.Drawing.Point(73, 229);
       this.Create.Name = "Create";
       this.Create.Size = new System.Drawing.Size(75, 23);
-      this.Create.TabIndex = 0;
+      this.Create.TabIndex = 4;
       this.Create.Text = "Create";
       this.Create.UseVisualStyleBackColor = true;
       this.Create.Click += new System.EventHandler(this.Create_Click);
@@ -72,7 +72,7 @@
       this.ExpTarget.Multiline = true;
       this.ExpTarget.Name = "ExpTarget";
       this.ExpTarget.Size = new System.Drawing.Size(287, 142);
-      this.ExpTarget.TabIndex = 2;
+      this.ExpTarget.TabIndex = 3;
       // 
       // AuthorName
       // 
@@ -80,7 +80,7 @@
       this.AuthorName.Location = new System.Drawing.Point(72, 4);
       this.AuthorName.Name = "AuthorName";
       this.AuthorName.Size = new System.Drawing.Size(287, 20);
-      this.AuthorName.TabIndex = 3;
+      this.AuthorName.TabIndex = 1;
       // 
       // label3
       // 
@@ -104,7 +104,7 @@
       this.button1.Location = new System.Drawing.Point(154, 229);
       this.button1.Name = "button1";
       this.button1.Size = new System.Drawing.Size(75, 23);
-      this.button1.TabIndex = 0;
+      this.button1.TabIndex = 5;
       this.button1.Text = "Cancel";
       this.button1.UseVisualStyleBackColor = true;
       this.button1.Click += new System.EventHandler(this.button1_Click);

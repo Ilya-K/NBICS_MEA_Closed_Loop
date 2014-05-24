@@ -9,15 +9,15 @@ using System.Windows.Forms;
 
 namespace MEAClosedLoop.Common
 {
-  public partial class StimParams : Form
+  public partial class FStimParams : Form
   {
     public bool DoUpdateParams = false;
     public int Time; // in ms
-    public StimParams()
+    public FStimParams()
     {
       InitializeComponent();
     }
-    public StimParams(int _time)
+    public FStimParams(int _time)
     {
       InitializeComponent();
       WaitPackTime.Text = _time.ToString();

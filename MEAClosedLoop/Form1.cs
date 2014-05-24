@@ -32,7 +32,7 @@ namespace MEAClosedLoop
     private CStimulator m_stimulator;
     private bool FakeStimulator = true;
 
-    private CPackStat m_statForm;
+    private FPackStat m_statForm;
 
     private CDataRender m_dataRender;
     private Thread dataRenderThread;
@@ -71,8 +71,11 @@ namespace MEAClosedLoop
     {
       InitializeComponent();
       prev2 = 0;
+      /*
       this.StartPosition = FormStartPosition.Manual;
       this.Location = new Point(600, 250);
+    
+       */
     }
 
     private void Form1_Load(object sender, EventArgs e)
@@ -683,13 +686,13 @@ namespace MEAClosedLoop
 
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {
-      StatForm statForm = new StatForm(m_salpaFilter, m_closedLoop);
+      FStatForm statForm = new FStatForm(m_salpaFilter, m_closedLoop);
       statForm.Show();
     }
 
     private void PackStatButton_Click(object sender, EventArgs e)
     {
-      m_statForm = new CPackStat(m_closedLoop, m_channelList);
+      m_statForm = new FPackStat(m_closedLoop, m_channelList);
       m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;
@@ -713,7 +716,7 @@ namespace MEAClosedLoop
 
     private void OpenRecorder_Click(object sender, EventArgs e)
     {
-      Recorder m_Recorder = new Recorder();
+      FRecorder m_Recorder = new FRecorder();
       m_Recorder.Show();
     }
   }

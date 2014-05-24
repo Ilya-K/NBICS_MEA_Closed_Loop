@@ -9,10 +9,10 @@ using System.Windows.Forms;
 using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
-  public partial class SelectExperimentForm : Form
+  public partial class FSelectExperiment : Form
   {
     public int SelectedID = -1;
-    public SelectExperimentForm()
+    public FSelectExperiment()
     {
       InitializeComponent();
       using (ExpDataContext _db = new ExpDataContext())

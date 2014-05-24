@@ -20,7 +20,7 @@ namespace MEAClosedLoop
   using TRawDataPacket = Dictionary<int, ushort[]>;
   public delegate void DelegateSetProgress(object sender, int value);
   #endregion
-  public partial class CPackStat : Form
+  public partial class FPackStat : Form
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
@@ -57,7 +57,7 @@ namespace MEAClosedLoop
     private double StimStartPosition;
     #endregion
     #region Конструктор
-    public CPackStat(CLoopController _LoopController, List<int> channelList)
+    public FPackStat(CLoopController _LoopController, List<int> channelList)
     {
       InitializeComponent();
       CurrentState = state.BeforeStimulation;
@@ -378,7 +378,7 @@ namespace MEAClosedLoop
     #region Кнопка отображения опций стимуляции
     private void button1_Click(object sender, EventArgs e)
     {
-      StimParams paramswindow = new StimParams(WAIT_PACK_WINDOW_LENGTH);
+      FStimParams paramswindow = new FStimParams(WAIT_PACK_WINDOW_LENGTH);
       paramswindow.ShowDialog();
       if (paramswindow.DoUpdateParams)
       {

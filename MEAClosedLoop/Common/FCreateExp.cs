@@ -9,10 +9,10 @@ using System.Windows.Forms;
 
 namespace MEAClosedLoop
 {
-  public partial class FormCreateExpOpt : Form
+  public partial class FCreateExpOpt : Form
   {
     public bool IsValidated = false;
-    public FormCreateExpOpt()
+    public FCreateExpOpt()
     {
       InitializeComponent();
     }

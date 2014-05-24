@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop.Common
 {
-  partial class StimParams
+  partial class FStimParams
   {
     /// <summary>
     /// Required designer variable.

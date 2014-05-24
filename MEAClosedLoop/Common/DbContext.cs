@@ -25,7 +25,7 @@ namespace MEAClosedLoop.Common
       : base("somedataConnectionString")
     { }
     public DbSet<Experiment> Experiments { get; set; }
-    //public DbSet<RawDataList> RawData { get; set; }
+    public DbSet<RawDataList> RawDataList { get; set; }
     public DbSet<MeasureManager> Manager { get; set; }
   }
   [Table("Experiments")]
@@ -43,16 +43,20 @@ namespace MEAClosedLoop.Common
   {
     [Key]
     public int id { get; set;}
-    public int ExperimentID { get; set; }
+    public int? ExperimentID { get; set; }
     public string About { get; set; }
+    public DateTime CreationTime { get; set; }
+    public DateTime StartTime { get; set; }
   }
   [Table("RawData")]
   public class RawDataList
   {
-    public TTime id { get; set; }
+    [Key]
+    public int id { get; set; }
     public int? MeasureID { get; set; }
-    public MeasureManager MeasureManager { get; set; }
+    public MeasureManager Measure { get; set; }
     public byte Value { get; set; }
+    public TFltDataPacket CompressedData { get; set; }
   }
   [Table("Packs")]
   public class PackData
@@ -67,5 +71,13 @@ namespace MEAClosedLoop.Common
       Time = pack.Start;
       Length = pack.Length;
     }
+  }
+  [Table("Stims")]
+  public class Stim
+  {
+    [Key]
+    public int id { get; set; }
+    public int MeasureID { get; set; }
+    public TTime Time { get; set; }
   }
 }

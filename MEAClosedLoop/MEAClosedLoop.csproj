@@ -102,26 +102,38 @@
     <Compile Include="Common\CPack.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Common\FCreateMeasure.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FCreateMeasure.Designer.cs">
+      <DependentUpon>FCreateMeasure.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\CSpikeTrain.cs" />
     <Compile Include="Common\DbContext.cs" />
-    <Compile Include="Common\StimParams.cs">
+    <Compile Include="Common\FStimParams.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Common\StimParams.Designer.cs">
-      <DependentUpon>StimParams.cs</DependentUpon>
+    <Compile Include="Common\FStimParams.Designer.cs">
+      <DependentUpon>FStimParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\FSelectExperiment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FSelectExperiment.Designer.cs">
+      <DependentUpon>FSelectExperiment.cs</DependentUpon>
     </Compile>
     <Compile Include="CPackDetector.cs" />
-    <Compile Include="CPackStat.cs">
+    <Compile Include="FPackStat.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CPackStat.Designer.cs">
-      <DependentUpon>CPackStat.cs</DependentUpon>
+    <Compile Include="FPackStat.Designer.cs">
+      <DependentUpon>FPackStat.cs</DependentUpon>
     </Compile>
-    <Compile Include="Common\FormCreateExpOpt.cs">
+    <Compile Include="Common\FCreateExp.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Common\FormCreateExpOpt.Designer.cs">
-      <DependentUpon>FormCreateExpOpt.cs</DependentUpon>
+    <Compile Include="Common\FCreateExp.Designer.cs">
+      <DependentUpon>FCreateExp.cs</DependentUpon>
     </Compile>
     <Compile Include="CStat.cs" />
     <Compile Include="CStimDetectShift.cs" />
@@ -143,10 +155,6 @@
     </Compile>
     <Compile Include="FormCalibrate.Designer.cs">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201405201447452_creation.cs" />
-    <Compile Include="Migrations\201405201447452_creation.Designer.cs">
-      <DependentUpon>201405201447452_creation.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Neurorighter\ButterworthFilter.cs" />
@@ -170,37 +178,32 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CRawFileReader.cs" />
-    <Compile Include="Recorder.cs">
+    <Compile Include="FRecorder.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Recorder.Designer.cs">
-      <DependentUpon>Recorder.cs</DependentUpon>
+    <Compile Include="FRecorder.Designer.cs">
+      <DependentUpon>FRecorder.cs</DependentUpon>
     </Compile>
-    <Compile Include="SelectExperimentForm.cs">
+    <Compile Include="FStatForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SelectExperimentForm.Designer.cs">
-      <DependentUpon>SelectExperimentForm.cs</DependentUpon>
+    <Compile Include="FStatForm.Designer.cs">
+      <DependentUpon>FStatForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="StatForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="StatForm.Designer.cs">
-      <DependentUpon>StatForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="TestDBDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TestDBDataSet.xsd</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Common\StimParams.resx">
-      <DependentUpon>StimParams.cs</DependentUpon>
+    <EmbeddedResource Include="Common\FCreateMeasure.resx">
+      <DependentUpon>FCreateMeasure.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CPackStat.resx">
-      <DependentUpon>CPackStat.cs</DependentUpon>
+    <EmbeddedResource Include="Common\FStimParams.resx">
+      <DependentUpon>FStimParams.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Common\FormCreateExpOpt.resx">
-      <DependentUpon>FormCreateExpOpt.cs</DependentUpon>
+    <EmbeddedResource Include="Common\FSelectExperiment.resx">
+      <DependentUpon>FSelectExperiment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FPackStat.resx">
+      <DependentUpon>FPackStat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\FCreateExp.resx">
+      <DependentUpon>FCreateExp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
@@ -210,9 +213,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormCalibrate.resx">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201405201447452_creation.resx">
-      <DependentUpon>201405201447452_creation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PackGraphForm.resx">
       <DependentUpon>PackGraphForm.cs</DependentUpon>
@@ -227,14 +227,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Recorder.resx">
-      <DependentUpon>Recorder.cs</DependentUpon>
+    <EmbeddedResource Include="FRecorder.resx">
+      <DependentUpon>FRecorder.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SelectExperimentForm.resx">
-      <DependentUpon>SelectExperimentForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="StatForm.resx">
-      <DependentUpon>StatForm.cs</DependentUpon>
+    <EmbeddedResource Include="FStatForm.resx">
+      <DependentUpon>FStatForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
@@ -260,17 +257,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="TestDBDataSet.xsc">
-      <DependentUpon>TestDBDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="TestDBDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>TestDBDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="TestDBDataSet.xss">
-      <DependentUpon>TestDBDataSet.xsd</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

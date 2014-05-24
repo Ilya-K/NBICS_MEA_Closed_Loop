@@ -1,9 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MEAClosedLoop", "MEAClosedLoop\MEAClosedLoop.csproj", "{11F80F97-BADE-4F7E-8299-539214BA9BF5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{7E5F4692-DFFB-499B-914D-9BED97D71CFE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B16D12CE-1C61-4707-A7C4-33A1EA8EE49F}"
 	ProjectSection(SolutionItems) = preProject
@@ -41,18 +39,6 @@ Global
 		{11F80F97-BADE-4F7E-8299-539214BA9BF5}.Release|Win32.ActiveCfg = Release|x86
 		{11F80F97-BADE-4F7E-8299-539214BA9BF5}.Release|x86.ActiveCfg = Release|x86
 		{11F80F97-BADE-4F7E-8299-539214BA9BF5}.Release|x86.Build.0 = Release|x86
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Release|Win32.ActiveCfg = Release|Any CPU
-		{7E5F4692-DFFB-499B-914D-9BED97D71CFE}.Release|x86.ActiveCfg = Release|Any CPU
 		{B9EDF56C-BEF6-4309-A289-C24ED1A475C9}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{B9EDF56C-BEF6-4309-A289-C24ED1A475C9}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{B9EDF56C-BEF6-4309-A289-C24ED1A475C9}.Debug|Mixed Platforms.Build.0 = Debug|x86
