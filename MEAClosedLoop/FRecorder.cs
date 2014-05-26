@@ -58,8 +58,8 @@ namespace MEAClosedLoop
         //InfoBar.Items[3].Text = "Exp created, id = " + experiment_to_add.id.ToString();
       }
       DialogResult result = MessageBox.Show(
-        "Exp created succesfull. \n Press yes to load it\n or not to do nth", 
-        "Experiment creation", 
+        "Exp created succesfull. \n Press yes to load it\n or not to do nth",
+        "Experiment creation",
         MessageBoxButtons.YesNo);
       switch (result)
       {
@@ -77,9 +77,18 @@ namespace MEAClosedLoop
       // ман в этих статьях
       //http://support.microsoft.com/kb/307283/ru
       //http://msdn.microsoft.com/en-us/library/gg696604(v=vs.113).aspx
-      
-      InfoBar.Items[1].Text = "connected";
-
+      try
+      {
+        using (ExpDataContext _db = new ExpDataContext())
+        {
+          int expcount = _db.Experiments.Count();
+          InfoBar.Items[1].Text = "connected";
+        }
+      }
+      catch(EntitySqlException ex)
+      {
+        MessageBox.Show(ex.Message.ToString());
+      }
     }
 
     private void OpenExp_Click(object sender, EventArgs e)
@@ -144,9 +153,17 @@ namespace MEAClosedLoop
         {
           CreateMeasure.measure.ExperimentID = currentRecordExperiment.id;
           _db.Manager.Add(CreateMeasure.measure);
-          _db.SaveChanges();
-          MessageBox.Show("Succesful created");
-          currentRecordMeasure = CreateMeasure.measure;
+          try
+          {
+            _db.SaveChanges();
+
+            MessageBox.Show("Succesful created");
+            currentRecordMeasure = CreateMeasure.measure;
+          }
+          catch (EntityException ex)
+          {
+            MessageBox.Show(ex.Message);
+          }
         }
       }
     }
@@ -160,6 +177,7 @@ namespace MEAClosedLoop
     {
       using (ExpDataContext _db = new ExpDataContext())
       {
+
         _db.SaveChanges();
       }
 
@@ -170,7 +188,7 @@ namespace MEAClosedLoop
       using (ExpDataContext _db = new ExpDataContext())
       {
         _db.SaveChanges();
-      }    
+      }
     }
 
     public void RecieveStimData(List<TAbsStimIndex> stims)
