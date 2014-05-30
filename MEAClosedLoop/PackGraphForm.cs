@@ -56,6 +56,8 @@ namespace MEAClosedLoop
     Panel[] channelPanels;
 
     public bool compareMode;
+
+    PackShapeForm PSF;
     
     private object lockSelIndex = new object();
     private int m_selectedIndex = 0;
@@ -77,6 +79,7 @@ namespace MEAClosedLoop
 
       dataGenerator = new PackGraph();
       m_LoopCtrl = LoopCtrl;
+      PSF = new PackShapeForm(dataGenerator);
 
       statCalcTimer = new System.Timers.Timer();
       statCalcTimer.Elapsed += StatTimer;
@@ -243,10 +246,17 @@ namespace MEAClosedLoop
     private void tmpPanel_Click(object sender, System.EventArgs e)
     {
       string elName = (sender as Panel).Name;
-      MessageBox.Show("канал выбран");
-      loadSelection(MEA.NAME2IDX[Convert.ToInt32(elName)]);
-
-      this.Hide();
+      PSF.Visible = false;
+      PSF.SetChannel(Convert.ToInt32(elName));
+      switch (PSF.ShowDialog()) {
+        case System.Windows.Forms.DialogResult.OK:
+          MessageBox.Show("канал выбран");
+          loadSelection(MEA.NAME2IDX[Convert.ToInt32(elName)]);
+          this.Hide();
+          break;
+        case System.Windows.Forms.DialogResult.Abort:
+        break;
+      }
     }
 
     private void PackGraphForm_Load(object sender, EventArgs e)

@@ -164,6 +164,7 @@ namespace MEAClosedLoop
       uint[] output = null;
       double[] tmp_data = null;
       int processedPacksNumber = 0;
+      int tmp_data_count = -1;
       scale = 1; //default
 
       if (RawData.Count == 0 || panelWidth == 0)
@@ -180,19 +181,44 @@ namespace MEAClosedLoop
           {
             tmp_data[i] += currentPack.Data[channel][i];
           }
+          if(currentPack.Data[channel].Count<double>() > tmp_data_count)
+            tmp_data_count = currentPack.Data[channel].Count<double>();
           processedPacksNumber++;
         }
       }
 
       Array.ForEach(tmp_data, (x => x /= processedPacksNumber));
-      //TODO: generate output
-      if (tmp_data.Max() != 0)
+      if (tmp_data.Max() != 0 && tmp_data_count > 0)
       {
         scale = (double)panelHeight / tmp_data.Max();
       }
       else
       {
         return output;
+      }
+      
+      //TODO: reverse interpolation
+      if (tmp_data_count > panelWidth) //interpolation
+      {
+        int dotsForCompletion = 0;
+        while ((tmp_data_count + dotsForCompletion) % panelWidth != 0) //filling tail with zeros
+        {
+          dotsForCompletion++;
+          tmp_data[tmp_data_count + dotsForCompletion] = 0;
+        }
+        int xscale = (tmp_data_count + dotsForCompletion) / panelWidth;
+        double outpoint=0;
+        int i, j;
+        for (i = 0; i < panelWidth; i++)
+        {
+          for (j = 0; j < xscale; j++)
+          {
+            outpoint += tmp_data[i * xscale + j];
+          }
+          outpoint /= xscale;
+          output[i] = (uint)outpoint;
+          outpoint = 0;
+        }
       }
       return output;
     }
