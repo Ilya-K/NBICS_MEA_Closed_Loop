@@ -164,7 +164,7 @@ namespace MEAClosedLoop
       uint[] output = null;
       double[] tmp_data = null;
       int processedPacksNumber = 0;
-      int tmp_data_count = -1;
+      int max_data_length = -1;
       scale = 1; //default
 
       if (RawData.Count == 0 || panelWidth == 0)
@@ -173,22 +173,25 @@ namespace MEAClosedLoop
       output = new uint[panelWidth];
       output.PopulateArray<uint>(0);
       tmp_data = new double[MAX_PACK_LENGTH];
+      int packLength;
       foreach (CPack currentPack in RawData)
       {
         if (currentPack.Data.ContainsKey(channel))
         {
-          for (int i = 0; i < currentPack.Data[channel].Count<double>(); i++)
+          packLength = (currentPack.Data[channel].Length > MAX_PACK_LENGTH) ? MAX_PACK_LENGTH : currentPack.Data[channel].Length;
+          for (int i = 0; i < packLength; i++)
           {
+            //tmp_data[i] += Math.Abs(currentPack.Data[channel][i]);
             tmp_data[i] += currentPack.Data[channel][i];
           }
-          if(currentPack.Data[channel].Count<double>() > tmp_data_count)
-            tmp_data_count = currentPack.Data[channel].Count<double>();
+          if (packLength > max_data_length)
+            max_data_length = packLength;
           processedPacksNumber++;
         }
       }
 
       Array.ForEach(tmp_data, (x => x /= processedPacksNumber));
-      if (tmp_data.Max() != 0 && tmp_data_count > 0)
+      if (tmp_data.Max() != 0 && max_data_length > 0)
       {
         scale = (double)panelHeight / tmp_data.Max();
       }
@@ -198,15 +201,15 @@ namespace MEAClosedLoop
       }
       
       //TODO: reverse interpolation
-      if (tmp_data_count > panelWidth) //interpolation
+      if (max_data_length > panelWidth) //interpolation
       {
         int dotsForCompletion = 0;
-        while ((tmp_data_count + dotsForCompletion) % panelWidth != 0) //filling tail with zeros
+        while ((max_data_length + dotsForCompletion) % panelWidth != 0) //filling tail with zeros
         {
-          dotsForCompletion++;
-          tmp_data[tmp_data_count + dotsForCompletion] = 0;
+          dotsForCompletion--;
+          //tmp_data[max_data_length + dotsForCompletion] = 0;
         }
-        int xscale = (tmp_data_count + dotsForCompletion) / panelWidth;
+        int xscale = (max_data_length + dotsForCompletion) / panelWidth;
         double outpoint=0;
         int i, j;
         for (i = 0; i < panelWidth; i++)
@@ -216,7 +219,8 @@ namespace MEAClosedLoop
             outpoint += tmp_data[i * xscale + j];
           }
           outpoint /= xscale;
-          output[i] = (uint)outpoint;
+          output[i] = (outpoint > 0) ? Convert.ToUInt32(outpoint) : 0;
+          //output[i] = (uint)outpoint;
           outpoint = 0;
         }
       }

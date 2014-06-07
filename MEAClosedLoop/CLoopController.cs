@@ -136,7 +136,7 @@ namespace MEAClosedLoop
     private void StimTimer(object o1, EventArgs e1)
     {
       //[DEBUG]
-      m_stimulator.Start();
+      //m_stimulator.Start();
     }
   }
 }

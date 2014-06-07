@@ -30,6 +30,7 @@ namespace MEAClosedLoop
       PackShapeGraph.BackColor = Color.White;
       this.Controls.Add(PackShapeGraph);
       pointsToDraw = new Point[PackShapeGraph.Size.Width];
+      PackShapeGraph.Paint += PaintShapeGraph;
       
       //this.IsAccessible = false;
       //this.Hide();
@@ -39,7 +40,6 @@ namespace MEAClosedLoop
     public void SetChannel(int _channel)
     {
       channel2draw = _channel;
-      PackShapeGraph.Paint += PaintShapeGraph;
     }
 
     private void PaintShapeGraph(object sender, PaintEventArgs e)

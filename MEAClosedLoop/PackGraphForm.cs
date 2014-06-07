@@ -247,7 +247,7 @@ namespace MEAClosedLoop
     {
       string elName = (sender as Panel).Name;
       PSF.Visible = false;
-      PSF.SetChannel(Convert.ToInt32(elName));
+      PSF.SetChannel(MEA.NAME2IDX[Convert.ToInt32(elName)]);
       switch (PSF.ShowDialog()) {
         case System.Windows.Forms.DialogResult.OK:
           MessageBox.Show("канал выбран");
@@ -291,7 +291,14 @@ namespace MEAClosedLoop
           RunStatButton.BeginInvoke(SetStatButtonText, "собрать статистику");
           statCalcTimer.Stop();
           spb_timer.Stop();
-          statFinished.Invoke();
+          try
+          {
+            statFinished.Invoke();
+          }
+          catch
+          {
+            MessageBox.Show("Предупреждение: сбор статистики остановлен");
+          }
       }
     }
 
