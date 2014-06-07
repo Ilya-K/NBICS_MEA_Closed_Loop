@@ -36,10 +36,17 @@
       this.label9 = new System.Windows.Forms.Label();
       this.label8 = new System.Windows.Forms.Label();
       this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.DeselectAllRecs = new System.Windows.Forms.Button();
+      this.SelectAllRecords = new System.Windows.Forms.Button();
+      this.DoRecordStimData = new System.Windows.Forms.CheckBox();
+      this.DoRecordPackData = new System.Windows.Forms.CheckBox();
+      this.DoRecordCompressData = new System.Windows.Forms.CheckBox();
+      this.DoRecordCmpData = new System.Windows.Forms.CheckBox();
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.CreateMeasureButton = new System.Windows.Forms.Button();
       this.label4 = new System.Windows.Forms.Label();
+      this.button11 = new System.Windows.Forms.Button();
       this.ManageMeasure = new System.Windows.Forms.Button();
       this.OpenExp = new System.Windows.Forms.Button();
       this.OpenDB = new System.Windows.Forms.Button();
@@ -62,7 +69,6 @@
       this.button5 = new System.Windows.Forms.Button();
       this.button7 = new System.Windows.Forms.Button();
       this.button1 = new System.Windows.Forms.Button();
-      this.button11 = new System.Windows.Forms.Button();
       this.InfoBar = new System.Windows.Forms.StatusStrip();
       this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
       this.BDStatus = new System.Windows.Forms.ToolStripStatusLabel();
@@ -120,6 +126,7 @@
       this.groupBox1.Controls.Add(this.label9);
       this.groupBox1.Controls.Add(this.label8);
       this.groupBox1.Controls.Add(this.groupBox3);
+      this.groupBox1.Controls.Add(this.button11);
       this.groupBox1.Controls.Add(this.ManageMeasure);
       this.groupBox1.Controls.Add(this.OpenExp);
       this.groupBox1.Controls.Add(this.OpenDB);
@@ -128,7 +135,7 @@
       this.groupBox1.Controls.Add(this.ManageExp);
       this.groupBox1.Location = new System.Drawing.Point(13, 13);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(515, 115);
+      this.groupBox1.Size = new System.Drawing.Size(515, 175);
       this.groupBox1.TabIndex = 4;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Record";
@@ -153,6 +160,12 @@
       // 
       // groupBox3
       // 
+      this.groupBox3.Controls.Add(this.DeselectAllRecs);
+      this.groupBox3.Controls.Add(this.SelectAllRecords);
+      this.groupBox3.Controls.Add(this.DoRecordStimData);
+      this.groupBox3.Controls.Add(this.DoRecordPackData);
+      this.groupBox3.Controls.Add(this.DoRecordCompressData);
+      this.groupBox3.Controls.Add(this.DoRecordCmpData);
       this.groupBox3.Controls.Add(this.label6);
       this.groupBox3.Controls.Add(this.StopButton);
       this.groupBox3.Controls.Add(this.label5);
@@ -161,10 +174,70 @@
       this.groupBox3.Controls.Add(this.label4);
       this.groupBox3.Location = new System.Drawing.Point(241, 9);
       this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(268, 69);
+      this.groupBox3.Size = new System.Drawing.Size(268, 160);
       this.groupBox3.TabIndex = 3;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Measure";
+      // 
+      // DeselectAllRecs
+      // 
+      this.DeselectAllRecs.Location = new System.Drawing.Point(184, 125);
+      this.DeselectAllRecs.Name = "DeselectAllRecs";
+      this.DeselectAllRecs.Size = new System.Drawing.Size(75, 23);
+      this.DeselectAllRecs.TabIndex = 10;
+      this.DeselectAllRecs.Text = "Deselect All";
+      this.DeselectAllRecs.UseVisualStyleBackColor = true;
+      this.DeselectAllRecs.Click += new System.EventHandler(this.DeselectAllRecs_Click);
+      // 
+      // SelectAllRecords
+      // 
+      this.SelectAllRecords.Location = new System.Drawing.Point(184, 96);
+      this.SelectAllRecords.Name = "SelectAllRecords";
+      this.SelectAllRecords.Size = new System.Drawing.Size(75, 23);
+      this.SelectAllRecords.TabIndex = 9;
+      this.SelectAllRecords.Text = "Select All";
+      this.SelectAllRecords.UseVisualStyleBackColor = true;
+      this.SelectAllRecords.Click += new System.EventHandler(this.SelectAllRecords_Click);
+      // 
+      // DoRecordStimData
+      // 
+      this.DoRecordStimData.AutoSize = true;
+      this.DoRecordStimData.Location = new System.Drawing.Point(6, 137);
+      this.DoRecordStimData.Name = "DoRecordStimData";
+      this.DoRecordStimData.Size = new System.Drawing.Size(110, 17);
+      this.DoRecordStimData.TabIndex = 8;
+      this.DoRecordStimData.Text = "Record Stim Data";
+      this.DoRecordStimData.UseVisualStyleBackColor = true;
+      // 
+      // DoRecordPackData
+      // 
+      this.DoRecordPackData.AutoSize = true;
+      this.DoRecordPackData.Location = new System.Drawing.Point(6, 114);
+      this.DoRecordPackData.Name = "DoRecordPackData";
+      this.DoRecordPackData.Size = new System.Drawing.Size(120, 17);
+      this.DoRecordPackData.TabIndex = 8;
+      this.DoRecordPackData.Text = "Record Packs Data";
+      this.DoRecordPackData.UseVisualStyleBackColor = true;
+      // 
+      // DoRecordCompressData
+      // 
+      this.DoRecordCompressData.AutoSize = true;
+      this.DoRecordCompressData.Location = new System.Drawing.Point(6, 91);
+      this.DoRecordCompressData.Name = "DoRecordCompressData";
+      this.DoRecordCompressData.Size = new System.Drawing.Size(112, 17);
+      this.DoRecordCompressData.TabIndex = 8;
+      this.DoRecordCompressData.Text = "Record Raw Data";
+      this.DoRecordCompressData.UseVisualStyleBackColor = true;
+      // 
+      // DoRecordCmpData
+      // 
+      this.DoRecordCmpData.AutoSize = true;
+      this.DoRecordCmpData.Location = new System.Drawing.Point(6, 68);
+      this.DoRecordCmpData.Name = "DoRecordCmpData";
+      this.DoRecordCmpData.Size = new System.Drawing.Size(148, 17);
+      this.DoRecordCmpData.TabIndex = 7;
+      this.DoRecordCmpData.Text = "Record Compressed Data";
+      this.DoRecordCmpData.UseVisualStyleBackColor = true;
       // 
       // label6
       // 
@@ -203,11 +276,20 @@
       this.label4.TabIndex = 5;
       this.label4.Text = "time elapsed:";
       // 
+      // button11
+      // 
+      this.button11.Location = new System.Drawing.Point(24, 142);
+      this.button11.Name = "button11";
+      this.button11.Size = new System.Drawing.Size(180, 23);
+      this.button11.TabIndex = 0;
+      this.button11.Text = "Database Managment";
+      this.button11.UseVisualStyleBackColor = true;
+      // 
       // ManageMeasure
       // 
-      this.ManageMeasure.Location = new System.Drawing.Point(241, 84);
+      this.ManageMeasure.Location = new System.Drawing.Point(24, 113);
       this.ManageMeasure.Name = "ManageMeasure";
-      this.ManageMeasure.Size = new System.Drawing.Size(140, 23);
+      this.ManageMeasure.Size = new System.Drawing.Size(180, 23);
       this.ManageMeasure.TabIndex = 0;
       this.ManageMeasure.Text = "Measure Managment";
       this.ManageMeasure.UseVisualStyleBackColor = true;
@@ -258,7 +340,7 @@
       this.groupBox2.Controls.Add(this.button7);
       this.groupBox2.Controls.Add(this.button1);
       this.groupBox2.Controls.Add(this.button4);
-      this.groupBox2.Location = new System.Drawing.Point(13, 131);
+      this.groupBox2.Location = new System.Drawing.Point(7, 245);
       this.groupBox2.Margin = new System.Windows.Forms.Padding(0);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Padding = new System.Windows.Forms.Padding(0);
@@ -377,7 +459,6 @@
       this.label1.Size = new System.Drawing.Size(36, 13);
       this.label1.TabIndex = 2;
       this.label1.Text = "speed";
-      this.label1.Click += new System.EventHandler(this.label1_Click);
       // 
       // button2
       // 
@@ -424,15 +505,6 @@
       this.button1.Text = "Load Measure";
       this.button1.UseVisualStyleBackColor = true;
       // 
-      // button11
-      // 
-      this.button11.Location = new System.Drawing.Point(12, 279);
-      this.button11.Name = "button11";
-      this.button11.Size = new System.Drawing.Size(180, 23);
-      this.button11.TabIndex = 0;
-      this.button11.Text = "Database Managment";
-      this.button11.UseVisualStyleBackColor = true;
-      // 
       // InfoBar
       // 
       this.InfoBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -440,7 +512,7 @@
             this.BDStatus,
             this.ExpStateLabel,
             this.toolStripStatusLabel2});
-      this.InfoBar.Location = new System.Drawing.Point(0, 320);
+      this.InfoBar.Location = new System.Drawing.Point(0, 432);
       this.InfoBar.Name = "InfoBar";
       this.InfoBar.Size = new System.Drawing.Size(554, 22);
       this.InfoBar.TabIndex = 6;
@@ -477,11 +549,10 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(554, 342);
+      this.ClientSize = new System.Drawing.Size(554, 454);
       this.Controls.Add(this.InfoBar);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
-      this.Controls.Add(this.button11);
       this.Cursor = System.Windows.Forms.Cursors.Default;
       this.Name = "FRecorder";
       this.Text = "Recorder";
@@ -542,5 +613,11 @@
     private System.Windows.Forms.ToolStripStatusLabel BDStatus;
     private System.Windows.Forms.ToolStripStatusLabel ExpStateLabel;
     private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+    private System.Windows.Forms.CheckBox DoRecordCmpData;
+    private System.Windows.Forms.Button DeselectAllRecs;
+    private System.Windows.Forms.Button SelectAllRecords;
+    private System.Windows.Forms.CheckBox DoRecordStimData;
+    private System.Windows.Forms.CheckBox DoRecordPackData;
+    private System.Windows.Forms.CheckBox DoRecordCompressData;
   }
 }

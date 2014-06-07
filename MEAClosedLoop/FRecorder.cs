@@ -5,6 +5,8 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 using MEAClosedLoop.Common;
 namespace MEAClosedLoop
@@ -21,6 +23,12 @@ namespace MEAClosedLoop
   #endregion
   public partial class FRecorder : Form
   {
+    public CDataCompress compressor = new CDataCompress();
+
+    public bool RawDataConnected = false;
+    public bool StimDataConnected = false;
+    public bool PackDataConnected = false;
+
     private Experiment currentRecordExperiment = null;
     private Experiment currentPlayExperiment = null;
     private MeasureManager currentRecordMeasure = null;
@@ -28,14 +36,12 @@ namespace MEAClosedLoop
     private TTime MeasureLength = 0;
     private string ConnectionString = "";
     private bool DoRecieveData = false;
+
+    //Delegate Section;
+
     public FRecorder()
     {
       InitializeComponent();
-    }
-
-    private void label1_Click(object sender, EventArgs e)
-    {
-
     }
 
     private void progress_Scroll(object sender, EventArgs e)
@@ -71,6 +77,41 @@ namespace MEAClosedLoop
           break;
       }
     }
+    private void CreateDB_Click(object sender, EventArgs e)
+    {
+      String str;
+      SqlConnection myConn = new SqlConnection("Server=localhost;Integrated security=SSPI;database=master");
+
+      str = "CREATE DATABASE MyDatabase ON PRIMARY " +
+          "(NAME = MyDatabase_Data, " +
+          "FILENAME = 'C:\\MyDatabaseData.mdf', " +
+          "SIZE = 2MB, MAXSIZE = 10GB, FILEGROWTH = 10%) " +
+          "LOG ON (NAME = MyDatabase_Log, " +
+          "FILENAME = 'C:\\MyDatabaseLog.ldf', " +
+          "SIZE = 1MB, " +
+          "MAXSIZE = 5GB, " +
+          "FILEGROWTH = 10%)";
+
+      SqlCommand myCommand = new SqlCommand(str, myConn);
+      try
+      {
+        myConn.Open();
+        myCommand.ExecuteNonQuery();
+        MessageBox.Show("DataBase is Created Successfully", "MyProgram", MessageBoxButtons.OK, MessageBoxIcon.Information);
+      }
+      catch (System.Exception ex)
+      {
+        MessageBox.Show(ex.ToString(), "MyProgram", MessageBoxButtons.OK, MessageBoxIcon.Information);
+      }
+      finally
+      {
+        if (myConn.State == ConnectionState.Open)
+        {
+          myConn.Close();
+        }
+      }
+      //throw new NotImplementedException("на данный момент опция отключена. Делает М.К.Татаринцев");
+    }
     private void OpenDB_Click(object sender, EventArgs e)
     {
       // Нужно переделать на выбор файла.
@@ -90,7 +131,6 @@ namespace MEAClosedLoop
         MessageBox.Show(ex.Message.ToString());
       }
     }
-
     private void OpenExp_Click(object sender, EventArgs e)
     {
 
@@ -138,10 +178,7 @@ namespace MEAClosedLoop
       }
     }
 
-    private void CreateDB_Click(object sender, EventArgs e)
-    {
-      throw new NotImplementedException("на данный момент опция отключена. Делает М.К.Татаринцев");
-    }
+   
 
     private void CreateMeasureButton_Click(object sender, EventArgs e)
     {
@@ -152,17 +189,19 @@ namespace MEAClosedLoop
         if (CreateMeasure.measure != null)
         {
           CreateMeasure.measure.ExperimentID = currentRecordExperiment.id;
+          CreateMeasure.measure.StartTime = DateTime.Now;
           _db.Manager.Add(CreateMeasure.measure);
+
           try
           {
             _db.SaveChanges();
-
+            currentRecordMeasure = CreateMeasure.measure;
             MessageBox.Show("Succesful created");
             currentRecordMeasure = CreateMeasure.measure;
           }
-          catch (EntityException ex)
+          catch (DbUpdateException ex)
           {
-            MessageBox.Show(ex.Message);
+            MessageBox.Show(ex.ToString());
           }
         }
       }
@@ -171,10 +210,44 @@ namespace MEAClosedLoop
     private void StartButton_Click(object sender, EventArgs e)
     {
       DoRecieveData = true;
+      StartButton.Enabled = false;
+      StopButton.Enabled = true;
+
+      DoRecordCmpData.Enabled = false;
+      DoRecordCompressData.Enabled = false;
+      DoRecordPackData.Enabled = false;
+      DoRecordStimData.Enabled = false;
+    }
+
+    private void StopButton_Click(object sender, EventArgs e)
+    {
+      DoRecieveData = false;
+      MeasureLength = 0;
+      DoRecordCmpData.Enabled = true;
+      DoRecordCompressData.Enabled = true;
+      DoRecordPackData.Enabled = true;
+      DoRecordStimData.Enabled = true;
+    }
+
+    private void SelectAllRecords_Click(object sender, EventArgs e)
+    {
+      DoRecordCmpData.Checked = true;
+      DoRecordCompressData.Checked = true;
+      DoRecordPackData.Checked = true;
+      DoRecordStimData.Checked = true;
+    }
+
+    private void DeselectAllRecs_Click(object sender, EventArgs e)
+    {
+      DoRecordCmpData.Checked = false;
+      DoRecordCompressData.Checked = false;
+      DoRecordPackData.Checked = false;
+      DoRecordStimData.Checked = false;
     }
 
     public void RecieveFltData(TFltDataPacket data)
     {
+
       using (ExpDataContext _db = new ExpDataContext())
       {
 
@@ -197,12 +270,6 @@ namespace MEAClosedLoop
       {
         _db.SaveChanges();
       }
-    }
-
-    private void StopButton_Click(object sender, EventArgs e)
-    {
-      DoRecieveData = false;
-      MeasureLength = 0;
     }
   }
 }

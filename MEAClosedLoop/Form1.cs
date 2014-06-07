@@ -30,6 +30,7 @@ namespace MEAClosedLoop
     private CSpikeDetector m_spikeDetector;
     private CRasterPlot m_rasterPlotter;
     private CStimulator m_stimulator;
+    private FRecorder m_Recorder;
     private bool FakeStimulator = true;
 
     private FPackStat m_statForm;
@@ -74,8 +75,8 @@ namespace MEAClosedLoop
       /*
       this.StartPosition = FormStartPosition.Manual;
       this.Location = new Point(600, 250);
-    
        */
+      //m_Recorder = new FRecorder();
     }
 
     private void Form1_Load(object sender, EventArgs e)
@@ -635,7 +636,12 @@ namespace MEAClosedLoop
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
       }
       showChannelData.Enabled = true;
-
+      if (m_Recorder != null)
+      {
+        m_salpaFilter.AddDataConsumer(m_Recorder.RecieveFltData);
+        m_salpaFilter.AddStimulConsumer(m_Recorder.RecieveStimData);
+        m_closedLoop.OnPackFound += m_Recorder.RecievePackData;
+      }
       m_inputStream.Start();
       buttonClosedLoop.Enabled = false;
       if (checkBox_Manual.Checked) m_inputStream.Pause();
@@ -716,8 +722,52 @@ namespace MEAClosedLoop
 
     private void OpenRecorder_Click(object sender, EventArgs e)
     {
-      FRecorder m_Recorder = new FRecorder();
-      m_Recorder.Show();
+      if (m_Recorder != null && m_Recorder.IsDisposed)
+      {
+        m_Recorder = null;
+      }
+      if (m_Recorder == null)
+      {
+        m_Recorder = new FRecorder();
+        if (m_salpaFilter != null)
+        {
+          m_salpaFilter.AddDataConsumer(m_Recorder.RecieveFltData);
+          m_salpaFilter.AddStimulConsumer(m_Recorder.RecieveStimData);
+          m_Recorder.StimDataConnected = true;
+          m_Recorder.RawDataConnected = true;
+        }
+        else
+        {
+          switch (MessageBox.Show("Не запущен фильтр данных, \nзапись данных невозможна", "предупреждение", MessageBoxButtons.OKCancel))
+          {
+            case System.Windows.Forms.DialogResult.OK:
+              break;
+            case System.Windows.Forms.DialogResult.Cancel:
+              m_Recorder = null;
+              return;
+          }
+        }
+        if (m_closedLoop != null)
+        {
+          m_closedLoop.OnPackFound += m_Recorder.RecievePackData;
+          m_Recorder.PackDataConnected = true;
+        }
+        else
+        {
+          switch (MessageBox.Show("Не запущена петля эксперимента, \nзапись данных о пачках невозможна", "предупреждение", MessageBoxButtons.OKCancel))
+          {
+            case System.Windows.Forms.DialogResult.OK:
+              break;
+            case System.Windows.Forms.DialogResult.Cancel:
+              m_Recorder = null;
+              return;
+          }
+        }
+      }
+      else
+      {
+        m_Recorder.Show();
+      }
     }
   }
 }

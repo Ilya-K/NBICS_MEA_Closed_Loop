@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
+using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
   using TTime = System.UInt64;
@@ -29,6 +29,9 @@ namespace MEAClosedLoop
     private CFiltering m_filter;
     private CPackDetector m_packDetector;
     private TStimGroup m_stimulus;
+    
+
+
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
