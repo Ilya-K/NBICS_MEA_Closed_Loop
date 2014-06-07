@@ -123,6 +123,9 @@ namespace MEAClosedLoop.Common
     public ExpDataContext()
       : base("somedataConnectionString")
     { }
+    public ExpDataContext(string connection_string)
+      : base(connection_string)
+    { }
     public DbSet<Experiment> Experiments { get; set; }
     public DbSet<RawDataList> RawDataList { get; set; }
     public DbSet<MeasureManager> Manager { get; set; }

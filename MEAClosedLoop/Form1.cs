@@ -763,6 +763,7 @@ namespace MEAClosedLoop
               return;
           }
         }
+        m_Recorder.Show();
       }
       else
       {

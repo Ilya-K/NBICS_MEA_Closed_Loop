@@ -8,6 +8,7 @@ using System.Text;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Windows.Forms;
+using System.IO;
 using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
@@ -37,6 +38,7 @@ namespace MEAClosedLoop
     private string ConnectionString = "";
     private bool DoRecieveData = false;
 
+    SqlConnection currentRecordConnection = new SqlConnection();
     //Delegate Section;
 
     public FRecorder()
@@ -79,20 +81,20 @@ namespace MEAClosedLoop
     }
     private void CreateDB_Click(object sender, EventArgs e)
     {
-      String str;
-      SqlConnection myConn = new SqlConnection("Server=localhost;Integrated security=SSPI;database=master");
+      String CreateDB_SQL_command;
+      SqlConnection myConn = new SqlConnection("Data Source=GRAPH\\SQLEXPRESS;Integrated security=SSPI;database=master");
 
-      str = "CREATE DATABASE MyDatabase ON PRIMARY " +
-          "(NAME = MyDatabase_Data, " +
-          "FILENAME = 'C:\\MyDatabaseData.mdf', " +
-          "SIZE = 2MB, MAXSIZE = 10GB, FILEGROWTH = 10%) " +
+      CreateDB_SQL_command = "CREATE DATABASE Exp_data ON PRIMARY " +
+          "(NAME = Exp_Data1, " +
+          @"FILENAME = 'C:\MCS_Data\ExpData.mdf', " +
+          "SIZE = 100MB, MAXSIZE = 10GB, FILEGROWTH = 10%) " +
           "LOG ON (NAME = MyDatabase_Log, " +
-          "FILENAME = 'C:\\MyDatabaseLog.ldf', " +
-          "SIZE = 1MB, " +
+          @"FILENAME = 'C:\MCS_Data\ExpDataLog.ldf', " +
+          "SIZE = 100MB, " +
           "MAXSIZE = 5GB, " +
           "FILEGROWTH = 10%)";
 
-      SqlCommand myCommand = new SqlCommand(str, myConn);
+      SqlCommand myCommand = new SqlCommand(CreateDB_SQL_command, myConn);
       try
       {
         myConn.Open();
@@ -116,21 +118,50 @@ namespace MEAClosedLoop
     {
       // Нужно переделать на выбор файла.
       // ман в этих статьях
+
       //http://support.microsoft.com/kb/307283/ru
       //http://msdn.microsoft.com/en-us/library/gg696604(v=vs.113).aspx
-      try
+
+      string FilePath = "";
+      OpenFileDialog dialog = new OpenFileDialog();
+
+      switch (dialog.ShowDialog())
       {
-        using (ExpDataContext _db = new ExpDataContext())
+        case System.Windows.Forms.DialogResult.OK:
+          if (dialog.FileNames.Count() > 1)
+          {
+            MessageBox.Show("необходимо выбрать только 1 файл", "ошибка");
+            return;
+          }
+          FilePath = dialog.FileName;
+          break;
+        case System.Windows.Forms.DialogResult.Cancel:
+          return;
+      }
+
+      SqlConnectionStringBuilder str_build = new SqlConnectionStringBuilder();
+      str_build.DataSource = "GRAPH\\SQLEXPRESS";
+      str_build.Encrypt = true;
+      str_build.InitialCatalog = FilePath;
+      str_build.MultipleActiveResultSets = true;
+     
+
+
+      using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
+      {
+        try
         {
           int expcount = _db.Experiments.Count();
           InfoBar.Items[1].Text = "connected";
         }
+        catch (ProviderIncompatibleException ex)
+        {
+          MessageBox.Show(ex.Message.ToString());
+        }
       }
-      catch(EntitySqlException ex)
-      {
-        MessageBox.Show(ex.Message.ToString());
-      }
+
     }
+
     private void OpenExp_Click(object sender, EventArgs e)
     {
 
@@ -177,8 +208,6 @@ namespace MEAClosedLoop
         }
       }
     }
-
-   
 
     private void CreateMeasureButton_Click(object sender, EventArgs e)
     {
