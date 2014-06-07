@@ -115,10 +115,15 @@ namespace MEAClosedLoop
       // [DEBUG]
       //label_refreshRate.Text = (1000.0 / (DateTime.Now - m_prevTime).Milliseconds).ToString();
       //SetText(label_refreshRate, m_bandpassFilter.Test().ToString());
-      AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
+      //AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
       SetText(label_time, (m_inputStream.TimeStamp / (double)Param.DAQ_FREQ).ToString("F1"));
 
       m_prevTime = DateTime.Now;
+    }
+
+    void OnPackFoundDelegate(CPack pack)
+    {
+      AddText((Math.Round(1.0 * pack.Length / Param.MS)).ToString() + "; ");
     }
 
     #region Data Display
@@ -630,6 +635,7 @@ namespace MEAClosedLoop
         }
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
+        m_closedLoop.OnPackFound += OnPackFoundDelegate;
       }
       showChannelData.Enabled = true;
 
