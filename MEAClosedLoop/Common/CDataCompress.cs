@@ -20,39 +20,45 @@ namespace MEAClosedLoop.Common
   using TCmpData = System.Byte;
   #endregion
 
-  public class CDataCompress
+  public static class CDataCompress
   {
-    //8000 - максимальная длина массива binary в базе данных MS SQL Server 2012
-    int SplitLength = 4000;
 
-    List<System.Byte[]> RawDataToBinary(TFltDataPacket DataPacket)
+    public static System.Byte[] RawDataToBinary(TFltDataPacket DataPacket)
     {
       byte[] resultarray;
-      byte[] subarray;
-      int partNum;
+      
+      MemoryStream ms = new MemoryStream();
+      BinaryFormatter formatter = new BinaryFormatter();
+      formatter.Serialize(ms, DataPacket);
+      resultarray = ms.ToArray();
+      return resultarray;
+    }
+    public static System.Byte[] RawDataToCmpBinary(TFltDataPacket DataPacket)
+    {
+      byte[] resultarray;
 
       MemoryStream ms = new MemoryStream();
       BinaryFormatter formatter = new BinaryFormatter();
       formatter.Serialize(ms, DataPacket);
       resultarray = ms.ToArray();
+      ms.Dispose();
+      return resultarray;
+    }
+    public static TFltDataPacket BinaryCmpToRawData(int compressRate)
+    {
+      return new TFltDataPacket();
+    }
+    public static TFltDataPacket BinaryRawToRawData(Byte[] data)
+    {
+      MemoryStream ms = new MemoryStream(data, false);
+      TFltDataPacket result = new TFltDataPacket();
+      BinaryFormatter formatter = new BinaryFormatter();
+      
+      //System.Runtime.Remoting.Messaging.Header header = new System.Runtime.Remoting.Messaging.Header();
+      
+      result = (TFltDataPacket)formatter.Deserialize(ms);
 
-      // разделим массив на части 
-      partNum = 0;
-      int currentPosition = 0;
-      while (true)
-      {
-        bool endflag = false;
-
-        if (currentPosition + SplitLength < resultarray.Length)
-        {
-          subarray = new byte[SplitLength];
-          Array.Copy(resultarray, currentPosition, subarray, 0, SplitLength);
-          currentPosition += SplitLength;
-        }
-        if (endflag) break;
-      }
-
-      return new List<Byte[]>();
+      return result;
     }
   }
 }

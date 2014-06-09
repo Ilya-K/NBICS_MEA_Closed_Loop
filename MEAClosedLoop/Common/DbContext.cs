@@ -34,7 +34,7 @@ namespace MEAClosedLoop.Common
     public DateTime CreationTime { get; set; }
     public virtual ICollection<MeasureManager> MeasureParts { get; set; }
   }
-  [Table("MeasureManagers")]
+  [Table("MeasureManagers")]                                  
   public class MeasureManager
   {
     [Key]
@@ -44,18 +44,22 @@ namespace MEAClosedLoop.Common
     public string About { get; set; }
     public DateTime CreationTime { get; set; }
     public DateTime StartTime { get; set; }
+
+    public virtual ICollection<PackData> Packs { get; set; }
+    public virtual ICollection<StimData> Stims { get; set; }
+    public virtual ICollection<CmpData> CmpData { get; set; }
+    public virtual ICollection<RawData> RawData { get; set; }
   }
-  [Table("RawData")]
-  public class RawDataList
+  [Table("BinRawData")]
+  public class RawData
   {
     [Key]
     public int id { get; set; }
     public int? MeasureID { get; set; }
     public virtual MeasureManager MeasureManager { get; set; }
-    public int ChannelNum { get; set; }
-    public TFltDataPacket CompressedData { get; set; }
+    byte[] binData { get; set; }
   }
-  [Table("CompressedData")]
+  [Table("BinCompressedData")]
   [SerializableAttribute]
   public class CmpData
   {
@@ -64,8 +68,9 @@ namespace MEAClosedLoop.Common
     public int? MeasureID { get; set; }
     public virtual MeasureManager MeasureManager { get; set; }
     public TCmpData[] CompressedData { get; set; }
-    public int ChannelNum { get; set; }
     public int CompressRate { get; set; }
+    byte[] binData { get; set; }
+
     /*
     public CmpData(TFltDataPacket DataPacket)
     {
@@ -110,7 +115,7 @@ namespace MEAClosedLoop.Common
     }
   }
   [Table("Stims")]
-  public class Stim
+  public class StimData
   {
     [Key]
     public int id { get; set; }
@@ -127,8 +132,10 @@ namespace MEAClosedLoop.Common
       : base(connection_string)
     { }
     public DbSet<Experiment> Experiments { get; set; }
-    public DbSet<RawDataList> RawDataList { get; set; }
     public DbSet<MeasureManager> Manager { get; set; }
     public DbSet<CmpData> CompressedData { get; set; }
+    public DbSet<RawData> RawData { get; set; }
+    public DbSet<PackData> PackData { get; set; }
+    public DbSet<StimData> StimData { get; set; }
   }
 }

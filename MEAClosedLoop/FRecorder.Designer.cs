@@ -45,7 +45,7 @@
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.CreateMeasureButton = new System.Windows.Forms.Button();
-      this.label4 = new System.Windows.Forms.Label();
+      this.RecordTimeElapsed = new System.Windows.Forms.Label();
       this.button11 = new System.Windows.Forms.Button();
       this.ManageMeasure = new System.Windows.Forms.Button();
       this.OpenExp = new System.Windows.Forms.Button();
@@ -171,7 +171,7 @@
       this.groupBox3.Controls.Add(this.label5);
       this.groupBox3.Controls.Add(this.CreateMeasureButton);
       this.groupBox3.Controls.Add(this.StartButton);
-      this.groupBox3.Controls.Add(this.label4);
+      this.groupBox3.Controls.Add(this.RecordTimeElapsed);
       this.groupBox3.Location = new System.Drawing.Point(241, 9);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.Size = new System.Drawing.Size(268, 160);
@@ -267,14 +267,14 @@
       this.CreateMeasureButton.UseVisualStyleBackColor = true;
       this.CreateMeasureButton.Click += new System.EventHandler(this.CreateMeasureButton_Click);
       // 
-      // label4
+      // RecordTimeElapsed
       // 
-      this.label4.AutoSize = true;
-      this.label4.Location = new System.Drawing.Point(3, 45);
-      this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(69, 13);
-      this.label4.TabIndex = 5;
-      this.label4.Text = "time elapsed:";
+      this.RecordTimeElapsed.AutoSize = true;
+      this.RecordTimeElapsed.Location = new System.Drawing.Point(3, 45);
+      this.RecordTimeElapsed.Name = "RecordTimeElapsed";
+      this.RecordTimeElapsed.Size = new System.Drawing.Size(69, 13);
+      this.RecordTimeElapsed.TabIndex = 5;
+      this.RecordTimeElapsed.Text = "time elapsed:";
       // 
       // button11
       // 
@@ -593,7 +593,7 @@
     private System.Windows.Forms.Button button7;
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.Label label5;
-    private System.Windows.Forms.Label label4;
+    private System.Windows.Forms.Label RecordTimeElapsed;
     private System.Windows.Forms.Button button8;
     private System.Windows.Forms.Button prev;
     private System.Windows.Forms.Label label7;

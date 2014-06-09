@@ -24,7 +24,6 @@ namespace MEAClosedLoop
   #endregion
   public partial class FRecorder : Form
   {
-    public CDataCompress compressor = new CDataCompress();
 
     public bool RawDataConnected = false;
     public bool StimDataConnected = false;
@@ -50,6 +49,7 @@ namespace MEAClosedLoop
     {
 
     }
+
     private void CreateExp_Click(object sender, EventArgs e)
     {
       FCreateExpOpt CreateExpForm = new FCreateExpOpt();
@@ -82,7 +82,7 @@ namespace MEAClosedLoop
     private void CreateDB_Click(object sender, EventArgs e)
     {
       String CreateDB_SQL_command;
-      SqlConnection myConn = new SqlConnection("Data Source=GRAPH\\SQLEXPRESS;Integrated security=SSPI;database=master");
+      SqlConnection myConn = new SqlConnection("Data Source=.\\SQLEXPRESS;Integrated security=SSPI;database=master");
 
       CreateDB_SQL_command = "CREATE DATABASE Exp_data ON PRIMARY " +
           "(NAME = Exp_Data1, " +
@@ -122,25 +122,29 @@ namespace MEAClosedLoop
       //http://support.microsoft.com/kb/307283/ru
       //http://msdn.microsoft.com/en-us/library/gg696604(v=vs.113).aspx
 
-      string FilePath = "";
-      OpenFileDialog dialog = new OpenFileDialog();
 
-      switch (dialog.ShowDialog())
+     
+
+      string FilePath = "";
+      OpenFileDialog open_db_file = new OpenFileDialog();
+      open_db_file.Filter = "mdf| *.mdf";
+
+      switch (open_db_file.ShowDialog())
       {
         case System.Windows.Forms.DialogResult.OK:
-          if (dialog.FileNames.Count() > 1)
+          if (open_db_file.FileNames.Count() > 1)
           {
             MessageBox.Show("необходимо выбрать только 1 файл", "ошибка");
             return;
           }
-          FilePath = dialog.FileName;
+          FilePath = open_db_file.FileName;
           break;
         case System.Windows.Forms.DialogResult.Cancel:
           return;
       }
 
       SqlConnectionStringBuilder str_build = new SqlConnectionStringBuilder();
-      str_build.DataSource = "GRAPH\\SQLEXPRESS";
+      str_build.DataSource = ".\\SQLEXPRESS";
       str_build.Encrypt = true;
       str_build.InitialCatalog = FilePath;
       str_build.MultipleActiveResultSets = true;
@@ -238,6 +242,11 @@ namespace MEAClosedLoop
 
     private void StartButton_Click(object sender, EventArgs e)
     {
+      if (currentRecordMeasure == null)
+      {
+        MessageBox.Show("Сначала необходимо создать measure");
+        return;
+      }
       DoRecieveData = true;
       StartButton.Enabled = false;
       StopButton.Enabled = true;
@@ -246,16 +255,27 @@ namespace MEAClosedLoop
       DoRecordCompressData.Enabled = false;
       DoRecordPackData.Enabled = false;
       DoRecordStimData.Enabled = false;
+
+      SelectAllRecords.Enabled = false;
+      DeselectAllRecs.Enabled = false;
     }
 
     private void StopButton_Click(object sender, EventArgs e)
     {
       DoRecieveData = false;
+      currentRecordMeasure = null;
+
       MeasureLength = 0;
+
+
       DoRecordCmpData.Enabled = true;
       DoRecordCompressData.Enabled = true;
       DoRecordPackData.Enabled = true;
       DoRecordStimData.Enabled = true;
+
+
+      SelectAllRecords.Enabled = false;
+      DeselectAllRecs.Enabled = false;
     }
 
     private void SelectAllRecords_Click(object sender, EventArgs e)
@@ -276,11 +296,19 @@ namespace MEAClosedLoop
 
     public void RecieveFltData(TFltDataPacket data)
     {
+      //[TODO]: необходимо сделать учет длины 1 секунды записи
 
-      using (ExpDataContext _db = new ExpDataContext())
+      data = CDataCompress.BinaryRawToRawData(CDataCompress.RawDataToBinary(data));
+
+      if (DoRecieveData && (DoRecordCmpData.Checked || DoRecordCompressData.Checked))
       {
+        MeasureLength += (TTime)(data[data.Keys.FirstOrDefault()].Length);
+        RecordTimeElapsed.Text = (MeasureLength / 25000).ToString() + " s";
+        using (ExpDataContext _db = new ExpDataContext())
+        {
 
-        _db.SaveChanges();
+          _db.SaveChanges();
+        }
       }
 
     }
