@@ -42,11 +42,10 @@
       this.DoRecordPackData = new System.Windows.Forms.CheckBox();
       this.DoRecordCompressData = new System.Windows.Forms.CheckBox();
       this.DoRecordCmpData = new System.Windows.Forms.CheckBox();
-      this.label6 = new System.Windows.Forms.Label();
+      this.RecordTimeElapsed = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
       this.CreateMeasureButton = new System.Windows.Forms.Button();
-      this.RecordTimeElapsed = new System.Windows.Forms.Label();
-      this.button11 = new System.Windows.Forms.Button();
+      this.RecordTimeElapsedLabel = new System.Windows.Forms.Label();
       this.ManageMeasure = new System.Windows.Forms.Button();
       this.OpenExp = new System.Windows.Forms.Button();
       this.OpenDB = new System.Windows.Forms.Button();
@@ -126,7 +125,6 @@
       this.groupBox1.Controls.Add(this.label9);
       this.groupBox1.Controls.Add(this.label8);
       this.groupBox1.Controls.Add(this.groupBox3);
-      this.groupBox1.Controls.Add(this.button11);
       this.groupBox1.Controls.Add(this.ManageMeasure);
       this.groupBox1.Controls.Add(this.OpenExp);
       this.groupBox1.Controls.Add(this.OpenDB);
@@ -166,12 +164,12 @@
       this.groupBox3.Controls.Add(this.DoRecordPackData);
       this.groupBox3.Controls.Add(this.DoRecordCompressData);
       this.groupBox3.Controls.Add(this.DoRecordCmpData);
-      this.groupBox3.Controls.Add(this.label6);
+      this.groupBox3.Controls.Add(this.RecordTimeElapsed);
       this.groupBox3.Controls.Add(this.StopButton);
       this.groupBox3.Controls.Add(this.label5);
       this.groupBox3.Controls.Add(this.CreateMeasureButton);
       this.groupBox3.Controls.Add(this.StartButton);
-      this.groupBox3.Controls.Add(this.RecordTimeElapsed);
+      this.groupBox3.Controls.Add(this.RecordTimeElapsedLabel);
       this.groupBox3.Location = new System.Drawing.Point(241, 9);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.Size = new System.Drawing.Size(268, 160);
@@ -239,14 +237,14 @@
       this.DoRecordCmpData.Text = "Record Compressed Data";
       this.DoRecordCmpData.UseVisualStyleBackColor = true;
       // 
-      // label6
+      // RecordTimeElapsed
       // 
-      this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(79, 45);
-      this.label6.Name = "label6";
-      this.label6.Size = new System.Drawing.Size(19, 13);
-      this.label6.TabIndex = 6;
-      this.label6.Text = "00";
+      this.RecordTimeElapsed.AutoSize = true;
+      this.RecordTimeElapsed.Location = new System.Drawing.Point(79, 45);
+      this.RecordTimeElapsed.Name = "RecordTimeElapsed";
+      this.RecordTimeElapsed.Size = new System.Drawing.Size(19, 13);
+      this.RecordTimeElapsed.TabIndex = 6;
+      this.RecordTimeElapsed.Text = "00";
       // 
       // label5
       // 
@@ -267,23 +265,14 @@
       this.CreateMeasureButton.UseVisualStyleBackColor = true;
       this.CreateMeasureButton.Click += new System.EventHandler(this.CreateMeasureButton_Click);
       // 
-      // RecordTimeElapsed
+      // RecordTimeElapsedLabel
       // 
-      this.RecordTimeElapsed.AutoSize = true;
-      this.RecordTimeElapsed.Location = new System.Drawing.Point(3, 45);
-      this.RecordTimeElapsed.Name = "RecordTimeElapsed";
-      this.RecordTimeElapsed.Size = new System.Drawing.Size(69, 13);
-      this.RecordTimeElapsed.TabIndex = 5;
-      this.RecordTimeElapsed.Text = "time elapsed:";
-      // 
-      // button11
-      // 
-      this.button11.Location = new System.Drawing.Point(24, 142);
-      this.button11.Name = "button11";
-      this.button11.Size = new System.Drawing.Size(180, 23);
-      this.button11.TabIndex = 0;
-      this.button11.Text = "Database Managment";
-      this.button11.UseVisualStyleBackColor = true;
+      this.RecordTimeElapsedLabel.AutoSize = true;
+      this.RecordTimeElapsedLabel.Location = new System.Drawing.Point(3, 45);
+      this.RecordTimeElapsedLabel.Name = "RecordTimeElapsedLabel";
+      this.RecordTimeElapsedLabel.Size = new System.Drawing.Size(69, 13);
+      this.RecordTimeElapsedLabel.TabIndex = 5;
+      this.RecordTimeElapsedLabel.Text = "time elapsed:";
       // 
       // ManageMeasure
       // 
@@ -340,7 +329,7 @@
       this.groupBox2.Controls.Add(this.button7);
       this.groupBox2.Controls.Add(this.button1);
       this.groupBox2.Controls.Add(this.button4);
-      this.groupBox2.Location = new System.Drawing.Point(7, 245);
+      this.groupBox2.Location = new System.Drawing.Point(13, 191);
       this.groupBox2.Margin = new System.Windows.Forms.Padding(0);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Padding = new System.Windows.Forms.Padding(0);
@@ -512,9 +501,9 @@
             this.BDStatus,
             this.ExpStateLabel,
             this.toolStripStatusLabel2});
-      this.InfoBar.Location = new System.Drawing.Point(0, 432);
+      this.InfoBar.Location = new System.Drawing.Point(0, 349);
       this.InfoBar.Name = "InfoBar";
-      this.InfoBar.Size = new System.Drawing.Size(554, 22);
+      this.InfoBar.Size = new System.Drawing.Size(550, 22);
       this.InfoBar.TabIndex = 6;
       this.InfoBar.Text = "Info:";
       // 
@@ -549,11 +538,12 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(554, 454);
+      this.ClientSize = new System.Drawing.Size(550, 371);
       this.Controls.Add(this.InfoBar);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Cursor = System.Windows.Forms.Cursors.Default;
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
       this.Name = "FRecorder";
       this.Text = "Recorder";
       this.groupBox1.ResumeLayout(false);
@@ -591,16 +581,15 @@
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Button button7;
-    private System.Windows.Forms.Label label6;
-    private System.Windows.Forms.Label label5;
     private System.Windows.Forms.Label RecordTimeElapsed;
+    private System.Windows.Forms.Label label5;
+    private System.Windows.Forms.Label RecordTimeElapsedLabel;
     private System.Windows.Forms.Button button8;
     private System.Windows.Forms.Button prev;
     private System.Windows.Forms.Label label7;
     private System.Windows.Forms.TextBox textBox2;
     private System.Windows.Forms.Button ManageMeasure;
     private System.Windows.Forms.Button CreateMeasureButton;
-    private System.Windows.Forms.Button button11;
     private System.Windows.Forms.Button ManageExp;
     private System.Windows.Forms.TrackBar PlayPosition;
     private System.Windows.Forms.Label label9;

@@ -12,10 +12,12 @@ namespace MEAClosedLoop
   public partial class FSelectExperiment : Form
   {
     public int SelectedID = -1;
-    public FSelectExperiment()
+    string connectonString;
+    public FSelectExperiment(string ConnectionString)
     {
+      connectonString = ConnectionString;
       InitializeComponent();
-      using (ExpDataContext _db = new ExpDataContext())
+      using (ExpDataContext _db = new ExpDataContext(connectonString))
       {
         foreach(Experiment exp in _db.Experiments)
         {

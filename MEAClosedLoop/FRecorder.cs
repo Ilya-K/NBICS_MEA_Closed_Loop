@@ -37,7 +37,8 @@ namespace MEAClosedLoop
     private string ConnectionString = "";
     private bool DoRecieveData = false;
 
-    SqlConnection currentRecordConnection = new SqlConnection();
+    private SqlConnection currentRecordConnection = new SqlConnection();
+    private SqlConnectionStringBuilder str_build; //current connection string
     //Delegate Section;
 
     public FRecorder()
@@ -55,7 +56,7 @@ namespace MEAClosedLoop
       FCreateExpOpt CreateExpForm = new FCreateExpOpt();
       Experiment experiment_to_add = new Experiment();
       CreateExpForm.ShowDialog();
-      using (ExpDataContext _db = new ExpDataContext())
+      using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
       {
         experiment_to_add.About = CreateExpForm.ExpName.Text;
         experiment_to_add.Author = CreateExpForm.AuthorName.Text;
@@ -79,6 +80,7 @@ namespace MEAClosedLoop
           break;
       }
     }
+
     private void CreateDB_Click(object sender, EventArgs e)
     {
       String CreateDB_SQL_command;
@@ -114,6 +116,7 @@ namespace MEAClosedLoop
       }
       //throw new NotImplementedException("на данный момент опция отключена. Делает М.К.Татаринцев");
     }
+
     private void OpenDB_Click(object sender, EventArgs e)
     {
       // Нужно переделать на выбор файла.
@@ -123,7 +126,7 @@ namespace MEAClosedLoop
       //http://msdn.microsoft.com/en-us/library/gg696604(v=vs.113).aspx
 
 
-     
+
 
       string FilePath = "";
       OpenFileDialog open_db_file = new OpenFileDialog();
@@ -143,12 +146,17 @@ namespace MEAClosedLoop
           return;
       }
 
-      SqlConnectionStringBuilder str_build = new SqlConnectionStringBuilder();
+      str_build = new SqlConnectionStringBuilder();
       str_build.DataSource = ".\\SQLEXPRESS";
-      str_build.Encrypt = true;
+      //str_build.Encrypt = true;
+      str_build.IntegratedSecurity = true;
       str_build.InitialCatalog = FilePath;
       str_build.MultipleActiveResultSets = true;
-     
+
+      SqlConnection connection = new SqlConnection(str_build.ToString());
+      connection.Open();
+      //dsdasd
+      connection.Close();
 
 
       using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
@@ -169,7 +177,7 @@ namespace MEAClosedLoop
     private void OpenExp_Click(object sender, EventArgs e)
     {
 
-      using (ExpDataContext _db = new ExpDataContext())
+      using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
       {
 
         if (_db.Experiments.Count() == 0)
@@ -198,7 +206,7 @@ namespace MEAClosedLoop
         }
         else
         {
-          FSelectExperiment selectExp = new FSelectExperiment();
+          FSelectExperiment selectExp = new FSelectExperiment(str_build.ToString());
           selectExp.ShowDialog();
           currentRecordExperiment = _db.Experiments.Where(x => x.id == selectExp.SelectedID).FirstOrDefault();
           if (currentRecordExperiment != null)
@@ -215,7 +223,7 @@ namespace MEAClosedLoop
 
     private void CreateMeasureButton_Click(object sender, EventArgs e)
     {
-      using (ExpDataContext _db = new ExpDataContext())
+      using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
       {
         FCreateMeasure CreateMeasure = new FCreateMeasure();
         CreateMeasure.ShowDialog();
@@ -273,9 +281,9 @@ namespace MEAClosedLoop
       DoRecordPackData.Enabled = true;
       DoRecordStimData.Enabled = true;
 
-
-      SelectAllRecords.Enabled = false;
-      DeselectAllRecs.Enabled = false;
+      StartButton.Enabled = true;
+      SelectAllRecords.Enabled = true;
+      DeselectAllRecs.Enabled = true;
     }
 
     private void SelectAllRecords_Click(object sender, EventArgs e)
@@ -303,8 +311,14 @@ namespace MEAClosedLoop
       if (DoRecieveData && (DoRecordCmpData.Checked || DoRecordCompressData.Checked))
       {
         MeasureLength += (TTime)(data[data.Keys.FirstOrDefault()].Length);
-        RecordTimeElapsed.Text = (MeasureLength / 25000).ToString() + " s";
-        using (ExpDataContext _db = new ExpDataContext())
+
+        if (RecordTimeElapsed.InvokeRequired) 
+          RecordTimeElapsed.Invoke(new Action<string>(s => RecordTimeElapsed.Text = s), (MeasureLength / 25000).ToString());
+        else 
+          RecordTimeElapsed.Text = (MeasureLength / 25000).ToString();
+
+        //RecordTimeElapsed.Text = (MeasureLength / 25000).ToString() + " s";
+        using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
         {
 
           _db.SaveChanges();
@@ -315,18 +329,29 @@ namespace MEAClosedLoop
 
     public void RecievePackData(CPack pack)
     {
-      using (ExpDataContext _db = new ExpDataContext())
+      if (DoRecieveData && DoRecordPackData.Checked)
+      using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
       {
+        PackData packData = new PackData(pack);
+        packData.MeasureID = currentRecordMeasure.id;
+        _db.PackData.Add(packData);
         _db.SaveChanges();
       }
     }
 
     public void RecieveStimData(List<TAbsStimIndex> stims)
     {
-      using (ExpDataContext _db = new ExpDataContext())
+      if(DoRecieveData && DoRecordPackData.Checked)
+      using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
       {
         _db.SaveChanges();
       }
     }
+  }
+  public enum DatabaseConnectionState
+  {
+    Connected,
+    Disconnected,
+    Openned
   }
 }
