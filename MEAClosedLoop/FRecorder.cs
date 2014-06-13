@@ -83,18 +83,30 @@ namespace MEAClosedLoop
 
     private void CreateDB_Click(object sender, EventArgs e)
     {
-      String CreateDB_SQL_command;
+      string CreateDB_SQL_command;
+      string DbName = "";
+      string DbFileName = "";
+      string DbLogName = "";
+      SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+      saveFileDialog.Filter = "mdf| *.mdf";
+      saveFileDialog.ShowDialog();
+
+
       SqlConnection myConn = new SqlConnection("Data Source=.\\SQLEXPRESS;Integrated security=SSPI;database=master");
 
-      CreateDB_SQL_command = "CREATE DATABASE Exp_data ON PRIMARY " +
-          "(NAME = Exp_Data1, " +
-          @"FILENAME = 'C:\MCS_Data\ExpData.mdf', " +
+      DbName = DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_");
+      DbFileName = saveFileDialog.FileName.ToString();
+      DbLogName = saveFileDialog.FileName.ToString().Replace(".mdf", "log.ldf");
+      CreateDB_SQL_command = "CREATE DATABASE " + DbName + " ON PRIMARY " +
+          "(NAME = Exp_Data_" + DbName + ", " +
+          @"FILENAME = '" + DbFileName + "', " +
           "SIZE = 100MB, MAXSIZE = 10GB, FILEGROWTH = 10%) " +
-          "LOG ON (NAME = MyDatabase_Log, " +
-          @"FILENAME = 'C:\MCS_Data\ExpDataLog.ldf', " +
+          "LOG ON (NAME = " + DbLogName + ", " +
+          @"FILENAME = '" + saveFileDialog.FileName.ToString().Replace(".mdf", "log.ldf") + "', " +
           "SIZE = 100MB, " +
           "MAXSIZE = 5GB, " +
-          "FILEGROWTH = 10%)";
+          "FILEGROWTH = 15%)";
 
       SqlCommand myCommand = new SqlCommand(CreateDB_SQL_command, myConn);
       try
@@ -106,6 +118,7 @@ namespace MEAClosedLoop
       catch (System.Exception ex)
       {
         MessageBox.Show(ex.ToString(), "MyProgram", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show(CreateDB_SQL_command);
       }
       finally
       {
