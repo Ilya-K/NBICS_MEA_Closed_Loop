@@ -31,7 +31,7 @@ namespace MEAClosedLoop
     public CRasterPlot m_rasterPlotter;
     public CStimulator m_stimulator;
     public FRecorder m_Recorder;
-    public bool FakeStimulator = true;
+    public bool FakeStimulator = false;
 
     private FPackStat m_statForm;
 
@@ -351,7 +351,8 @@ namespace MEAClosedLoop
           thresholds[i] = 1000 * 3;
         }
         // length_sams [75], asym_sams [10], blank_sams [75], ahead_sams [5], forcepeg_sams [10], thresholds[]
-        SALPAParams parSALPA = new SALPAParams(75, 10, 75, 5, 10, thresholds);
+        // SALPAParams parSALPA = new SALPAParams(75, 10, 75, 5, 10, thresholds);
+        SALPAParams parSALPA = new SALPAParams(100, 15, 100, 10, 15, thresholds);
 
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
 

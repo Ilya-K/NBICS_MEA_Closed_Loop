@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 220;
+    private const int Minimum_Pack_Requered_Count = 20;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -39,6 +39,7 @@ namespace MEAClosedLoop
     private const int Stat_Window_Minutes = 0;
     private const int Stat_Window_Seconds = 10;
     private int AveragePackPeriod = 0;
+    private double StimStartPosition;
     bool DoStatCollection = false;
     bool DoDrawStartStimTime = false;
     bool DoStimulation = false;
@@ -54,7 +55,9 @@ namespace MEAClosedLoop
     public event DelegateUpdateDistribGrath UpdateDistribGrath;
     public event DelegateSetCollectStatButtonText SetCollectStatButtonText;
 
-    private double StimStartPosition;
+    
+
+
     #endregion
     #region Конструктор
     public FPackStat(CLoopController _LoopController, List<int> channelList)
@@ -217,6 +220,7 @@ namespace MEAClosedLoop
               {
                 Thread.Sleep(5);
                 CPack pack_to_add = new CPack(InputCount * 43000 + (TTime)rnd.Next(12000), 0, null);
+                
                 lock (PacklListBlock)
                 {
                   PackListBefore.Add(pack_to_add);
@@ -257,7 +261,9 @@ namespace MEAClosedLoop
         switch (CurrentState)
         {
           case state.BeforeStimulation:
-            if (DoStatCollection) PackListBefore.Add(pack_to_add);
+            //light pack - Pack version that not include PackDataArray - memory optimization
+            CPack lightPack = new CPack(pack_to_add.Start, pack_to_add.Length, null);
+            if (DoStatCollection) PackListBefore.Add(lightPack);
             StatProgressBar.BeginInvoke(SetVal, null, 1);
             DistribGrath.BeginInvoke(UpdateDistribGrath);
             if (PackListBefore.Count >= Minimum_Pack_Requered_Count)
@@ -355,15 +361,10 @@ namespace MEAClosedLoop
       }
       else
       {
-        if (newTrackBarPosition < trackBar1.Minimum)
-        {
-          trackBar1.Value = trackBar1.Minimum;
-        }
-        else
-        {
-          trackBar1.Value = newTrackBarPosition;
-        }
+        trackBar1.Value = (newTrackBarPosition < trackBar1.Minimum) ? trackBar1.Minimum : newTrackBarPosition;
       }
+      LoopCtrl.ReceivedStimShift = (int)(1000 * StimStartPosition * Param.MS);
+
       //DistribGrath.Refresh();
     }
     private void trackBar1_Scroll(object sender, EventArgs e)
@@ -398,6 +399,7 @@ namespace MEAClosedLoop
       CurrentState = state.AfterStimulation;
       DoStatCollection = true;
       DoStimulation = true;
+      LoopCtrl.ReceivedStimShift = (int)(1000 * StimStartPosition * Param.MS);
       //TODO: вызов функции, начинающей стимуляции.
       DrawPackCountGraph((int)this.numericUpDown1.Value);
       PackCountGraph.Invalidate();

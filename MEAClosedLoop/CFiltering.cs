@@ -115,16 +115,17 @@ namespace MEAClosedLoop
       m_stimulCallback = new List<StimulTimeDelegate>();
 
       // [TODO] Allow user to choose stimulus artifact detection channel
-      stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0];
+      //stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0]; // old fixed
+      stimDetector.m_Artif_Channel = MEA.NAME2IDX[33];
       ///[DEBUG STIM]
-      sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
+      //sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
 
       //ACHTUNG IDIOT WRITES HERE!!!!
-      foreach (TStimGroup stim in sl_groups)
-      {
+      //foreach (TStimGroup stim in sl_groups)
+      //{
         //m_stimDetector.SetExpectedStims(stim);
 
-      }
+      //}
       ///[/DEBUG STIM]
       if (parSALPA != null)
       {
@@ -290,11 +291,14 @@ namespace MEAClosedLoop
       }
       int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
       List<TStimIndex> stimIndices = m_noArtifacts;
+      /*
       if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
       {
+        //[HARD DEBUG]
         m_stimDetector.SetExpectedStims(sl_groups[0]);
         sl_groups.RemoveAt(0);
       }
+      */
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
       // Returns true if the current packet is requred (stimulation might be expected in the next packet)
       if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime)currPacketLength))
