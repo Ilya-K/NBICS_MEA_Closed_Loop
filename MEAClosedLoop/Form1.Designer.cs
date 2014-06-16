@@ -48,17 +48,17 @@
       this.label_time = new System.Windows.Forms.Label();
       this.button_integral0 = new System.Windows.Forms.Button();
       this.buttonStatWindow = new System.Windows.Forms.Button();
-      this.PackStatButton = new System.Windows.Forms.Button();
       this.showChannelData = new System.Windows.Forms.Button();
       this.DisplayData = new System.Windows.Forms.GroupBox();
-      this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.button1 = new System.Windows.Forms.Button();
       this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.PackStatButton = new System.Windows.Forms.Button();
+      this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.DisplayData.SuspendLayout();
-      this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
       this.groupBox3.SuspendLayout();
+      this.groupBox1.SuspendLayout();
       this.SuspendLayout();
       // 
       // buttonStartDAQ
@@ -168,10 +168,10 @@
       // 
       // textBox_DeviceInfo
       // 
-      this.textBox_DeviceInfo.Location = new System.Drawing.Point(25, 203);
+      this.textBox_DeviceInfo.Location = new System.Drawing.Point(12, 100);
       this.textBox_DeviceInfo.Multiline = true;
       this.textBox_DeviceInfo.Name = "textBox_DeviceInfo";
-      this.textBox_DeviceInfo.Size = new System.Drawing.Size(728, 49);
+      this.textBox_DeviceInfo.Size = new System.Drawing.Size(10, 10);
       this.textBox_DeviceInfo.TabIndex = 14;
       // 
       // label1
@@ -250,17 +250,6 @@
       this.buttonStatWindow.UseVisualStyleBackColor = true;
       this.buttonStatWindow.Click += new System.EventHandler(this.buttonStatWindow_Click);
       // 
-      // PackStatButton
-      // 
-      this.PackStatButton.Enabled = false;
-      this.PackStatButton.Location = new System.Drawing.Point(68, 19);
-      this.PackStatButton.Name = "PackStatButton";
-      this.PackStatButton.Size = new System.Drawing.Size(87, 23);
-      this.PackStatButton.TabIndex = 27;
-      this.PackStatButton.Text = "Start Exp 1";
-      this.PackStatButton.UseVisualStyleBackColor = true;
-      this.PackStatButton.Click += new System.EventHandler(this.PackStatButton_Click);
-      // 
       // showChannelData
       // 
       this.showChannelData.Enabled = false;
@@ -275,22 +264,12 @@
       // DisplayData
       // 
       this.DisplayData.Controls.Add(this.showChannelData);
-      this.DisplayData.Location = new System.Drawing.Point(15, 130);
+      this.DisplayData.Location = new System.Drawing.Point(569, 130);
       this.DisplayData.Name = "DisplayData";
       this.DisplayData.Size = new System.Drawing.Size(170, 48);
       this.DisplayData.TabIndex = 30;
       this.DisplayData.TabStop = false;
       this.DisplayData.Text = "Display MChannel data";
-      // 
-      // groupBox1
-      // 
-      this.groupBox1.Controls.Add(this.PackStatButton);
-      this.groupBox1.Location = new System.Drawing.Point(371, 130);
-      this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(170, 48);
-      this.groupBox1.TabIndex = 31;
-      this.groupBox1.TabStop = false;
-      this.groupBox1.Text = "LearnExp";
       // 
       // groupBox2
       // 
@@ -315,18 +294,39 @@
       // groupBox3
       // 
       this.groupBox3.Controls.Add(this.buttonStatWindow);
-      this.groupBox3.Location = new System.Drawing.Point(559, 130);
+      this.groupBox3.Location = new System.Drawing.Point(15, 130);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.Size = new System.Drawing.Size(170, 48);
       this.groupBox3.TabIndex = 31;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Debug";
       // 
+      // PackStatButton
+      // 
+      this.PackStatButton.Enabled = false;
+      this.PackStatButton.Location = new System.Drawing.Point(68, 19);
+      this.PackStatButton.Name = "PackStatButton";
+      this.PackStatButton.Size = new System.Drawing.Size(87, 23);
+      this.PackStatButton.TabIndex = 27;
+      this.PackStatButton.Text = "Start Exp 1";
+      this.PackStatButton.UseVisualStyleBackColor = true;
+      this.PackStatButton.Click += new System.EventHandler(this.PackStatButton_Click);
+      // 
+      // groupBox1
+      // 
+      this.groupBox1.Controls.Add(this.PackStatButton);
+      this.groupBox1.Location = new System.Drawing.Point(371, 130);
+      this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(170, 48);
+      this.groupBox1.TabIndex = 31;
+      this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "LearnExp";
+      // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(765, 302);
+      this.ClientSize = new System.Drawing.Size(765, 260);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox3);
       this.Controls.Add(this.groupBox1);
@@ -356,9 +356,9 @@
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
       this.Load += new System.EventHandler(this.Form1_Load);
       this.DisplayData.ResumeLayout(false);
-      this.groupBox1.ResumeLayout(false);
       this.groupBox2.ResumeLayout(false);
       this.groupBox3.ResumeLayout(false);
+      this.groupBox1.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -386,13 +386,13 @@
         private System.Windows.Forms.Label label_time;
         private System.Windows.Forms.Button button_integral0;
         private System.Windows.Forms.Button buttonStatWindow;
-        private System.Windows.Forms.Button PackStatButton;
         private System.Windows.Forms.Button showChannelData;
         private System.Windows.Forms.GroupBox DisplayData;
-        private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button PackStatButton;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
 

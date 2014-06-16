@@ -86,6 +86,7 @@ namespace MEAClosedLoop
       string CreateDB_SQL_command;
       string DbName = "";
       string DbFileName = "";
+      string DbLogFileName = "";
       string DbLogName = "";
       SaveFileDialog saveFileDialog = new SaveFileDialog();
 
@@ -93,17 +94,20 @@ namespace MEAClosedLoop
       saveFileDialog.ShowDialog();
 
 
-      SqlConnection myConn = new SqlConnection("Data Source=.\\SQLEXPRESS;Integrated security=SSPI;database=master");
+      SqlConnection myConn = new SqlConnection(@"Data Source=.\SQLEXPRESS;Integrated security=SSPI;database=master");
 
-      DbName = DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_");
+      DbName = "ExpData_" + DateTime.Now.Date.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_").Replace("-", "_");
+      DbLogName = DbName + "_Log";
+
       DbFileName = saveFileDialog.FileName.ToString();
-      DbLogName = saveFileDialog.FileName.ToString().Replace(".mdf", "log.ldf");
+      DbLogFileName = saveFileDialog.FileName.ToString().Replace(".mdf", "log.ldf");
+
       CreateDB_SQL_command = "CREATE DATABASE " + DbName + " ON PRIMARY " +
-          "(NAME = Exp_Data_" + DbName + ", " +
-          @"FILENAME = '" + DbFileName + "', " +
+          "(NAME = Exp_Data_" + @DbName + ", " +
+          @"FILENAME = '" + @DbFileName + "', " +
           "SIZE = 100MB, MAXSIZE = 10GB, FILEGROWTH = 10%) " +
-          "LOG ON (NAME = " + DbLogName + ", " +
-          @"FILENAME = '" + saveFileDialog.FileName.ToString().Replace(".mdf", "log.ldf") + "', " +
+          "LOG ON (NAME = " + @DbLogName + ", " +
+          @"FILENAME = '" + DbLogFileName + "', " +
           "SIZE = 100MB, " +
           "MAXSIZE = 5GB, " +
           "FILEGROWTH = 15%)";
@@ -126,6 +130,9 @@ namespace MEAClosedLoop
         {
           myConn.Close();
         }
+
+        // попробуем изменить права на открытие файла
+
       }
       //throw new NotImplementedException("на данный момент опция отключена. Делает М.К.Татаринцев");
     }
@@ -137,9 +144,6 @@ namespace MEAClosedLoop
 
       //http://support.microsoft.com/kb/307283/ru
       //http://msdn.microsoft.com/en-us/library/gg696604(v=vs.113).aspx
-
-
-
 
       string FilePath = "";
       OpenFileDialog open_db_file = new OpenFileDialog();
@@ -161,15 +165,9 @@ namespace MEAClosedLoop
 
       str_build = new SqlConnectionStringBuilder();
       str_build.DataSource = ".\\SQLEXPRESS";
-      //str_build.Encrypt = true;
       str_build.IntegratedSecurity = true;
       str_build.InitialCatalog = FilePath;
       str_build.MultipleActiveResultSets = true;
-
-      SqlConnection connection = new SqlConnection(str_build.ToString());
-      connection.Open();
-      //dsdasd
-      connection.Close();
 
 
       using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))

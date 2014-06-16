@@ -57,7 +57,7 @@ namespace MEAClosedLoop.Common
     public int id { get; set; }
     public int? MeasureID { get; set; }
     public virtual MeasureManager MeasureManager { get; set; }
-    byte[] binData { get; set; }
+    public byte[] binData { get; set; }
   }
   [Table("BinCompressedData")]
   [SerializableAttribute]
@@ -69,7 +69,7 @@ namespace MEAClosedLoop.Common
     public virtual MeasureManager MeasureManager { get; set; }
     public TCmpData[] CompressedData { get; set; }
     public int CompressRate { get; set; }
-    byte[] binData { get; set; }
+    public byte[] binData { get; set; }
 
     /*
     public CmpData(TFltDataPacket DataPacket)

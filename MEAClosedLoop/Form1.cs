@@ -25,13 +25,13 @@ namespace MEAClosedLoop
     private object m_chDataLock2 = new object();
     int m_viewChannel1;
     int m_viewChannel2;
-    private CInputStream m_inputStream;
-    private CFiltering m_salpaFilter;
-    private CSpikeDetector m_spikeDetector;
-    private CRasterPlot m_rasterPlotter;
-    private CStimulator m_stimulator;
-    private FRecorder m_Recorder;
-    private bool FakeStimulator = true;
+    public CInputStream m_inputStream;
+    public CFiltering m_salpaFilter;
+    public CSpikeDetector m_spikeDetector;
+    public CRasterPlot m_rasterPlotter;
+    public CStimulator m_stimulator;
+    public FRecorder m_Recorder;
+    public bool FakeStimulator = true;
 
     private FPackStat m_statForm;
 
@@ -46,7 +46,7 @@ namespace MEAClosedLoop
     private int m_selectedDAQ = -1;
     private int m_selectedStim = -1;
     private bool m_DAQConfigured = false;
-    private CLoopController m_closedLoop = null;
+    public CLoopController m_closedLoop = null;
     private string m_fileOpened = "";
     private int m_fileIdx = -1;
 
@@ -703,6 +703,7 @@ namespace MEAClosedLoop
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;
       m_statForm.Top = this.Location.Y;
+      m_statForm.MdiParent = this.MdiParent;
       m_statForm.Show();
     }
 
@@ -713,7 +714,16 @@ namespace MEAClosedLoop
     }
     private void DrawDataFunction()
     {
+
       m_dataRender = new CDataRender(m_salpaFilter);
+
+      Form temp_Form = new Form();
+      if (MdiParent.InvokeRequired)
+        Invoke(
+          new Action<Form>(s => s.MdiParent = this.MdiParent), temp_Form);
+
+      System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+      //(System.Windows.Forms.Control.FromHandle(m_dataRender.Window.Handle)).FindForm().MdiParent = temp_Form.MdiParent;
       m_closedLoop.OnPackFound += m_dataRender.RecievePackData;
 
       m_dataRender.Run();
