@@ -118,7 +118,12 @@ namespace MEAClosedLoop
       //stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0]; // old fixed
       stimDetector.m_Artif_Channel = MEA.NAME2IDX[33];
       ///[DEBUG STIM]
+      ///
+
       //sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
+
+
+
 
       //ACHTUNG IDIOT WRITES HERE!!!!
       //foreach (TStimGroup stim in sl_groups)
@@ -291,6 +296,8 @@ namespace MEAClosedLoop
       }
       int currPacketLength = currPacket[currPacket.Keys.ElementAt(0)].Length;
       List<TStimIndex> stimIndices = m_noArtifacts;
+      
+      /*[DEBUG] SET TEST STIMS*/
       /*
       if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
       {
