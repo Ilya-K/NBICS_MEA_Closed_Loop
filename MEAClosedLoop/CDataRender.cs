@@ -136,7 +136,7 @@ namespace MEAClosedLoop
       //typereader asdf = new typereader();
       //string ss = Content.RootDirectory;  
       Content.RootDirectory = @"Content\";
-      mainFont = Content.Load<SpriteFont>("SpriteFont");
+      mainFont = Content.Load<SpriteFont>("MainFont");
 
     }
 
@@ -294,12 +294,12 @@ namespace MEAClosedLoop
                       line[1].Position += ChannelvectorsArray[key];
                       line[0].Color = Color.DarkGreen;
                       line[1].Color = line[0].Color;
-                      
+
                       if (j > PointsPerPX)
                       {
 
                       }
-                      
+
                     }
                     currentlength += (int)(DataPacketHistory.ElementAt(PuckNum)[key].Length * 2 / PointsPerPX);
                   }
@@ -588,6 +588,7 @@ namespace MEAClosedLoop
             #region отрисовка сетки каналов
             VertexPositionColor[] HorizontalLinesPoints = new VertexPositionColor[2];
             VertexPositionColor[] VericalLinesPoints = new VertexPositionColor[2];
+
             for (int i = 1; i < 8; i++)
             {
               HorizontalLinesPoints[0].Position = new Vector3(0, i * CellHeight, 0);
@@ -604,17 +605,32 @@ namespace MEAClosedLoop
               graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, VericalLinesPoints, 0, 1);
             }
             #endregion
-            #region отрисовока надписей
-            //lock (DataPacketLock)
-            //{
-            //  foreach (int key in DataPacket.Keys)
-            //  {
-            //    gr.DrawString((MEA.AR_DECODE[key]).ToString(),
-            //        (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font,
-            //        new windraw.SolidBrush(windraw.Color.White),
-            //        new windraw.Point((int)(ChannelvectorsArray[key].X * ((float)FormWidth / WindowWidth)), (int)(ChannelvectorsArray[key].Y * ((float)FormHeight / WindowHeight))));
-            //  }
-            //}
+
+            
+            #region Отрисовка надписей
+            // Текущее время
+            string CurrentTimeMCH = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
+            string QueueTimeLength = "Window Length " + ((double)HistoryTimeLength / 25000).ToString() + " seconds";
+            //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
+            TextSprite.Begin();
+
+            TextPosition = new Vector2(20, 40);
+            //Выводим строку
+            TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 20), Color.Red, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 40), Color.Red, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            float kX, kY; // соотношение между шириной окна и буффера
+
+            //39, 16  - разница в размерах между окном и буффером 
+
+            kX = (float)(FormWidth - 16) / (WindowWidth + 0);
+            kY = (float)(FormHeight - 39) / (WindowHeight + 0);
+            foreach (int key in DataPacket.Keys)
+            {
+              Vector2 shift = new Vector2((ChannelvectorsArray[key].X - 1) * kX, ChannelvectorsArray[key].Y * kY);
+              //Vector2 shift = new Vector2(ChannelvectorsArray[key].X, ChannelvectorsArray[key].Y);
+              TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[key].ToString(), shift, Color.Red, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            }
+            TextSprite.End();
             #endregion
             break;
             #endregion
@@ -747,21 +763,23 @@ namespace MEAClosedLoop
 
             #region Отрисовка надписей
             // Текущее время
-            string CurrentTime = "Current Time " + (m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
+            string CurrentTime = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
             //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
             TextPosition = new Vector2(20, 40);
-      //Выводим строку
+            //Выводим строку
             TextSprite.DrawString(mainFont, CurrentTime, new Vector2(20, 20), Color.Red,
           0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 40), Color.Red,
+          0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             TextSprite.End();
-
 
             //gr.DrawString(CurrentTime, (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font, new windraw.SolidBrush(windraw.Color.Green), new windraw.Point(10, 10));
 
             #endregion
             break;
+
             #endregion
         }
       }

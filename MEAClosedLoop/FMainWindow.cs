@@ -13,9 +13,13 @@ namespace MEAClosedLoop
   {
     public Form1 MainManager;
     public FRecorder Recorder;
+
+
     public FMainWindow()
     {
       InitializeComponent();
+      MainManager = new Form1();
+      MainManager.MdiParent = this;
     }
 
     private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -91,6 +95,11 @@ namespace MEAClosedLoop
       {
         Recorder.Show();
       }
+    }
+
+    private void FMainWindow_Load(object sender, EventArgs e)
+    {
+      MainManager.Show();
     }
     
   }

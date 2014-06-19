@@ -720,8 +720,7 @@ namespace MEAClosedLoop
 
       Form temp_Form = new Form();
       if (MdiParent.InvokeRequired)
-        Invoke(
-          new Action<Form>(s => s.MdiParent = this.MdiParent), temp_Form);
+        //Invoke(new Action<Form>(s => s.MdiParent = this.MdiParent), temp_Form);
 
       System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
       //(System.Windows.Forms.Control.FromHandle(m_dataRender.Window.Handle)).FindForm().MdiParent = temp_Form.MdiParent;
