@@ -85,11 +85,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppData\somedataDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>somedataDataSet.xsd</DependentUpon>
-    </Compile>
     <Compile Include="CDataRender.cs" />
     <Compile Include="CFiltering.cs" />
     <Compile Include="CArtifRender.cs" />
@@ -246,17 +241,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="AppData\somedataDataSet.xsc">
-      <DependentUpon>somedataDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="AppData\somedataDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>somedataDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="AppData\somedataDataSet.xss">
-      <DependentUpon>somedataDataSet.xsd</DependentUpon>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -276,7 +260,7 @@
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <ProductName>Клиентский профиль .NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -306,13 +290,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AppData\somedata.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="AppData\somedata_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>somedata.mdf</DependentUpon>
-    </Content>
+    <ProjectReference Include="..\XNALibrary\XNALibrary.csproj">
+      <Project>{37b2f535-faa8-4c99-9fbe-762655f36f0f}</Project>
+      <Name>XNALibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

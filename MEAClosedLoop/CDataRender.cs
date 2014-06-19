@@ -135,8 +135,8 @@ namespace MEAClosedLoop
       //ContentTypeReader<SpriteFont> typereader = new ContentTypeReader<SpriteFont>();
       //typereader asdf = new typereader();
       //string ss = Content.RootDirectory;  
-      //Content.RootDirectory = "C:\\Users\\Михаил\\Documents\\GitHub\\NBICS_MEA_Closed_Loop\\XNAContent\\";
-      //mainFont = Content.Load<SpriteFont>("mainFont");
+      Content.RootDirectory = @"Content\";
+      mainFont = Content.Load<SpriteFont>("SpriteFont");
 
     }
 
@@ -747,11 +747,14 @@ namespace MEAClosedLoop
 
             #region Отрисовка надписей
             // Текущее время
-            string CurrentTime = "Текущее время " + (m_salpaFilter.TimeStamp / 25000).ToString() + "секунд";
+            string CurrentTime = "Current Time " + (m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
             //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
             TextPosition = new Vector2(20, 40);
+      //Выводим строку
+            TextSprite.DrawString(mainFont, CurrentTime, new Vector2(20, 20), Color.Red,
+          0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             TextSprite.End();
 
 
