@@ -145,6 +145,7 @@ namespace MEAClosedLoop
     {
       //[DEBUG]
       m_stimulator.Start();
+      m_stimTimer.Stop();
     }
   }
 }

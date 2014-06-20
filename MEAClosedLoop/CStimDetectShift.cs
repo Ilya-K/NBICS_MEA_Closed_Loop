@@ -1,4 +1,4 @@
-﻿//#define GRAPH
+﻿#define GRAPH
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,18 +21,18 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения класса
     public const int ErrorState = -3303;
-    private const TStimIndex FILTER_DEPTH = 22; 
+    private const TStimIndex FILTER_DEPTH = 18; //22 - best value {by tests} 
     private const TStimIndex default_offset = 8;
     private const TStimIndex start_offset = 16;
     private const TStimIndex GUARANTEED_EMPTY_SPACE = 245;
     private const TStimIndex POST_SIGMA_CALC_DEPTH = 16;
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 40;
-    public TAbsStimIndex MaximumShiftRange = 1100;
+    public TAbsStimIndex MaximumShiftRange = 1600;
     private TStimIndex MinimumLengthBetweenPegs = 10; // 240 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
     public bool FullResearch = false; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
-    public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия удаления артефактов
+    public bool SalpaShiftOptimization = false; // сдвиг для сальпы, убирает последствия удаления артефактов
     public int m_Artif_Channel = MEA.NAME2IDX[25];
     #endregion
 
@@ -87,7 +87,7 @@ namespace MEAClosedLoop
     #region Проверка необходимости пакета, заканчивающегося временем TestingTime, анализ вхождения артефакта в этот пакет
     public bool IsDataRequired(TTime TestingTime)
     {
-
+      if (FullResearch) return true;
       bool Flag = false;
       //- если было в следующем пакете
       lock (LockStimList)
@@ -136,6 +136,8 @@ namespace MEAClosedLoop
     #region Выдача найденных в пакете артефактов
     public List<TStimIndex> GetStims(TRawDataPacket DataPacket)
     {
+      if(FullResearch)
+        return FindStims(DataPacket[m_Artif_Channel]);
       CallCount++;
       #region Определение ситуации с расположением артефактов в пакете
       //Случай, когда мы просим задержать пакет.
@@ -203,7 +205,7 @@ namespace MEAClosedLoop
       if (FullResearch)
       {
         #region Поиск по всему пакету
-        for (short i = (short)FILTER_DEPTH; i < DataPacket.Length - FILTER_DEPTH; i++)
+        for (short i = (short)FILTER_DEPTH; i < DataPacket.Length - FILTER_DEPTH; i += 2)
         {
           if (TrueValidateSingleStimInT(DataPacket, i))
           {

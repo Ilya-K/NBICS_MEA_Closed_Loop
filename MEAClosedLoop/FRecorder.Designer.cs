@@ -58,7 +58,6 @@
       this.button8 = new System.Windows.Forms.Button();
       this.prev = new System.Windows.Forms.Button();
       this.TimeElapsed = new System.Windows.Forms.Label();
-      this.label3 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.textBox2 = new System.Windows.Forms.TextBox();
       this.textBox1 = new System.Windows.Forms.TextBox();
@@ -355,7 +354,6 @@
       this.groupBox4.Controls.Add(this.button8);
       this.groupBox4.Controls.Add(this.prev);
       this.groupBox4.Controls.Add(this.TimeElapsed);
-      this.groupBox4.Controls.Add(this.label3);
       this.groupBox4.Controls.Add(this.label2);
       this.groupBox4.Controls.Add(this.textBox2);
       this.groupBox4.Controls.Add(this.textBox1);
@@ -406,15 +404,6 @@
       this.TimeElapsed.Size = new System.Drawing.Size(19, 13);
       this.TimeElapsed.TabIndex = 6;
       this.TimeElapsed.Text = "00";
-      // 
-      // label3
-      // 
-      this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(100, 75);
-      this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(24, 13);
-      this.label3.TabIndex = 5;
-      this.label3.Text = "sec";
       // 
       // label2
       // 
@@ -579,7 +568,6 @@
     private System.Windows.Forms.TextBox textBox1;
     private System.Windows.Forms.Label TimeElapsed;
     private System.Windows.Forms.Label label2;
-    private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Button button7;
     private System.Windows.Forms.Label RecordTimeElapsed;
     private System.Windows.Forms.Label label5;

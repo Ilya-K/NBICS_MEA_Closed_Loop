@@ -31,7 +31,7 @@ namespace MEAClosedLoop
     public CRasterPlot m_rasterPlotter;
     public CStimulator m_stimulator;
     public FRecorder m_Recorder;
-    public bool FakeStimulator = true;
+    public bool FakeStimulator = false;
 
     private FPackStat m_statForm;
 

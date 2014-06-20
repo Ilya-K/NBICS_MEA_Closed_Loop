@@ -34,7 +34,7 @@ namespace MEAClosedLoop
     #region стандартные значения
     private int DEFAULT_WINDOW_HEIGHT = 600;
     private int DEFAULT_WINDOW_WIDTH = 800;
-    int HistoryLength = 2;
+    int HistoryLength = 20;
     bool editFlagLeft = true;
     bool editFlagRight = true;
     bool editFlagUp = true;
@@ -47,8 +47,8 @@ namespace MEAClosedLoop
     private int SCHYRange = 120;
 
 
-    private int MaxVoltageMch = 200;
-    private int MaxVoltageSch = 200;
+    private int MaxVoltageMch = 3000;
+    private int MaxVoltageSch = 3000;
     #endregion
 
     #region внутренние данные
@@ -64,7 +64,7 @@ namespace MEAClosedLoop
 
     GameTime OldUpdateTimeMch;
     int timeElapsed = 0;
-    int millisecondsPerMove = 2000;
+    int millisecondsBeetwinUpdate = 500;
 
     public TTime summary_time_stamp = 0;
     CFiltering m_salpaFilter;
@@ -87,7 +87,7 @@ namespace MEAClosedLoop
     int ZeroChannelNum = MEA.NAME2IDX[53];
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
-
+    volatile int PrepeareDataTime = 0;
 
     #endregion
 
@@ -212,11 +212,23 @@ namespace MEAClosedLoop
       #endregion
       #endregion
 
+      #region Установка оптимальной частоты пересчета данных
+      millisecondsBeetwinUpdate = 200;
+      if (HistoryLength < 100)
+        millisecondsBeetwinUpdate = 100;
+      if (HistoryLength < 50)
+        millisecondsBeetwinUpdate = 50;
+      if (HistoryLength < 30)
+        millisecondsBeetwinUpdate = 20;
+      if (HistoryLength < 20)
+        millisecondsBeetwinUpdate = 10;
+      #endregion
+
       switch (SelectedDrawMode)
       {
         case DrawMode.DrawMultiChannel:
           // случай отрисовки всех каналов, подготовливаем массив точек
-          if (timeElapsed > millisecondsPerMove && !IsDataUpdated && DataPacket != null)
+          if (/*timeElapsed > millisecondsBeetwinUpdate/2 && */!IsDataUpdated && DataPacket != null)
           // надо заменить на обработку GameTime [но пока сойдет и так] - для фиксации фпс
           {
             timeElapsed = 0;
@@ -252,13 +264,7 @@ namespace MEAClosedLoop
                 //количество точек в очереди
                 int length = 0;
                 #region Вычисление векторов смещения для каналов
-                /*
-              Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Max() + 1];
-              foreach (int i in DataPacket.Keys)
-              {
-                ChannelvectorsArray[i] = new Vector3((MEA.IDX2NAME[i] / 10 - 1) * CellWidth, (MEA.IDX2NAME[i] % 10 - 1) * CellHeight, 0);
-              }
-              */
+                
                 #endregion
                 for (int i = 0; i < DataPacketHistory.Count; i++)
                 {
@@ -269,16 +275,15 @@ namespace MEAClosedLoop
                 // key - номер канала
                 foreach (int key in DataPacket.Keys)
                 {
-                  // массив точек удвоенной длины - мы добавляем между каждыми двумя
-                  //вертикальными диниями одну соединяющую.
-                  vertices[key] = new VertexPositionColor[pxCount][]; // -1 - поправка на непонятный баг
+                  
+                  vertices[key] = new VertexPositionColor[pxCount][]; 
                   double[] GlueArray = new double[length];
 
                   // текущая позиция в массиве точек 
                   int currentlength = 0;
                   int PackCount = DataPacketHistory.Count;
                   int CurrentPacketLength = 0;
-                  long ticks = Environment.TickCount;
+                  long PrepeareDataTime = Environment.TickCount;
                   for (int PackNum = 0; PackNum < DataPacketHistory.Count; PackNum++)
                   {
                     CurrentPacketLength = DataPacketHistory.ElementAt(PackNum)[key].Length;
@@ -305,7 +310,7 @@ namespace MEAClosedLoop
                     vertices[key][i] = line;
 
                   }
-                  ticks = Environment.TickCount - ticks;
+                  PrepeareDataTime = Environment.TickCount - PrepeareDataTime;
                   /*
                   if (ticks > 120)
                   {
@@ -367,12 +372,12 @@ namespace MEAClosedLoop
           }
           break;
         case DrawMode.DrawSingleChannel:
-
+          
           lock (CurrentTimeCync)
           {
-            lock (DataPacketLock)
               summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
           }
+          
           break;
       }
 
@@ -400,11 +405,13 @@ namespace MEAClosedLoop
         }
       }
       IsDataUpdated = false;
+      /*
       lock (CurrentTimeCync)
       {
         summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.First()].Length;
         DebugCount++;
       }
+      */
 
     }
 
@@ -530,7 +537,6 @@ namespace MEAClosedLoop
 
             }
             #endregion
-            int RealChannelIndx = 0;
 
            
             foreach (int key in DataPacket.Keys)
@@ -693,13 +699,15 @@ namespace MEAClosedLoop
             // Текущее время
             string CurrentTimeMCH = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
             string QueueTimeLength = "Window Length " + ((double)HistoryTimeLength / 25000).ToString() + " seconds";
+            string UpdateTime = "Update Time " + ((double)PrepeareDataTime / 1000).ToString() + " seconds";
             //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
             TextPosition = new Vector2(20, 40);
             //Выводим строку
-            TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 20), Color.Red, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
-            TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 40), Color.Red, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 20), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 40), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, UpdateTime, new Vector2(0, 60), Color.White, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             float kX, kY; // соотношение между шириной окна и буффера
 
             //39, 16  - разница в размерах между окном и буффером 
@@ -841,7 +849,7 @@ namespace MEAClosedLoop
 
             }
             #endregion
-            summary_time_stamp = m_salpaFilter.TimeStamp;// + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+            //summary_time_stamp = m_salpaFilter.TimeStamp;// + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
 
             #region Отрисовка надписей
             // Текущее время

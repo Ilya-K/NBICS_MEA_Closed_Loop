@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 20;
+    private const int Minimum_Pack_Requered_Count = 1260;
     #endregion
     #region Внутренние данные класса
     private CPackDetector PackDetector;
@@ -145,7 +145,7 @@ namespace MEAClosedLoop
       //set as 0
       for (int i = 0; i < PackLengthDestrib.Length; i++)
       {
-        PackLengthDestrib[i] = 3;
+        PackLengthDestrib[i] = 0;
       }
       lock (PacklListBlock)
       {
@@ -255,14 +255,15 @@ namespace MEAClosedLoop
     }
     private void AddPack(CPack pack_to_add)
     {
-      
+      //light pack - Pack version that not include PackDataArray - memory optimization
+      CPack lightPack = new CPack(pack_to_add.Start, pack_to_add.Length, null);
       lock (PacklListBlock)
       {
         switch (CurrentState)
         {
           case state.BeforeStimulation:
             //light pack - Pack version that not include PackDataArray - memory optimization
-            CPack lightPack = new CPack(pack_to_add.Start, pack_to_add.Length, null);
+            
             if (DoStatCollection) PackListBefore.Add(lightPack);
             StatProgressBar.BeginInvoke(SetVal, null, 1);
             DistribGrath.BeginInvoke(UpdateDistribGrath);
@@ -274,7 +275,7 @@ namespace MEAClosedLoop
             break;
           case state.AfterStimulation:
 
-            if (DoStimulation) PackListAfter.Add(pack_to_add);
+            if (DoStimulation) PackListAfter.Add(lightPack);
             PackCountGraph.Invalidate();
             DistribGrath.BeginInvoke(UpdateDistribGrath);
             break;

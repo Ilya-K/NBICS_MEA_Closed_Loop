@@ -302,7 +302,7 @@ namespace MEAClosedLoop
       if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
       {
         //[HARD DEBUG]
-        m_stimDetector.SetExpectedStims(sl_groups[0]);
+        //m_stimDetector.SetExpectedStims(sl_groups[0]);
         sl_groups.RemoveAt(0);
       }
       

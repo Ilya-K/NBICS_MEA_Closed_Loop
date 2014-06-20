@@ -96,7 +96,7 @@ namespace MEAClosedLoop
 
       SqlConnection myConn = new SqlConnection(@"Data Source=.\SQLEXPRESS;Integrated security=SSPI;database=master");
 
-      DbName = "ExpData_" + DateTime.Now.Date.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_").Replace("-", "_");
+      DbName = "ExpData_" + DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_").Replace("-", "_");
       DbLogName = DbName + "_Log";
 
       DbFileName = saveFileDialog.FileName.ToString();
@@ -317,7 +317,7 @@ namespace MEAClosedLoop
     {
       //[TODO]: необходимо сделать учет длины 1 секунды записи
 
-      data = CDataCompress.BinaryRawToRawData(CDataCompress.RawDataToBinary(data));
+      //data = CDataCompress.BinaryRawToRawData(CDataCompress.RawDataToBinary(data));
 
       if (DoRecieveData && (DoRecordCmpData.Checked || DoRecordCompressData.Checked))
       {
@@ -326,12 +326,13 @@ namespace MEAClosedLoop
         if (RecordTimeElapsed.InvokeRequired) 
           RecordTimeElapsed.Invoke(new Action<string>(s => RecordTimeElapsed.Text = s), (MeasureLength / 25000).ToString());
         else 
-          RecordTimeElapsed.Text = (MeasureLength / 25000).ToString();
-
-        //RecordTimeElapsed.Text = (MeasureLength / 25000).ToString() + " s";
+          RecordTimeElapsed.Text = (MeasureLength / 25000).ToString() + " sec";
         using (ExpDataContext _db = new ExpDataContext(str_build.ToString()))
         {
-
+          RawData rawData = new RawData();
+          rawData.MeasureID = currentRecordMeasure.id;
+          rawData.binData = CDataCompress.RawDataToCmpBinary(data, 5);
+          _db.RawData.Add(rawData);
           _db.SaveChanges();
         }
       }

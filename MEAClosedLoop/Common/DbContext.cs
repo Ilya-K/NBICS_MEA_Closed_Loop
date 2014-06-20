@@ -106,11 +106,11 @@ namespace MEAClosedLoop.Common
     public int id { get; set; }
     public int? MeasureID { get; set; }
     public virtual MeasureManager MeasureManager { get; set; }
-    public TTime Time { get; set; }
+    public long Time { get; set; }
     public int Length { get; set; }
     public PackData(CPack pack)
     {
-      Time = pack.Start;
+      Time = (long)pack.Start;
       Length = pack.Length;
     }
   }
