@@ -120,7 +120,7 @@ namespace MEAClosedLoop
       ///[DEBUG STIM]
       ///
 
-      //sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
+      sl_groups = GenStimulList(StartStimTime, StimType, MAX_FILE_LENGTH);
 
 
 
@@ -298,14 +298,14 @@ namespace MEAClosedLoop
       List<TStimIndex> stimIndices = m_noArtifacts;
       
       /*[DEBUG] SET TEST STIMS*/
-      /*
+      
       if (sl_groups[0].stimTime < m_inputStream.TimeStamp + (TTime)currPacketLength)
       {
         //[HARD DEBUG]
         m_stimDetector.SetExpectedStims(sl_groups[0]);
         sl_groups.RemoveAt(0);
       }
-      */
+      
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
       // Returns true if the current packet is requred (stimulation might be expected in the next packet)
       if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime)currPacketLength))

@@ -45,6 +45,10 @@ namespace MEAClosedLoop
     private int SCHCompress = 2;
     private int MCHYRange = 8;
     private int SCHYRange = 120;
+
+
+    private int MaxVoltageMch = 200;
+    private int MaxVoltageSch = 200;
     #endregion
 
     #region внутренние данные
@@ -56,6 +60,12 @@ namespace MEAClosedLoop
 
     object DataPacketLock = new object(); // блокировка данных
     object CurrentTimeCync = new object(); // блокировка времени для синхронизации отрисовки
+    object UpdateGraphDataLock = new object();
+
+    GameTime OldUpdateTimeMch;
+    int timeElapsed = 0;
+    int millisecondsPerMove = 2000;
+
     public TTime summary_time_stamp = 0;
     CFiltering m_salpaFilter;
     GraphicsDeviceManager graphics;
@@ -78,8 +88,6 @@ namespace MEAClosedLoop
     TTime HistoryTimeLength = 0;
     bool IsDataUpdated;
 
-    windraw.Graphics gr;
-
 
     #endregion
 
@@ -94,7 +102,6 @@ namespace MEAClosedLoop
       this.SelectedDrawMode = CDataRender.DrawMode.DrawMultiChannel;
       (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).DoubleClick += ChangeDrawMode;
 
-      gr = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).FindForm().CreateGraphics();
 
       IsDataUpdated = false;
 
@@ -121,6 +128,7 @@ namespace MEAClosedLoop
           graphics.GraphicsDevice.Viewport.Height, 0,    // bottom, top
           0, 1);                                         // near, far plane
 
+      OldUpdateTimeMch = new GameTime();
       base.Initialize();
     }
 
@@ -146,7 +154,7 @@ namespace MEAClosedLoop
 
     protected override void Update(GameTime gameTime)
     {
-
+      timeElapsed += gameTime.ElapsedGameTime.Milliseconds;
       #region Обработка клавиш
       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
         this.Exit();
@@ -178,10 +186,10 @@ namespace MEAClosedLoop
         switch (this.SelectedDrawMode)
         {
           case DrawMode.DrawMultiChannel:
-            MCHYRange = (MCHYRange > 2) ? MCHYRange - 2 : MCHYRange;
+            MaxVoltageMch += (MaxVoltageMch > 50) ? 25 : 10;
             break;
           case DrawMode.DrawSingleChannel:
-            SCHYRange = (SCHYRange > 2) ? SCHYRange - 2 : SCHYRange;
+            MaxVoltageSch += (MaxVoltageSch > 50) ? 25 : 10;
             break;
         }
       }
@@ -191,10 +199,10 @@ namespace MEAClosedLoop
         switch (this.SelectedDrawMode)
         {
           case DrawMode.DrawMultiChannel:
-            MCHYRange += 2;
+            MaxVoltageMch -= (MaxVoltageMch > 100) ? 50 : (MaxVoltageMch > 20) ? 20 : 0;
             break;
           case DrawMode.DrawSingleChannel:
-            SCHYRange += 2;
+            MaxVoltageSch -= (MaxVoltageSch > 100) ? 50 : (MaxVoltageSch > 20) ? 20 : 0;
             break;
         }
       }
@@ -208,18 +216,20 @@ namespace MEAClosedLoop
       {
         case DrawMode.DrawMultiChannel:
           // случай отрисовки всех каналов, подготовливаем массив точек
-          if (false)
+          if (timeElapsed > millisecondsPerMove && !IsDataUpdated && DataPacket != null)
           // надо заменить на обработку GameTime [но пока сойдет и так] - для фиксации фпс
           {
+            timeElapsed = 0;
             lock (DataPacketLock)
             {
               lock (CurrentTimeCync)
               {
                 summary_time_stamp = m_salpaFilter.TimeStamp;
-                if (DataPacket != null)
-                  summary_time_stamp += (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+                if (DataPacket != null) summary_time_stamp += (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+
+                
               }
-              if (!IsDataUpdated)
+              lock (UpdateGraphDataLock)
               {
                 // Здесь мы пересчитываем данные исходя из текущего состояния очереди, для чего её лочим 
                 // создадим массив массивовх
@@ -230,79 +240,127 @@ namespace MEAClosedLoop
                 double PointsPerPX = 1;
                 //размеры
                 int WindowWidth = graphics.PreferredBackBufferWidth;
-                int FormWidth = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Width;
-                int FormHeight = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Height;
+                int FormWidth = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Width - 16; // 16 поправка на  обрамление окна
+                int FormHeight = (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Height - 39;
                 // сетка 8 x 8 клеток
                 // длина и ширина пропорциональны размеру главного окна
                 int CellWidth = WindowWidth / 8;
                 int CellHeight = WindowHeight / 8;
+                int WindowCellWidth = FormWidth / 8;
+                int WindowCellHeght = FormHeight / 8;
+                int pxCount = FormWidth/8;
                 //количество точек в очереди
                 int length = 0;
                 #region Вычисление векторов смещения для каналов
-                Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Max() + 1];
-                foreach (int i in DataPacket.Keys)
-                {
-                  ChannelvectorsArray[i] = new Vector3((MEA.IDX2NAME[i] / 10 - 1) * CellWidth, (MEA.IDX2NAME[i] % 10 - 1) * CellHeight, 0);
-                }
+                /*
+              Vector3[] ChannelvectorsArray = new Vector3[DataPacket.Keys.Max() + 1];
+              foreach (int i in DataPacket.Keys)
+              {
+                ChannelvectorsArray[i] = new Vector3((MEA.IDX2NAME[i] / 10 - 1) * CellWidth, (MEA.IDX2NAME[i] % 10 - 1) * CellHeight, 0);
+              }
+              */
                 #endregion
                 for (int i = 0; i < DataPacketHistory.Count; i++)
                 {
                   length += DataPacketHistory.ElementAt(i)[DataPacket.Keys.First()].Length;
                 }
 
-                PointsPerPX = ((double)length) * 8 / FormWidth;
+                PointsPerPX = ((double)length) / CellWidth;
                 // key - номер канала
                 foreach (int key in DataPacket.Keys)
                 {
                   // массив точек удвоенной длины - мы добавляем между каждыми двумя
                   //вертикальными диниями одну соединяющую.
-                  vertices[key] = new VertexPositionColor[(int)(length * 2 / PointsPerPX)][];
+                  vertices[key] = new VertexPositionColor[pxCount][]; // -1 - поправка на непонятный баг
+                  double[] GlueArray = new double[length];
+
                   // текущая позиция в массиве точек 
                   int currentlength = 0;
-                  int PointNum = 0;
-                  for (int PuckNum = 0; PuckNum < DataPacketHistory.Count; PuckNum++)
+                  int PackCount = DataPacketHistory.Count;
+                  int CurrentPacketLength = 0;
+                  long ticks = Environment.TickCount;
+                  for (int PackNum = 0; PackNum < DataPacketHistory.Count; PackNum++)
                   {
-                    for (int j = (int)PointsPerPX; j < DataPacketHistory.ElementAt(PuckNum)[key].Length; j += (int)PointsPerPX)
+                    CurrentPacketLength = DataPacketHistory.ElementAt(PackNum)[key].Length;
+                    Array.Copy(DataPacketHistory.ElementAt(PackNum)[key], 0, GlueArray, currentlength, CurrentPacketLength);
+                    currentlength += CurrentPacketLength;
+                  }
+
+                  PointsPerPX = length / pxCount; // точек в одном пикселе
+                  for (int i = 0; i < pxCount; i++)
+                  {
+                    float max = float.MinValue;
+                    float min = float.MaxValue;
+                    for (int j = (int)(i * PointsPerPX); (i + 1) * PointsPerPX + 1 < length && j < (i + 1) * PointsPerPX + 1; j++)
                     {
-                      // находим минимум и максимум
-                      float max = float.MinValue;
-                      float min = float.MaxValue;
-                      for (int z = 0; z < (int)PointsPerPX; z++)
-                      {
-                        float t = (float)DataPacketHistory.ElementAt(PuckNum)[key][j - z];
-                        if (t > max) max = t;
-                        if (t < min) min = t;
-                      }
-                      VertexPositionColor[] line = new VertexPositionColor[2];
-                      line[0].Position = new Vector3(0, 0, 0);
-                      line[1].Position = new Vector3(0, 0, 0);
-                      line[0].Position.X = ((float)(PuckNum) * CellWidth) / length;
-                      line[0].Position.Y = max * MCHYRange / 200 + CellHeight / 2;
-                      line[1].Position.X = line[0].Position.X;
-                      line[1].Position.Y = min * MCHYRange / 200 + CellHeight / 2;
-                      if (line[0].Position.Y < 0)
-                        line[0].Position.Y = 0;
-                      if (line[0].Position.Y > CellHeight)
-                        line[0].Position.Y = CellHeight;
+                      float t = (float)GlueArray[j];
+                      if (t > max) max = t;
+                      if (t < min) min = t;
+                    }
+                    VertexPositionColor[] line = new VertexPositionColor[2];
+                    line[0].Position.X = i *(float) CellWidth/WindowCellWidth;
+                    line[0].Position.Y = max * CellHeight / MaxVoltageMch;
+                    line[1].Position.X = line[0].Position.X;
+                    line[1].Position.Y = min * CellHeight / MaxVoltageMch;
+                    vertices[key][i] = line;
 
-                      if (line[1].Position.Y > CellHeight)
-                        line[1].Position.Y = CellHeight;
-                      if (line[1].Position.Y < 0)
-                        line[1].Position.Y = 0;
+                  }
+                  ticks = Environment.TickCount - ticks;
+                  /*
+                  if (ticks > 120)
+                  {
+                    pxCount /= 2; // оптимизация при задержках
+                  }
+                  */
+                  #region Стрый, монструозный способ отрисовки
+                  /*
+                for (int PuckNum = 0; PuckNum < DataPacketHistory.Count; PuckNum++)
+                {
+                  for (int j = (int)PointsPerPX; j < DataPacketHistory.ElementAt(PuckNum)[key].Length; j += (int)PointsPerPX)
+                  {
+                    // находим минимум и максимум
+                    float max = float.MinValue;
+                    float min = float.MaxValue;
+                    for (int z = 0; z < (int)PointsPerPX; z++)
+                    {
+                      float t = (float)DataPacketHistory.ElementAt(PuckNum)[key][j - z];
+                      if (t > max) max = t;
+                      if (t < min) min = t;
+                    }
+                    VertexPositionColor[] line = new VertexPositionColor[2];
+                    line[0].Position = new Vector3(0, 0, 0);
+                    line[1].Position = new Vector3(0, 0, 0);
+                    line[0].Position.X = ((float)(PuckNum) * CellWidth) / length;
+                    line[0].Position.Y = max * MCHYRange / 200 + CellHeight / 2;
+                    line[1].Position.X = line[0].Position.X;
+                    line[1].Position.Y = min * MCHYRange / 200 + CellHeight / 2;
+                    if (line[0].Position.Y < 0)
+                      line[0].Position.Y = 0;
+                    if (line[0].Position.Y > CellHeight)
+                      line[0].Position.Y = CellHeight;
 
-                      line[0].Position += ChannelvectorsArray[key];
-                      line[1].Position += ChannelvectorsArray[key];
-                      line[0].Color = Color.DarkGreen;
-                      line[1].Color = line[0].Color;
+                    if (line[1].Position.Y > CellHeight)
+                      line[1].Position.Y = CellHeight;
+                    if (line[1].Position.Y < 0)
+                      line[1].Position.Y = 0;
 
-                      if (j > PointsPerPX)
-                      {
+                    line[0].Position += ChannelvectorsArray[key];
+                    line[1].Position += ChannelvectorsArray[key];
+                    line[0].Color = Color.DarkGreen;
+                    line[1].Color = line[0].Color;
 
-                      }
+                    if (j > PointsPerPX)
+                    {
 
                     }
-                    currentlength += (int)(DataPacketHistory.ElementAt(PuckNum)[key].Length * 2 / PointsPerPX);
+
                   }
+                  currentlength += (int)(DataPacketHistory.ElementAt(PuckNum)[key].Length * 2 / PointsPerPX);
+                }
+                 */
+                  #endregion
+
+
                 }
               }
             }
@@ -474,16 +532,18 @@ namespace MEAClosedLoop
             #endregion
             int RealChannelIndx = 0;
 
-            if (!IsDataUpdated) vertices = new VertexPositionColor[DataPacket.Keys.Count][][];
+           
             foreach (int key in DataPacket.Keys)
             {
               //подготовка массива массивов точек
               IsDataUpdated = false;
-
+              #region Старая, монструозная отрисовка
+              /*
               if (!IsDataUpdated)
               {
                 #region обновление массивов точек
                 // склеим "исторические" данные
+                
                 int length = 0;
                 lock (DataPacketLock)
                 {
@@ -577,11 +637,33 @@ namespace MEAClosedLoop
                       line[0].Position.Y = ChannelvectorsArray[RealChannelIndx].Y;
                   }
                   graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
+                 
                   #endregion
                 }
               }
+                 
                 #endregion
-              RealChannelIndx++;
+              */
+              #endregion
+
+              lock (UpdateGraphDataLock)
+              {
+                if (!(vertices != null && vertices.Count() == DataPacket.Keys.Count && vertices[key] != null && vertices[key].Length > 0))
+                {
+                  break;
+                }
+                for (int i = 0; i < vertices[key].Length; i++)
+                {
+                  VertexPositionColor[] line = new VertexPositionColor[2];
+                  line[0].Position = vertices[key][i][0].Position + ChannelvectorsArray[key];
+                  line[0].Position.Y += CellHeight / 2;
+                  line[1].Position = vertices[key][i][1].Position + ChannelvectorsArray[key];
+                  line[1].Position.Y += CellHeight / 2;
+                  line[0].Color = Color.Green;
+                  line[1].Color = Color.Green;
+                  graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
+                }
+              }
             }
             IsDataUpdated = true;
 
@@ -606,7 +688,7 @@ namespace MEAClosedLoop
             }
             #endregion
 
-            
+
             #region Отрисовка надписей
             // Текущее время
             string CurrentTimeMCH = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
@@ -784,7 +866,6 @@ namespace MEAClosedLoop
         }
       }
       base.Draw(gameTime);
-      Thread.Sleep(60);
     }
 
     private bool IsPackAtTime(float time)
