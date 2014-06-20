@@ -238,8 +238,6 @@ namespace MEAClosedLoop
               {
                 summary_time_stamp = m_salpaFilter.TimeStamp;
                 if (DataPacket != null) summary_time_stamp += (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
-
-                
               }
               lock (UpdateGraphDataLock)
               {
@@ -260,11 +258,11 @@ namespace MEAClosedLoop
                 int CellHeight = WindowHeight / 8;
                 int WindowCellWidth = FormWidth / 8;
                 int WindowCellHeght = FormHeight / 8;
-                int pxCount = FormWidth/8;
+                int pxCount = FormWidth / 8;
                 //количество точек в очереди
                 int length = 0;
                 #region Вычисление векторов смещения для каналов
-                
+
                 #endregion
                 for (int i = 0; i < DataPacketHistory.Count; i++)
                 {
@@ -275,8 +273,8 @@ namespace MEAClosedLoop
                 // key - номер канала
                 foreach (int key in DataPacket.Keys)
                 {
-                  
-                  vertices[key] = new VertexPositionColor[pxCount][]; 
+
+                  vertices[key] = new VertexPositionColor[pxCount][];
                   double[] GlueArray = new double[length];
 
                   // текущая позиция в массиве точек 
@@ -292,7 +290,7 @@ namespace MEAClosedLoop
                   }
 
                   PointsPerPX = length / pxCount; // точек в одном пикселе
-                  for (int i = 0; i < pxCount; i++)
+                  for (int i = pxCount - 1; i > pxCount; i--)
                   {
                     float max = float.MinValue;
                     float min = float.MaxValue;
@@ -302,11 +300,15 @@ namespace MEAClosedLoop
                       if (t > max) max = t;
                       if (t < min) min = t;
                     }
+                    
                     VertexPositionColor[] line = new VertexPositionColor[2];
-                    line[0].Position.X = i *(float) CellWidth/WindowCellWidth;
-                    line[0].Position.Y = max * CellHeight / MaxVoltageMch;
+                    line[0].Position.X = ( i) * (float)CellWidth / WindowCellWidth;
+                    line[0].Position.Y = max * WindowCellHeght / MaxVoltageMch;
                     line[1].Position.X = line[0].Position.X;
-                    line[1].Position.Y = min * CellHeight / MaxVoltageMch;
+                    line[1].Position.Y = min * WindowCellHeght / MaxVoltageMch;
+                    if (line[0].Position.Y > WindowCellHeght / 2) line[0].Position.Y = WindowCellHeght / 2;
+                    if (line[1].Position.Y < - WindowCellHeght / 2) line[1].Position.Y = - WindowCellHeght / 2;
+                    
                     vertices[key][i] = line;
 
                   }
@@ -372,12 +374,12 @@ namespace MEAClosedLoop
           }
           break;
         case DrawMode.DrawSingleChannel:
-          
+
           lock (CurrentTimeCync)
           {
-              summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+            summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
           }
-          
+
           break;
       }
 
@@ -538,7 +540,7 @@ namespace MEAClosedLoop
             }
             #endregion
 
-           
+
             foreach (int key in DataPacket.Keys)
             {
               //подготовка массива массивов точек
@@ -660,6 +662,7 @@ namespace MEAClosedLoop
                 }
                 for (int i = 0; i < vertices[key].Length; i++)
                 {
+                  if (vertices[key][i] == null) continue;
                   VertexPositionColor[] line = new VertexPositionColor[2];
                   line[0].Position = vertices[key][i][0].Position + ChannelvectorsArray[key];
                   line[0].Position.Y += CellHeight / 2;
