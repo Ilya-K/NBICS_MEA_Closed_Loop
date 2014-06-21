@@ -31,13 +31,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Scene1.fbx">
-      <Name>Scene1</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="MainFont.spritefont">
       <Name>MainFont</Name>
       <Importer>FontDescriptionImporter</Importer>

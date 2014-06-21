@@ -1,4 +1,4 @@
-﻿#define DEBUG_SPIKETRAINS
+﻿//#define DEBUG_SPIKETRAINS
 //#define RANDOM_PACKS
 
 using System;
@@ -18,8 +18,10 @@ namespace MEAClosedLoop
   {
     private const int MIN_TRAINS_TO_START_PACK = 4;
     private const int MIN_TRAINS_TO_CONTINUE_PACK = 4;
-    private const int MAX_FRONT_WIDTH = 20 * Param.MS;     // Насколько один спайк-трэйн может выдаваться вперёд пачки (ширина фронта пачки).
-    // В текущем алгоритме не может быть больше 100 - Param.PRE_SPIKE = 92 мс (2300 отсчетов)
+    private const int MAX_FRONT_WIDTH = 20 * Param.MS;      // Насколько один спайк-трэйн может выдаваться вперёд пачки (ширина фронта пачки).
+                                                            // В текущем алгоритме не может быть больше 100 - Param.PRE_SPIKE = 92 мс (2300 отсчетов)
+    private const int MAX_PACK_LENGTH = 5000 * Param.MS;    // Максимальная длина пачки. При её достижении пачка будет закончена, и начнётся следующая при необходимости.
+
 
     // Алгоритм выделения спайк-трэйнов
     // Считаем дисперсию сигнала в экспоненциальном окне с временем релаксации 250 точек (10 мс, окно ~20 мс).
@@ -621,6 +623,22 @@ namespace MEAClosedLoop
               finishCurrentPack = true;     // Finish current pack despite of active trains at the ent of packet, cos they've come too late
             }
           }
+        }
+
+        // Check if pack length limit exceeded
+        if (m_timestamp + (TTime)currPacketLength > m_firstSpikeTime + MAX_PACK_LENGTH)
+        {
+          if (finishedTrains.Count > 0)
+          {
+            // Find the last spike in the spike-traines finished in current packet
+            m_lastSpikeTime = finishedTrains.Max(el => el.Start + (TTime)el.Length);
+          }
+          else
+          {
+            // Just stop this pack as soon as possible, i.e. at the start of this packet
+            m_lastSpikeTime = m_timestamp; // m_firstSpikeTime + MAX_PACK_LENGTH // Or at MAX_PACK_LENGTH
+          }
+          finishCurrentPack = true;
         }
 
         if ((numActiveTrainsLeft < MIN_TRAINS_TO_CONTINUE_PACK) || finishCurrentPack)

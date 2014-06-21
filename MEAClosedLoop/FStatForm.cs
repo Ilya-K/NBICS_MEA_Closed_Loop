@@ -1,4 +1,4 @@
-﻿#define DEBUG_SPIKETRAINS
+﻿//#define DEBUG_SPIKETRAINS
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

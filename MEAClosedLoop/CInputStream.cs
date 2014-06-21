@@ -215,19 +215,6 @@ namespace MEAClosedLoop
 
     #endregion
 
-    public UInt32 GetIntervalFromNowInMS(TTime futureTime)
-    {
-      UInt32 delta;
-      TTime currTime;
-      lock (lockCurrentTime) {
-        currTime = m_currentTimeStamp + (TTime)m_windowsTime.ElapsedMilliseconds * (m_samplingRate / 1000);
-      }
-      if (futureTime < currTime) return 0;
-      delta = (UInt32)(futureTime - currTime);
-
-      return (1000 * delta) / m_samplingRate;
-    }
-
     public void Kill()
     {
       Stop();
@@ -284,17 +271,34 @@ namespace MEAClosedLoop
       } while (!m_kill);
     }
 
+    public UInt32 GetIntervalFromNowInMS(TTime futureTime)
+    {
+      UInt32 delta;
+      TTime currTime;
+      lock (lockCurrentTime)
+      {
+        currTime = m_currentTimeStamp + (TTime)m_windowsTime.ElapsedMilliseconds * (m_samplingRate / 1000);
+      }
+      if (futureTime < currTime) return 0;
+      delta = (UInt32)(futureTime - currTime);
+
+      return (1000 * delta) / m_samplingRate;
+    }
+
     // Функция, которая передаётся в источник данных в кач-ве callback-а
     private void OnChannelData(int CbHandle, int numSamples)
     {
       // [TODO] Check time consistency
-      m_windowsTime.Restart();
-      
-      int size_ret;
-      Dictionary<int, ushort[]> data = m_dataSource.ChannelBlock_ReadFramesDictUI16(CbHandle, numSamples, out size_ret);
+      Dictionary<int, ushort[]> data;
+      lock (lockCurrentTime)
+      {
+        m_windowsTime.Restart();
 
-      lock (lockCurrentTime) m_currentTimeStamp += (ulong)data.First().Value.Length;
+        int size_ret;
+        data = m_dataSource.ChannelBlock_ReadFramesDictUI16(CbHandle, numSamples, out size_ret);
 
+        m_currentTimeStamp += (ulong)data.First().Value.Length;
+      }
       if (!m_stop)
       {
         lock (m_rawQueue) m_rawQueue.Enqueue(data);
