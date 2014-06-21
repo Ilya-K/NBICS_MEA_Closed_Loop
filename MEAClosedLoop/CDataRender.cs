@@ -86,7 +86,7 @@ namespace MEAClosedLoop
     int SingleChannelNum = MEA.NAME2IDX[21];
     int ZeroChannelNum = MEA.NAME2IDX[53];
     TTime HistoryTimeLength = 0;
-    bool IsDataUpdated;
+    private volatile bool IsDataUpdated;
     volatile int PrepeareDataTime = 0;
 
     #endregion
@@ -290,7 +290,7 @@ namespace MEAClosedLoop
                   }
 
                   PointsPerPX = length / pxCount; // точек в одном пикселе
-                  for (int i = pxCount - 1; i > pxCount; i--)
+                  for (int i = pxCount - 1; i > 0; i--)
                   {
                     float max = float.MinValue;
                     float min = float.MaxValue;
@@ -307,7 +307,9 @@ namespace MEAClosedLoop
                     line[1].Position.X = line[0].Position.X;
                     line[1].Position.Y = min * WindowCellHeght / MaxVoltageMch;
                     if (line[0].Position.Y > WindowCellHeght / 2) line[0].Position.Y = WindowCellHeght / 2;
-                    if (line[1].Position.Y < - WindowCellHeght / 2) line[1].Position.Y = - WindowCellHeght / 2;
+                    if (line[0].Position.Y < -WindowCellHeght / 2) line[0].Position.Y = WindowCellHeght / 2;
+                    if (line[1].Position.Y < -WindowCellHeght / 2) line[1].Position.Y = -WindowCellHeght / 2;
+                    if (line[1].Position.Y > WindowCellHeght / 2) line[1].Position.Y = WindowCellHeght / 2;
                     
                     vertices[key][i] = line;
 
@@ -398,8 +400,7 @@ namespace MEAClosedLoop
         for (; DataPacketHistory.Count >= HistoryLength; DataPacketHistory.Dequeue()) ;
 
         int AnyExistsKey = DataPacket.Keys.First();
-        //Текущее время (время на конец последнего пакета)
-        //summary_time_stamp = m_salpaFilter.TimeStamp + (TTime)DataPacket[AnyExistsKey].Length;
+        
         HistoryTimeLength = 0;
         for (int i = 0; i < DataPacketHistory.Count; i++)
         {
@@ -407,14 +408,6 @@ namespace MEAClosedLoop
         }
       }
       IsDataUpdated = false;
-      /*
-      lock (CurrentTimeCync)
-      {
-        summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.First()].Length;
-        DebugCount++;
-      }
-      */
-
     }
 
     public void RecievePackData(CPack pack)
@@ -848,24 +841,26 @@ namespace MEAClosedLoop
                 stimline[1].Position.Y = WindowHeight / 2;
                 stimline[1].Color = Color.Blue;
                 graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, stimline, 0, 1);
+                stimline[0].Position.X += 1;
+                stimline[1].Position.X += 1;
+                graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, stimline, 0, 1);
               }
-
             }
             #endregion
-            //summary_time_stamp = m_salpaFilter.TimeStamp;// + (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
 
             #region Отрисовка надписей
             // Текущее время
-            string CurrentTime = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
+            CurrentTimeMCH = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
+            QueueTimeLength = "Window Length " + ((double)HistoryTimeLength / 25000).ToString() + " seconds";
+            UpdateTime = "Update Time " + ((double)PrepeareDataTime / 1000).ToString() + " seconds";
             //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
             TextPosition = new Vector2(20, 40);
             //Выводим строку
-            TextSprite.DrawString(mainFont, CurrentTime, new Vector2(20, 20), Color.Red,
-          0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
-            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 40), Color.Red,
-          0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 20), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 40), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, UpdateTime, new Vector2(0, 60), Color.White, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             TextSprite.End();
 
             //gr.DrawString(CurrentTime, (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font, new windraw.SolidBrush(windraw.Color.Green), new windraw.Point(10, 10));

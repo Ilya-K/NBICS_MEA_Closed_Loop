@@ -39,6 +39,8 @@ namespace MEAClosedLoop
     private System.Timers.Timer m_stimTimer;
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
+    public delegate void onSetStimDelegate(TStimGroup ExpStim);
+    public event onSetStimDelegate OnSetStim;
 
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
@@ -133,9 +135,12 @@ namespace MEAClosedLoop
           m_stimulus.stimTime = nextStimTime;
           m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
-          // 
+          //
+ 
           m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
           m_stimTimer.Start();
+          // Костыль, не будет работать с 
+          OnSetStim(m_stimulus);
         }
         prevPack = currPack;
       }
