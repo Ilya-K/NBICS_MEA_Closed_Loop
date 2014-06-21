@@ -31,7 +31,7 @@ namespace MEAClosedLoop
     public CRasterPlot m_rasterPlotter;
     public CStimulator m_stimulator;
     public FRecorder m_Recorder;
-    public bool FakeStimulator = true;
+    public bool FakeStimulator = false;
 
     private FPackStat m_statForm;
 
@@ -716,17 +716,16 @@ namespace MEAClosedLoop
     private void DrawDataFunction()
     {
 
-      m_dataRender = new CDataRender(m_salpaFilter);
 
-      Form temp_Form = new Form();
-      if (MdiParent.InvokeRequired)
+      //Form temp_Form = new Form();
+      //if (MdiParent.InvokeRequired)
         //Invoke(new Action<Form>(s => s.MdiParent = this.MdiParent), temp_Form);
 
-      System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+      //System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
       //(System.Windows.Forms.Control.FromHandle(m_dataRender.Window.Handle)).FindForm().MdiParent = temp_Form.MdiParent;
-      m_closedLoop.OnPackFound += m_dataRender.RecievePackData;
-
-      m_dataRender.Run();
+      CDataRender m_dataRenderN = new CDataRender(m_salpaFilter);
+      m_closedLoop.OnPackFound += m_dataRenderN.RecievePackData;
+      m_dataRenderN.Run();
 
     }
 

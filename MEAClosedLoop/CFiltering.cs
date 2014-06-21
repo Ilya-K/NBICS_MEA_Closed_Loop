@@ -116,7 +116,7 @@ namespace MEAClosedLoop
 
       // [TODO] Allow user to choose stimulus artifact detection channel
       //stimDetector.m_Artif_Channel = m_inputStream.ChannelList[0]; // old fixed
-      stimDetector.m_Artif_Channel = MEA.NAME2IDX[33];
+      stimDetector.m_Artif_Channel = MEA.NAME2IDX[35];
       ///[DEBUG STIM]
       ///
 

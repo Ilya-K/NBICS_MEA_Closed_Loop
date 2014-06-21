@@ -16,8 +16,8 @@ namespace MEAClosedLoop
 
   public class CPackDetector
   {
-    private const int MIN_TRAINS_TO_START_PACK = 4;
-    private const int MIN_TRAINS_TO_CONTINUE_PACK = 4;
+    private const int MIN_TRAINS_TO_START_PACK = 3;
+    private const int MIN_TRAINS_TO_CONTINUE_PACK = 3;
     private const int MAX_FRONT_WIDTH = 20 * Param.MS;      // Насколько один спайк-трэйн может выдаваться вперёд пачки (ширина фронта пачки).
                                                             // В текущем алгоритме не может быть больше 100 - Param.PRE_SPIKE = 92 мс (2300 отсчетов)
     private const int MAX_PACK_LENGTH = 5000 * Param.MS;    // Максимальная длина пачки. При её достижении пачка будет закончена, и начнётся следующая при необходимости.

@@ -860,7 +860,8 @@ namespace MEAClosedLoop
             //Выводим строку
             TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 20), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 40), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
-            TextSprite.DrawString(mainFont, UpdateTime, new Vector2(0, 60), Color.White, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 40), Color.Red,0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+
             TextSprite.End();
 
             //gr.DrawString(CurrentTime, (System.Windows.Forms.Control.FromHandle(this.Window.Handle)).Font, new windraw.SolidBrush(windraw.Color.Green), new windraw.Point(10, 10));

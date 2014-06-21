@@ -1,4 +1,4 @@
-﻿#define DEBUG_SPIKETRAINS
+﻿//#define DEBUG_SPIKETRAINS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -140,7 +140,7 @@ namespace MEAClosedLoop
           m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
           m_stimTimer.Start();
           // Костыль, не будет работать с 
-          OnSetStim(m_stimulus);
+          //OnSetStim(m_stimulus);
         }
         prevPack = currPack;
       }
