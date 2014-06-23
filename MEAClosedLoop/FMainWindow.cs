@@ -99,6 +99,8 @@ namespace MEAClosedLoop
 
     private void FMainWindow_Load(object sender, EventArgs e)
     {
+      MainManager.StartPosition = FormStartPosition.Manual;
+      MainManager.Location = new System.Drawing.Point(0, 0);
       MainManager.Show();
     }
     

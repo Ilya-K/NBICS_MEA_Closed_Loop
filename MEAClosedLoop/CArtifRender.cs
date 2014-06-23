@@ -72,7 +72,7 @@ namespace MEAClosedLoop
           vertices = new VertexPositionColor[detector.inner_data_to_display.Length];
           for (int i = 0; i < detector.inner_data_to_display.Length; i++)
           {
-            vertices[i].Position = new Vector3(i * x_range, (detector.inner_data_to_display[i] - 32768) / 15 + 200, 0);
+            vertices[i].Position = new Vector3(i * x_range, (detector.inner_data_to_display[i] - 32768) / 15 + 250, 0);
             vertices[i].Color = Color.Black;
           }
           arraylengh = detector.inner_data_to_display.Length - 1;

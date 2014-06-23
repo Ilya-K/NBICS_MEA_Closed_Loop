@@ -352,7 +352,7 @@ namespace MEAClosedLoop
         }
         // length_sams [75], asym_sams [10], blank_sams [75], ahead_sams [5], forcepeg_sams [10], thresholds[]
         // SALPAParams parSALPA = new SALPAParams(75, 10, 75, 5, 10, thresholds);
-        SALPAParams parSALPA = new SALPAParams(100, 15, 100, 10, 15, thresholds);
+        SALPAParams parSALPA = new SALPAParams(35, 15, 35, 10, 5, thresholds);
 
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
 

@@ -21,18 +21,18 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения класса
     public const int ErrorState = -3303;
-    private const TStimIndex FILTER_DEPTH = 22; //22 - best value {by tests} 
+    private const TStimIndex FILTER_DEPTH = 16; //22 - best value {by tests} 
     private const TStimIndex default_offset = 8;
     private const TStimIndex start_offset = 16;
     private const TStimIndex GUARANTEED_EMPTY_SPACE = 245;
-    private const TStimIndex POST_SIGMA_CALC_DEPTH = 16;
-    private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 40;
-    public TAbsStimIndex MaximumShiftRange = 1000; // 1200 - MAX VALUE
+    private const TStimIndex POST_SIGMA_CALC_DEPTH = 32;
+    private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 32;
+    public TAbsStimIndex MaximumShiftRange = 900; // 1200 - MAX VALUE
     private TStimIndex MinimumLengthBetweenPegs = 10; // 240 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
-    public bool FullResearch = false; //True for unoptimized research
+    public bool FullResearch = true; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
-    public bool SalpaShiftOptimization = true; // сдвиг для сальпы, убирает последствия удаления артефактов
+    public bool SalpaShiftOptimization = false; // сдвиг для сальпы, убирает последствия удаления артефактов
     public int m_Artif_Channel = MEA.NAME2IDX[25];
     #endregion
 
@@ -136,7 +136,7 @@ namespace MEAClosedLoop
     #region Выдача найденных в пакете артефактов
     public List<TStimIndex> GetStims(TRawDataPacket DataPacket)
     {
-      if(FullResearch)
+      if (FullResearch)
         return FindStims(DataPacket[m_Artif_Channel]);
       CallCount++;
       #region Определение ситуации с расположением артефактов в пакете
@@ -205,10 +205,15 @@ namespace MEAClosedLoop
       if (FullResearch)
       {
         #region Поиск по всему пакету
-        for (short i = (short)FILTER_DEPTH; i < DataPacket.Length - FILTER_DEPTH; i += 2)
+        for (short i = (short)FILTER_DEPTH; i < DataPacket.Length - POST_SIGMA_CALC_DEPTH; i += 1)
         {
+          if (i == 1956)
+          {
+          }
           if (TrueValidateSingleStimInT(DataPacket, i))
           {
+            
+
             FoundPegs.Add((TStimIndex)i);
             lock (LockStimList)
             {
@@ -239,7 +244,7 @@ namespace MEAClosedLoop
           {
             //DEBUG
 
-            if(CurrentTime == 355000)
+            if (CurrentTime == 355000)
             {
 
             }
@@ -249,14 +254,14 @@ namespace MEAClosedLoop
                     (TAbsStimIndex)DataPacket.Length : (stim.stimTime - CurrentTime + ((TAbsStimIndex)MaximumShiftRange));
             TAbsStimIndex leftRange = (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 0
               && stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange - (TAbsStimIndex)FILTER_DEPTH < 20000) ?
-                     0 : 
+                     0 :
                      (stim.stimTime - CurrentTime - (TAbsStimIndex)MaximumShiftRange);
             if (FoundPegs.Count() > 0 && leftRange <= (TAbsStimIndex)FoundPegs[FoundPegs.Count() - 1] + 10)
               leftRange = (TAbsStimIndex)FoundPegs[FoundPegs.Count() - 1] + 10;
             for (TAbsStimIndex i = leftRange; i < rightRange; i++)
             {
               if (i == 1954)
-              { 
+              {
               }
               if (TrueValidateSingleStimInT(DataPacket, (TStimIndex)i))
               {
@@ -353,31 +358,27 @@ namespace MEAClosedLoop
         {
           pre_average.AddValueElem(DataPacket[t - i]);
         }
-        for (int i = 5; i < POST_SIGMA_CALC_DEPTH; i++)
+        for (int i = 7; i < POST_SIGMA_CALC_DEPTH; i++)
         {
           post_average.AddValueElem(DataPacket[t + i]);
         }
         pre_average.Calc();
         post_average.Calc();
         #region Условия Подтверждения артефакта
-        if (pre_average.IsInArea(DataPacket[t])
-          && !pre_average.IsInArea(DataPacket[t + 1])
-          && !pre_average.IsInArea(post_average.Value - pre_average.TripleSigma)
-          && !pre_average.IsInArea(post_average.Value + pre_average.TripleSigma)
-          //Clipping Fix
-          && pre_average.Value > 0
-          && pre_average.Value < 65535
-          //StableLinesFix
-          && Math.Abs(pre_average.Value - post_average.Value) > 300
-          //Blanking Fix
-
-          && pre_average.Sigma < 35
-          )
+          if (!pre_average.IsInArea(DataPacket[t + 1]))
+            if (!pre_average.IsInArea(post_average.Value - pre_average.TripleSigma))
+              if (!pre_average.IsInArea(post_average.Value + pre_average.TripleSigma))
+                //Clipping Fix
+                if (pre_average.Value > 0)
+                  if (pre_average.Value < 65535)
+                    //StableLinesFix
+                    if (Math.Abs(pre_average.Value - post_average.Value) > 160)
+                      //Blanking Fix
+                      if (pre_average.Sigma < 100)
+                      {
+                        return true;
+                      }
         #endregion
-        {
-          //MessageBox.Show("ArtifFounded");
-          return true;
-        }
         return false;
       }
       catch (Exception e)
