@@ -67,27 +67,27 @@ namespace MEAClosedLoop
     int millisecondsBeetwinUpdate = 500;
 
     public TTime summary_time_stamp = 0;
-    CFiltering m_salpaFilter;
+    public CFiltering m_salpaFilter;
     GraphicsDeviceManager graphics;
     // эффект BasicEffect для кривой  
     BasicEffect basicEffect;
     // спрайт для текстуры
-    SpriteBatch TextSprite;
-    SpriteFont mainFont;
-    Vector2 TextPosition;
+    private SpriteBatch TextSprite;
+    private SpriteFont mainFont;
+    private Vector2 TextPosition;
     // массив массивов массивов сверток нашей кривой для многоканального режима
-    VertexPositionColor[][][] vertices;
+    private VertexPositionColor[][][] vertices;
     // массив массивов вершин для режима одного канала со сверткой
-    VertexPositionColor[][] schCompVerices;
+    private VertexPositionColor[][] schCompVerices;
     // массив массивов вершин для режима одного канала без свертки
-    VertexPositionColor[] schUncompVerices;
-    object VertexPositionLock = new object();
-    DrawMode SelectedDrawMode;
-    int SingleChannelNum = MEA.NAME2IDX[21];
-    int ZeroChannelNum = MEA.NAME2IDX[53];
-    TTime HistoryTimeLength = 0;
+    private VertexPositionColor[] schUncompVerices;
+    private object VertexPositionLock = new object();
+    private DrawMode SelectedDrawMode;
+    private int SingleChannelNum = MEA.NAME2IDX[21];
+    private int ZeroChannelNum = MEA.NAME2IDX[53];
+    private TTime HistoryTimeLength = 0;
     private volatile bool IsDataUpdated;
-    volatile int PrepeareDataTime = 0;
+    private volatile int MaxPrepeareDataTime = 0;
 
     #endregion
 
@@ -131,7 +131,14 @@ namespace MEAClosedLoop
       OldUpdateTimeMch = new GameTime();
       base.Initialize();
     }
-
+    /*
+    protected override void Dispose()
+    {
+      m_salpaFilter.RemoveDataConsumer(this.RecieveFltData);
+      m_salpaFilter.RemoveStimulConsumer(this.RecieveStimData);
+      base.Dispose();
+    }
+    */
     protected override void LoadContent()
     {
       // Создали новый SpriteBatch, который может быть использован для прорисовки текстур.
@@ -155,6 +162,8 @@ namespace MEAClosedLoop
     protected override void Update(GameTime gameTime)
     {
       timeElapsed += gameTime.ElapsedGameTime.Milliseconds;
+      if (gameTime.ElapsedGameTime.Milliseconds > MaxPrepeareDataTime)
+        MaxPrepeareDataTime = gameTime.ElapsedGameTime.Milliseconds;
       #region Обработка клавиш
       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
         this.Exit();
@@ -307,7 +316,7 @@ namespace MEAClosedLoop
                     line[1].Position.X = line[0].Position.X;
                     line[1].Position.Y = min * WindowCellHeght / MaxVoltageMch;
                     if (line[0].Position.Y > WindowCellHeght / 2) line[0].Position.Y = WindowCellHeght / 2;
-                    if (line[0].Position.Y < -WindowCellHeght / 2) line[0].Position.Y = WindowCellHeght / 2;
+                    if (line[0].Position.Y < -WindowCellHeght / 2) line[0].Position.Y = -WindowCellHeght / 2;
                     if (line[1].Position.Y < -WindowCellHeght / 2) line[1].Position.Y = -WindowCellHeght / 2;
                     if (line[1].Position.Y > WindowCellHeght / 2) line[1].Position.Y = WindowCellHeght / 2;
                     
@@ -695,7 +704,7 @@ namespace MEAClosedLoop
             // Текущее время
             string CurrentTimeMCH = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
             string QueueTimeLength = "Window Length " + ((double)HistoryTimeLength / 25000).ToString() + " seconds";
-            string UpdateTime = "Update Time " + ((double)PrepeareDataTime / 1000).ToString() + " seconds";
+            string UpdateTime = "Update Time " + ((double)MaxPrepeareDataTime / 1000).ToString() + " seconds";
             //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
@@ -852,15 +861,15 @@ namespace MEAClosedLoop
             // Текущее время
             CurrentTimeMCH = "Current Time " + ((double)m_salpaFilter.TimeStamp / 25000).ToString() + " seconds";
             QueueTimeLength = "Window Length " + ((double)HistoryTimeLength / 25000).ToString() + " seconds";
-            UpdateTime = "Update Time " + ((double)PrepeareDataTime / 1000).ToString() + " seconds";
+            UpdateTime = "Update Time " + ((double)MaxPrepeareDataTime / 1000).ToString() + " seconds";
             //(System.Windows.Forms.Control.FromHandle(this.Window.Handle)).
             TextSprite.Begin();
 
             TextPosition = new Vector2(20, 40);
             //Выводим строку
-            TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 20), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
-            TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 40), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
-            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 40), Color.Red,0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 12), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 24), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 36), Color.Red,0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
 
             TextSprite.End();
 

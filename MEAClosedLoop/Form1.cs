@@ -31,7 +31,7 @@ namespace MEAClosedLoop
     public CRasterPlot m_rasterPlotter;
     public CStimulator m_stimulator;
     public FRecorder m_Recorder;
-    public bool FakeStimulator = false;
+    public bool FakeStimulator = true;
 
     private FPackStat m_statForm;
 
@@ -726,7 +726,10 @@ namespace MEAClosedLoop
       CDataRender m_dataRenderN = new CDataRender(m_salpaFilter);
       m_closedLoop.OnPackFound += m_dataRenderN.RecievePackData;
       m_dataRenderN.Run();
-
+      m_closedLoop.OnPackFound -= m_dataRenderN.RecievePackData;
+      m_dataRenderN.m_salpaFilter.RemoveDataConsumer(m_dataRenderN.RecieveFltData);
+      m_dataRenderN.m_salpaFilter.RemoveStimulConsumer(m_dataRenderN.RecieveStimData);
+      m_dataRenderN.Dispose();
     }
 
     private void OpenRecorder_Click(object sender, EventArgs e)
