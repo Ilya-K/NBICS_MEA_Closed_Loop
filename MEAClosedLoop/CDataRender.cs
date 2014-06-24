@@ -172,6 +172,18 @@ namespace MEAClosedLoop
       timeElapsed += gameTime.ElapsedGameTime.Milliseconds;
       if (gameTime.ElapsedGameTime.Milliseconds > MaxPrepeareDataTime)
         MaxPrepeareDataTime = gameTime.ElapsedGameTime.Milliseconds;
+
+
+      lock (DataPacketLock)
+      {
+        // удалим устаревшие найденные стимулы
+        while (FoundStimData.Count > 0 && FoundStimData.Peek() + HistoryTimeLength < summary_time_stamp)
+        {
+          FoundStimData.Dequeue();
+        }
+      }
+
+
       #region Обработка клавиш
       if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
         this.Exit();
@@ -255,7 +267,7 @@ namespace MEAClosedLoop
               {
                 summary_time_stamp = m_salpaFilter.TimeStamp;
                 if (DataPacket != null) summary_time_stamp += (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
-                
+
               }
               lock (UpdateGraphDataLock)
               {
@@ -329,7 +341,7 @@ namespace MEAClosedLoop
                       line[0].Color = Color.Green;
                       line[1].Color = Color.Green;
                     }
-                    
+
                     line[0].Position.X = (i) * (float)CellWidth / WindowCellWidth;
                     line[0].Position.Y = max * WindowCellHeght / MaxVoltageMch;
                     line[1].Position.X = line[0].Position.X;
@@ -338,7 +350,7 @@ namespace MEAClosedLoop
                     if (line[0].Position.Y < -WindowCellHeght / 2) line[0].Position.Y = -WindowCellHeght / 2;
                     if (line[1].Position.Y < -WindowCellHeght / 2) line[1].Position.Y = -WindowCellHeght / 2;
                     if (line[1].Position.Y > WindowCellHeght / 2) line[1].Position.Y = WindowCellHeght / 2;
-                    
+
                     vertices[key][i] = line;
 
                   }
@@ -428,8 +440,8 @@ namespace MEAClosedLoop
         for (; DataPacketHistory.Count >= HistoryLength; DataPacketHistory.Dequeue()) ;
 
         int AnyExistsKey = DataPacket.Keys.First();
-        
-        
+
+
       }
       IsDataUpdated = false;
     }
@@ -689,6 +701,26 @@ namespace MEAClosedLoop
                   line[1].Color = vertices[key][i][1].Color;
                   graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
                 }
+                #region Отрисовка стимулов
+                lock (DataPacketLock)
+                {
+                  foreach (TAbsStimIndex stim in FoundStimData)
+                  {
+                    VertexPositionColor[] stimline = new VertexPositionColor[2];
+                    stimline[0].Position.X = CellWidth * (1 - (float)(summary_time_stamp - stim - (TTime)DataPacket[DataPacket.Keys.First()].Length) / HistoryTimeLength);
+                    stimline[0].Position.Y = CellHeight / 2 - 20;
+                    stimline[0].Position.Z = 0;// (float)0.1;
+                    stimline[0].Position += ChannelvectorsArray[key];
+                    stimline[0].Color = Color.White;
+                    stimline[1].Position = stimline[0].Position;
+                    stimline[1].Position.Y += CellHeight / 2;
+                    stimline[1].Color = Color.Black;
+
+                    graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, stimline, 0, 1);
+                   
+                  }
+                }
+                #endregion
               }
             }
             IsDataUpdated = true;
@@ -850,8 +882,7 @@ namespace MEAClosedLoop
               }
               #endregion
             }
-            base.Draw(gameTime);
-            #region Отрисовка стимулов и пачек
+            #region Отрисовка стимулов
             lock (DataPacketLock)
             {
               foreach (TAbsStimIndex stim in FoundStimData)
@@ -884,7 +915,7 @@ namespace MEAClosedLoop
             //Выводим строку
             TextSprite.DrawString(mainFont, CurrentTimeMCH, new Vector2(0, 12), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
             TextSprite.DrawString(mainFont, QueueTimeLength, new Vector2(0, 24), Color.Black, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
-            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 36), Color.Red,0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
+            TextSprite.DrawString(mainFont, "Ch# " + MEA.IDX2NAME[SingleChannelNum].ToString(), new Vector2(20, 36), Color.Red, 0, new Vector2(0, 0), 1.0f, SpriteEffects.None, 0.5f);
 
             TextSprite.End();
 
