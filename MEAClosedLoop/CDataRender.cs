@@ -161,6 +161,14 @@ namespace MEAClosedLoop
 
     protected override void Update(GameTime gameTime)
     {
+      lock (DataPacketLock)
+      {
+        HistoryTimeLength = 0;
+        for (int i = 0; i < DataPacketHistory.Count; i++)
+        {
+          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[SingleChannelNum].Length;
+        }
+      }
       timeElapsed += gameTime.ElapsedGameTime.Milliseconds;
       if (gameTime.ElapsedGameTime.Milliseconds > MaxPrepeareDataTime)
         MaxPrepeareDataTime = gameTime.ElapsedGameTime.Milliseconds;
@@ -247,6 +255,7 @@ namespace MEAClosedLoop
               {
                 summary_time_stamp = m_salpaFilter.TimeStamp;
                 if (DataPacket != null) summary_time_stamp += (TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+                
               }
               lock (UpdateGraphDataLock)
               {
@@ -309,9 +318,19 @@ namespace MEAClosedLoop
                       if (t > max) max = t;
                       if (t < min) min = t;
                     }
-                    
                     VertexPositionColor[] line = new VertexPositionColor[2];
-                    line[0].Position.X = ( i) * (float)CellWidth / WindowCellWidth;
+                    if (IsPackAtTime(length - (i) * (float)PointsPerPX + 2500))
+                    {
+                      line[0].Color = Color.Red;
+                      line[1].Color = Color.Red;
+                    }
+                    else
+                    {
+                      line[0].Color = Color.Green;
+                      line[1].Color = Color.Green;
+                    }
+                    
+                    line[0].Position.X = (i) * (float)CellWidth / WindowCellWidth;
                     line[0].Position.Y = max * WindowCellHeght / MaxVoltageMch;
                     line[1].Position.X = line[0].Position.X;
                     line[1].Position.Y = min * WindowCellHeght / MaxVoltageMch;
@@ -410,11 +429,7 @@ namespace MEAClosedLoop
 
         int AnyExistsKey = DataPacket.Keys.First();
         
-        HistoryTimeLength = 0;
-        for (int i = 0; i < DataPacketHistory.Count; i++)
-        {
-          HistoryTimeLength += (TTime)DataPacketHistory.ElementAt(i)[SingleChannelNum].Length;
-        }
+        
       }
       IsDataUpdated = false;
     }
@@ -670,8 +685,8 @@ namespace MEAClosedLoop
                   line[0].Position.Y += CellHeight / 2;
                   line[1].Position = vertices[key][i][1].Position + ChannelvectorsArray[key];
                   line[1].Position.Y += CellHeight / 2;
-                  line[0].Color = Color.Green;
-                  line[1].Color = Color.Green;
+                  line[0].Color = vertices[key][i][0].Color;
+                  line[1].Color = vertices[key][i][1].Color;
                   graphics.GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, line, 0, 1);
                 }
               }

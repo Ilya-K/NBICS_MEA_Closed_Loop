@@ -27,6 +27,7 @@ namespace MEAClosedLoop
     private const TStimIndex GUARANTEED_EMPTY_SPACE = 245;
     private const TStimIndex POST_SIGMA_CALC_DEPTH = 32;
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 32;
+    private const int FULL_RESEARCH_MODE_STEP = 3; //100% is 1, more increase speed, but decrease accuracy
     public TAbsStimIndex MaximumShiftRange = 900; // 1200 - MAX VALUE
     private TStimIndex MinimumLengthBetweenPegs = 10; // 240 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
@@ -372,7 +373,7 @@ namespace MEAClosedLoop
                 if (pre_average.Value > 0)
                   if (pre_average.Value < 65535)
                     //StableLinesFix
-                    if (Math.Abs(pre_average.Value - post_average.Value) > 160)
+                    if (Math.Abs(pre_average.Value - post_average.Value) > 300)
                       //Blanking Fix
                       if (pre_average.Sigma < 100)
                       {
