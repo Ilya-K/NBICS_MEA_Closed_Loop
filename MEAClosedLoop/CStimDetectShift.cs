@@ -1,4 +1,4 @@
-﻿#define GRAPH
+﻿//#define GRAPH
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -373,7 +373,7 @@ namespace MEAClosedLoop
                 if (pre_average.Value > 0)
                   if (pre_average.Value < 65535)
                     //StableLinesFix
-                    if (Math.Abs(pre_average.Value - post_average.Value) > 300)
+                    if (Math.Abs(pre_average.Value - post_average.Value) > 250) //варируемый параметр, отсекает резкие спаки
                       //Blanking Fix
                       if (pre_average.Sigma < 100)
                       {

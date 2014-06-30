@@ -218,7 +218,7 @@ namespace MEAClosedLoop
             MaxVoltageMch += (MaxVoltageMch > 50) ? 25 : 10;
             break;
           case DrawMode.DrawSingleChannel:
-            MaxVoltageSch += (MaxVoltageSch > 50) ? 25 : 10;
+            MaxVoltageSch += (MaxVoltageSch > 50) ? 250 : 100;
             break;
         }
       }
@@ -231,7 +231,7 @@ namespace MEAClosedLoop
             MaxVoltageMch -= (MaxVoltageMch > 100) ? 50 : (MaxVoltageMch > 20) ? 20 : 0;
             break;
           case DrawMode.DrawSingleChannel:
-            MaxVoltageSch -= (MaxVoltageSch > 100) ? 50 : (MaxVoltageSch > 20) ? 20 : 0;
+            MaxVoltageSch -= (MaxVoltageSch > 100) ? 500 : (MaxVoltageSch > 20) ? 20 : 0;
             break;
         }
       }
@@ -813,7 +813,7 @@ namespace MEAClosedLoop
               for (int i = 0; i < data_to_display.Length; i++)
               {
                 schUncompVerices[i].Position.X = ((float)i * WindowWidth) / data_to_display.Length;
-                schUncompVerices[i].Position.Y = WindowHeight / 2 + (float)data_to_display[i] * SCHYRange / 100;
+                schUncompVerices[i].Position.Y = WindowHeight / 2 + (float)data_to_display[i] * WindowHeight  / MaxVoltageSch;
                 if (schUncompVerices[i].Position.Y < 0) schUncompVerices[i].Position.Y = 0;
                 if (schUncompVerices[i].Position.Y > WindowHeight) schUncompVerices[i].Position.Y = WindowHeight;
                 schUncompVerices[i].Position.Z = 0;
@@ -843,10 +843,10 @@ namespace MEAClosedLoop
                 }
                 VertexPositionColor[] line = new VertexPositionColor[2];
                 line[0].Position.X = ((float)(i) * WindowWidth) / length;
-                line[0].Position.Y = max * SCHYRange / 100 + WindowHeight / 2;
+                line[0].Position.Y = max * WindowHeight / MaxVoltageSch + WindowHeight / 2;
                 line[0].Position.Z = 0;
                 line[1].Position.X = line[0].Position.X;
-                line[1].Position.Y = min * SCHYRange / 100 + WindowHeight / 2;
+                line[1].Position.Y = min * WindowHeight / MaxVoltageSch + WindowHeight / 2;
                 line[1].Position.Z = 0;
                 line[0].Color = Color.DarkGray;
                 line[1].Color = Color.DarkGray;
