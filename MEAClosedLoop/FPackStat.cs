@@ -68,10 +68,7 @@ namespace MEAClosedLoop
       PackListAfter = new List<CPack>();
       StimList = new List<TAbsStimIndex>();
       LoopCtrl = _LoopController;
-      StatProgressBar.Maximum = Minimum_Pack_Requered_Count + 1;
       m_channelList = channelList;
-
-      SetVal += UpdateProgressBar;
       UpdateDistribGrath += DistribGrath.Refresh;
       UpdateDistribGrath += PreCalcStat;
       UpdateDistribGrath += CurrentCalcStat;
@@ -226,7 +223,6 @@ namespace MEAClosedLoop
                   PackListBefore.Add(pack_to_add);
                 }
               }
-              StatProgressBar.BeginInvoke(SetVal, null, 1);
               DistribGrath.BeginInvoke(UpdateDistribGrath);
               InputCount++;
               if (PackListBefore.Count() >= Minimum_Pack_Requered_Count
@@ -265,8 +261,7 @@ namespace MEAClosedLoop
             //light pack - Pack version that not include PackDataArray - memory optimization
             
             if (DoStatCollection) PackListBefore.Add(lightPack);
-            StatProgressBar.BeginInvoke(SetVal, null, 1);
-            DistribGrath.BeginInvoke(UpdateDistribGrath);
+            if (!this.IsDisposed) DistribGrath.BeginInvoke(UpdateDistribGrath);
             if (PackListBefore.Count >= Minimum_Pack_Requered_Count)
             {
               DoStatCollection = false;
@@ -341,13 +336,7 @@ namespace MEAClosedLoop
     }
 
     #endregion
-    #region Обработка события обновления прогресс бара
-    void UpdateProgressBar(object sender, int val)
-    {
-      if (StatProgressBar.Value + val <= StatProgressBar.Maximum )
-        StatProgressBar.Value += val;
-    }
-    #endregion
+   
     #region Обработка скрола ползунка времени стимуляции
     private void StimPadding_TextChanged(object sender, EventArgs e)
     {
@@ -406,8 +395,6 @@ namespace MEAClosedLoop
       PackCountGraph.Invalidate();
       PackCountGraph.Refresh();
     }
-
-
 
     private void SetDefaultMinWindow(object sender, EventArgs e)
     {

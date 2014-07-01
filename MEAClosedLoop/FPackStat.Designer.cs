@@ -29,9 +29,7 @@
     private void InitializeComponent()
     {
       this.Prepearing = new System.Windows.Forms.GroupBox();
-      this.label11 = new System.Windows.Forms.Label();
       this.CollectStatButton = new System.Windows.Forms.Button();
-      this.StatProgressBar = new System.Windows.Forms.ProgressBar();
       this.GraphChannelSelectButton = new System.Windows.Forms.Button();
       this.label2 = new System.Windows.Forms.Label();
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -49,7 +47,6 @@
       this.CurrentAverage = new System.Windows.Forms.TextBox();
       this.label26 = new System.Windows.Forms.Label();
       this.CurrentSigma = new System.Windows.Forms.TextBox();
-      this.label25 = new System.Windows.Forms.Label();
       this.label20 = new System.Windows.Forms.Label();
       this.groupBox6 = new System.Windows.Forms.GroupBox();
       this.StatWindowMinCount = new System.Windows.Forms.NumericUpDown();
@@ -86,6 +83,7 @@
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.compareButton = new System.Windows.Forms.Button();
+      this.label25 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -108,24 +106,13 @@
       // 
       // Prepearing
       // 
-      this.Prepearing.Controls.Add(this.label11);
       this.Prepearing.Controls.Add(this.CollectStatButton);
-      this.Prepearing.Controls.Add(this.StatProgressBar);
-      this.Prepearing.Location = new System.Drawing.Point(11, 12);
+      this.Prepearing.Location = new System.Drawing.Point(10, 12);
       this.Prepearing.Name = "Prepearing";
       this.Prepearing.Size = new System.Drawing.Size(461, 44);
       this.Prepearing.TabIndex = 6;
       this.Prepearing.TabStop = false;
       this.Prepearing.Text = "Подготовка";
-      // 
-      // label11
-      // 
-      this.label11.AutoSize = true;
-      this.label11.Location = new System.Drawing.Point(2, 18);
-      this.label11.Name = "label11";
-      this.label11.Size = new System.Drawing.Size(167, 13);
-      this.label11.TabIndex = 6;
-      this.label11.Text = "Анализ спонтанной активности";
       // 
       // CollectStatButton
       // 
@@ -136,13 +123,6 @@
       this.CollectStatButton.Text = "Собрать Статистику";
       this.CollectStatButton.UseVisualStyleBackColor = true;
       this.CollectStatButton.Click += new System.EventHandler(this.CollectStatButton_Click);
-      // 
-      // StatProgressBar
-      // 
-      this.StatProgressBar.Location = new System.Drawing.Point(176, 13);
-      this.StatProgressBar.Name = "StatProgressBar";
-      this.StatProgressBar.Size = new System.Drawing.Size(139, 23);
-      this.StatProgressBar.TabIndex = 1;
       // 
       // GraphChannelSelectButton
       // 
@@ -182,7 +162,7 @@
       this.StimParams.Controls.Add(this.StimPadding);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
-      this.StimParams.Location = new System.Drawing.Point(11, 390);
+      this.StimParams.Location = new System.Drawing.Point(10, 323);
       this.StimParams.Name = "StimParams";
       this.StimParams.Size = new System.Drawing.Size(461, 74);
       this.StimParams.TabIndex = 11;
@@ -281,9 +261,9 @@
       this.StatResult.Controls.Add(this.label16);
       this.StatResult.Controls.Add(this.DistribGrath);
       this.StatResult.Controls.Add(this.label1);
-      this.StatResult.Location = new System.Drawing.Point(11, 62);
+      this.StatResult.Location = new System.Drawing.Point(10, 62);
       this.StatResult.Name = "StatResult";
-      this.StatResult.Size = new System.Drawing.Size(461, 322);
+      this.StatResult.Size = new System.Drawing.Size(461, 255);
       this.StatResult.TabIndex = 10;
       this.StatResult.TabStop = false;
       this.StatResult.Text = "Результат сбора статистики";
@@ -300,9 +280,9 @@
       this.groupBox4.Controls.Add(this.label23);
       this.groupBox4.Controls.Add(this.StatWindowSecCount);
       this.groupBox4.Controls.Add(this.label24);
-      this.groupBox4.Location = new System.Drawing.Point(5, 227);
+      this.groupBox4.Location = new System.Drawing.Point(213, 158);
       this.groupBox4.Name = "groupBox4";
-      this.groupBox4.Size = new System.Drawing.Size(350, 91);
+      this.groupBox4.Size = new System.Drawing.Size(227, 91);
       this.groupBox4.TabIndex = 10;
       this.groupBox4.TabStop = false;
       this.groupBox4.Text = "Текущаяя статистика";
@@ -331,15 +311,6 @@
       this.CurrentSigma.ReadOnly = true;
       this.CurrentSigma.Size = new System.Drawing.Size(66, 20);
       this.CurrentSigma.TabIndex = 2;
-      // 
-      // label25
-      // 
-      this.label25.AutoSize = true;
-      this.label25.Location = new System.Drawing.Point(226, 16);
-      this.label25.Name = "label25";
-      this.label25.Size = new System.Drawing.Size(42, 13);
-      this.label25.TabIndex = 16;
-      this.label25.Text = "секунд";
       // 
       // label20
       // 
@@ -385,7 +356,7 @@
       // 
       // StatWindowSecCount
       // 
-      this.StatWindowSecCount.Location = new System.Drawing.Point(185, 14);
+      this.StatWindowSecCount.Location = new System.Drawing.Point(163, 13);
       this.StatWindowSecCount.Maximum = new decimal(new int[] {
             59,
             0,
@@ -413,9 +384,9 @@
       this.label24.AutoSize = true;
       this.label24.Location = new System.Drawing.Point(142, 16);
       this.label24.Name = "label24";
-      this.label24.Size = new System.Drawing.Size(37, 13);
+      this.label24.Size = new System.Drawing.Size(15, 13);
       this.label24.TabIndex = 13;
-      this.label24.Text = "минут";
+      this.label24.Text = "м";
       // 
       // groupBox3
       // 
@@ -425,7 +396,7 @@
       this.groupBox3.Controls.Add(this.label4);
       this.groupBox3.Location = new System.Drawing.Point(5, 158);
       this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(350, 63);
+      this.groupBox3.Size = new System.Drawing.Size(202, 91);
       this.groupBox3.TabIndex = 9;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Статистика до стимуляции";
@@ -576,7 +547,7 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(11, 578);
+      this.PackProbability.Location = new System.Drawing.Point(10, 519);
       this.PackProbability.Name = "PackProbability";
       this.PackProbability.Size = new System.Drawing.Size(461, 146);
       this.PackProbability.TabIndex = 9;
@@ -726,7 +697,7 @@
       this.groupBox1.Controls.Add(this.numericUpDown1);
       this.groupBox1.Controls.Add(this.button1);
       this.groupBox1.Controls.Add(this.GraphChannelSelectButton);
-      this.groupBox1.Location = new System.Drawing.Point(11, 470);
+      this.groupBox1.Location = new System.Drawing.Point(11, 402);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(460, 52);
       this.groupBox1.TabIndex = 12;
@@ -739,7 +710,7 @@
       this.groupBox2.Controls.Add(this.label9);
       this.groupBox2.Controls.Add(this.StimType);
       this.groupBox2.Controls.Add(this.StartStimButton);
-      this.groupBox2.Location = new System.Drawing.Point(11, 528);
+      this.groupBox2.Location = new System.Drawing.Point(10, 460);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(461, 44);
       this.groupBox2.TabIndex = 13;
@@ -757,22 +728,30 @@
       this.compareButton.UseVisualStyleBackColor = true;
       this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
       // 
-      // CPackStat
+      // label25
+      // 
+      this.label25.AutoSize = true;
+      this.label25.Location = new System.Drawing.Point(199, 16);
+      this.label25.Name = "label25";
+      this.label25.Size = new System.Drawing.Size(25, 13);
+      this.label25.TabIndex = 16;
+      this.label25.Text = "сек";
+      // 
+      // FPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(478, 726);
+      this.ClientSize = new System.Drawing.Size(563, 726);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.StimParams);
       this.Controls.Add(this.StatResult);
       this.Controls.Add(this.PackProbability);
       this.Controls.Add(this.Prepearing);
-      this.Name = "CPackStat";
+      this.Name = "FPackStat";
       this.Text = "CPackStat";
       this.Load += new System.EventHandler(this.CPackStat_Load);
       this.Prepearing.ResumeLayout(false);
-      this.Prepearing.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
       this.StimParams.ResumeLayout(false);
       this.StimParams.PerformLayout();
@@ -806,7 +785,6 @@
     private System.Windows.Forms.GroupBox Prepearing;
     private System.Windows.Forms.Button CollectStatButton;
     private System.Windows.Forms.Label label2;
-    private System.Windows.Forms.ProgressBar StatProgressBar;
     private System.Windows.Forms.NumericUpDown numericUpDown1;
     private System.Windows.Forms.GroupBox StimParams;
     private System.Windows.Forms.Button StartStimButton;
@@ -832,7 +810,6 @@
     private System.Windows.Forms.TrackBar trackBar1;
     private System.Windows.Forms.Button button1;
     private System.Windows.Forms.Button GraphChannelSelectButton;
-    private System.Windows.Forms.Label label11;
     private System.Windows.Forms.GroupBox groupBox1;
     private System.Windows.Forms.GroupBox groupBox2;
     private System.Windows.Forms.Label label14;
@@ -852,7 +829,6 @@
     private System.Windows.Forms.GroupBox groupBox4;
     private System.Windows.Forms.TextBox CurrentAverage;
     private System.Windows.Forms.Label label26;
-    private System.Windows.Forms.Label label25;
     private System.Windows.Forms.GroupBox groupBox6;
     private System.Windows.Forms.NumericUpDown StatWindowMinCount;
     private System.Windows.Forms.Label label23;
@@ -861,5 +837,6 @@
     private System.Windows.Forms.TextBox CurrentSigma;
     private System.Windows.Forms.Label label20;
     private System.Windows.Forms.Button compareButton;
+    private System.Windows.Forms.Label label25;
   }
 }
