@@ -43,8 +43,8 @@ namespace MEAClosedLoop
     Timeline processed_data;
     PackStatType GraphType;
     public ulong totalTime;
-    
-    const int MAX_PACK_LENGTH = 12500; //500 ms 
+
+    const int MAX_PACK_LENGTH = /*12500; //500 ms*/ 250 * Param.MS; 
     const int PACK_DETECTED_PERCENT_CRITERION = 50;
     const int STAT_ITERATION_LENGTH = 125; //5 ms
 
@@ -159,30 +159,45 @@ namespace MEAClosedLoop
       return (prevPosition + 1) * ticksInPoint > (ulong)val ? prevPosition : prevPosition + 1;
     }
 
-    public uint[] PrepareShape(int channel, int panelWidth, int panelHeight, out double scale)
+    public uint[] PrepareShape(int channel, int panelWidth, int panelHeight, out double scale, int shapeType)
     {
       uint[] output = null;
       double[] tmp_data = null;
       int processedPacksNumber = 0;
       int max_data_length = -1;
+      uint dataZeroLevel = 0 /*(uint)panelHeight / 2*/;
+
       scale = 1; //default
 
       if (RawData.Count == 0 || panelWidth == 0)
         return output;
 
       output = new uint[panelWidth];
-      output.PopulateArray<uint>(0);
+      output.PopulateArray<uint>(dataZeroLevel);
       tmp_data = new double[MAX_PACK_LENGTH];
       int packLength;
+      TPack bool_currentPack;
       foreach (CPack currentPack in RawData)
       {
         if (currentPack.Data.ContainsKey(channel))
         {
-          packLength = (currentPack.Data[channel].Length > MAX_PACK_LENGTH) ? MAX_PACK_LENGTH : currentPack.Data[channel].Length;
+          bool_currentPack = CPack2TPack(currentPack, channel);
+          packLength = (shapeType == 0) ? currentPack.Data[channel].Length : bool_currentPack.data.Count;
+          packLength = (packLength > MAX_PACK_LENGTH) ? MAX_PACK_LENGTH : packLength;
           for (int i = 0; i < packLength; i++)
           {
-            //tmp_data[i] += Math.Abs(currentPack.Data[channel][i]);
-            tmp_data[i] += currentPack.Data[channel][i];
+            switch (shapeType)
+            {
+              case 0: //amp
+                tmp_data[i] += Math.Abs(currentPack.Data[channel][i]);
+                //tmp_data[i] += currentPack.Data[channel][i];
+                break;
+              case 1: //freq
+                if (bool_currentPack.data[i])
+                  tmp_data[i]++;
+                break;
+            }
+
           }
           if (packLength > max_data_length)
             max_data_length = packLength;
@@ -190,17 +205,18 @@ namespace MEAClosedLoop
         }
       }
 
-      Array.ForEach(tmp_data, (x => x /= processedPacksNumber));
+      //Array.ForEach(tmp_data, new Action<double>(x => x /= processedPacksNumber));
       if (tmp_data.Max() != 0 && max_data_length > 0)
       {
+        //scale = (double)panelHeight / Array.ConvertAll(tmp_data, Math.Abs).Max();
         scale = (double)panelHeight / tmp_data.Max();
+        scale *= 4;
       }
       else
       {
         return output;
       }
       
-      //TODO: reverse interpolation
       if (max_data_length > panelWidth) //interpolation
       {
         int dotsForCompletion = 0;
@@ -219,12 +235,115 @@ namespace MEAClosedLoop
             outpoint += tmp_data[i * xscale + j];
           }
           outpoint /= xscale;
-          output[i] = (outpoint > 0) ? Convert.ToUInt32(outpoint) : 0;
+          if(outpoint > 0){
+            output[i] += Convert.ToUInt32(outpoint * scale / processedPacksNumber) ;
+          }
+          else{
+            output[i] -= Convert.ToUInt32(-outpoint * scale / processedPacksNumber);
+          }
           //output[i] = (uint)outpoint;
           outpoint = 0;
         }
       }
       return output;
+    }
+
+    public uint[] PrepareNextPack(int channel, int panelWidth, int panelHeight, int packNumber, double scale, int shapeType)
+    {
+      uint[] output = null;
+      double[] tmp_data = null;
+      int processedPacksNumber = 0;
+      int max_data_length = -1;
+      uint dataZeroLevel = 0 /*(uint)panelHeight / 2*/;
+
+      if (RawData.Count == 0 || panelWidth == 0)
+        return output;
+
+      int packLength;
+      TPack bool_currentPack;
+      int packCount = 0;
+      foreach (CPack currentPack in RawData)
+      {
+        if (packCount == packNumber)
+        {
+          tmp_data = new double[MAX_PACK_LENGTH];
+          if (currentPack.Data.ContainsKey(channel))
+          {
+            bool_currentPack = CPack2TPack(currentPack, channel);
+            packLength = (shapeType == 0) ? currentPack.Data[channel].Length : bool_currentPack.data.Count;
+            packLength = (packLength > MAX_PACK_LENGTH) ? MAX_PACK_LENGTH : packLength;
+            for (int i = 0; i < packLength; i++)
+            {
+              switch (shapeType)
+              {
+                case 0: //amp
+                  tmp_data[i] += Math.Abs(currentPack.Data[channel][i]);
+                  //tmp_data[i] += currentPack.Data[channel][i];
+                  break;
+                case 1: //freq
+                  if (bool_currentPack.data[i])
+                    tmp_data[i]++;
+                  break;
+              }
+
+            }
+            if (packLength > max_data_length)
+              max_data_length = packLength;
+            processedPacksNumber++;
+          }
+          break;
+        }
+        else
+        {
+          packCount++;
+        }
+      }
+      if (tmp_data == null)
+        return output;
+
+      if (!(tmp_data.Max() != 0 && max_data_length > 0))
+      {
+        return output;
+      }
+
+      output = new uint[panelWidth];
+      output.PopulateArray<uint>(dataZeroLevel);
+      if (max_data_length > panelWidth) //interpolation
+      {
+        int dotsForCompletion = 0;
+        while ((max_data_length + dotsForCompletion) % panelWidth != 0) //filling tail with zeros
+        {
+          dotsForCompletion--;
+          //tmp_data[max_data_length + dotsForCompletion] = 0;
+        }
+        int xscale = (max_data_length + dotsForCompletion) / panelWidth;
+        double outpoint = 0;
+        int i, j;
+        for (i = 0; i < panelWidth; i++)
+        {
+          for (j = 0; j < xscale; j++)
+          {
+            outpoint += tmp_data[i * xscale + j];
+          }
+          outpoint /= xscale;
+          if (outpoint > 0)
+          {
+            output[i] += Convert.ToUInt32(outpoint * scale);
+          }
+          else
+          {
+            output[i] -= Convert.ToUInt32(-outpoint * scale);
+          }
+          //output[i] = (uint)outpoint;
+          outpoint = 0;
+        }
+      }
+      return output;
+    }
+
+    public int totalPackNumber()
+    {
+      return RawData.Count;
     }
 
     public uint[] PrepareData(int channel, int panelWidth, int panelHeight)
@@ -299,4 +418,5 @@ namespace MEAClosedLoop
       return output;
     }
   }
+
 }

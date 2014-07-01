@@ -17,6 +17,8 @@ namespace MEAClosedLoop
     PackGraph dataGenerator;
     uint[] data;
     private Point[] pointsToDraw;
+    int m_selectedIndex;
+    private object lockSelIndex;
 
     public PackShapeForm(PackGraph _dataGenerator)
     {
@@ -31,7 +33,7 @@ namespace MEAClosedLoop
       this.Controls.Add(PackShapeGraph);
       pointsToDraw = new Point[PackShapeGraph.Size.Width];
       PackShapeGraph.Paint += PaintShapeGraph;
-      
+      lockSelIndex = new object();
       //this.IsAccessible = false;
       //this.Hide();
       this.Visible = false;
@@ -47,22 +49,40 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
       double dataScale;
-      data = dataGenerator.PrepareShape(channel2draw, width, height, out dataScale);
-
-      //drawing data
-      for (int i = 0; i < data.Count<uint>(); i++)
+      int d_packCount;
+      data = dataGenerator.PrepareShape(channel2draw, width, height, out dataScale, m_selectedIndex);
+  
+      //drawing all packs
+      d_packCount = dataGenerator.totalPackNumber();
+      Pen allPacksPen = new Pen(Color.DarkGray, 1);
+      for (int j = 0; j < d_packCount; j++)
       {
-        pointsToDraw[i] = new Point(i, (data[i] < height) ? height - (int)data[i] : height);
+        data = dataGenerator.PrepareNextPack(channel2draw, width, height, j, dataScale, m_selectedIndex);
+        if (data != null)
+        {
+          for (int i = 0; i < data.Length; i++)
+          {
+            pointsToDraw[i] = new Point(i, height - (int)data[i]);
+          }
+          e.Graphics.DrawLines(allPacksPen, pointsToDraw);
+        }
+      }
+      //drawing data
+      for (int i = 0; i < data.Length; i++)
+      {
+        //pointsToDraw[i] = new Point(i, (data[i] < height) ? height - (int)data[i] : height);
+        pointsToDraw[i] = new Point(i, height - (int)data[i]);
       }
       Pen pen = new Pen(Color.DodgerBlue, 1);
       e.Graphics.DrawLines(pen, pointsToDraw);
+
 
       //drawing scale
       using (SolidBrush textBrush = new SolidBrush(Color.Green), backgroundBrush = new SolidBrush(Color.White))
       {
         StringFormat sf = new StringFormat();
         double roundedScale = Math.Round(dataScale, 2);
-        string scaleString = ((roundedScale != 0) ? "x" + roundedScale.ToString() : ">0.01");
+        string scaleString = ((roundedScale != 0) ? "x" + roundedScale.ToString() : ">0.01") + " N" + d_packCount.ToString();
         sf.FormatFlags = StringFormatFlags.NoWrap;
         SizeF ScaleStringSize = new SizeF();
         ScaleStringSize = e.Graphics.MeasureString(scaleString, this.Font, width, sf);
@@ -83,5 +103,11 @@ namespace MEAClosedLoop
       this.DialogResult = System.Windows.Forms.DialogResult.Abort;
       this.Hide();
     }
+
+    private void ShapeSelectListBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      lock (lockSelIndex) m_selectedIndex = ShapeSelectListBox.SelectedIndex;
+      this.PackShapeGraph.Invalidate();
+    } 
   }
 }
