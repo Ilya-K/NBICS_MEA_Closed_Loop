@@ -49,8 +49,24 @@ namespace MEAClosedLoop
       int width = ((Panel)sender).Width;
       int height = ((Panel)sender).Height;
       double dataScale;
+      int d_packCount;
       data = dataGenerator.PrepareShape(channel2draw, width, height, out dataScale, m_selectedIndex);
-      
+  
+      //drawing all packs
+      d_packCount = dataGenerator.totalPackNumber();
+      Pen allPacksPen = new Pen(Color.DarkGray, 1);
+      for (int j = 0; j < d_packCount; j++)
+      {
+        data = dataGenerator.PrepareNextPack(channel2draw, width, height, j, dataScale, m_selectedIndex);
+        if (data != null)
+        {
+          for (int i = 0; i < data.Length; i++)
+          {
+            pointsToDraw[i] = new Point(i, height - (int)data[i]);
+          }
+          e.Graphics.DrawLines(allPacksPen, pointsToDraw);
+        }
+      }
       //drawing data
       for (int i = 0; i < data.Length; i++)
       {
@@ -60,12 +76,13 @@ namespace MEAClosedLoop
       Pen pen = new Pen(Color.DodgerBlue, 1);
       e.Graphics.DrawLines(pen, pointsToDraw);
 
+
       //drawing scale
       using (SolidBrush textBrush = new SolidBrush(Color.Green), backgroundBrush = new SolidBrush(Color.White))
       {
         StringFormat sf = new StringFormat();
         double roundedScale = Math.Round(dataScale, 2);
-        string scaleString = ((roundedScale != 0) ? "x" + roundedScale.ToString() : ">0.01");
+        string scaleString = ((roundedScale != 0) ? "x" + roundedScale.ToString() : ">0.01") + " N" + d_packCount.ToString();
         sf.FormatFlags = StringFormatFlags.NoWrap;
         SizeF ScaleStringSize = new SizeF();
         ScaleStringSize = e.Graphics.MeasureString(scaleString, this.Font, width, sf);
