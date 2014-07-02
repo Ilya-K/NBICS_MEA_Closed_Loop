@@ -356,7 +356,7 @@ namespace MEAClosedLoop
       {
         if (m_consumerList.Count != 0)
         {
-          foreach (ConsumerDelegate consumer in m_consumerList) consumer(filteredData);
+          foreach (ConsumerDelegate consumer in m_consumerList) consumer.DynamicInvoke(filteredData);
         }
       }
 

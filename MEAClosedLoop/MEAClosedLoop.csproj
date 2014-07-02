@@ -119,6 +119,12 @@
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
     </Compile>
     <Compile Include="CPackDetector.cs" />
+    <Compile Include="FLearnCycle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FLearnCycle.Designer.cs">
+      <DependentUpon>FLearnCycle.cs</DependentUpon>
+    </Compile>
     <Compile Include="FMainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -200,6 +206,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\FSelectExperiment.resx">
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FLearnCycle.resx">
+      <DependentUpon>FLearnCycle.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FMainWindow.resx">
       <DependentUpon>FMainWindow.cs</DependentUpon>

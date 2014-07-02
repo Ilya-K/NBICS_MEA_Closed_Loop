@@ -104,6 +104,7 @@ namespace MEAClosedLoop
         {
           // Distribute current pack (with EOP) to consumers
           if (OnPackFound != null) OnPackFound(currSemiPack);
+          
           if (insidePack)                         // We're inside of previously started pack
           {
             currPack.Length = currSemiPack.Length;

@@ -13,8 +13,6 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Storage;
-using winforms = System.Windows.Forms;
-using windraw = System.Drawing;
 using MEAClosedLoop;
 using MEAClosedLoop.Common;
 namespace MEAClosedLoop
@@ -157,6 +155,7 @@ namespace MEAClosedLoop
 
     protected override void UnloadContent()
     {
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -419,7 +418,7 @@ namespace MEAClosedLoop
 
           lock (CurrentTimeCync)
           {
-            summary_time_stamp = m_salpaFilter.TimeStamp;// +(TTime)DataPacket[DataPacket.Keys.FirstOrDefault()].Length;
+            summary_time_stamp = m_salpaFilter.TimeStamp;
           }
 
           break;
