@@ -33,6 +33,7 @@ namespace MEAClosedLoop
     private TStimGroup m_stimulus;
 
     public volatile Int32 ReceivedStimShift = 0;
+    public volatile bool DoStim = false;
 
     private Thread m_t;
     private volatile bool m_stop = false;
@@ -131,7 +132,7 @@ namespace MEAClosedLoop
         TTime nextStimTime = currPack.Start + (TTime)(STIM_TIME_PERCENT * stimShift);
 
         // Pass the next stimulation time to the StimDetector
-        if (ReceivedStimShift > 0)
+        if (ReceivedStimShift > 0 && DoStim)
         {
           m_stimulus.stimTime = nextStimTime;
           m_filter.StimDetector.SetExpectedStims(m_stimulus);

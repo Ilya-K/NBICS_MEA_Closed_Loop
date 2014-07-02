@@ -782,5 +782,10 @@ namespace MEAClosedLoop
         m_Recorder.Show();
       }
     }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+
+    }
   }
 }
