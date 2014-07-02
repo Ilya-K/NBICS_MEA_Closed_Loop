@@ -9,7 +9,7 @@ using Common;
 
 namespace MEAClosedLoop
 {
-  class CRasterPlot
+  public class CRasterPlot
   {
     private const int SAMPLING_F = Param.DAQ_FREQ;
     private Timer m_refreshTimer;

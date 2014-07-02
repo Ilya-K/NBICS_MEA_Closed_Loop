@@ -13,7 +13,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -25,7 +26,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -51,9 +51,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.1.0\lib\net40\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="McsNetUsb">
       <HintPath>.\McsNetUsb.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -61,10 +69,16 @@
     <Reference Include="Microsoft.Xna.Framework.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework.Storage, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.Services.Client" />
+    <Reference Include="System.Data.Services.Design" />
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -73,29 +87,61 @@
   <ItemGroup>
     <Compile Include="CDataRender.cs" />
     <Compile Include="CFiltering.cs" />
-    <Compile Include="CGraphRender.cs" />
+    <Compile Include="CArtifRender.cs" />
     <Compile Include="Common\CCalcSE_Block.cs" />
     <Compile Include="Common\CCalcSE_N.cs" />
     <Compile Include="CLoopController.cs" />
     <Compile Include="Common\CCalcExpWndSE.cs" />
+    <Compile Include="Common\CDataCompress.cs" />
     <Compile Include="Common\CMovingSum.cs" />
     <Compile Include="Common\CExpAvg.cs" />
     <Compile Include="Common\CPack.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Common\CSpikeTrain.cs" />
-    <Compile Include="Common\StimParams.cs">
+    <Compile Include="Common\FCreateMeasure.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Common\StimParams.Designer.cs">
-      <DependentUpon>StimParams.cs</DependentUpon>
+    <Compile Include="Common\FCreateMeasure.Designer.cs">
+      <DependentUpon>FCreateMeasure.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\CSpikeTrain.cs" />
+    <Compile Include="Common\DbContext.cs" />
+    <Compile Include="Common\FStimParams.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FStimParams.Designer.cs">
+      <DependentUpon>FStimParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\FSelectExperiment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FSelectExperiment.Designer.cs">
+      <DependentUpon>FSelectExperiment.cs</DependentUpon>
     </Compile>
     <Compile Include="CPackDetector.cs" />
-    <Compile Include="CPackStat.cs">
+    <Compile Include="FLearnCycle.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CPackStat.Designer.cs">
-      <DependentUpon>CPackStat.cs</DependentUpon>
+    <Compile Include="FLearnCycle.Designer.cs">
+      <DependentUpon>FLearnCycle.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FMainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FMainWindow.Designer.cs">
+      <DependentUpon>FMainWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FPackStat.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FPackStat.Designer.cs">
+      <DependentUpon>FPackStat.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\FCreateExp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FCreateExp.Designer.cs">
+      <DependentUpon>FCreateExp.cs</DependentUpon>
     </Compile>
     <Compile Include="CStat.cs" />
     <Compile Include="CStimDetectShift.cs" />
@@ -118,6 +164,7 @@
     <Compile Include="FormCalibrate.Designer.cs">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Neurorighter\ButterworthFilter.cs" />
     <Compile Include="CInputStream.cs" />
     <Compile Include="Form1.cs">
@@ -136,20 +183,47 @@
     <Compile Include="PackGraphForm.Designer.cs">
       <DependentUpon>PackGraphForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="PackShapeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PackShapeForm.Designer.cs">
+      <DependentUpon>PackShapeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CRawFileReader.cs" />
-    <Compile Include="StatForm.cs">
+    <Compile Include="FRecorder.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="StatForm.Designer.cs">
-      <DependentUpon>StatForm.cs</DependentUpon>
+    <Compile Include="FRecorder.Designer.cs">
+      <DependentUpon>FRecorder.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Common\StimParams.resx">
-      <DependentUpon>StimParams.cs</DependentUpon>
+    <Compile Include="FStatForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FStatForm.Designer.cs">
+      <DependentUpon>FStatForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Common\FCreateMeasure.resx">
+      <DependentUpon>FCreateMeasure.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CPackStat.resx">
-      <DependentUpon>CPackStat.cs</DependentUpon>
+    <EmbeddedResource Include="Common\FStimParams.resx">
+      <DependentUpon>FStimParams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\FSelectExperiment.resx">
+      <DependentUpon>FSelectExperiment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FLearnCycle.resx">
+      <DependentUpon>FLearnCycle.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FMainWindow.resx">
+      <DependentUpon>FMainWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FPackStat.resx">
+      <DependentUpon>FPackStat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\FCreateExp.resx">
+      <DependentUpon>FCreateExp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
@@ -163,6 +237,9 @@
     <EmbeddedResource Include="PackGraphForm.resx">
       <DependentUpon>PackGraphForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PackShapeForm.resx">
+      <DependentUpon>PackShapeForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -173,12 +250,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="StatForm.resx">
-      <DependentUpon>StatForm.cs</DependentUpon>
+    <EmbeddedResource Include="FRecorder.resx">
+      <DependentUpon>FRecorder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FStatForm.resx">
+      <DependentUpon>FStatForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -192,12 +273,12 @@
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 и x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <ProductName>Клиентский профиль .NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -205,11 +286,32 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.4.0">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 4.0 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Sql.Server.Express.10.0">
+      <Visible>False</Visible>
+      <ProductName>SQL Server 2008 Express</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XNALibrary\XNALibrary.csproj">
+      <Project>{37b2f535-faa8-4c99-9fbe-762655f36f0f}</Project>
+      <Name>XNALibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

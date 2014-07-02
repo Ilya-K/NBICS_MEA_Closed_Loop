@@ -28,14 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-      this.panel1 = new System.Windows.Forms.Panel();
       this.buttonStartDAQ = new System.Windows.Forms.Button();
       this.buttonStop = new System.Windows.Forms.Button();
-      this.textBoxSpikes = new System.Windows.Forms.TextBox();
-      this.textBoxStimules = new System.Windows.Forms.TextBox();
-      this.m_panelSpikeRaster = new System.Windows.Forms.Panel();
       this.comboBox1 = new System.Windows.Forms.ComboBox();
-      this.panel2 = new System.Windows.Forms.Panel();
       this.comboBox2 = new System.Windows.Forms.ComboBox();
       this.labelAmpl1 = new System.Windows.Forms.Label();
       this.labelAmpl2 = new System.Windows.Forms.Label();
@@ -53,24 +48,19 @@
       this.label_time = new System.Windows.Forms.Label();
       this.button_integral0 = new System.Windows.Forms.Button();
       this.buttonStatWindow = new System.Windows.Forms.Button();
-      this.PackStatButton = new System.Windows.Forms.Button();
-      this.checkBox1 = new System.Windows.Forms.CheckBox();
-      this.checkBox2 = new System.Windows.Forms.CheckBox();
       this.showChannelData = new System.Windows.Forms.Button();
       this.DisplayData = new System.Windows.Forms.GroupBox();
+      this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.button1 = new System.Windows.Forms.Button();
+      this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.PackStatButton = new System.Windows.Forms.Button();
+      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.button2 = new System.Windows.Forms.Button();
       this.DisplayData.SuspendLayout();
+      this.groupBox2.SuspendLayout();
+      this.groupBox3.SuspendLayout();
+      this.groupBox1.SuspendLayout();
       this.SuspendLayout();
-      // 
-      // panel1
-      // 
-      this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.panel1.BackColor = System.Drawing.SystemColors.Window;
-      this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.panel1.Location = new System.Drawing.Point(12, 105);
-      this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(259, 180);
-      this.panel1.TabIndex = 13;
       // 
       // buttonStartDAQ
       // 
@@ -94,32 +84,6 @@
       this.buttonStop.UseVisualStyleBackColor = true;
       this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
       // 
-      // textBoxSpikes
-      // 
-      this.textBoxSpikes.Location = new System.Drawing.Point(327, 303);
-      this.textBoxSpikes.Multiline = true;
-      this.textBoxSpikes.Name = "textBoxSpikes";
-      this.textBoxSpikes.Size = new System.Drawing.Size(222, 173);
-      this.textBoxSpikes.TabIndex = 15;
-      // 
-      // textBoxStimules
-      // 
-      this.textBoxStimules.Location = new System.Drawing.Point(12, 303);
-      this.textBoxStimules.Multiline = true;
-      this.textBoxStimules.Name = "textBoxStimules";
-      this.textBoxStimules.Size = new System.Drawing.Size(278, 173);
-      this.textBoxStimules.TabIndex = 14;
-      // 
-      // m_panelSpikeRaster
-      // 
-      this.m_panelSpikeRaster.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.m_panelSpikeRaster.BackColor = System.Drawing.SystemColors.Window;
-      this.m_panelSpikeRaster.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.m_panelSpikeRaster.Location = new System.Drawing.Point(525, 105);
-      this.m_panelSpikeRaster.Name = "m_panelSpikeRaster";
-      this.m_panelSpikeRaster.Size = new System.Drawing.Size(200, 180);
-      this.m_panelSpikeRaster.TabIndex = 16;
-      // 
       // comboBox1
       // 
       this.comboBox1.FormattingEnabled = true;
@@ -128,17 +92,6 @@
       this.comboBox1.Size = new System.Drawing.Size(87, 21);
       this.comboBox1.TabIndex = 17;
       this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-      // 
-      // panel2
-      // 
-      this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.panel2.BackColor = System.Drawing.SystemColors.Window;
-      this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.panel2.Location = new System.Drawing.Point(258, 105);
-      this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(259, 180);
-      this.panel2.TabIndex = 14;
       // 
       // comboBox2
       // 
@@ -216,10 +169,10 @@
       // 
       // textBox_DeviceInfo
       // 
-      this.textBox_DeviceInfo.Location = new System.Drawing.Point(12, 492);
+      this.textBox_DeviceInfo.Location = new System.Drawing.Point(12, 100);
       this.textBox_DeviceInfo.Multiline = true;
       this.textBox_DeviceInfo.Name = "textBox_DeviceInfo";
-      this.textBox_DeviceInfo.Size = new System.Drawing.Size(691, 101);
+      this.textBox_DeviceInfo.Size = new System.Drawing.Size(10, 10);
       this.textBox_DeviceInfo.TabIndex = 14;
       // 
       // label1
@@ -290,7 +243,7 @@
       // buttonStatWindow
       // 
       this.buttonStatWindow.Enabled = false;
-      this.buttonStatWindow.Location = new System.Drawing.Point(616, 303);
+      this.buttonStatWindow.Location = new System.Drawing.Point(69, 19);
       this.buttonStatWindow.Name = "buttonStatWindow";
       this.buttonStatWindow.Size = new System.Drawing.Size(88, 23);
       this.buttonStatWindow.TabIndex = 26;
@@ -298,45 +251,10 @@
       this.buttonStatWindow.UseVisualStyleBackColor = true;
       this.buttonStatWindow.Click += new System.EventHandler(this.buttonStatWindow_Click);
       // 
-      // PackStatButton
-      // 
-      this.PackStatButton.Enabled = false;
-      this.PackStatButton.Location = new System.Drawing.Point(616, 332);
-      this.PackStatButton.Name = "PackStatButton";
-      this.PackStatButton.Size = new System.Drawing.Size(87, 23);
-      this.PackStatButton.TabIndex = 27;
-      this.PackStatButton.Text = "Pack Stat ";
-      this.PackStatButton.UseVisualStyleBackColor = true;
-      this.PackStatButton.Click += new System.EventHandler(this.PackStatButton_Click);
-      // 
-      // checkBox1
-      // 
-      this.checkBox1.AutoSize = true;
-      this.checkBox1.Checked = true;
-      this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.checkBox1.Location = new System.Drawing.Point(10, 280);
-      this.checkBox1.Name = "checkBox1";
-      this.checkBox1.Size = new System.Drawing.Size(80, 17);
-      this.checkBox1.TabIndex = 28;
-      this.checkBox1.Text = "checkBox1";
-      this.checkBox1.UseVisualStyleBackColor = true;
-      // 
-      // checkBox2
-      // 
-      this.checkBox2.AutoSize = true;
-      this.checkBox2.Checked = true;
-      this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.checkBox2.Location = new System.Drawing.Point(258, 280);
-      this.checkBox2.Name = "checkBox2";
-      this.checkBox2.Size = new System.Drawing.Size(80, 17);
-      this.checkBox2.TabIndex = 28;
-      this.checkBox2.Text = "checkBox1";
-      this.checkBox2.UseVisualStyleBackColor = true;
-      // 
       // showChannelData
       // 
       this.showChannelData.Enabled = false;
-      this.showChannelData.Location = new System.Drawing.Point(61, 28);
+      this.showChannelData.Location = new System.Drawing.Point(59, 19);
       this.showChannelData.Name = "showChannelData";
       this.showChannelData.Size = new System.Drawing.Size(87, 23);
       this.showChannelData.TabIndex = 29;
@@ -347,23 +265,84 @@
       // DisplayData
       // 
       this.DisplayData.Controls.Add(this.showChannelData);
-      this.DisplayData.Location = new System.Drawing.Point(555, 361);
+      this.DisplayData.Location = new System.Drawing.Point(569, 130);
       this.DisplayData.Name = "DisplayData";
-      this.DisplayData.Size = new System.Drawing.Size(170, 100);
+      this.DisplayData.Size = new System.Drawing.Size(170, 48);
       this.DisplayData.TabIndex = 30;
       this.DisplayData.TabStop = false;
       this.DisplayData.Text = "Display MChannel data";
+      // 
+      // groupBox2
+      // 
+      this.groupBox2.Controls.Add(this.button1);
+      this.groupBox2.Location = new System.Drawing.Point(191, 130);
+      this.groupBox2.Name = "groupBox2";
+      this.groupBox2.Size = new System.Drawing.Size(170, 48);
+      this.groupBox2.TabIndex = 31;
+      this.groupBox2.TabStop = false;
+      this.groupBox2.Text = "Recorder";
+      // 
+      // button1
+      // 
+      this.button1.Location = new System.Drawing.Point(67, 19);
+      this.button1.Name = "button1";
+      this.button1.Size = new System.Drawing.Size(75, 23);
+      this.button1.TabIndex = 0;
+      this.button1.Text = "Open";
+      this.button1.UseVisualStyleBackColor = true;
+      this.button1.Click += new System.EventHandler(this.OpenRecorder_Click);
+      // 
+      // groupBox3
+      // 
+      this.groupBox3.Controls.Add(this.buttonStatWindow);
+      this.groupBox3.Location = new System.Drawing.Point(15, 130);
+      this.groupBox3.Name = "groupBox3";
+      this.groupBox3.Size = new System.Drawing.Size(170, 48);
+      this.groupBox3.TabIndex = 31;
+      this.groupBox3.TabStop = false;
+      this.groupBox3.Text = "Debug";
+      // 
+      // PackStatButton
+      // 
+      this.PackStatButton.Enabled = false;
+      this.PackStatButton.Location = new System.Drawing.Point(68, 19);
+      this.PackStatButton.Name = "PackStatButton";
+      this.PackStatButton.Size = new System.Drawing.Size(87, 23);
+      this.PackStatButton.TabIndex = 27;
+      this.PackStatButton.Text = "Pack Stat";
+      this.PackStatButton.UseVisualStyleBackColor = true;
+      this.PackStatButton.Click += new System.EventHandler(this.PackStatButton_Click);
+      // 
+      // groupBox1
+      // 
+      this.groupBox1.Controls.Add(this.button2);
+      this.groupBox1.Controls.Add(this.PackStatButton);
+      this.groupBox1.Location = new System.Drawing.Point(371, 130);
+      this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(170, 78);
+      this.groupBox1.TabIndex = 31;
+      this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "LearnExp";
+      // 
+      // button2
+      // 
+      this.button2.Location = new System.Drawing.Point(68, 48);
+      this.button2.Name = "button2";
+      this.button2.Size = new System.Drawing.Size(87, 23);
+      this.button2.TabIndex = 28;
+      this.button2.Text = "Learn Cycle";
+      this.button2.UseVisualStyleBackColor = true;
+      this.button2.Click += new System.EventHandler(this.button2_Click);
       // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(737, 604);
+      this.ClientSize = new System.Drawing.Size(765, 260);
+      this.Controls.Add(this.groupBox2);
+      this.Controls.Add(this.groupBox3);
+      this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.DisplayData);
-      this.Controls.Add(this.checkBox2);
-      this.Controls.Add(this.checkBox1);
-      this.Controls.Add(this.PackStatButton);
-      this.Controls.Add(this.buttonStatWindow);
       this.Controls.Add(this.comboBox_Stimulators);
       this.Controls.Add(this.comboBox_DAQs);
       this.Controls.Add(this.label2);
@@ -377,23 +356,21 @@
       this.Controls.Add(this.labelAmpl2);
       this.Controls.Add(this.labelAmpl1);
       this.Controls.Add(this.comboBox2);
-      this.Controls.Add(this.panel2);
       this.Controls.Add(this.comboBox1);
-      this.Controls.Add(this.m_panelSpikeRaster);
       this.Controls.Add(this.textBox_DeviceInfo);
-      this.Controls.Add(this.textBoxStimules);
-      this.Controls.Add(this.textBoxSpikes);
       this.Controls.Add(this.buttonStop);
       this.Controls.Add(this.buttonOpen);
       this.Controls.Add(this.buttonClosedLoop);
       this.Controls.Add(this.buttonStartDAQ);
-      this.Controls.Add(this.panel1);
       this.Name = "Form1";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Form1";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
       this.Load += new System.EventHandler(this.Form1_Load);
       this.DisplayData.ResumeLayout(false);
+      this.groupBox2.ResumeLayout(false);
+      this.groupBox3.ResumeLayout(false);
+      this.groupBox1.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -401,14 +378,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button buttonStartDAQ;
         private System.Windows.Forms.Button buttonStop;
-        private System.Windows.Forms.TextBox textBoxSpikes;
-        private System.Windows.Forms.TextBox textBoxStimules;
-        private System.Windows.Forms.Panel m_panelSpikeRaster;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label labelAmpl1;
         private System.Windows.Forms.Label labelAmpl2;
@@ -426,11 +398,14 @@
         private System.Windows.Forms.Label label_time;
         private System.Windows.Forms.Button button_integral0;
         private System.Windows.Forms.Button buttonStatWindow;
-        private System.Windows.Forms.Button PackStatButton;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.Button showChannelData;
         private System.Windows.Forms.GroupBox DisplayData;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button PackStatButton;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button button2;
     }
 }
 

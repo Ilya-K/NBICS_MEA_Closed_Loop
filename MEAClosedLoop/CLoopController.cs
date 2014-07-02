@@ -1,10 +1,10 @@
-﻿#define DEBUG_SPIKETRAINS
+﻿//#define DEBUG_SPIKETRAINS
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
+using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
   using TTime = System.UInt64;
@@ -13,7 +13,9 @@ namespace MEAClosedLoop
   public class CLoopController
   {
     // Time of applying of stimulus as a share of period of activity
-    private double STIM_TIME_PERCENT = 0.8;
+    //private double STIM_TIME_PERCENT = 0.8;
+    //[DEBUG]
+    private double STIM_TIME_PERCENT = 1.0; 
 
     // Delay of stimulus introduced by signal processing time (in 40 us intervals)
     private const Int16 STIM_TIME_DELAY = 2 * Param.MS;             // 4 ms
@@ -29,11 +31,17 @@ namespace MEAClosedLoop
     private CFiltering m_filter;
     private CPackDetector m_packDetector;
     private TStimGroup m_stimulus;
+
+    public volatile Int32 ReceivedStimShift = 0;
+    public volatile bool DoStim = false;
+
     private Thread m_t;
     private volatile bool m_stop = false;
     private System.Timers.Timer m_stimTimer;
     public delegate void OnPackFoundDelegate(CPack pack);
     public event OnPackFoundDelegate OnPackFound;
+    public delegate void onSetStimDelegate(TStimGroup ExpStim);
+    public event onSetStimDelegate OnSetStim;
 
     public CLoopController(CInputStream inputStream, CFiltering filter, CStimulator stimulator)
     {
@@ -60,7 +68,7 @@ namespace MEAClosedLoop
     {
       m_stop = true;
     }
-
+   
 #if DEBUG_SPIKETRAINS
     public Dictionary<int, List<CSpikeTrainFrame>> GetSpikeTrainsDbg()
     {
@@ -97,6 +105,7 @@ namespace MEAClosedLoop
         {
           // Distribute current pack (with EOP) to consumers
           if (OnPackFound != null) OnPackFound(currSemiPack);
+          
           if (insidePack)                         // We're inside of previously started pack
           {
             currPack.Length = currSemiPack.Length;
@@ -116,19 +125,25 @@ namespace MEAClosedLoop
         meanPackPeriod = m_se.Mean;
 
         // Calculate time of the next stumulation
-        Int32 stimShift = (Int32)meanPackPeriod - N_SE * (Int32)sePackPeriod - STIM_TIME_DELAY;
+        //old
+        //Int32 stimShift = (Int32)meanPackPeriod - N_SE * (Int32)sePackPeriod - STIM_TIME_DELAY;
+        Int32 stimShift = ReceivedStimShift - STIM_TIME_DELAY;
         if (stimShift < 0) stimShift = 0;
-
         TTime nextStimTime = currPack.Start + (TTime)(STIM_TIME_PERCENT * stimShift);
 
         // Pass the next stimulation time to the StimDetector
-        m_stimulus.stimTime = nextStimTime;
-        m_filter.StimDetector.SetExpectedStims(m_stimulus);
+        if (ReceivedStimShift > 0 && DoStim)
+        {
+          m_stimulus.stimTime = nextStimTime;
+          m_filter.StimDetector.SetExpectedStims(m_stimulus);
 
-        // 
-        m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
-        m_stimTimer.Start();
-
+          //
+ 
+          m_stimTimer.Interval = m_inputStream.GetIntervalFromNowInMS(nextStimTime) + 1; // +1 - just for debug, to avoid null time
+          m_stimTimer.Start();
+          // Костыль, не будет работать с 
+          //OnSetStim(m_stimulus);
+        }
         prevPack = currPack;
       }
     }
@@ -137,6 +152,7 @@ namespace MEAClosedLoop
     {
       //[DEBUG]
       m_stimulator.Start();
+      m_stimTimer.Stop();
     }
   }
 }

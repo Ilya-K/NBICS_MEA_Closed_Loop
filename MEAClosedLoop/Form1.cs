@@ -25,14 +25,15 @@ namespace MEAClosedLoop
     private object m_chDataLock2 = new object();
     int m_viewChannel1;
     int m_viewChannel2;
-    private CInputStream m_inputStream;
-    private CFiltering m_salpaFilter;
-    private CSpikeDetector m_spikeDetector;
-    private CRasterPlot m_rasterPlotter;
-    private CStimulator m_stimulator;
-    private bool FakeStimulator = true;
+    public CInputStream m_inputStream;
+    public CFiltering m_salpaFilter;
+    public CSpikeDetector m_spikeDetector;
+    public CRasterPlot m_rasterPlotter;
+    public CStimulator m_stimulator;
+    public FRecorder m_Recorder;
+    public bool FakeStimulator = true;
 
-    private CPackStat m_statForm;
+    private FPackStat m_statForm;
 
     private CDataRender m_dataRender;
     private Thread dataRenderThread;
@@ -45,7 +46,7 @@ namespace MEAClosedLoop
     private int m_selectedDAQ = -1;
     private int m_selectedStim = -1;
     private bool m_DAQConfigured = false;
-    private CLoopController m_closedLoop = null;
+    public CLoopController m_closedLoop = null;
     private string m_fileOpened = "";
     private int m_fileIdx = -1;
 
@@ -71,8 +72,11 @@ namespace MEAClosedLoop
     {
       InitializeComponent();
       prev2 = 0;
+      /*
       this.StartPosition = FormStartPosition.Manual;
       this.Location = new Point(600, 250);
+       */
+      //m_Recorder = new FRecorder();
     }
 
     private void Form1_Load(object sender, EventArgs e)
@@ -81,7 +85,7 @@ namespace MEAClosedLoop
       comboBox_DAQs_Click(null, null);
       comboBox_Stimulators_Click(null, null);
       SetDefaultChannels();
-      showChannelData.Click+=buttonClosedLoop_Click;
+      showChannelData.Click += buttonClosedLoop_Click;
     }
     /*
     private void DataLoop()
@@ -105,33 +109,28 @@ namespace MEAClosedLoop
       {
         m_channelData1 = data[m_viewChannel1];
       }
-      panel1.Invalidate();
+      //panel1.Invalidate();
       lock (m_chDataLock2)
       {
         m_channelData2 = data[m_viewChannel2];
       }
-      panel2.Invalidate();
+      //panel2.Invalidate();
 
       // [DEBUG]
       //label_refreshRate.Text = (1000.0 / (DateTime.Now - m_prevTime).Milliseconds).ToString();
       //SetText(label_refreshRate, m_bandpassFilter.Test().ToString());
-      //AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
+      AddText((1000 / ((DateTime.Now - m_prevTime).Milliseconds + 1)).ToString() + "; ");
       SetText(label_time, (m_inputStream.TimeStamp / (double)Param.DAQ_FREQ).ToString("F1"));
 
       m_prevTime = DateTime.Now;
     }
 
-    void OnPackFoundDelegate(CPack pack)
-    {
-      AddText((Math.Round(1.0 * pack.Length / Param.MS)).ToString() + "; ");
-    }
-
     #region Data Display
     private void panel1_Paint(object sender, PaintEventArgs e)
     {
-      if (!checkBox1.Checked) return;
-      int width = panel1.Width;
-      int height = panel1.Height;
+      //if (!checkBox1.Checked) return;
+      int width = 0;// panel1.Width;
+      int height = 0;// panel1.Height;
       double max = double.MinValue;
       double min = double.MaxValue;
 
@@ -163,7 +162,7 @@ namespace MEAClosedLoop
               }
               else
               {
-                hpf[i] = hpf[i-1] * 0.98;
+                hpf[i] = hpf[i - 1] * 0.98;
               }
               m_hpf = hpf[i];
             }
@@ -234,9 +233,9 @@ namespace MEAClosedLoop
 
     private void panel2_Paint(object sender, PaintEventArgs e)
     {
-      if (!checkBox2.Checked) return;
-      int width = panel2.Width;
-      int height = panel2.Height;
+      //if (!checkBox2.Checked) return;
+      int width = 1;// panel2.Width;
+      int height = 1;// panel2.Height;
       double max = double.MinValue;
       double min = double.MaxValue;
       lock (m_chDataLock2)
@@ -306,7 +305,7 @@ namespace MEAClosedLoop
             se_points[i] = new Point(i * width / se.Length, (int)(height - (se[i] - min + shift + 1) * height / (delta + 2)));
             se_pointsLT[i] = new Point(i * width / seLT.Length, (int)(height - (seLT[i] - min + shift + 1) * height / (delta + 2)));
             corr1_points[i] = new Point(i * width / corr1.Length, (int)((height * 3) / 4 - corr1[i] * 5));
-            corr2_points[i] = new Point(i * width / corr2.Length, (int)(height  - corr2[i] * 30));
+            corr2_points[i] = new Point(i * width / corr2.Length, (int)(height - corr2[i] * 30));
           }
           pen = new Pen(Color.Red, 1);
           e.Graphics.DrawLines(pen, se_points);
@@ -352,7 +351,8 @@ namespace MEAClosedLoop
           thresholds[i] = 1000 * 3;
         }
         // length_sams [75], asym_sams [10], blank_sams [75], ahead_sams [5], forcepeg_sams [10], thresholds[]
-        SALPAParams parSALPA = new SALPAParams(75, 10, 75, 5, 10, thresholds);
+        // SALPAParams parSALPA = new SALPAParams(75, 10, 75, 5, 10, thresholds);
+        SALPAParams parSALPA = new SALPAParams(25, 15, 15, 5, 5, thresholds);
 
         //m_bandpassFilter = new CFiltering(m_inputStream, null, null);
 
@@ -367,7 +367,7 @@ namespace MEAClosedLoop
         //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DEF_PACKET_LENGTH, 2);
 
         m_DAQConfigured = true;
-        
+
         PackStatButton.Enabled = true;
         buttonStatWindow.Enabled = true;
       }
@@ -461,7 +461,7 @@ namespace MEAClosedLoop
           m_inputStream = new CInputStream(ofd.FileName, m_channelList, Param.DEF_PACKET_LENGTH);
           //m_inputStream = new CInputStream(m_usbDAQList, 0, m_channelList, Param.DEF_PACKET_LENGTH);
 
-          
+
           m_fileOpened = ofd.FileName;
           m_selectedDAQ = comboBox_DAQs.Items.Add(Path.GetFileNameWithoutExtension(m_fileOpened));
           comboBox_DAQs.SelectedIndex = m_selectedDAQ;
@@ -548,7 +548,7 @@ namespace MEAClosedLoop
         }
         m_selectedDAQ = sel;
       }
-      */ 
+      */
 
       // If a DAQ device has been selected, enable the sampling buttons
       buttonStartDAQ.Enabled = (m_selectedDAQ >= 0);
@@ -582,7 +582,7 @@ namespace MEAClosedLoop
         m_channelList = new List<int>(new int[] { 0, 1, 3 });
         m_inputStream = new CInputStream(m_usbDAQList, (uint)m_selectedDAQ, m_channelList, Param.DEF_PACKET_LENGTH);
       }
-      
+
       if (m_stimulator == null)
       {
         // Configure Stimulator here
@@ -635,10 +635,14 @@ namespace MEAClosedLoop
         }
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
-        m_closedLoop.OnPackFound += OnPackFoundDelegate;
       }
       showChannelData.Enabled = true;
-
+      if (m_Recorder != null)
+      {
+        m_salpaFilter.AddDataConsumer(m_Recorder.RecieveFltData);
+        m_salpaFilter.AddStimulConsumer(m_Recorder.RecieveStimData);
+        m_closedLoop.OnPackFound += m_Recorder.RecievePackData;
+      }
       m_inputStream.Start();
       buttonClosedLoop.Enabled = false;
       if (checkBox_Manual.Checked) m_inputStream.Pause();
@@ -689,17 +693,18 @@ namespace MEAClosedLoop
 
     private void buttonStatWindow_Click(object sender, EventArgs e)
     {
-      StatForm statForm = new StatForm(m_salpaFilter, m_closedLoop);
+      FStatForm statForm = new FStatForm(m_salpaFilter, m_closedLoop);
       statForm.Show();
     }
 
     private void PackStatButton_Click(object sender, EventArgs e)
     {
-      m_statForm = new CPackStat(m_closedLoop, m_channelList);
-      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData); 
+      m_statForm = new FPackStat(m_closedLoop, m_channelList);
+      m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;
-      m_statForm.Top =  this.Location.Y;
+      m_statForm.Top = this.Location.Y;
+      m_statForm.MdiParent = this.MdiParent;
       m_statForm.Show();
     }
 
@@ -710,10 +715,76 @@ namespace MEAClosedLoop
     }
     private void DrawDataFunction()
     {
-      m_dataRender = new CDataRender(m_salpaFilter);
-      m_closedLoop.OnPackFound += m_dataRender.RecievePackData;
 
-      m_dataRender.Run();
+
+      //Form temp_Form = new Form();
+      //if (MdiParent.InvokeRequired)
+        //Invoke(new Action<Form>(s => s.MdiParent = this.MdiParent), temp_Form);
+
+      //System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+      //(System.Windows.Forms.Control.FromHandle(m_dataRender.Window.Handle)).FindForm().MdiParent = temp_Form.MdiParent;
+      CDataRender m_dataRenderN = new CDataRender(m_salpaFilter);
+      m_closedLoop.OnPackFound += m_dataRenderN.RecievePackData;
+      m_dataRenderN.Run();
+      m_closedLoop.OnPackFound -= m_dataRenderN.RecievePackData;
+      m_dataRenderN.m_salpaFilter.RemoveDataConsumer(m_dataRenderN.RecieveFltData);
+      m_dataRenderN.m_salpaFilter.RemoveStimulConsumer(m_dataRenderN.RecieveStimData);
+      m_dataRenderN.Dispose();
+    }
+
+    private void OpenRecorder_Click(object sender, EventArgs e)
+    {
+      if (m_Recorder != null && m_Recorder.IsDisposed)
+      {
+        m_Recorder = null;
+      }
+      if (m_Recorder == null)
+      {
+        m_Recorder = new FRecorder();
+        if (m_salpaFilter != null)
+        {
+          m_salpaFilter.AddDataConsumer(m_Recorder.RecieveFltData);
+          m_salpaFilter.AddStimulConsumer(m_Recorder.RecieveStimData);
+          m_Recorder.StimDataConnected = true;
+          m_Recorder.RawDataConnected = true;
+        }
+        else
+        {
+          switch (MessageBox.Show("Не запущен фильтр данных, \nзапись данных невозможна", "предупреждение", MessageBoxButtons.OKCancel))
+          {
+            case System.Windows.Forms.DialogResult.OK:
+              break;
+            case System.Windows.Forms.DialogResult.Cancel:
+              m_Recorder = null;
+              return;
+          }
+        }
+        if (m_closedLoop != null)
+        {
+          m_closedLoop.OnPackFound += m_Recorder.RecievePackData;
+          m_Recorder.PackDataConnected = true;
+        }
+        else
+        {
+          switch (MessageBox.Show("Не запущена петля эксперимента, \nзапись данных о пачках невозможна", "предупреждение", MessageBoxButtons.OKCancel))
+          {
+            case System.Windows.Forms.DialogResult.OK:
+              break;
+            case System.Windows.Forms.DialogResult.Cancel:
+              m_Recorder = null;
+              return;
+          }
+        }
+        m_Recorder.Show();
+      }
+      else
+      {
+        m_Recorder.Show();
+      }
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
 
     }
   }
