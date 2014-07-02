@@ -210,7 +210,7 @@ namespace MEAClosedLoop
       {
         //scale = (double)panelHeight / Array.ConvertAll(tmp_data, Math.Abs).Max();
         scale = (double)panelHeight / tmp_data.Max();
-        scale *= 4;
+        scale *= 3;
       }
       else
       {

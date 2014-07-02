@@ -50,7 +50,8 @@ namespace MEAClosedLoop
       int height = ((Panel)sender).Height;
       double dataScale;
       int d_packCount;
-      data = dataGenerator.PrepareShape(channel2draw, width, height, out dataScale, m_selectedIndex);
+      uint[] tmp_data;
+      tmp_data = dataGenerator.PrepareShape(channel2draw, width, height, out dataScale, m_selectedIndex);
   
       //drawing all packs
       d_packCount = dataGenerator.totalPackNumber();
@@ -68,6 +69,7 @@ namespace MEAClosedLoop
         }
       }
       //drawing data
+      data = tmp_data;
       for (int i = 0; i < data.Length; i++)
       {
         //pointsToDraw[i] = new Point(i, (data[i] < height) ? height - (int)data[i] : height);
