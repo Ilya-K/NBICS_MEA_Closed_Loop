@@ -290,7 +290,7 @@ namespace StimDetectorTest
         }
       }
 
-      Console.WriteLine("TOTAL ERROR: {0}", errorRate);
+      //Console.WriteLine("TOTAL ERROR: {0}", errorRate);
       Console.ReadLine();
       Console.ReadKey();
     }
