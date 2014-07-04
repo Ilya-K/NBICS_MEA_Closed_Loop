@@ -191,33 +191,11 @@ namespace StimDetectorTest
             int commonStimsCount = foundStimIndices.Count();
             if (commonStimsCount > realStimIndices.Count())
             {
-              // [TODO] CountOverhead считается не точно, т.к. объём realStimIndices сильно завышен.
-              // Но это не страшно, т.к. в случае, если стимулов найдётся больше чем заказывали, то сильно увеличится суммарная ошибка.
-              // [DONE] It seems to be fixed by regenerating of the stimuli list after the test
               countOverhead = commonStimsCount - realStimIndices.Count();
               commonStimsCount = realStimIndices.Count();
             }
             List<TAbsStimIndex> ExcessStimIndices = new List<TAbsStimIndex>();
             List<TAbsStimIndex> NotfoundedStimIndices = new List<TAbsStimIndex>();
-            /*
-            for (int i = 0; i < foundStimIndices.Count(); i++)
-            {
-              if (!realStimIndices.Contains(foundStimIndices[i]) && !realStimIndices.Contains(foundStimIndices[i] + 1))
-              {
-                ExcessStimIndices.Add(foundStimIndices[i]);
-                Console.WriteLine("excess abs stim index: {0}", foundStimIndices[i]);
-              }
-
-            }
-            for (int i = 0; i < realStimIndices.Count(); i++)
-            {
-              if (!foundStimIndices.Contains(realStimIndices[i]) && !foundStimIndices.Contains(realStimIndices[i] - 1))
-              {
-                NotfoundedStimIndices.Add(realStimIndices[i]);
-                Console.WriteLine("not found abs stim index: {0}", foundStimIndices[i]);
-              }
-            }
-             */
             for (int i = 0; i < foundStimIndices.Count(); i++)
             {
               bool flag = false;
@@ -272,7 +250,6 @@ namespace StimDetectorTest
                 CurrentError = realStimIndices[i] - foundStimIndices[i];
                 errorRate += CurrentError;
               }
-              //Console.WriteLine("index " + i.ToString() + ": error: " + CurrentError.ToString());
             }
             Console.WriteLine("stims expected:  {0}", realStimIndices.Count());
             Console.WriteLine("stims found:     {0}", foundStimIndices.Count());
@@ -290,7 +267,6 @@ namespace StimDetectorTest
         }
       }
 
-      //Console.WriteLine("TOTAL ERROR: {0}", errorRate);
       Console.ReadLine();
       Console.ReadKey();
     }

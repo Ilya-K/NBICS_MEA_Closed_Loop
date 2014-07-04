@@ -86,14 +86,6 @@ namespace MEAClosedLoop
       uint iterationLength = (uint)(totalTime / (ulong)timeUnitSegment);
 
       //Filling timeline
-      
-      /*if ((RawFreqData.Count > 0) && (RawAmpData.Count > 0))
-      {
-        //Something went wrong
-        GraphType = PackStatType.Both;
-        throw new Exception("Неверные данные!"); //или оба режима сразу...
-      }
-      else*/
 
       if (RawData.Count == 0)
       {
@@ -165,7 +157,7 @@ namespace MEAClosedLoop
       double[] tmp_data = null;
       int processedPacksNumber = 0;
       int max_data_length = -1;
-      uint dataZeroLevel = 0 /*(uint)panelHeight / 2*/;
+      uint dataZeroLevel = 0;
 
       scale = 1; //default
 
@@ -190,7 +182,6 @@ namespace MEAClosedLoop
             {
               case 0: //amp
                 tmp_data[i] += Math.Abs(currentPack.Data[channel][i]);
-                //tmp_data[i] += currentPack.Data[channel][i];
                 break;
               case 1: //freq
                 if (bool_currentPack.data[i])
@@ -205,13 +196,9 @@ namespace MEAClosedLoop
         }
       }
 
-      //Array.ForEach(tmp_data, new Action<double>(x => x /= processedPacksNumber));
       if (tmp_data.Max() != 0 && max_data_length > 0)
       {
-        //scale = (double)panelHeight / Array.ConvertAll(tmp_data, Math.Abs).Max();
         scale = (double)panelHeight / tmp_data.Max();
-        //MessageBox.Show("max = " + tmp_data.Max().ToString()+ " height = "+panelHeight.ToString());
-        scale *= 5; //magic
       }
       else
       {
@@ -224,7 +211,6 @@ namespace MEAClosedLoop
         while ((max_data_length + dotsForCompletion) % panelWidth != 0) //filling tail with zeros
         {
           dotsForCompletion--;
-          //tmp_data[max_data_length + dotsForCompletion] = 0;
         }
         int xscale = (max_data_length + dotsForCompletion) / panelWidth;
         double outpoint=0;
@@ -242,7 +228,6 @@ namespace MEAClosedLoop
           else{
             output[i] -= Convert.ToUInt32(-outpoint * scale / processedPacksNumber);
           }
-          //output[i] = (uint)outpoint;
           outpoint = 0;
         }
       }
@@ -255,7 +240,7 @@ namespace MEAClosedLoop
       double[] tmp_data = null;
       int processedPacksNumber = 0;
       int max_data_length = -1;
-      uint dataZeroLevel = 0 /*(uint)panelHeight / 2*/;
+      uint dataZeroLevel = 0;
 
       if (RawData.Count == 0 || panelWidth == 0)
         return output;
@@ -279,7 +264,6 @@ namespace MEAClosedLoop
               {
                 case 0: //amp
                   tmp_data[i] += Math.Abs(currentPack.Data[channel][i]);
-                  //tmp_data[i] += currentPack.Data[channel][i];
                   break;
                 case 1: //freq
                   if (bool_currentPack.data[i])
@@ -315,7 +299,6 @@ namespace MEAClosedLoop
         while ((max_data_length + dotsForCompletion) % panelWidth != 0) //filling tail with zeros
         {
           dotsForCompletion--;
-          //tmp_data[max_data_length + dotsForCompletion] = 0;
         }
         int xscale = (max_data_length + dotsForCompletion) / panelWidth;
         double outpoint = 0;
@@ -335,7 +318,6 @@ namespace MEAClosedLoop
           {
             output[i] -= Convert.ToUInt32(-outpoint * scale);
           }
-          //output[i] = (uint)outpoint;
           outpoint = 0;
         }
       }
@@ -352,7 +334,6 @@ namespace MEAClosedLoop
       uint[] output = null;
       ulong cursorPosition = 0;
       ulong ticksInPoint;
-      //double maxOutputVal;
       Timeline local_data;
       uint ampsPerPoint;
       Queue<CPack>.Enumerator ampDataIterator = RawData.GetEnumerator();
@@ -365,7 +346,7 @@ namespace MEAClosedLoop
         return output;
       output = new uint[panelWidth];
       output.PopulateArray<uint>(0);
-      TTime statStartTime = local_data.First<ProcessedPack>().start; //dummy assingment
+      TTime statStartTime = local_data.First<ProcessedPack>().start;
 
       ticksInPoint = totalTime / (ulong)panelWidth;
       int debug_ldc = local_data.Count;

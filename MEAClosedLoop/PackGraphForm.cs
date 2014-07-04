@@ -334,7 +334,6 @@ namespace MEAClosedLoop
       RunStatButton.BeginInvoke(SetStatButtonText, "пересчитать");
       StatProgressBar.BeginInvoke(ResetProgressBar, 0);
       StatProgressBar.Invalidate();
-      //TODO: allow result saving
       statFinished = null;
       MessageBox.Show("подсчёт завершён");
     }

@@ -85,11 +85,6 @@ namespace StimDetectorTest
       sw1.Start();
 
       // Check here if we need to call the Stimulus Artifact Detector for the current packet
-      //if (m_stimDetector.IsDataRequired(m_inputStream.TimeStamp + (TTime) currPacketLength))
-      //{
-
-      //  stimIndices = m_stimDetector.Detect(currPacket);
-      //}
       if (m_stimDetectorShift.IsDataRequired(m_inputStream.TimeStamp + (TTime)currPacketLength))
       {
         stimIndices = m_stimDetectorShift.GetStims(currPacket);
@@ -101,7 +96,6 @@ namespace StimDetectorTest
         foreach (TStimIndex stimIdx in stimIndices)
         {
           m_stimIndices.Add(m_inputStream.TimeStamp + (TAbsStimIndex)stimIdx);
-          //Console.WriteLine("\tstim add: " + m_stimIndices[m_stimIndices.Count() - 1].ToString());
         }
       }
 
@@ -113,35 +107,18 @@ namespace StimDetectorTest
       }
     }
     
-    public void ReceiveData_old(TRawDataPacket currPacket)  //TODO: make absolute stimIndices
+    public void ReceiveData_old(TRawDataPacket currPacket)
     {
       m_inputStream.Next();
       TTime endOfPacket = m_inputStream.TimeStamp + (TTime)currPacket[currPacket.Keys.ElementAt(0)].Length;
-      //m_stimDetector.GetStims(currPacket[m_artifChannel], m_nextExpectedStim);
       if (m_nextExpectedStim.stimTime < endOfPacket)
       {
         sw1.Start();
-
-        /* List<TStimIndex> currentList = m_stimDetector.GetStims(currPacket[m_artifChannel], m_prevPacket[m_artifChannel], m_nextExpectedStim);
-        foreach (TStimIndex stimIdx in currentList)
-        {
-          m_stimIndices.Add(m_inputStream.TimeStamp + (TAbsStimIndex)stimIdx);
-          Console.WriteLine("stim add: " + m_stimIndices[m_stimIndices.Count() - 1].ToString());
-        } */
         m_nextExpectedStim = m_expectedStims[0];
         m_expectedStims.RemoveAt(0);
 
         sw1.Stop();
       }
-      /* // [ILYA_K] I believe it's not necessarily to run Stimulus Detector on the "empty" space
-       * //may be needed on empty file test
-      else
-      {
-        m_stimIndices.AddRange(m_stimDetector.GetStims(currPacket[m_artifChannel]));
-      }
-      */
-      // Calculate error
-      // m_squareError += error;
     }
 
     public List<TAbsStimIndex> RunTest()
