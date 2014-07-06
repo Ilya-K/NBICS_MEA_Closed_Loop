@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MEAClosedLoop", "MEAClosedLoop\MEAClosedLoop.csproj", "{11F80F97-BADE-4F7E-8299-539214BA9BF5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{37B2F535-FAA8-4C99-9FBE-762655F36F0F} = {37B2F535-FAA8-4C99-9FBE-762655F36F0F}

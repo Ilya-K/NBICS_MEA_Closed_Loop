@@ -27,8 +27,9 @@ namespace MEAClosedLoop
     private const int Minimum_Pack_Requered_Count = 140;
     #endregion
     #region Внутренние данные класса
-    private CPackDetector PackDetector;
     private CLoopController LoopCtrl;
+    private CFiltering Filter;
+
     public List<CPack> PackListBefore; //befor stim started
     public List<CPack> PackListAfter; // After stim started
     public List<CPack> PackListDetectReaction = new List<CPack>(); // Лист пачек, которые считаются реакцией культуры
@@ -60,7 +61,7 @@ namespace MEAClosedLoop
 
     #endregion
     #region Конструктор
-    public FPackStat(CLoopController _LoopController, List<int> channelList)
+    public FPackStat(CLoopController _LoopController,CFiltering _Filter, List<int> channelList)
     {
       InitializeComponent();
       CurrentState = state.BeforeStimulation;
@@ -68,20 +69,25 @@ namespace MEAClosedLoop
       PackListAfter = new List<CPack>();
       StimList = new List<TAbsStimIndex>();
       LoopCtrl = _LoopController;
+      Filter = _Filter;
       m_channelList = channelList;
+
       UpdateDistribGrath += DistribGrath.Refresh;
       UpdateDistribGrath += PreCalcStat;
       UpdateDistribGrath += CurrentCalcStat;
       SetCollectStatButtonText += SetStatButtontext;
+      numericUpDown1.ValueChanged += GraphChannelSelected;
+
       StimType.Enabled = false;
       StartStimButton.Enabled = false;
-      numericUpDown1.ValueChanged += GraphChannelSelected;
       MinutesWindow.Enabled = false;
       SecondsWindow.Enabled = false;
+
       MinutesWindow.ValueChanged += StimReady;
       SecondsWindow.ValueChanged += StimReady;
       MinutesWindow.EnabledChanged += SetDefaultMinWindow;
       SecondsWindow.EnabledChanged += SetDefaultSecWindow;
+
       formShowWindows = new PackGraphForm(m_channelList, LoopCtrl);
       formShowWindows.loadSelection += ChannelChangeRequest;
     }
@@ -538,6 +544,11 @@ namespace MEAClosedLoop
     private void CPackStat_Load(object sender, EventArgs e)
     {
 
+    }
+
+    private void RunNewMSHLearnCycle_Click(object sender, EventArgs e)
+    {
+      FLearnCycle LearnCycle = new FLearnCycle(LoopCtrl, Filter);
     }
   }
 }

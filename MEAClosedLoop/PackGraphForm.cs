@@ -17,7 +17,6 @@ namespace MEAClosedLoop
   public delegate void DelegateSetStatButtonText(string text);
   public delegate void DelegateResetProgressBar(int val = 0);
   public delegate void DelegateLockUI(bool lockflag);
-
   public enum OnOffSwitch
   {
     On,

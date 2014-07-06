@@ -484,12 +484,12 @@ namespace MEAClosedLoop
       // m_channelList = new List<int>(new int[] { 0, 1, 3, 5, 10, 12, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59 });
       // m_channelList = new List<int>(new int[] { 0, 1, 3 });
       m_channelList = new List<int>(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 });
-      comboBox1.Items.Clear();
-      comboBox1.Items.AddRange(Array.ConvertAll(m_channelList.ToArray(), ch => (object)ch));
-      comboBox1.SelectedIndex = 0;
-      comboBox2.Items.Clear();
-      comboBox2.Items.AddRange(Array.ConvertAll(m_channelList.ToArray(), ch => (object)ch));
-      comboBox2.SelectedIndex = 1;
+      //comboBox1.Items.Clear();
+      //comboBox1.Items.AddRange(Array.ConvertAll(m_channelList.ToArray(), ch => (object)ch));
+      //comboBox1.SelectedIndex = 0;
+      //comboBox2.Items.Clear();
+      //comboBox2.Items.AddRange(Array.ConvertAll(m_channelList.ToArray(), ch => (object)ch));
+      //comboBox2.SelectedIndex = 1;
     }
 
     private void comboBox_DAQs_Click(object sender, EventArgs e)
@@ -699,7 +699,7 @@ namespace MEAClosedLoop
 
     private void PackStatButton_Click(object sender, EventArgs e)
     {
-      m_statForm = new FPackStat(m_closedLoop, m_channelList);
+      m_statForm = new FPackStat(m_closedLoop, m_salpaFilter,  m_channelList);
       m_salpaFilter.AddStimulConsumer(m_statForm.RecieveStimData);
       m_statForm.StartPosition = FormStartPosition.Manual;
       m_statForm.Left = this.Location.X + 300;
@@ -784,6 +784,36 @@ namespace MEAClosedLoop
     }
 
     private void button2_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void labelAmpl1_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void groupBox3_Enter(object sender, EventArgs e)
+    {
+
+    }
+
+    private void groupBox1_Enter(object sender, EventArgs e)
+    {
+
+    }
+
+    private void DisplayData_Enter(object sender, EventArgs e)
+    {
+
+    }
+
+    private void labelAmpl2_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    private void groupBox2_Enter(object sender, EventArgs e)
     {
 
     }

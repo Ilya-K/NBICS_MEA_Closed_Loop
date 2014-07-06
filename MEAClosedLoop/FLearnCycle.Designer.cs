@@ -38,19 +38,26 @@
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
       this.button1 = new System.Windows.Forms.Button();
       this.button2 = new System.Windows.Forms.Button();
+      this.label4 = new System.Windows.Forms.Label();
+      this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
+      this.label5 = new System.Windows.Forms.Label();
+      this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.ReactionPacks = new System.Windows.Forms.Panel();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
       this.groupBox1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
+      this.groupBox2.SuspendLayout();
       this.SuspendLayout();
       // 
       // pictureBox1
       // 
       this.pictureBox1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.pictureBox1.Location = new System.Drawing.Point(417, 12);
+      this.pictureBox1.Location = new System.Drawing.Point(12, 369);
       this.pictureBox1.Name = "pictureBox1";
-      this.pictureBox1.Size = new System.Drawing.Size(249, 159);
+      this.pictureBox1.Size = new System.Drawing.Size(398, 159);
       this.pictureBox1.TabIndex = 0;
       this.pictureBox1.TabStop = false;
       this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
@@ -84,15 +91,18 @@
       // 
       // groupBox1
       // 
+      this.groupBox1.Controls.Add(this.label5);
+      this.groupBox1.Controls.Add(this.numericUpDown4);
       this.groupBox1.Controls.Add(this.numericUpDown3);
       this.groupBox1.Controls.Add(this.numericUpDown2);
       this.groupBox1.Controls.Add(this.numericUpDown1);
       this.groupBox1.Controls.Add(this.label1);
+      this.groupBox1.Controls.Add(this.label4);
       this.groupBox1.Controls.Add(this.label3);
       this.groupBox1.Controls.Add(this.label2);
       this.groupBox1.Location = new System.Drawing.Point(12, 12);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(399, 100);
+      this.groupBox1.Size = new System.Drawing.Size(398, 244);
       this.groupBox1.TabIndex = 4;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Параметры цикла";
@@ -165,7 +175,7 @@
       // 
       // button1
       // 
-      this.button1.Location = new System.Drawing.Point(21, 119);
+      this.button1.Location = new System.Drawing.Point(21, 262);
       this.button1.Name = "button1";
       this.button1.Size = new System.Drawing.Size(98, 23);
       this.button1.TabIndex = 5;
@@ -174,18 +184,77 @@
       // 
       // button2
       // 
-      this.button2.Location = new System.Drawing.Point(21, 148);
+      this.button2.Location = new System.Drawing.Point(21, 291);
       this.button2.Name = "button2";
       this.button2.Size = new System.Drawing.Size(98, 23);
       this.button2.TabIndex = 5;
       this.button2.Text = "Завершить цикл";
       this.button2.UseVisualStyleBackColor = true;
       // 
+      // label4
+      // 
+      this.label4.AutoSize = true;
+      this.label4.Location = new System.Drawing.Point(6, 100);
+      this.label4.Name = "label4";
+      this.label4.Size = new System.Drawing.Size(159, 13);
+      this.label4.TabIndex = 3;
+      this.label4.Text = "критерий правильного ответа";
+      // 
+      // numericUpDown4
+      // 
+      this.numericUpDown4.Location = new System.Drawing.Point(331, 98);
+      this.numericUpDown4.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+      this.numericUpDown4.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      this.numericUpDown4.Name = "numericUpDown4";
+      this.numericUpDown4.Size = new System.Drawing.Size(28, 20);
+      this.numericUpDown4.TabIndex = 4;
+      this.numericUpDown4.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+      // 
+      // label5
+      // 
+      this.label5.AutoSize = true;
+      this.label5.Location = new System.Drawing.Point(365, 100);
+      this.label5.Name = "label5";
+      this.label5.Size = new System.Drawing.Size(24, 13);
+      this.label5.TabIndex = 5;
+      this.label5.Text = "/10";
+      // 
+      // groupBox2
+      // 
+      this.groupBox2.Controls.Add(this.ReactionPacks);
+      this.groupBox2.Location = new System.Drawing.Point(445, 17);
+      this.groupBox2.Name = "groupBox2";
+      this.groupBox2.Size = new System.Drawing.Size(403, 511);
+      this.groupBox2.TabIndex = 8;
+      this.groupBox2.TabStop = false;
+      this.groupBox2.Text = "Ответ культуры";
+      // 
+      // ReactionPacks
+      // 
+      this.ReactionPacks.AutoScroll = true;
+      this.ReactionPacks.Location = new System.Drawing.Point(7, 17);
+      this.ReactionPacks.Name = "ReactionPacks";
+      this.ReactionPacks.Size = new System.Drawing.Size(390, 488);
+      this.ReactionPacks.TabIndex = 0;
+      // 
       // FLearnCycle
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(685, 193);
+      this.ClientSize = new System.Drawing.Size(860, 540);
+      this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.button2);
       this.Controls.Add(this.button1);
       this.Controls.Add(this.groupBox1);
@@ -198,6 +267,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
+      this.groupBox2.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
@@ -214,5 +285,10 @@
     private System.Windows.Forms.NumericUpDown numericUpDown1;
     private System.Windows.Forms.Button button1;
     private System.Windows.Forms.Button button2;
+    private System.Windows.Forms.Label label5;
+    private System.Windows.Forms.NumericUpDown numericUpDown4;
+    private System.Windows.Forms.Label label4;
+    private System.Windows.Forms.GroupBox groupBox2;
+    private System.Windows.Forms.Panel ReactionPacks;
   }
 }

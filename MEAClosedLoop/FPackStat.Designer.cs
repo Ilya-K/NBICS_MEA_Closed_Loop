@@ -47,6 +47,7 @@
       this.CurrentAverage = new System.Windows.Forms.TextBox();
       this.label26 = new System.Windows.Forms.Label();
       this.CurrentSigma = new System.Windows.Forms.TextBox();
+      this.label25 = new System.Windows.Forms.Label();
       this.label20 = new System.Windows.Forms.Label();
       this.groupBox6 = new System.Windows.Forms.GroupBox();
       this.StatWindowMinCount = new System.Windows.Forms.NumericUpDown();
@@ -83,7 +84,9 @@
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.compareButton = new System.Windows.Forms.Button();
-      this.label25 = new System.Windows.Forms.Label();
+      this.groupBox5 = new System.Windows.Forms.GroupBox();
+      this.RunNewMSHLearnCycle = new System.Windows.Forms.Button();
+      this.label11 = new System.Windows.Forms.Label();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -102,6 +105,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.PackCountGraph)).BeginInit();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
+      this.groupBox5.SuspendLayout();
       this.SuspendLayout();
       // 
       // Prepearing
@@ -162,7 +166,7 @@
       this.StimParams.Controls.Add(this.StimPadding);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
-      this.StimParams.Location = new System.Drawing.Point(10, 323);
+      this.StimParams.Location = new System.Drawing.Point(477, 12);
       this.StimParams.Name = "StimParams";
       this.StimParams.Size = new System.Drawing.Size(461, 74);
       this.StimParams.TabIndex = 11;
@@ -312,6 +316,15 @@
       this.CurrentSigma.Size = new System.Drawing.Size(66, 20);
       this.CurrentSigma.TabIndex = 2;
       // 
+      // label25
+      // 
+      this.label25.AutoSize = true;
+      this.label25.Location = new System.Drawing.Point(199, 16);
+      this.label25.Name = "label25";
+      this.label25.Size = new System.Drawing.Size(25, 13);
+      this.label25.TabIndex = 16;
+      this.label25.Text = "сек";
+      // 
       // label20
       // 
       this.label20.AutoSize = true;
@@ -404,7 +417,7 @@
       // label3
       // 
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(11, 16);
+      this.label3.Location = new System.Drawing.Point(8, 45);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(109, 13);
       this.label3.TabIndex = 3;
@@ -412,7 +425,7 @@
       // 
       // SelectedAverageBox
       // 
-      this.SelectedAverageBox.Location = new System.Drawing.Point(126, 13);
+      this.SelectedAverageBox.Location = new System.Drawing.Point(130, 42);
       this.SelectedAverageBox.Name = "SelectedAverageBox";
       this.SelectedAverageBox.ReadOnly = true;
       this.SelectedAverageBox.Size = new System.Drawing.Size(66, 20);
@@ -420,7 +433,7 @@
       // 
       // SelectedSigmaBox
       // 
-      this.SelectedSigmaBox.Location = new System.Drawing.Point(126, 37);
+      this.SelectedSigmaBox.Location = new System.Drawing.Point(130, 65);
       this.SelectedSigmaBox.Name = "SelectedSigmaBox";
       this.SelectedSigmaBox.ReadOnly = true;
       this.SelectedSigmaBox.Size = new System.Drawing.Size(66, 20);
@@ -429,7 +442,7 @@
       // label4
       // 
       this.label4.AutoSize = true;
-      this.label4.Location = new System.Drawing.Point(11, 40);
+      this.label4.Location = new System.Drawing.Point(11, 68);
       this.label4.Name = "label4";
       this.label4.Size = new System.Drawing.Size(39, 13);
       this.label4.TabIndex = 3;
@@ -547,7 +560,7 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(10, 519);
+      this.PackProbability.Location = new System.Drawing.Point(10, 323);
       this.PackProbability.Name = "PackProbability";
       this.PackProbability.Size = new System.Drawing.Size(461, 146);
       this.PackProbability.TabIndex = 9;
@@ -697,7 +710,7 @@
       this.groupBox1.Controls.Add(this.numericUpDown1);
       this.groupBox1.Controls.Add(this.button1);
       this.groupBox1.Controls.Add(this.GraphChannelSelectButton);
-      this.groupBox1.Location = new System.Drawing.Point(11, 402);
+      this.groupBox1.Location = new System.Drawing.Point(477, 91);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(460, 52);
       this.groupBox1.TabIndex = 12;
@@ -710,7 +723,7 @@
       this.groupBox2.Controls.Add(this.label9);
       this.groupBox2.Controls.Add(this.StimType);
       this.groupBox2.Controls.Add(this.StartStimButton);
-      this.groupBox2.Location = new System.Drawing.Point(10, 460);
+      this.groupBox2.Location = new System.Drawing.Point(477, 149);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(461, 44);
       this.groupBox2.TabIndex = 13;
@@ -728,20 +741,42 @@
       this.compareButton.UseVisualStyleBackColor = true;
       this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
       // 
-      // label25
+      // groupBox5
       // 
-      this.label25.AutoSize = true;
-      this.label25.Location = new System.Drawing.Point(199, 16);
-      this.label25.Name = "label25";
-      this.label25.Size = new System.Drawing.Size(25, 13);
-      this.label25.TabIndex = 16;
-      this.label25.Text = "сек";
+      this.groupBox5.Controls.Add(this.label11);
+      this.groupBox5.Controls.Add(this.RunNewMSHLearnCycle);
+      this.groupBox5.Location = new System.Drawing.Point(479, 199);
+      this.groupBox5.Name = "groupBox5";
+      this.groupBox5.Size = new System.Drawing.Size(450, 50);
+      this.groupBox5.TabIndex = 14;
+      this.groupBox5.TabStop = false;
+      this.groupBox5.Text = "Обучение";
+      // 
+      // RunNewMSHLearnCycle
+      // 
+      this.RunNewMSHLearnCycle.Location = new System.Drawing.Point(348, 16);
+      this.RunNewMSHLearnCycle.Name = "RunNewMSHLearnCycle";
+      this.RunNewMSHLearnCycle.Size = new System.Drawing.Size(96, 23);
+      this.RunNewMSHLearnCycle.TabIndex = 0;
+      this.RunNewMSHLearnCycle.Text = "Новый цикл";
+      this.RunNewMSHLearnCycle.UseVisualStyleBackColor = true;
+      this.RunNewMSHLearnCycle.Click += new System.EventHandler(this.RunNewMSHLearnCycle_Click);
+      // 
+      // label11
+      // 
+      this.label11.AutoSize = true;
+      this.label11.Location = new System.Drawing.Point(6, 21);
+      this.label11.Name = "label11";
+      this.label11.Size = new System.Drawing.Size(147, 13);
+      this.label11.TabIndex = 1;
+      this.label11.Text = "Marom && Shahaf  Learn Cycle";
       // 
       // FPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(563, 726);
+      this.ClientSize = new System.Drawing.Size(942, 476);
+      this.Controls.Add(this.groupBox5);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.StimParams);
@@ -776,6 +811,8 @@
       this.groupBox1.PerformLayout();
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
+      this.groupBox5.ResumeLayout(false);
+      this.groupBox5.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -838,5 +875,8 @@
     private System.Windows.Forms.Label label20;
     private System.Windows.Forms.Button compareButton;
     private System.Windows.Forms.Label label25;
+    private System.Windows.Forms.GroupBox groupBox5;
+    private System.Windows.Forms.Label label11;
+    private System.Windows.Forms.Button RunNewMSHLearnCycle;
   }
 }

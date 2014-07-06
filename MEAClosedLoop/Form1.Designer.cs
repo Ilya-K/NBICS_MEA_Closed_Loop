@@ -30,16 +30,12 @@
         {
       this.buttonStartDAQ = new System.Windows.Forms.Button();
       this.buttonStop = new System.Windows.Forms.Button();
-      this.comboBox1 = new System.Windows.Forms.ComboBox();
-      this.comboBox2 = new System.Windows.Forms.ComboBox();
       this.labelAmpl1 = new System.Windows.Forms.Label();
       this.labelAmpl2 = new System.Windows.Forms.Label();
       this.buttonOpen = new System.Windows.Forms.Button();
       this.checkBox_Manual = new System.Windows.Forms.CheckBox();
       this.button_Next = new System.Windows.Forms.Button();
-      this.label_refreshRate = new System.Windows.Forms.Label();
       this.comboBox_DAQs = new System.Windows.Forms.ComboBox();
-      this.textBox_DeviceInfo = new System.Windows.Forms.TextBox();
       this.label1 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.comboBox_Stimulators = new System.Windows.Forms.ComboBox();
@@ -47,19 +43,20 @@
       this.buttonClosedLoop = new System.Windows.Forms.Button();
       this.label_time = new System.Windows.Forms.Label();
       this.button_integral0 = new System.Windows.Forms.Button();
-      this.buttonStatWindow = new System.Windows.Forms.Button();
       this.showChannelData = new System.Windows.Forms.Button();
       this.DisplayData = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.button1 = new System.Windows.Forms.Button();
-      this.groupBox3 = new System.Windows.Forms.GroupBox();
       this.PackStatButton = new System.Windows.Forms.Button();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
-      this.button2 = new System.Windows.Forms.Button();
+      this.buttonStatWindow = new System.Windows.Forms.Button();
+      this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.label_refreshRate = new System.Windows.Forms.Label();
+      this.textBox_DeviceInfo = new System.Windows.Forms.TextBox();
       this.DisplayData.SuspendLayout();
       this.groupBox2.SuspendLayout();
-      this.groupBox3.SuspendLayout();
       this.groupBox1.SuspendLayout();
+      this.groupBox3.SuspendLayout();
       this.SuspendLayout();
       // 
       // buttonStartDAQ
@@ -84,37 +81,21 @@
       this.buttonStop.UseVisualStyleBackColor = true;
       this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
       // 
-      // comboBox1
-      // 
-      this.comboBox1.FormattingEnabled = true;
-      this.comboBox1.Location = new System.Drawing.Point(12, 73);
-      this.comboBox1.Name = "comboBox1";
-      this.comboBox1.Size = new System.Drawing.Size(87, 21);
-      this.comboBox1.TabIndex = 17;
-      this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-      // 
-      // comboBox2
-      // 
-      this.comboBox2.FormattingEnabled = true;
-      this.comboBox2.Location = new System.Drawing.Point(258, 71);
-      this.comboBox2.Name = "comboBox2";
-      this.comboBox2.Size = new System.Drawing.Size(87, 21);
-      this.comboBox2.TabIndex = 18;
-      this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
-      // 
       // labelAmpl1
       // 
-      this.labelAmpl1.Location = new System.Drawing.Point(105, 77);
+      this.labelAmpl1.Location = new System.Drawing.Point(339, 44);
       this.labelAmpl1.Name = "labelAmpl1";
       this.labelAmpl1.Size = new System.Drawing.Size(38, 17);
       this.labelAmpl1.TabIndex = 19;
+      this.labelAmpl1.Click += new System.EventHandler(this.labelAmpl1_Click);
       // 
       // labelAmpl2
       // 
-      this.labelAmpl2.Location = new System.Drawing.Point(351, 75);
+      this.labelAmpl2.Location = new System.Drawing.Point(463, 47);
       this.labelAmpl2.Name = "labelAmpl2";
       this.labelAmpl2.Size = new System.Drawing.Size(38, 17);
       this.labelAmpl2.TabIndex = 20;
+      this.labelAmpl2.Click += new System.EventHandler(this.labelAmpl2_Click);
       // 
       // buttonOpen
       // 
@@ -147,14 +128,6 @@
       this.button_Next.UseVisualStyleBackColor = true;
       this.button_Next.Click += new System.EventHandler(this.button_Next_Click);
       // 
-      // label_refreshRate
-      // 
-      this.label_refreshRate.Location = new System.Drawing.Point(138, 77);
-      this.label_refreshRate.Name = "label_refreshRate";
-      this.label_refreshRate.Size = new System.Drawing.Size(72, 17);
-      this.label_refreshRate.TabIndex = 23;
-      this.label_refreshRate.Text = "Rerfesh Rate";
-      // 
       // comboBox_DAQs
       // 
       this.comboBox_DAQs.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -166,14 +139,6 @@
       this.comboBox_DAQs.TabIndex = 25;
       this.comboBox_DAQs.SelectedIndexChanged += new System.EventHandler(this.comboBox_DAQs_SelectedIndexChanged);
       this.comboBox_DAQs.Click += new System.EventHandler(this.comboBox_DAQs_Click);
-      // 
-      // textBox_DeviceInfo
-      // 
-      this.textBox_DeviceInfo.Location = new System.Drawing.Point(12, 100);
-      this.textBox_DeviceInfo.Multiline = true;
-      this.textBox_DeviceInfo.Name = "textBox_DeviceInfo";
-      this.textBox_DeviceInfo.Size = new System.Drawing.Size(10, 10);
-      this.textBox_DeviceInfo.TabIndex = 14;
       // 
       // label1
       // 
@@ -224,7 +189,7 @@
       // 
       // label_time
       // 
-      this.label_time.Location = new System.Drawing.Point(544, 77);
+      this.label_time.Location = new System.Drawing.Point(628, 50);
       this.label_time.Name = "label_time";
       this.label_time.Size = new System.Drawing.Size(72, 17);
       this.label_time.TabIndex = 23;
@@ -240,17 +205,6 @@
       this.button_integral0.UseVisualStyleBackColor = true;
       this.button_integral0.Click += new System.EventHandler(this.button_integral0_Click);
       // 
-      // buttonStatWindow
-      // 
-      this.buttonStatWindow.Enabled = false;
-      this.buttonStatWindow.Location = new System.Drawing.Point(69, 19);
-      this.buttonStatWindow.Name = "buttonStatWindow";
-      this.buttonStatWindow.Size = new System.Drawing.Size(88, 23);
-      this.buttonStatWindow.TabIndex = 26;
-      this.buttonStatWindow.Text = "Stat";
-      this.buttonStatWindow.UseVisualStyleBackColor = true;
-      this.buttonStatWindow.Click += new System.EventHandler(this.buttonStatWindow_Click);
-      // 
       // showChannelData
       // 
       this.showChannelData.Enabled = false;
@@ -265,22 +219,24 @@
       // DisplayData
       // 
       this.DisplayData.Controls.Add(this.showChannelData);
-      this.DisplayData.Location = new System.Drawing.Point(569, 130);
+      this.DisplayData.Location = new System.Drawing.Point(569, 69);
       this.DisplayData.Name = "DisplayData";
       this.DisplayData.Size = new System.Drawing.Size(170, 48);
       this.DisplayData.TabIndex = 30;
       this.DisplayData.TabStop = false;
       this.DisplayData.Text = "Display MChannel data";
+      this.DisplayData.Enter += new System.EventHandler(this.DisplayData_Enter);
       // 
       // groupBox2
       // 
       this.groupBox2.Controls.Add(this.button1);
-      this.groupBox2.Location = new System.Drawing.Point(191, 130);
+      this.groupBox2.Location = new System.Drawing.Point(191, 69);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(170, 48);
       this.groupBox2.TabIndex = 31;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Recorder";
+      this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
       // 
       // button1
       // 
@@ -291,16 +247,6 @@
       this.button1.Text = "Open";
       this.button1.UseVisualStyleBackColor = true;
       this.button1.Click += new System.EventHandler(this.OpenRecorder_Click);
-      // 
-      // groupBox3
-      // 
-      this.groupBox3.Controls.Add(this.buttonStatWindow);
-      this.groupBox3.Location = new System.Drawing.Point(15, 130);
-      this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(170, 48);
-      this.groupBox3.TabIndex = 31;
-      this.groupBox3.TabStop = false;
-      this.groupBox3.Text = "Debug";
       // 
       // PackStatButton
       // 
@@ -315,30 +261,58 @@
       // 
       // groupBox1
       // 
-      this.groupBox1.Controls.Add(this.button2);
       this.groupBox1.Controls.Add(this.PackStatButton);
-      this.groupBox1.Location = new System.Drawing.Point(371, 130);
+      this.groupBox1.Location = new System.Drawing.Point(371, 69);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(170, 78);
+      this.groupBox1.Size = new System.Drawing.Size(170, 48);
       this.groupBox1.TabIndex = 31;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "LearnExp";
+      this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
       // 
-      // button2
+      // buttonStatWindow
       // 
-      this.button2.Location = new System.Drawing.Point(68, 48);
-      this.button2.Name = "button2";
-      this.button2.Size = new System.Drawing.Size(87, 23);
-      this.button2.TabIndex = 28;
-      this.button2.Text = "Learn Cycle";
-      this.button2.UseVisualStyleBackColor = true;
-      this.button2.Click += new System.EventHandler(this.button2_Click);
+      this.buttonStatWindow.Enabled = false;
+      this.buttonStatWindow.Location = new System.Drawing.Point(69, 19);
+      this.buttonStatWindow.Name = "buttonStatWindow";
+      this.buttonStatWindow.Size = new System.Drawing.Size(88, 23);
+      this.buttonStatWindow.TabIndex = 26;
+      this.buttonStatWindow.Text = "Stat";
+      this.buttonStatWindow.UseVisualStyleBackColor = true;
+      this.buttonStatWindow.Click += new System.EventHandler(this.buttonStatWindow_Click);
+      // 
+      // groupBox3
+      // 
+      this.groupBox3.Controls.Add(this.buttonStatWindow);
+      this.groupBox3.Location = new System.Drawing.Point(15, 69);
+      this.groupBox3.Name = "groupBox3";
+      this.groupBox3.Size = new System.Drawing.Size(170, 48);
+      this.groupBox3.TabIndex = 31;
+      this.groupBox3.TabStop = false;
+      this.groupBox3.Text = "Debug";
+      this.groupBox3.Enter += new System.EventHandler(this.groupBox3_Enter);
+      // 
+      // label_refreshRate
+      // 
+      this.label_refreshRate.Location = new System.Drawing.Point(261, 45);
+      this.label_refreshRate.Name = "label_refreshRate";
+      this.label_refreshRate.Size = new System.Drawing.Size(72, 17);
+      this.label_refreshRate.TabIndex = 23;
+      this.label_refreshRate.Text = "Rerfesh Rate";
+      // 
+      // textBox_DeviceInfo
+      // 
+      this.textBox_DeviceInfo.Location = new System.Drawing.Point(754, 1);
+      this.textBox_DeviceInfo.Multiline = true;
+      this.textBox_DeviceInfo.Name = "textBox_DeviceInfo";
+      this.textBox_DeviceInfo.Size = new System.Drawing.Size(10, 10);
+      this.textBox_DeviceInfo.TabIndex = 14;
       // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(765, 260);
+      this.ClientSize = new System.Drawing.Size(765, 125);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox3);
       this.Controls.Add(this.groupBox1);
@@ -355,22 +329,22 @@
       this.Controls.Add(this.checkBox_Manual);
       this.Controls.Add(this.labelAmpl2);
       this.Controls.Add(this.labelAmpl1);
-      this.Controls.Add(this.comboBox2);
-      this.Controls.Add(this.comboBox1);
       this.Controls.Add(this.textBox_DeviceInfo);
       this.Controls.Add(this.buttonStop);
       this.Controls.Add(this.buttonOpen);
       this.Controls.Add(this.buttonClosedLoop);
       this.Controls.Add(this.buttonStartDAQ);
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+      this.MaximizeBox = false;
       this.Name = "Form1";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-      this.Text = "Form1";
+      this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+      this.Text = "Device && Loop";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
       this.Load += new System.EventHandler(this.Form1_Load);
       this.DisplayData.ResumeLayout(false);
       this.groupBox2.ResumeLayout(false);
-      this.groupBox3.ResumeLayout(false);
       this.groupBox1.ResumeLayout(false);
+      this.groupBox3.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -380,32 +354,29 @@
 
         private System.Windows.Forms.Button buttonStartDAQ;
         private System.Windows.Forms.Button buttonStop;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label labelAmpl1;
         private System.Windows.Forms.Label labelAmpl2;
         private System.Windows.Forms.Button buttonOpen;
         private System.Windows.Forms.CheckBox checkBox_Manual;
         private System.Windows.Forms.Button button_Next;
-        private System.Windows.Forms.Label label_refreshRate;
         private System.Windows.Forms.ComboBox comboBox_DAQs;
         private System.Windows.Forms.ComboBox comboBox_Stimulators;
-        private System.Windows.Forms.TextBox textBox_DeviceInfo;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button buttonCalibrate;
         private System.Windows.Forms.Button buttonClosedLoop;
         private System.Windows.Forms.Label label_time;
         private System.Windows.Forms.Button button_integral0;
-        private System.Windows.Forms.Button buttonStatWindow;
         private System.Windows.Forms.Button showChannelData;
         private System.Windows.Forms.GroupBox DisplayData;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button PackStatButton;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button buttonStatWindow;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Label label_refreshRate;
+        private System.Windows.Forms.TextBox textBox_DeviceInfo;
     }
 }
 
