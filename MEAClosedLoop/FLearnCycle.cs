@@ -88,8 +88,10 @@ namespace MEAClosedLoop
         }
       }
     }
-    private bool ChekSpike()
+    private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
     {
+
+      return false;
     }
   }
 }
