@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
   #region Definitions
@@ -21,7 +21,7 @@ namespace MEAClosedLoop
   public partial class FLearnCycle : Form
   {
     #region Внутренние константы
-
+    private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
     #endregion
 
     #region Внутренние данные
@@ -88,8 +88,21 @@ namespace MEAClosedLoop
         }
       }
     }
+    //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative
     private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
     {
+      //Пачка началась сильно позже стимула? т.е. не считалась вызванной
+      if (pack.Start > StimTime + StimControlDuration)
+        return false;
+      //Пачка закончилась раньше начала стимула
+      if (pack.Start + (TTime)pack.Length < StimTime)
+        return false;
+      //[TO DO] более правильный выбор начала поиска (часть, когда pack.Start > StimTime необходимо уточнить)
+      TTime StartSearchTime = (pack.Start <= StimTime) ? StimTime + CenterTime - Delta : StimTime + CenterTime - Delta;
+
+      for (TTime i = StartSearchTime; i < StimTime + CenterTime + Delta && i < StimTime; i++)
+      {
+      }
 
       return false;
     }

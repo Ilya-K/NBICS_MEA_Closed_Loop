@@ -33,29 +33,29 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.label5 = new System.Windows.Forms.Label();
+      this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
       this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
       this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+      this.label4 = new System.Windows.Forms.Label();
       this.button1 = new System.Windows.Forms.Button();
       this.button2 = new System.Windows.Forms.Button();
-      this.label4 = new System.Windows.Forms.Label();
-      this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
-      this.label5 = new System.Windows.Forms.Label();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.RSPacks = new System.Windows.Forms.Panel();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
       this.groupBox1.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
       this.groupBox2.SuspendLayout();
       this.SuspendLayout();
       // 
       // pictureBox1
       // 
       this.pictureBox1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.pictureBox1.Location = new System.Drawing.Point(12, 369);
+      this.pictureBox1.Location = new System.Drawing.Point(21, 343);
       this.pictureBox1.Name = "pictureBox1";
       this.pictureBox1.Size = new System.Drawing.Size(398, 159);
       this.pictureBox1.TabIndex = 0;
@@ -106,6 +106,37 @@
       this.groupBox1.TabIndex = 4;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Параметры цикла";
+      // 
+      // label5
+      // 
+      this.label5.AutoSize = true;
+      this.label5.Location = new System.Drawing.Point(365, 100);
+      this.label5.Name = "label5";
+      this.label5.Size = new System.Drawing.Size(24, 13);
+      this.label5.TabIndex = 5;
+      this.label5.Text = "/10";
+      // 
+      // numericUpDown4
+      // 
+      this.numericUpDown4.Location = new System.Drawing.Point(331, 98);
+      this.numericUpDown4.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+      this.numericUpDown4.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      this.numericUpDown4.Name = "numericUpDown4";
+      this.numericUpDown4.Size = new System.Drawing.Size(28, 20);
+      this.numericUpDown4.TabIndex = 4;
+      this.numericUpDown4.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
       // 
       // numericUpDown3
       // 
@@ -173,6 +204,15 @@
             0,
             0});
       // 
+      // label4
+      // 
+      this.label4.AutoSize = true;
+      this.label4.Location = new System.Drawing.Point(6, 100);
+      this.label4.Name = "label4";
+      this.label4.Size = new System.Drawing.Size(159, 13);
+      this.label4.TabIndex = 3;
+      this.label4.Text = "критерий правильного ответа";
+      // 
       // button1
       // 
       this.button1.Location = new System.Drawing.Point(21, 262);
@@ -190,46 +230,6 @@
       this.button2.TabIndex = 5;
       this.button2.Text = "Завершить цикл";
       this.button2.UseVisualStyleBackColor = true;
-      // 
-      // label4
-      // 
-      this.label4.AutoSize = true;
-      this.label4.Location = new System.Drawing.Point(6, 100);
-      this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(159, 13);
-      this.label4.TabIndex = 3;
-      this.label4.Text = "критерий правильного ответа";
-      // 
-      // numericUpDown4
-      // 
-      this.numericUpDown4.Location = new System.Drawing.Point(331, 98);
-      this.numericUpDown4.Maximum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-      this.numericUpDown4.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-      this.numericUpDown4.Name = "numericUpDown4";
-      this.numericUpDown4.Size = new System.Drawing.Size(28, 20);
-      this.numericUpDown4.TabIndex = 4;
-      this.numericUpDown4.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-      // 
-      // label5
-      // 
-      this.label5.AutoSize = true;
-      this.label5.Location = new System.Drawing.Point(365, 100);
-      this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(24, 13);
-      this.label5.TabIndex = 5;
-      this.label5.Text = "/10";
       // 
       // groupBox2
       // 
@@ -264,10 +264,10 @@
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
       this.groupBox1.ResumeLayout(false);
       this.groupBox1.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
       this.groupBox2.ResumeLayout(false);
       this.ResumeLayout(false);
 
