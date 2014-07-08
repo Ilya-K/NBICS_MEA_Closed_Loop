@@ -46,6 +46,7 @@ namespace MEAClosedLoop
       PictureBox SomePack = new PictureBox();
       SomePack.Location = new Point(20, 20);
       SomePack.BackColor = Color.White;
+      SomePack.Size = new Size(200, 50);
       this.RSPacks.Controls.Add(SomePack);
       // END DEBUG
 
