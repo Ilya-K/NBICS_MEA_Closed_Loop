@@ -549,6 +549,8 @@ namespace MEAClosedLoop
     private void RunNewMSHLearnCycle_Click(object sender, EventArgs e)
     {
       FLearnCycle LearnCycle = new FLearnCycle(LoopCtrl, Filter);
+      LearnCycle.MdiParent = this.MdiParent;
+      LearnCycle.Show();
     }
   }
 }

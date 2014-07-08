@@ -85,8 +85,8 @@
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.compareButton = new System.Windows.Forms.Button();
       this.groupBox5 = new System.Windows.Forms.GroupBox();
-      this.RunNewMSHLearnCycle = new System.Windows.Forms.Button();
       this.label11 = new System.Windows.Forms.Label();
+      this.RunNewMSHLearnCycle = new System.Windows.Forms.Button();
       this.Prepearing.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
       this.StimParams.SuspendLayout();
@@ -166,7 +166,7 @@
       this.StimParams.Controls.Add(this.StimPadding);
       this.StimParams.Controls.Add(this.label10);
       this.StimParams.Controls.Add(this.trackBar1);
-      this.StimParams.Location = new System.Drawing.Point(477, 12);
+      this.StimParams.Location = new System.Drawing.Point(10, 327);
       this.StimParams.Name = "StimParams";
       this.StimParams.Size = new System.Drawing.Size(461, 74);
       this.StimParams.TabIndex = 11;
@@ -352,7 +352,7 @@
             0,
             0});
       this.StatWindowMinCount.Name = "StatWindowMinCount";
-      this.StatWindowMinCount.Size = new System.Drawing.Size(34, 20);
+      this.StatWindowMinCount.Size = new System.Drawing.Size(40, 20);
       this.StatWindowMinCount.TabIndex = 11;
       this.StatWindowMinCount.ValueChanged += new System.EventHandler(this.StatWindowCount_ValueChanged);
       this.StatWindowMinCount.Click += new System.EventHandler(this.StatWindowCount_ValueChanged);
@@ -395,7 +395,7 @@
       // label24
       // 
       this.label24.AutoSize = true;
-      this.label24.Location = new System.Drawing.Point(142, 16);
+      this.label24.Location = new System.Drawing.Point(145, 16);
       this.label24.Name = "label24";
       this.label24.Size = new System.Drawing.Size(15, 13);
       this.label24.TabIndex = 13;
@@ -560,7 +560,7 @@
       this.PackProbability.Controls.Add(this.label6);
       this.PackProbability.Controls.Add(this.label5);
       this.PackProbability.Controls.Add(this.PackCountGraph);
-      this.PackProbability.Location = new System.Drawing.Point(10, 323);
+      this.PackProbability.Location = new System.Drawing.Point(477, 255);
       this.PackProbability.Name = "PackProbability";
       this.PackProbability.Size = new System.Drawing.Size(461, 146);
       this.PackProbability.TabIndex = 9;
@@ -710,7 +710,7 @@
       this.groupBox1.Controls.Add(this.numericUpDown1);
       this.groupBox1.Controls.Add(this.button1);
       this.groupBox1.Controls.Add(this.GraphChannelSelectButton);
-      this.groupBox1.Location = new System.Drawing.Point(477, 91);
+      this.groupBox1.Location = new System.Drawing.Point(479, 12);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(460, 52);
       this.groupBox1.TabIndex = 12;
@@ -723,9 +723,9 @@
       this.groupBox2.Controls.Add(this.label9);
       this.groupBox2.Controls.Add(this.StimType);
       this.groupBox2.Controls.Add(this.StartStimButton);
-      this.groupBox2.Location = new System.Drawing.Point(477, 149);
+      this.groupBox2.Location = new System.Drawing.Point(479, 63);
       this.groupBox2.Name = "groupBox2";
-      this.groupBox2.Size = new System.Drawing.Size(461, 44);
+      this.groupBox2.Size = new System.Drawing.Size(459, 44);
       this.groupBox2.TabIndex = 13;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Стимуляция";
@@ -745,22 +745,12 @@
       // 
       this.groupBox5.Controls.Add(this.label11);
       this.groupBox5.Controls.Add(this.RunNewMSHLearnCycle);
-      this.groupBox5.Location = new System.Drawing.Point(479, 199);
+      this.groupBox5.Location = new System.Drawing.Point(479, 113);
       this.groupBox5.Name = "groupBox5";
-      this.groupBox5.Size = new System.Drawing.Size(450, 50);
+      this.groupBox5.Size = new System.Drawing.Size(460, 50);
       this.groupBox5.TabIndex = 14;
       this.groupBox5.TabStop = false;
       this.groupBox5.Text = "Обучение";
-      // 
-      // RunNewMSHLearnCycle
-      // 
-      this.RunNewMSHLearnCycle.Location = new System.Drawing.Point(348, 16);
-      this.RunNewMSHLearnCycle.Name = "RunNewMSHLearnCycle";
-      this.RunNewMSHLearnCycle.Size = new System.Drawing.Size(96, 23);
-      this.RunNewMSHLearnCycle.TabIndex = 0;
-      this.RunNewMSHLearnCycle.Text = "Новый цикл";
-      this.RunNewMSHLearnCycle.UseVisualStyleBackColor = true;
-      this.RunNewMSHLearnCycle.Click += new System.EventHandler(this.RunNewMSHLearnCycle_Click);
       // 
       // label11
       // 
@@ -771,11 +761,21 @@
       this.label11.TabIndex = 1;
       this.label11.Text = "Marom && Shahaf  Learn Cycle";
       // 
+      // RunNewMSHLearnCycle
+      // 
+      this.RunNewMSHLearnCycle.Location = new System.Drawing.Point(357, 16);
+      this.RunNewMSHLearnCycle.Name = "RunNewMSHLearnCycle";
+      this.RunNewMSHLearnCycle.Size = new System.Drawing.Size(96, 23);
+      this.RunNewMSHLearnCycle.TabIndex = 0;
+      this.RunNewMSHLearnCycle.Text = "Новый цикл";
+      this.RunNewMSHLearnCycle.UseVisualStyleBackColor = true;
+      this.RunNewMSHLearnCycle.Click += new System.EventHandler(this.RunNewMSHLearnCycle_Click);
+      // 
       // FPackStat
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(942, 476);
+      this.ClientSize = new System.Drawing.Size(942, 405);
       this.Controls.Add(this.groupBox5);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);

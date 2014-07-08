@@ -20,11 +20,21 @@ namespace MEAClosedLoop
   #endregion
   public partial class FLearnCycle : Form
   {
+    #region Внутренние константы
+
+    #endregion
+
+    #region Внутренние данные
     private CFiltering Filter;
     private CLoopController loopController;
     private Form1 MainForm;
-    private Queue<CPack> PackQuery;
-    private List<TTime> StimList;
+    private Queue<CPack> PackQueue;
+    private Queue<TTime> StimQueue;
+
+    private Object StimQueueLock = new Object();
+    private Object PackQueueLock = new Object();
+
+    #endregion
 
     public FLearnCycle(CLoopController _LoopController, CFiltering _Filter)
     {
@@ -32,6 +42,13 @@ namespace MEAClosedLoop
 
       Filter = _Filter;
       loopController = _LoopController;
+      //DEBUG
+      PictureBox SomePack = new PictureBox();
+      SomePack.Location = new Point(20, 20);
+      SomePack.BackColor = Color.White;
+      this.RSPacks.Controls.Add(SomePack);
+      // END DEBUG
+
     }
 
     private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -43,12 +60,35 @@ namespace MEAClosedLoop
       SolidBrush AxisBrush = new SolidBrush(Color.Black);
       Pen AxisPen = new Pen(AxisBrush, 1);
       // Отрисовка осей
-      e.Graphics.DrawLine(AxisPen, 
-        new Point(0, e.ClipRectangle.Height -padding_bottom ),
+      e.Graphics.DrawLine(AxisPen,
+        new Point(0, e.ClipRectangle.Height - padding_bottom),
         new Point(e.ClipRectangle.Width - padding_right, e.ClipRectangle.Height - padding_bottom));
       e.Graphics.DrawLine(AxisPen,
         new Point(padding_left, padding_top),
         new Point(padding_left, e.ClipRectangle.Height));
+    }
+
+    public void RecieveStimData(List<TAbsStimIndex> stimlist)
+    {
+      lock (StimQueueLock)
+        foreach (TTime stim in stimlist)
+        {
+          StimQueue.Enqueue(stim);
+        }
+    }
+
+    private void AddPack(CPack pack)
+    {
+      lock (PackQueueLock)
+      {
+        if (true)
+        {
+          PackQueue.Enqueue(pack);
+        }
+      }
+    }
+    private bool ChekSpike()
+    {
     }
   }
 }

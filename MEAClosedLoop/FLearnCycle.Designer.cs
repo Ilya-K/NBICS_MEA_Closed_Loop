@@ -42,7 +42,7 @@
       this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
       this.label5 = new System.Windows.Forms.Label();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
-      this.ReactionPacks = new System.Windows.Forms.Panel();
+      this.RSPacks = new System.Windows.Forms.Panel();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
       this.groupBox1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
@@ -233,7 +233,7 @@
       // 
       // groupBox2
       // 
-      this.groupBox2.Controls.Add(this.ReactionPacks);
+      this.groupBox2.Controls.Add(this.RSPacks);
       this.groupBox2.Location = new System.Drawing.Point(445, 17);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(403, 511);
@@ -241,13 +241,13 @@
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Ответ культуры";
       // 
-      // ReactionPacks
+      // RSPacks
       // 
-      this.ReactionPacks.AutoScroll = true;
-      this.ReactionPacks.Location = new System.Drawing.Point(7, 17);
-      this.ReactionPacks.Name = "ReactionPacks";
-      this.ReactionPacks.Size = new System.Drawing.Size(390, 488);
-      this.ReactionPacks.TabIndex = 0;
+      this.RSPacks.AutoScroll = true;
+      this.RSPacks.Location = new System.Drawing.Point(7, 17);
+      this.RSPacks.Name = "RSPacks";
+      this.RSPacks.Size = new System.Drawing.Size(390, 488);
+      this.RSPacks.TabIndex = 0;
       // 
       // FLearnCycle
       // 
@@ -289,6 +289,6 @@
     private System.Windows.Forms.NumericUpDown numericUpDown4;
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.GroupBox groupBox2;
-    private System.Windows.Forms.Panel ReactionPacks;
+    private System.Windows.Forms.Panel RSPacks;
   }
 }

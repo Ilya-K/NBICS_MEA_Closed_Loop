@@ -141,14 +141,6 @@ namespace MEAClosedLoop
     {
       // Создали новый SpriteBatch, который может быть использован для прорисовки текстур.
       TextSprite = new SpriteBatch(GraphicsDevice);
-      //Установим папку контента
-      string path = @"mainFont";
-      //StreamReader s = new StreamReader(path);
-      //string startPath = System.AppDomain.CurrentDomain.BaseDirectory; 
-      //ContentTypeReader<SpriteFont> typereader = new ContentTypeReader<SpriteFont>();
-      //typereader asdf = new typereader();
-      //string ss = Content.RootDirectory;  
-      Content.RootDirectory = @"Content\";
       mainFont = Content.Load<SpriteFont>("MainFont");
 
     }
