@@ -32,7 +32,7 @@
       this.label1 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
-      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.ParamBox = new System.Windows.Forms.GroupBox();
       this.label5 = new System.Windows.Forms.Label();
       this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
       this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
@@ -44,7 +44,7 @@
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.RSPacks = new System.Windows.Forms.Panel();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-      this.groupBox1.SuspendLayout();
+      this.ParamBox.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
@@ -89,23 +89,23 @@
       this.label3.TabIndex = 3;
       this.label3.Text = "Максимальная продолжительность эксперимента - мин";
       // 
-      // groupBox1
+      // ParamBox
       // 
-      this.groupBox1.Controls.Add(this.label5);
-      this.groupBox1.Controls.Add(this.numericUpDown4);
-      this.groupBox1.Controls.Add(this.numericUpDown3);
-      this.groupBox1.Controls.Add(this.numericUpDown2);
-      this.groupBox1.Controls.Add(this.numericUpDown1);
-      this.groupBox1.Controls.Add(this.label1);
-      this.groupBox1.Controls.Add(this.label4);
-      this.groupBox1.Controls.Add(this.label3);
-      this.groupBox1.Controls.Add(this.label2);
-      this.groupBox1.Location = new System.Drawing.Point(12, 12);
-      this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(398, 244);
-      this.groupBox1.TabIndex = 4;
-      this.groupBox1.TabStop = false;
-      this.groupBox1.Text = "Параметры цикла";
+      this.ParamBox.Controls.Add(this.label5);
+      this.ParamBox.Controls.Add(this.numericUpDown4);
+      this.ParamBox.Controls.Add(this.numericUpDown3);
+      this.ParamBox.Controls.Add(this.numericUpDown2);
+      this.ParamBox.Controls.Add(this.numericUpDown1);
+      this.ParamBox.Controls.Add(this.label1);
+      this.ParamBox.Controls.Add(this.label4);
+      this.ParamBox.Controls.Add(this.label3);
+      this.ParamBox.Controls.Add(this.label2);
+      this.ParamBox.Location = new System.Drawing.Point(12, 12);
+      this.ParamBox.Name = "ParamBox";
+      this.ParamBox.Size = new System.Drawing.Size(398, 244);
+      this.ParamBox.TabIndex = 4;
+      this.ParamBox.TabStop = false;
+      this.ParamBox.Text = "Параметры цикла";
       // 
       // label5
       // 
@@ -259,13 +259,13 @@
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.FinishCycle);
       this.Controls.Add(this.StartCycle);
-      this.Controls.Add(this.groupBox1);
+      this.Controls.Add(this.ParamBox);
       this.Controls.Add(this.pictureBox1);
       this.Name = "FLearnCycle";
       this.Text = "FLearnCycle";
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-      this.groupBox1.ResumeLayout(false);
-      this.groupBox1.PerformLayout();
+      this.ParamBox.ResumeLayout(false);
+      this.ParamBox.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
@@ -281,7 +281,7 @@
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;
-    private System.Windows.Forms.GroupBox groupBox1;
+    private System.Windows.Forms.GroupBox ParamBox;
     private System.Windows.Forms.NumericUpDown numericUpDown3;
     private System.Windows.Forms.NumericUpDown numericUpDown2;
     private System.Windows.Forms.NumericUpDown numericUpDown1;

@@ -47,6 +47,8 @@ namespace MEAClosedLoop
 
       Filter = _Filter;
       loopController = _LoopController;
+
+
       //DEBUG
       PictureBox SomePack = new PictureBox();
       SomePack.Location = new Point(20, 20);
@@ -56,7 +58,7 @@ namespace MEAClosedLoop
       SomePack = new PictureBox();
       SomePack.Location = new Point(20, 140);
       SomePack.BackColor = Color.White;
-      SomePack.Size = new Size(200, 50);
+      SomePack.Size = new Size(400, 100);
       this.RSPacks.Controls.Add(SomePack);
       // END DEBUG
 
@@ -110,7 +112,6 @@ namespace MEAClosedLoop
       //Пачка закончилась раньше начала стимула
       if (pack.Start + (TTime)pack.Length < StimTime)
         return false;
-      //[TO DO] более правильный выбор начала поиска (часть, когда pack.Start > StimTime необходимо уточнить)
       TTime StartSearchTime = (pack.Start <= StimTime) ? StimTime - pack.Start + CenterTime - Delta : pack.Start - StimTime + CenterTime - Delta;
       Average average = new Average();
       for (int i = 0; i < pack.NoiseLevel.Length; i++)
@@ -134,6 +135,10 @@ namespace MEAClosedLoop
       loopController.OnPackFound += RecievePackData;
       Filter.AddStimulConsumer(RecieveStimData);
       Filter.AddDataConsumer(UpdateTime);
+      foreach (Control control in ParamBox.Controls)
+      {
+        
+      }
     }
 
     private void FinishCycle_Click(object sender, EventArgs e)
