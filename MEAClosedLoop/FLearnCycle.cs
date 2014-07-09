@@ -21,7 +21,10 @@ namespace MEAClosedLoop
   public partial class FLearnCycle : Form
   {
     #region Внутренние константы
+    
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
+    
+    public int ChannelIdx = 1;
     #endregion
 
     #region Внутренние данные
@@ -34,6 +37,8 @@ namespace MEAClosedLoop
     private Object StimQueueLock = new Object();
     private Object PackQueueLock = new Object();
 
+    private TTime CurrentTime = 0;
+
     #endregion
 
     public FLearnCycle(CLoopController _LoopController, CFiltering _Filter)
@@ -45,6 +50,11 @@ namespace MEAClosedLoop
       //DEBUG
       PictureBox SomePack = new PictureBox();
       SomePack.Location = new Point(20, 20);
+      SomePack.BackColor = Color.White;
+      SomePack.Size = new Size(400, 100);
+      this.RSPacks.Controls.Add(SomePack);
+      SomePack = new PictureBox();
+      SomePack.Location = new Point(20, 140);
       SomePack.BackColor = Color.White;
       SomePack.Size = new Size(200, 50);
       this.RSPacks.Controls.Add(SomePack);
@@ -78,7 +88,7 @@ namespace MEAClosedLoop
         }
     }
 
-    private void AddPack(CPack pack)
+    private void RecievePackData(CPack pack)
     {
       lock (PackQueueLock)
       {
@@ -87,6 +97,9 @@ namespace MEAClosedLoop
           PackQueue.Enqueue(pack);
         }
       }
+    }
+    public void UpdateTime(TFltDataPacket data) //Recieve Flt Data
+    {
     }
     //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative
     private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
@@ -98,13 +111,37 @@ namespace MEAClosedLoop
       if (pack.Start + (TTime)pack.Length < StimTime)
         return false;
       //[TO DO] более правильный выбор начала поиска (часть, когда pack.Start > StimTime необходимо уточнить)
-      TTime StartSearchTime = (pack.Start <= StimTime) ? StimTime + CenterTime - Delta : StimTime + CenterTime - Delta;
-
-      for (TTime i = StartSearchTime; i < StimTime + CenterTime + Delta && i < StimTime; i++)
+      TTime StartSearchTime = (pack.Start <= StimTime) ? StimTime - pack.Start + CenterTime - Delta : pack.Start - StimTime + CenterTime - Delta;
+      Average average = new Average();
+      for (int i = 0; i < pack.NoiseLevel.Length; i++)
       {
+        average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
+      }
+      average.Calc();
+      for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length; i++)
+      {
+        if (Math.Abs(pack.Data[ChannelIdx][i]) > average.TripleSigma)
+        {
+          return true;
+        }
       }
 
       return false;
     }
+
+    private void StartCycle_Click(object sender, EventArgs e)
+    {
+      loopController.OnPackFound += RecievePackData;
+      Filter.AddStimulConsumer(RecieveStimData);
+      Filter.AddDataConsumer(UpdateTime);
+    }
+
+    private void FinishCycle_Click(object sender, EventArgs e)
+    {
+      loopController.OnPackFound -= RecievePackData;
+      Filter.RemoveStimulConsumer(RecieveStimData);
+      Filter.RemoveDataConsumer(UpdateTime);
+    }
+    
   }
 }

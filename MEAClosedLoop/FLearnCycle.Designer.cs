@@ -39,8 +39,8 @@
       this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
       this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
       this.label4 = new System.Windows.Forms.Label();
-      this.button1 = new System.Windows.Forms.Button();
-      this.button2 = new System.Windows.Forms.Button();
+      this.StartCycle = new System.Windows.Forms.Button();
+      this.FinishCycle = new System.Windows.Forms.Button();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.RSPacks = new System.Windows.Forms.Panel();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -213,23 +213,25 @@
       this.label4.TabIndex = 3;
       this.label4.Text = "критерий правильного ответа";
       // 
-      // button1
+      // StartCycle
       // 
-      this.button1.Location = new System.Drawing.Point(21, 262);
-      this.button1.Name = "button1";
-      this.button1.Size = new System.Drawing.Size(98, 23);
-      this.button1.TabIndex = 5;
-      this.button1.Text = "Начать цикл";
-      this.button1.UseVisualStyleBackColor = true;
+      this.StartCycle.Location = new System.Drawing.Point(21, 262);
+      this.StartCycle.Name = "StartCycle";
+      this.StartCycle.Size = new System.Drawing.Size(98, 23);
+      this.StartCycle.TabIndex = 5;
+      this.StartCycle.Text = "Начать цикл";
+      this.StartCycle.UseVisualStyleBackColor = true;
+      this.StartCycle.Click += new System.EventHandler(this.StartCycle_Click);
       // 
-      // button2
+      // FinishCycle
       // 
-      this.button2.Location = new System.Drawing.Point(21, 291);
-      this.button2.Name = "button2";
-      this.button2.Size = new System.Drawing.Size(98, 23);
-      this.button2.TabIndex = 5;
-      this.button2.Text = "Завершить цикл";
-      this.button2.UseVisualStyleBackColor = true;
+      this.FinishCycle.Location = new System.Drawing.Point(21, 291);
+      this.FinishCycle.Name = "FinishCycle";
+      this.FinishCycle.Size = new System.Drawing.Size(98, 23);
+      this.FinishCycle.TabIndex = 5;
+      this.FinishCycle.Text = "Завершить цикл";
+      this.FinishCycle.UseVisualStyleBackColor = true;
+      this.FinishCycle.Click += new System.EventHandler(this.FinishCycle_Click);
       // 
       // groupBox2
       // 
@@ -255,8 +257,8 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(860, 540);
       this.Controls.Add(this.groupBox2);
-      this.Controls.Add(this.button2);
-      this.Controls.Add(this.button1);
+      this.Controls.Add(this.FinishCycle);
+      this.Controls.Add(this.StartCycle);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.pictureBox1);
       this.Name = "FLearnCycle";
@@ -283,8 +285,8 @@
     private System.Windows.Forms.NumericUpDown numericUpDown3;
     private System.Windows.Forms.NumericUpDown numericUpDown2;
     private System.Windows.Forms.NumericUpDown numericUpDown1;
-    private System.Windows.Forms.Button button1;
-    private System.Windows.Forms.Button button2;
+    private System.Windows.Forms.Button StartCycle;
+    private System.Windows.Forms.Button FinishCycle;
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.NumericUpDown numericUpDown4;
     private System.Windows.Forms.Label label4;
