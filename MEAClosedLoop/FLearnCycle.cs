@@ -21,9 +21,9 @@ namespace MEAClosedLoop
   public partial class FLearnCycle : Form
   {
     #region Внутренние константы
-    
+
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
-    
+
     public int ChannelIdx = 1;
     #endregion
 
@@ -31,13 +31,14 @@ namespace MEAClosedLoop
     private CFiltering Filter;
     private CLoopController loopController;
     private Form1 MainForm;
-    private Queue<CPack> PackQueue;
-    private Queue<TTime> StimQueue;
+    private Queue<CPack> PackQueue = new Queue<CPack>();
+    private Queue<TTime> StimQueue = new Queue<TTime>();
 
     private Object StimQueueLock = new Object();
     private Object PackQueueLock = new Object();
 
     private TTime CurrentTime = 0;
+    private TTime StartTime = 0;
 
     #endregion
 
@@ -47,7 +48,6 @@ namespace MEAClosedLoop
 
       Filter = _Filter;
       loopController = _LoopController;
-
 
       //DEBUG
       PictureBox SomePack = new PictureBox();
@@ -80,7 +80,6 @@ namespace MEAClosedLoop
         new Point(padding_left, padding_top),
         new Point(padding_left, e.ClipRectangle.Height));
     }
-
     public void RecieveStimData(List<TAbsStimIndex> stimlist)
     {
       lock (StimQueueLock)
@@ -102,7 +101,13 @@ namespace MEAClosedLoop
     }
     public void UpdateTime(TFltDataPacket data) //Recieve Flt Data
     {
+      CurrentTime = Filter.TimeStamp - StartTime;
+      if (TimeStamp.InvokeRequired)
+        TimeStamp.BeginInvoke(new Action<string>(s => TimeStamp.Text = s), (((double)CurrentTime) / 25000).ToString());
+      else
+        TimeStamp.Text = (((double)CurrentTime) / 25000).ToString();
     }
+
     //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative
     private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
     {
@@ -137,8 +142,9 @@ namespace MEAClosedLoop
       Filter.AddDataConsumer(UpdateTime);
       foreach (Control control in ParamBox.Controls)
       {
-        
+        control.Enabled = false;
       }
+      StartTime = Filter.TimeStamp;
     }
 
     private void FinishCycle_Click(object sender, EventArgs e)
@@ -146,7 +152,25 @@ namespace MEAClosedLoop
       loopController.OnPackFound -= RecievePackData;
       Filter.RemoveStimulConsumer(RecieveStimData);
       Filter.RemoveDataConsumer(UpdateTime);
+      foreach (Control control in ParamBox.Controls)
+      {
+        control.Enabled = true;
+      }
+      ParamBox.Enabled = false;
     }
-    
+
+    private void SelectName_ValueChanged(object sender, EventArgs e)
+    {
+      if (!MEA.IDX2NAME.Contains((int)SelectName.Value))
+      {
+        MessageBox.Show("Канал не существует");
+        return;
+      }
+      else
+      {
+        SelectIndex.Value = MEA.NAME2IDX[(int)SelectName.Value];
+      }
+    }
+
   }
 }
