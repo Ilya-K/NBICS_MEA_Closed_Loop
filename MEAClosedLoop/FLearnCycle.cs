@@ -30,7 +30,7 @@ namespace MEAClosedLoop
     #region Внутренние данные
     private CFiltering Filter;
     private CLoopController loopController;
-    private Form1 MainForm;
+    //private Form1 MainForm;
     private Queue<CPack> PackQueue = new Queue<CPack>();
     private Queue<TTime> StimQueue = new Queue<TTime>();
 
@@ -39,6 +39,10 @@ namespace MEAClosedLoop
 
     private TTime CurrentTime = 0;
     private TTime StartTime = 0;
+
+    private ShahafCycleState CycleState = ShahafCycleState.NotStarted;
+    private List<ShahafCycleIteration> CycleInfo = new List<ShahafCycleIteration>();
+    private ShahafCycleIteration currentIteration = new ShahafCycleIteration();
 
     #endregion
 
@@ -80,6 +84,7 @@ namespace MEAClosedLoop
         new Point(padding_left, padding_top),
         new Point(padding_left, e.ClipRectangle.Height));
     }
+
     public void RecieveStimData(List<TAbsStimIndex> stimlist)
     {
       lock (StimQueueLock)
@@ -89,7 +94,7 @@ namespace MEAClosedLoop
         }
     }
 
-    private void RecievePackData(CPack pack)
+    public void RecievePackData(CPack pack)
     {
       lock (PackQueueLock)
       {
@@ -99,13 +104,67 @@ namespace MEAClosedLoop
 
       }
     }
+
     public void UpdateTime(TFltDataPacket data) //Recieve Flt Data
     {
+      //Update Time Count
       CurrentTime = Filter.TimeStamp - StartTime;
       if (TimeStamp.InvokeRequired)
         TimeStamp.BeginInvoke(new Action<string>(s => TimeStamp.Text = s), (((double)CurrentTime) / 25000).ToString());
       else
         TimeStamp.Text = (((double)CurrentTime) / 25000).ToString();
+      //Do Shahaf Cycle 
+      if (currentIteration == null) return;
+      
+      switch (CycleState)
+      {
+        case ShahafCycleState.NotStarted:
+          //ничего не делаем, цикл еще не начался
+          break;
+        case ShahafCycleState.Finished:
+          //ничего не делаем, цикл уже завершен
+          break;
+        case ShahafCycleState.RunningStim:
+          //добавляем врмя стимуляции
+          currentIteration.ElapsedStimTime = (int)( CurrentTime - currentIteration.StartTime);
+          //Если время стимуляции пройденно полностью или выполнился R/S > xxx, 
+          //завершаем стимуляцию и переходим к отдыху 
+          //[TODO]: вычислить R/S, а пока false
+          if (currentIteration.ElapsedStimTime >= (int)(this.PStimLength.Value)
+            || false)
+          {
+            loopController.DoStim = false;
+            CycleState = ShahafCycleState.CoolDown;
+            currentIteration.StartCoolDown = CurrentTime;
+          }
+          break;
+        case ShahafCycleState.CoolDown:
+          //добавляем время отдыха
+          currentIteration.ElapsedCoolDownTime = (int)( CurrentTime - currentIteration.StartCoolDown);
+          //если отдых пройден полностью - завершаем итерацию.
+          // + Запускаем следующую итерацию цикла
+          if (currentIteration.ElapsedCoolDownTime >= (int)(this.PCoolDownLength.Value * Param.MS))
+          {
+            CycleInfo.Add(currentIteration);
+            currentIteration = new ShahafCycleIteration();
+            
+          }
+          break;
+      }
+      // Если цикл длится слишком долго.
+      if (CurrentTime - StartTime > this.PExpMaxLength.Value 
+        && (CycleState == ShahafCycleState.RunningStim || CycleState == ShahafCycleState.CoolDown))
+      {
+        CycleState = ShahafCycleState.Finished;
+        CycleInfo.Add(currentIteration);
+      }
+    }
+
+    private void RunNewCycleIteration()
+    {
+      currentIteration = new ShahafCycleIteration();
+      currentIteration.StartTime = CurrentTime;
+      CycleState = ShahafCycleState.RunningStim;
     }
 
     //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative
@@ -161,16 +220,53 @@ namespace MEAClosedLoop
 
     private void SelectName_ValueChanged(object sender, EventArgs e)
     {
-      if (!MEA.IDX2NAME.Contains((int)SelectName.Value))
+      if (!MEA.IDX2NAME.Contains((int)PSelectName.Value))
       {
         MessageBox.Show("Канал не существует");
         return;
       }
       else
       {
-        SelectIndex.Value = MEA.NAME2IDX[(int)SelectName.Value];
+        PSelectIndex.Value = MEA.NAME2IDX[(int)PSelectName.Value];
       }
     }
 
+    private void SelectIndex_ValueChanged(object sender, EventArgs e)
+    {
+      if (!MEA.NAME2IDX.Contains((int)PSelectIndex.Value))
+      {
+        MessageBox.Show("Канал не существует");
+        return;
+      }
+      else
+      {
+        PSelectName.Value = MEA.IDX2NAME[(int)PSelectIndex.Value];
+      }
+      
+    }
+    
   }
+  public enum ShahafCycleState
+  {
+    NotStarted,
+    RunningStim,
+    CoolDown,
+    Finished
+  }
+  public class ShahafCycleIteration
+  {
+    public int num = 0;
+    public int RS = 0;
+    public int ElapsedStimTime = 0;
+    public int ElapsedCoolDownTime = 0;
+    public TTime StartTime = 0;
+    public TTime StartCoolDown = 0;
+    public TTime FinishTime = 0;
+
+    public ShahafCycleIteration()
+    { 
+
+    }
+  }
+  
 }
