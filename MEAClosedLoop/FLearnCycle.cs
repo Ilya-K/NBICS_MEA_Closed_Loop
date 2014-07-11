@@ -93,10 +93,10 @@ namespace MEAClosedLoop
     {
       lock (PackQueueLock)
       {
-        if (true)
-        {
-          PackQueue.Enqueue(pack);
-        }
+        PackQueue.Enqueue(pack);
+        //10 - максимальное число S в отношении R/S
+        for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
+
       }
     }
     public void UpdateTime(TFltDataPacket data) //Recieve Flt Data
