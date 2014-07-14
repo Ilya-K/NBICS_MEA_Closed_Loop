@@ -52,19 +52,8 @@ namespace MEAClosedLoop
 
       Filter = _Filter;
       loopController = _LoopController;
+      PRSCount.Value = 2;
 
-      //DEBUG
-      PictureBox SomePack = new PictureBox();
-      SomePack.Location = new Point(20, 20);
-      SomePack.BackColor = Color.White;
-      SomePack.Size = new Size(400, 100);
-      this.RSPacks.Controls.Add(SomePack);
-      SomePack = new PictureBox();
-      SomePack.Location = new Point(20, 140);
-      SomePack.BackColor = Color.White;
-      SomePack.Size = new Size(400, 100);
-      this.RSPacks.Controls.Add(SomePack);
-      // END DEBUG
 
     }
 
@@ -98,10 +87,20 @@ namespace MEAClosedLoop
     {
       lock (PackQueueLock)
       {
-        PackQueue.Enqueue(pack);
+        // Нам подходят только вызванные пачки
+        if (true)
+          PackQueue.Enqueue(pack);
         //10 - максимальное число S в отношении R/S
-        for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
 
+        //
+        for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
+      }
+      foreach (Control picturebox in RSPacks.Controls)
+      {
+        if (picturebox.InvokeRequired)
+          picturebox.BeginInvoke(new Action<Control>(c => c.Refresh()), picturebox);
+        else
+          picturebox.Refresh();
       }
     }
 
@@ -109,13 +108,16 @@ namespace MEAClosedLoop
     {
       //Update Time Count
       CurrentTime = Filter.TimeStamp - StartTime;
+
+      
+
       if (TimeStamp.InvokeRequired)
         TimeStamp.BeginInvoke(new Action<string>(s => TimeStamp.Text = s), (((double)CurrentTime) / 25000).ToString());
       else
         TimeStamp.Text = (((double)CurrentTime) / 25000).ToString();
       //Do Shahaf Cycle 
       if (currentIteration == null) return;
-      
+
       switch (CycleState)
       {
         case ShahafCycleState.NotStarted:
@@ -126,7 +128,7 @@ namespace MEAClosedLoop
           break;
         case ShahafCycleState.RunningStim:
           //добавляем врмя стимуляции
-          currentIteration.ElapsedStimTime = (int)( CurrentTime - currentIteration.StartTime);
+          currentIteration.ElapsedStimTime = (int)(CurrentTime - currentIteration.StartTime);
           //Если время стимуляции пройденно полностью или выполнился R/S > xxx, 
           //завершаем стимуляцию и переходим к отдыху 
           //[TODO]: вычислить R/S, а пока false
@@ -140,19 +142,19 @@ namespace MEAClosedLoop
           break;
         case ShahafCycleState.CoolDown:
           //добавляем время отдыха
-          currentIteration.ElapsedCoolDownTime = (int)( CurrentTime - currentIteration.StartCoolDown);
+          currentIteration.ElapsedCoolDownTime = (int)(CurrentTime - currentIteration.StartCoolDown);
           //если отдых пройден полностью - завершаем итерацию.
           // + Запускаем следующую итерацию цикла
           if (currentIteration.ElapsedCoolDownTime >= (int)(this.PCoolDownLength.Value * Param.MS))
           {
             CycleInfo.Add(currentIteration);
             currentIteration = new ShahafCycleIteration();
-            
+
           }
           break;
       }
       // Если цикл длится слишком долго.
-      if (CurrentTime - StartTime > this.PExpMaxLength.Value 
+      if (CurrentTime - StartTime > this.PExpMaxLength.Value
         && (CycleState == ShahafCycleState.RunningStim || CycleState == ShahafCycleState.CoolDown))
       {
         CycleState = ShahafCycleState.Finished;
@@ -242,9 +244,52 @@ namespace MEAClosedLoop
       {
         PSelectName.Value = MEA.IDX2NAME[(int)PSelectIndex.Value];
       }
-      
+
     }
-    
+
+    private void PRSCount_ValueChanged(object sender, EventArgs e)
+    {
+      this.RSPacks.Controls.Clear();
+      for (int i = 0; i < PRSCount.Value; i++)
+      {
+        PictureBox SomePack = new PictureBox();
+        SomePack.Location = new Point(20, 20 + 108 * i);
+        SomePack.BackColor = Color.White;
+        SomePack.Size = new Size(400, 100);
+        SomePack.Paint += SomePack_Paint;
+        this.RSPacks.Controls.Add(SomePack);
+        SomePack.Refresh();
+      }
+    }
+
+    void SomePack_Paint(object sender, PaintEventArgs e)
+    {
+      int i;
+      for (i = 0; i < RSPacks.Controls.Count; i++)
+      {
+        if (RSPacks.Controls[i].Equals(sender))
+        {
+          break;
+        }
+      }
+      lock (PackQueueLock)
+      {
+        if (PackQueue.Count > i)
+          using (SolidBrush brush = new SolidBrush(Color.Aqua))
+          {
+            TFltDataPacket pack = PackQueue.ElementAt(i).Data;
+            for (int idx = 0; idx < pack[ChannelIdx].Length - 1  && idx < 400 * 10; idx++)
+            {
+              e.Graphics.DrawLine(new Pen(brush),
+                new Point(idx / 10, (int)pack[ChannelIdx][idx] + e.ClipRectangle.Height/2),
+                new Point(idx / 10, (int)pack[ChannelIdx][idx + 1] + e.ClipRectangle.Height/2)
+                );
+            }
+          }
+      }
+      //throw new NotImplementedException();
+    }
+
   }
   public enum ShahafCycleState
   {
@@ -264,9 +309,9 @@ namespace MEAClosedLoop
     public TTime FinishTime = 0;
 
     public ShahafCycleIteration()
-    { 
+    {
 
     }
   }
-  
+
 }

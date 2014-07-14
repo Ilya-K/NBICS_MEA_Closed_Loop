@@ -282,10 +282,11 @@
       this.PRSCount.Size = new System.Drawing.Size(28, 20);
       this.PRSCount.TabIndex = 4;
       this.PRSCount.Value = new decimal(new int[] {
-            2,
+            1,
             0,
             0,
             0});
+      this.PRSCount.ValueChanged += new System.EventHandler(this.PRSCount_ValueChanged);
       // 
       // PExpMaxLength
       // 
@@ -387,7 +388,7 @@
       this.groupBox2.Controls.Add(this.RSPacks);
       this.groupBox2.Location = new System.Drawing.Point(445, 17);
       this.groupBox2.Name = "groupBox2";
-      this.groupBox2.Size = new System.Drawing.Size(403, 511);
+      this.groupBox2.Size = new System.Drawing.Size(514, 511);
       this.groupBox2.TabIndex = 8;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Ответ культуры";
@@ -397,7 +398,7 @@
       this.RSPacks.AutoScroll = true;
       this.RSPacks.Location = new System.Drawing.Point(7, 17);
       this.RSPacks.Name = "RSPacks";
-      this.RSPacks.Size = new System.Drawing.Size(390, 488);
+      this.RSPacks.Size = new System.Drawing.Size(501, 488);
       this.RSPacks.TabIndex = 0;
       // 
       // label9
@@ -420,7 +421,7 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(860, 540);
+      this.ClientSize = new System.Drawing.Size(971, 540);
       this.Controls.Add(this.TimeStamp);
       this.Controls.Add(this.label9);
       this.Controls.Add(this.groupBox2);
