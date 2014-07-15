@@ -54,8 +54,8 @@ namespace MEAClosedLoop
 
       Filter = _Filter;
       loopController = _LoopController;
-      PRSCount.Value = 2;
-
+      this.PRSCount.Value = 2;
+      this.PSelectName.Value = 54;
 
     }
 
@@ -306,31 +306,41 @@ namespace MEAClosedLoop
           TTime StimTime = EvokedPacksQueue.ElementAt(i).AbsStim;
           // Пусть все окно - Время поиска + дельта + 10 мс
           int WindowTimelength = (int)this.PDelayTime.Value * Param.MS + (int)this.PSearchDelta.Value * Param.MS + 10 * Param.MS;
+
           // Отрисовываем пачку от момента начала стимула
           //Сдвиг начала отрисовки пачки (если стимул произошел раньше)
-          int PackShift = (StimTime > Pack.Start) ? 0 : (int)(Pack.Start - StimTime);
+          int PackShift = (StimTime < Pack.Start) ? (int)(Pack.Start - StimTime) : 0;
+
           //Смещение пачки влево (если стимул внутри пачки)
-          int StimShift = (StimTime > Pack.Start ) ? (int)(StimTime - Pack.Start) : 0;
-          //отрисовка стимула
-          float k = e.ClipRectangle.Width/WindowTimelength;
-          e.Graphics.DrawLine(new Pen(stimBrush),
-            new Point((int) (0 * k), 0),
-            new Point((int) (0 * k), e.ClipRectangle.Height));
-          // отрисовка области поиска спайка
-          e.Graphics.DrawLine(new Pen(stimBrush),
-            new Point((int)this.PDelayTime.Value * Param.MS - (int)this.PSearchDelta.Value * Param.MS, 0),
-            new Point((int)this.PDelayTime.Value * Param.MS - (int)this.PSearchDelta.Value * Param.MS, e.ClipRectangle.Height));
+          int StimShift = (StimTime > Pack.Start) ? (int)(StimTime - Pack.Start) : 0;
+
+          //переводит Время(отсчет) в позицию на экране
+          float k = (float)e.ClipRectangle.Width / (float)WindowTimelength;
+
+          
           
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
-          for (int idx = StimShift; idx < PackData[ChannelIdx].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
+          for (int idx = 0; idx < PackData[ChannelIdx].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
 
             e.Graphics.DrawLine(new Pen(packBrush),
-              new Point(idx / 10 - PackShift / 10, (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
-              new Point(idx / 10 - PackShift / 10, (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2)
+              new Point((int)((idx - StimShift + PackShift) * k) - 60, (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
+              new Point((int)((idx - StimShift + PackShift) * k) - 60, (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2 + 1) // + 1 - фикс для отрисовки линии, равной нулю.
               );
           }
+          //отрисовка стимула
+          e.Graphics.DrawLine(new Pen(stimBrush),
+            new Point((int)(0 * k), 0),
+            new Point((int)(0 * k), e.ClipRectangle.Height));
+
+          // отрисовка области поиска спайка
+          e.Graphics.DrawLine(new Pen(DeltaBrush),
+            new Point((int)((float)(this.PDelayTime.Value - this.PSearchDelta.Value) * Param.MS * k), 0),
+            new Point((int)((float)(this.PDelayTime.Value - this.PSearchDelta.Value) * Param.MS * k), e.ClipRectangle.Height));
+          e.Graphics.DrawLine(new Pen(DeltaBrush),
+            new Point((int)((float)(this.PDelayTime.Value + this.PSearchDelta.Value) * Param.MS * k), 0),
+            new Point((int)((float)(this.PDelayTime.Value + this.PSearchDelta.Value) * Param.MS * k), e.ClipRectangle.Height));
         }
           
       }
