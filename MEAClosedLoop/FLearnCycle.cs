@@ -23,7 +23,7 @@ namespace MEAClosedLoop
     #region Внутренние константы
 
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
-
+    private TTime StimActualityDuration = Param.MS * 100; // Время, на протяжении которого для стимула ищется пачка
     public int ChannelIdx = 1;
     #endregion
 
@@ -33,9 +33,11 @@ namespace MEAClosedLoop
     //private Form1 MainForm;
     private Queue<CPack> PackQueue = new Queue<CPack>();
     private Queue<TTime> StimQueue = new Queue<TTime>();
+    private Queue<EvokedPackInfo> EvokedPacksQueue = new Queue<EvokedPackInfo>();
 
     private Object StimQueueLock = new Object();
     private Object PackQueueLock = new Object();
+    private Object EvokedPacksLock = new Object();
 
     private TTime CurrentTime = 0;
     private TTime StartTime = 0;
@@ -77,10 +79,14 @@ namespace MEAClosedLoop
     public void RecieveStimData(List<TAbsStimIndex> stimlist)
     {
       lock (StimQueueLock)
+      {
         foreach (TTime stim in stimlist)
         {
           StimQueue.Enqueue(stim);
         }
+        for (; StimQueue.ElementAt(0) + StimActualityDuration < CurrentTime ; StimQueue.Dequeue()) ;
+      }
+ 
     }
 
     public void RecievePackData(CPack pack)
@@ -281,8 +287,8 @@ namespace MEAClosedLoop
             for (int idx = 0; idx < pack[ChannelIdx].Length - 1  && idx < 400 * 10; idx++)
             {
               e.Graphics.DrawLine(new Pen(brush),
-                new Point(idx / 10, (int)pack[ChannelIdx][idx] + e.ClipRectangle.Height/2),
-                new Point(idx / 10, (int)pack[ChannelIdx][idx + 1] + e.ClipRectangle.Height/2)
+                new Point(idx / 10, (int)pack[ChannelIdx][idx]/10 + e.ClipRectangle.Height/2),
+                new Point(idx / 10, (int)pack[ChannelIdx][idx + 1]/10 + e.ClipRectangle.Height/2)
                 );
             }
           }
@@ -291,6 +297,7 @@ namespace MEAClosedLoop
     }
 
   }
+
   public enum ShahafCycleState
   {
     NotStarted,
@@ -310,8 +317,12 @@ namespace MEAClosedLoop
 
     public ShahafCycleIteration()
     {
-
     }
+  }
+  public struct EvokedPackInfo
+  {
+    public CPack Pack;
+    public TTime AbsStim;
   }
 
 }
