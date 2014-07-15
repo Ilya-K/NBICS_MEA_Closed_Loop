@@ -84,9 +84,9 @@ namespace MEAClosedLoop
         {
           StimQueue.Enqueue(stim);
         }
-        for (; StimQueue.ElementAt(0) + StimActualityDuration < CurrentTime ; StimQueue.Dequeue()) ;
+        for (; StimQueue.ElementAt(0) + StimActualityDuration < CurrentTime; StimQueue.Dequeue()) ;
       }
- 
+
     }
 
     public void RecievePackData(CPack pack)
@@ -94,12 +94,29 @@ namespace MEAClosedLoop
       lock (PackQueueLock)
       {
         // Нам подходят только вызванные пачки
+        // Совместим пачки со стимулами
+        lock (StimQueueLock)
+        {
+          foreach (TTime stim in StimQueue)
+          {
+            // стимул должен находится внутри пачки или быть раньшее её не более чем на StimControlDuration.
+            if (stim + StimControlDuration > pack.Start && stim < pack.Start + (TTime)pack.Length)
+            {
+              EvokedPackInfo evokedPackInfo = new EvokedPackInfo();
+              evokedPackInfo.Pack = pack;
+              evokedPackInfo.AbsStim = stim;
+              EvokedPacksQueue.Enqueue(evokedPackInfo);
+              PackQueue.Enqueue(pack);
+            }
+          }
+        }
         if (true)
           PackQueue.Enqueue(pack);
         //10 - максимальное число S в отношении R/S
 
-        //
+        // Очистка переполненных очередей
         for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
+        for (; EvokedPacksQueue.Count > this.PRSCount.Value; EvokedPacksQueue.Dequeue()) ;
       }
       foreach (Control picturebox in RSPacks.Controls)
       {
@@ -114,8 +131,6 @@ namespace MEAClosedLoop
     {
       //Update Time Count
       CurrentTime = Filter.TimeStamp - StartTime;
-
-      
 
       if (TimeStamp.InvokeRequired)
         TimeStamp.BeginInvoke(new Action<string>(s => TimeStamp.Text = s), (((double)CurrentTime) / 25000).ToString());
@@ -281,19 +296,44 @@ namespace MEAClosedLoop
       lock (PackQueueLock)
       {
         if (PackQueue.Count > i)
-          using (SolidBrush brush = new SolidBrush(Color.Aqua))
+        {
+          SolidBrush packBrush = new SolidBrush(Color.DarkGray);
+          SolidBrush stimBrush = new SolidBrush(Color.DarkBlue);
+          SolidBrush DeltaBrush = new SolidBrush(Color.Red);
+          if (i >= EvokedPacksQueue.Count) return;
+          TFltDataPacket PackData = EvokedPacksQueue.ElementAt(i).Pack.Data;
+          CPack Pack = EvokedPacksQueue.ElementAt(i).Pack;
+          TTime StimTime = EvokedPacksQueue.ElementAt(i).AbsStim;
+          // Пусть все окно - Время поиска + дельта + 10 мс
+          int WindowTimelength = (int)this.PDelayTime.Value * Param.MS + (int)this.PSearchDelta.Value * Param.MS + 10 * Param.MS;
+          // Отрисовываем пачку от момента начала стимула
+          //Сдвиг начала отрисовки пачки (если стимул произошел раньше)
+          int PackShift = (StimTime > Pack.Start) ? 0 : (int)(Pack.Start - StimTime);
+          //Смещение пачки влево (если стимул внутри пачки)
+          int StimShift = (StimTime > Pack.Start ) ? (int)(StimTime - Pack.Start) : 0;
+          //отрисовка стимула
+          float k = e.ClipRectangle.Width/WindowTimelength;
+          e.Graphics.DrawLine(new Pen(stimBrush),
+            new Point((int) (0 * k), 0),
+            new Point((int) (0 * k), e.ClipRectangle.Height));
+          // отрисовка области поиска спайка
+          e.Graphics.DrawLine(new Pen(stimBrush),
+            new Point((int)this.PDelayTime.Value * Param.MS - (int)this.PSearchDelta.Value * Param.MS, 0),
+            new Point((int)this.PDelayTime.Value * Param.MS - (int)this.PSearchDelta.Value * Param.MS, e.ClipRectangle.Height));
+          
+          //отрисовка пачки
+          //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
+          for (int idx = StimShift; idx < PackData[ChannelIdx].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
-            TFltDataPacket pack = PackQueue.ElementAt(i).Data;
-            for (int idx = 0; idx < pack[ChannelIdx].Length - 1  && idx < 400 * 10; idx++)
-            {
-              e.Graphics.DrawLine(new Pen(brush),
-                new Point(idx / 10, (int)pack[ChannelIdx][idx]/10 + e.ClipRectangle.Height/2),
-                new Point(idx / 10, (int)pack[ChannelIdx][idx + 1]/10 + e.ClipRectangle.Height/2)
-                );
-            }
+
+            e.Graphics.DrawLine(new Pen(packBrush),
+              new Point(idx / 10 - PackShift / 10, (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
+              new Point(idx / 10 - PackShift / 10, (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2)
+              );
           }
+        }
+          
       }
-      //throw new NotImplementedException();
     }
 
   }
