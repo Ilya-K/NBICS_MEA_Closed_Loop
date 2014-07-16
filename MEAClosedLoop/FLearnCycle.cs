@@ -274,9 +274,10 @@ namespace MEAClosedLoop
       for (int i = 0; i < PRSCount.Value; i++)
       {
         PictureBox SomePack = new PictureBox();
-        SomePack.Location = new Point(20, 20 + 108 * i);
+        SomePack.Location = new Point(0, 20 + 108 * i);
+        SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left;
         SomePack.BackColor = Color.White;
-        SomePack.Size = new Size(400, 100);
+        SomePack.Size = new Size(RSPacks.Width, 100);
         SomePack.Paint += SomePack_Paint;
         this.RSPacks.Controls.Add(SomePack);
         SomePack.Refresh();
@@ -298,6 +299,7 @@ namespace MEAClosedLoop
         if (PackQueue.Count > i)
         {
           SolidBrush packBrush = new SolidBrush(Color.DarkGray);
+          SolidBrush BurstSpikeBrush = new SolidBrush(Color.DarkViolet);
           SolidBrush stimBrush = new SolidBrush(Color.DarkBlue);
           SolidBrush DeltaBrush = new SolidBrush(Color.Red);
           if (i >= EvokedPacksQueue.Count) return;
@@ -317,14 +319,19 @@ namespace MEAClosedLoop
           //переводит Время(отсчет) в позицию на экране
           float k = (float)e.ClipRectangle.Width / (float)WindowTimelength;
 
-          
-          
+          //DEBUG
+          Average average = new Average();
+          for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++ )
+          {
+            average.AddValueElem(Pack.NoiseLevel[idx]);
+          }
+          average.Calc();
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[ChannelIdx].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
-
-            e.Graphics.DrawLine(new Pen(packBrush),
+            SolidBrush current_brush = (Math.Abs(PackData[ChannelIdx][idx]) < average.Sigma * 10) ? packBrush : BurstSpikeBrush;
+            e.Graphics.DrawLine(new Pen(current_brush),
               new Point((int)((idx - StimShift + PackShift) * k) - 60, (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
               new Point((int)((idx - StimShift + PackShift) * k) - 60, (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2 + 1) // + 1 - фикс для отрисовки линии, равной нулю.
               );
