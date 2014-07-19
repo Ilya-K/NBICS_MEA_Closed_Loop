@@ -31,9 +31,13 @@ namespace MEAClosedLoop
     private CFiltering Filter;
     private CLoopController loopController;
     //private Form1 MainForm;
+    //очередь пачек (содержит RS пачки из последних N вызванных)
     private Queue<CPack> PackQueue = new Queue<CPack>();
+    //очередь стимулов (содержит не устаревшие стимулы)
     private Queue<TTime> StimQueue = new Queue<TTime>();
+    //очередь вызванных пачек
     private Queue<EvokedPackInfo> EvokedPacksQueue = new Queue<EvokedPackInfo>();
+
 
     private Object StimQueueLock = new Object();
     private Object PackQueueLock = new Object();
@@ -97,26 +101,37 @@ namespace MEAClosedLoop
         // Совместим пачки со стимулами
         lock (StimQueueLock)
         {
-          foreach (TTime stim in StimQueue)
+          lock (PackQueueLock)
           {
-            // стимул должен находится внутри пачки или быть раньшее её не более чем на StimControlDuration.
-            if (stim + StimControlDuration > pack.Start && stim < pack.Start + (TTime)pack.Length)
+            foreach (TTime stim in StimQueue)
             {
-              EvokedPackInfo evokedPackInfo = new EvokedPackInfo();
-              evokedPackInfo.Pack = pack;
-              evokedPackInfo.AbsStim = stim;
-              EvokedPacksQueue.Enqueue(evokedPackInfo);
-              PackQueue.Enqueue(pack);
+              // стимул должен находится внутри пачки или быть раньшее её не более чем на StimControlDuration.
+              if (stim + StimControlDuration > pack.Start && stim < pack.Start + (TTime)pack.Length)
+              {
+                EvokedPackInfo evokedPackInfo = new EvokedPackInfo();
+                evokedPackInfo.Pack = pack;
+                evokedPackInfo.AbsStim = stim;
+                EvokedPacksQueue.Enqueue(evokedPackInfo);
+
+              }
             }
           }
         }
-        if (true)
-          PackQueue.Enqueue(pack);
-        //10 - максимальное число S в отношении R/S
+        lock (PackQueueLock)
+        {
+          PackQueue.Clear();
+          foreach (EvokedPackInfo ev_pack in EvokedPacksQueue)
+          {
+            if (ChekSpike(ev_pack.Pack, ev_pack.AbsStim, (TAbsStimIndex)this.PDelayTime.Value, (TAbsStimIndex)this.PSearchDelta.Value))
+              PackQueue.Enqueue(pack);
+          }
 
-        // Очистка переполненных очередей
-        for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
-        for (; EvokedPacksQueue.Count > this.PRSCount.Value; EvokedPacksQueue.Dequeue()) ;
+          //10 - максимальное число S в отношении R/S
+
+          // Очистка переполненных очередей
+          for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
+          for (; EvokedPacksQueue.Count > this.PRSCount.Value; EvokedPacksQueue.Dequeue()) ;
+        }
       }
       foreach (Control picturebox in RSPacks.Controls)
       {
@@ -199,16 +214,19 @@ namespace MEAClosedLoop
       //Пачка закончилась раньше начала стимула
       if (pack.Start + (TTime)pack.Length < StimTime)
         return false;
-      TTime StartSearchTime = (pack.Start <= StimTime) ? StimTime - pack.Start + CenterTime - Delta : pack.Start - StimTime + CenterTime - Delta;
+      TTime StartSearchTime = (pack.Start + Param.PRE_SPIKE <= StimTime)
+        ? StimTime - (pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
+        : (pack.Start + Param.PRE_SPIKE) - StimTime + CenterTime - Delta;
       Average average = new Average();
       for (int i = 0; i < pack.NoiseLevel.Length; i++)
       {
         average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
       }
       average.Calc();
-      for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length; i++)
+      for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length - 1; i++)
       {
-        if (Math.Abs(pack.Data[ChannelIdx][i]) > average.TripleSigma)
+        if (Math.Abs(pack.Data[ChannelIdx][i]) > average.Sigma * 10 &&
+            Math.Abs(pack.Data[ChannelIdx][i + 1]) > average.Sigma * 10)
         {
           return true;
         }
@@ -321,7 +339,7 @@ namespace MEAClosedLoop
 
           //DEBUG
           Average average = new Average();
-          for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++ )
+          for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
           {
             average.AddValueElem(Pack.NoiseLevel[idx]);
           }
@@ -330,10 +348,10 @@ namespace MEAClosedLoop
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[ChannelIdx].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
-            SolidBrush current_brush = (Math.Abs(PackData[ChannelIdx][idx]) < average.Sigma * 10) ? packBrush : BurstSpikeBrush;
+            SolidBrush current_brush = (Math.Abs(PackData[ChannelIdx][idx]) < average.Sigma * 10 && Math.Abs(PackData[ChannelIdx][idx + 1]) < average.Sigma * 10) ? packBrush : BurstSpikeBrush;
             e.Graphics.DrawLine(new Pen(current_brush),
-              new Point((int)((idx - StimShift + PackShift) * k) - 60, (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
-              new Point((int)((idx - StimShift + PackShift) * k) - 60, (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2 + 1) // + 1 - фикс для отрисовки линии, равной нулю.
+              new Point((int)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k), (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
+              new Point((int)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k), (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2 + 1) // + 1 - фикс для отрисовки линии, равной нулю.
               );
           }
           //отрисовка стимула
@@ -348,8 +366,27 @@ namespace MEAClosedLoop
           e.Graphics.DrawLine(new Pen(DeltaBrush),
             new Point((int)((float)(this.PDelayTime.Value + this.PSearchDelta.Value) * Param.MS * k), 0),
             new Point((int)((float)(this.PDelayTime.Value + this.PSearchDelta.Value) * Param.MS * k), e.ClipRectangle.Height));
+          //отрисовка уровня ограничния шума
+          e.Graphics.DrawLine(new Pen(BurstSpikeBrush),
+            (float)0,
+            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * 10 / 10,
+            (float)e.ClipRectangle.Width,
+            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * 10 / 10);
+          e.Graphics.DrawLine(new Pen(BurstSpikeBrush),
+            (float)0,
+            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10,
+            (float)e.ClipRectangle.Width,
+            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10);
+          // отрисовка надписей
+          e.Graphics.DrawString("noise",
+            SystemFonts.MessageBoxFont, BurstSpikeBrush,
+            new PointF(0,
+              (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10));
+          e.Graphics.DrawString((Pack.Start / 25000).ToString() + " sec",
+            SystemFonts.MessageBoxFont, BurstSpikeBrush,
+            new PointF(0, 0));
         }
-          
+
       }
     }
 
