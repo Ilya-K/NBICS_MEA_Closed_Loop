@@ -244,6 +244,8 @@ namespace MEAClosedLoop
       {
         control.Enabled = false;
       }
+      currentIteration = new ShahafCycleIteration();
+      currentIteration.StartTime = Filter.TimeStamp; 
       StartTime = Filter.TimeStamp;
     }
 
@@ -382,7 +384,7 @@ namespace MEAClosedLoop
             SystemFonts.MessageBoxFont, BurstSpikeBrush,
             new PointF(0,
               (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10));
-          e.Graphics.DrawString((Pack.Start / 25000).ToString() + " sec",
+          e.Graphics.DrawString(((Pack.Start - currentIteration.StartTime)/ 25000).ToString() + " sec",
             SystemFonts.MessageBoxFont, BurstSpikeBrush,
             new PointF(0, 0));
         }
