@@ -122,15 +122,15 @@ namespace MEAClosedLoop
           PackQueue.Clear();
           foreach (EvokedPackInfo ev_pack in EvokedPacksQueue)
           {
-            if (ChekSpike(ev_pack.Pack, ev_pack.AbsStim, (TAbsStimIndex)this.PDelayTime.Value, (TAbsStimIndex)this.PSearchDelta.Value))
+            if (ChekSpike(ev_pack.Pack, ev_pack.AbsStim, (TAbsStimIndex)this.PDelayTime.Value * Param.MS, (TAbsStimIndex)this.PSearchDelta.Value * Param.MS))
               PackQueue.Enqueue(pack);
           }
 
           //10 - максимальное число S в отношении R/S
 
           // Очистка переполненных очередей
-          for (; PackQueue.Count > 10; PackQueue.Dequeue()) ;
-          for (; EvokedPacksQueue.Count > this.PRSCount.Value; EvokedPacksQueue.Dequeue()) ;
+          for (; PackQueue.Count > this.PRSCount.Value; PackQueue.Dequeue()) ;
+          for (; EvokedPacksQueue.Count > 10; EvokedPacksQueue.Dequeue()) ;
         }
       }
       foreach (Control picturebox in RSPacks.Controls)
@@ -168,10 +168,12 @@ namespace MEAClosedLoop
           //Если время стимуляции пройденно полностью или выполнился R/S > xxx, 
           //завершаем стимуляцию и переходим к отдыху 
           //[TODO]: вычислить R/S, а пока false
+          lock(PackQueueLock)
           if (currentIteration.ElapsedStimTime >= (int)(this.PStimLength.Value)
-            || false)
+            || PackQueue.Count() >= this.PRSCount.Value)
           {
             loopController.DoStim = false;
+            PackQueue.Clear();
             CycleState = ShahafCycleState.CoolDown;
             currentIteration.StartCoolDown = CurrentTime;
           }
@@ -205,15 +207,22 @@ namespace MEAClosedLoop
       CycleState = ShahafCycleState.RunningStim;
     }
 
-    //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative
+    //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative (all in Points), NOT MS!
     private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
     {
       //Пачка началась сильно позже стимула? т.е. не считалась вызванной
       if (pack.Start > StimTime + StimControlDuration)
+      {
+        MessageBox.Show("Ошибка в паре пачка - стимул");
         return false;
+      }
+
       //Пачка закончилась раньше начала стимула
       if (pack.Start + (TTime)pack.Length < StimTime)
+      {
+        MessageBox.Show("Ошибка в паре пачка - стимул");
         return false;
+      } 
       TTime StartSearchTime = (pack.Start + Param.PRE_SPIKE <= StimTime)
         ? StimTime - (pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
         : (pack.Start + Param.PRE_SPIKE) - StimTime + CenterTime - Delta;
@@ -225,8 +234,8 @@ namespace MEAClosedLoop
       average.Calc();
       for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length - 1; i++)
       {
-        if (Math.Abs(pack.Data[ChannelIdx][i]) > average.Sigma * 10 &&
-            Math.Abs(pack.Data[ChannelIdx][i + 1]) > average.Sigma * 10)
+        if (Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i]) > (average.Sigma * 10 + 5) &&
+            Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i + 1]) > (average.Sigma * 10 + 10))
         {
           return true;
         }
@@ -294,10 +303,10 @@ namespace MEAClosedLoop
       for (int i = 0; i < PRSCount.Value; i++)
       {
         PictureBox SomePack = new PictureBox();
-        SomePack.Location = new Point(0, 20 + 108 * i);
+        SomePack.Location = new Point(0, 20 + 158 * i);
         SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left;
         SomePack.BackColor = Color.White;
-        SomePack.Size = new Size(RSPacks.Width, 100);
+        SomePack.Size = new Size(RSPacks.Width, 150);
         SomePack.Paint += SomePack_Paint;
         this.RSPacks.Controls.Add(SomePack);
         SomePack.Refresh();
@@ -350,10 +359,10 @@ namespace MEAClosedLoop
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[ChannelIdx].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
-            SolidBrush current_brush = (Math.Abs(PackData[ChannelIdx][idx]) < average.Sigma * 10 && Math.Abs(PackData[ChannelIdx][idx + 1]) < average.Sigma * 10) ? packBrush : BurstSpikeBrush;
+            SolidBrush current_brush = (Math.Abs(PackData[ChannelIdx][idx]) < average.Sigma * 10 + 1 && Math.Abs(PackData[ChannelIdx][idx + 1]) < average.Sigma * 10 + 1) ? packBrush : BurstSpikeBrush;
             e.Graphics.DrawLine(new Pen(current_brush),
-              new Point((int)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k), (int)PackData[ChannelIdx][idx] / 10 + e.ClipRectangle.Height / 2),
-              new Point((int)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k), (int)PackData[ChannelIdx][idx + 1] / 10 + e.ClipRectangle.Height / 2 + 1) // + 1 - фикс для отрисовки линии, равной нулю.
+              new Point((int)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k), (int)PackData[ChannelIdx][idx] / 6 + e.ClipRectangle.Height / 2),
+              new Point((int)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k), (int)PackData[ChannelIdx][idx + 1] / 6 + e.ClipRectangle.Height / 2 + 1) // + 1 - фикс для отрисовки линии, равной нулю.
               );
           }
           //отрисовка стимула
@@ -371,22 +380,27 @@ namespace MEAClosedLoop
           //отрисовка уровня ограничния шума
           e.Graphics.DrawLine(new Pen(BurstSpikeBrush),
             (float)0,
-            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * 10 / 10,
+            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * 10 / 6,
             (float)e.ClipRectangle.Width,
-            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * 10 / 10);
+            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * 10 / 6);
           e.Graphics.DrawLine(new Pen(BurstSpikeBrush),
             (float)0,
-            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10,
+            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 6,
             (float)e.ClipRectangle.Width,
-            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10);
+            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 6);
           // отрисовка надписей
           e.Graphics.DrawString("noise",
             SystemFonts.MessageBoxFont, BurstSpikeBrush,
-            new PointF(0,
-              (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10));
+            new PointF(0, (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * 10 / 10));
           e.Graphics.DrawString(((Pack.Start - currentIteration.StartTime)/ 25000).ToString() + " sec",
-            SystemFonts.MessageBoxFont, BurstSpikeBrush,
+            SystemFonts.MessageBoxFont, 
+            new SolidBrush (Color.Black),
             new PointF(0, 0));
+          e.Graphics.DrawString("Burst #" + i.ToString(),
+           SystemFonts.MessageBoxFont, 
+           new SolidBrush(Color.Black),
+           new PointF(70, 0));
+         
         }
 
       }
