@@ -50,10 +50,13 @@
       this.label4 = new System.Windows.Forms.Label();
       this.StartCycle = new System.Windows.Forms.Button();
       this.FinishCycle = new System.Windows.Forms.Button();
-      this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.RSBurstBox = new System.Windows.Forms.GroupBox();
       this.RSPacks = new System.Windows.Forms.Panel();
       this.label9 = new System.Windows.Forms.Label();
       this.TimeStamp = new System.Windows.Forms.TextBox();
+      this.LernLogTextBox = new System.Windows.Forms.TextBox();
+      this.EvPacksBox = new System.Windows.Forms.GroupBox();
+      this.evBurstPanel = new System.Windows.Forms.Panel();
       ((System.ComponentModel.ISupportInitialize)(this.TrainEvolutionGraph)).BeginInit();
       this.ParamBox.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectName)).BeginInit();
@@ -64,13 +67,14 @@
       ((System.ComponentModel.ISupportInitialize)(this.PExpMaxLength)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PCoolDownLength)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PStimLength)).BeginInit();
-      this.groupBox2.SuspendLayout();
+      this.RSBurstBox.SuspendLayout();
+      this.EvPacksBox.SuspendLayout();
       this.SuspendLayout();
       // 
       // TrainEvolutionGraph
       // 
       this.TrainEvolutionGraph.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.TrainEvolutionGraph.Location = new System.Drawing.Point(12, 363);
+      this.TrainEvolutionGraph.Location = new System.Drawing.Point(12, 369);
       this.TrainEvolutionGraph.Name = "TrainEvolutionGraph";
       this.TrainEvolutionGraph.Size = new System.Drawing.Size(398, 159);
       this.TrainEvolutionGraph.TabIndex = 0;
@@ -124,9 +128,9 @@
       this.ParamBox.Controls.Add(this.label4);
       this.ParamBox.Controls.Add(this.label3);
       this.ParamBox.Controls.Add(this.label2);
-      this.ParamBox.Location = new System.Drawing.Point(12, 12);
+      this.ParamBox.Location = new System.Drawing.Point(12, 11);
       this.ParamBox.Name = "ParamBox";
-      this.ParamBox.Size = new System.Drawing.Size(398, 259);
+      this.ParamBox.Size = new System.Drawing.Size(398, 260);
       this.ParamBox.TabIndex = 4;
       this.ParamBox.TabStop = false;
       this.ParamBox.Text = "Параметры цикла";
@@ -383,18 +387,18 @@
       this.FinishCycle.UseVisualStyleBackColor = true;
       this.FinishCycle.Click += new System.EventHandler(this.FinishCycle_Click);
       // 
-      // groupBox2
+      // RSBurstBox
       // 
-      this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+      this.RSBurstBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.groupBox2.Controls.Add(this.RSPacks);
-      this.groupBox2.Location = new System.Drawing.Point(445, 17);
-      this.groupBox2.Name = "groupBox2";
-      this.groupBox2.Size = new System.Drawing.Size(514, 511);
-      this.groupBox2.TabIndex = 8;
-      this.groupBox2.TabStop = false;
-      this.groupBox2.Text = "Ответ культуры";
+      this.RSBurstBox.Controls.Add(this.RSPacks);
+      this.RSBurstBox.Location = new System.Drawing.Point(416, 11);
+      this.RSBurstBox.Name = "RSBurstBox";
+      this.RSBurstBox.Size = new System.Drawing.Size(431, 705);
+      this.RSBurstBox.TabIndex = 8;
+      this.RSBurstBox.TabStop = false;
+      this.RSBurstBox.Text = "Ответ культуры";
       // 
       // RSPacks
       // 
@@ -402,9 +406,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.RSPacks.AutoScroll = true;
-      this.RSPacks.Location = new System.Drawing.Point(7, 17);
+      this.RSPacks.Location = new System.Drawing.Point(6, 18);
       this.RSPacks.Name = "RSPacks";
-      this.RSPacks.Size = new System.Drawing.Size(501, 488);
+      this.RSPacks.Size = new System.Drawing.Size(415, 680);
       this.RSPacks.TabIndex = 0;
       // 
       // label9
@@ -420,23 +424,56 @@
       // 
       this.TimeStamp.Location = new System.Drawing.Point(286, 280);
       this.TimeStamp.Name = "TimeStamp";
+      this.TimeStamp.ReadOnly = true;
       this.TimeStamp.Size = new System.Drawing.Size(73, 20);
       this.TimeStamp.TabIndex = 10;
+      // 
+      // LernLogTextBox
+      // 
+      this.LernLogTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
+      this.LernLogTextBox.Location = new System.Drawing.Point(12, 555);
+      this.LernLogTextBox.Multiline = true;
+      this.LernLogTextBox.Name = "LernLogTextBox";
+      this.LernLogTextBox.ReadOnly = true;
+      this.LernLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+      this.LernLogTextBox.Size = new System.Drawing.Size(398, 161);
+      this.LernLogTextBox.TabIndex = 11;
+      // 
+      // EvPacksBox
+      // 
+      this.EvPacksBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.EvPacksBox.Controls.Add(this.evBurstPanel);
+      this.EvPacksBox.Location = new System.Drawing.Point(867, 11);
+      this.EvPacksBox.Name = "EvPacksBox";
+      this.EvPacksBox.Size = new System.Drawing.Size(427, 704);
+      this.EvPacksBox.TabIndex = 12;
+      this.EvPacksBox.TabStop = false;
+      this.EvPacksBox.Text = "Вызванные пачки";
+      // 
+      // evBurstPanel
+      // 
+      this.evBurstPanel.Location = new System.Drawing.Point(0, 19);
+      this.evBurstPanel.Name = "evBurstPanel";
+      this.evBurstPanel.Size = new System.Drawing.Size(428, 679);
+      this.evBurstPanel.TabIndex = 0;
       // 
       // FLearnCycle
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(971, 540);
+      this.ClientSize = new System.Drawing.Size(1307, 728);
+      this.Controls.Add(this.EvPacksBox);
+      this.Controls.Add(this.LernLogTextBox);
       this.Controls.Add(this.TimeStamp);
       this.Controls.Add(this.label9);
-      this.Controls.Add(this.groupBox2);
+      this.Controls.Add(this.RSBurstBox);
       this.Controls.Add(this.FinishCycle);
       this.Controls.Add(this.StartCycle);
       this.Controls.Add(this.ParamBox);
       this.Controls.Add(this.TrainEvolutionGraph);
       this.Name = "FLearnCycle";
       this.Text = "FLearnCycle";
+      this.Load += new System.EventHandler(this.FLearnCycle_Load);
       ((System.ComponentModel.ISupportInitialize)(this.TrainEvolutionGraph)).EndInit();
       this.ParamBox.ResumeLayout(false);
       this.ParamBox.PerformLayout();
@@ -448,7 +485,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.PExpMaxLength)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.PCoolDownLength)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.PStimLength)).EndInit();
-      this.groupBox2.ResumeLayout(false);
+      this.RSBurstBox.ResumeLayout(false);
+      this.EvPacksBox.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -469,7 +507,7 @@
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.NumericUpDown PRSCount;
     private System.Windows.Forms.Label label4;
-    private System.Windows.Forms.GroupBox groupBox2;
+    private System.Windows.Forms.GroupBox RSBurstBox;
     private System.Windows.Forms.Panel RSPacks;
     private System.Windows.Forms.NumericUpDown PSearchDelta;
     private System.Windows.Forms.NumericUpDown PDelayTime;
@@ -482,5 +520,8 @@
     private System.Windows.Forms.NumericUpDown PSelectName;
     private System.Windows.Forms.Label label11;
     private System.Windows.Forms.Label label10;
+    private volatile System.Windows.Forms.TextBox LernLogTextBox;
+    private System.Windows.Forms.GroupBox EvPacksBox;
+    private System.Windows.Forms.Panel evBurstPanel;
   }
 }
