@@ -96,6 +96,28 @@ namespace MEAClosedLoop
       e.Graphics.DrawLine(AxisPen,
         new Point(padding_left, padding_top),
         new Point(padding_left, e.ClipRectangle.Height));
+      // Отрисовка графика
+      if (CycleInfo.Count == 0) return;
+      float XProportional = (e.ClipRectangle.Width - padding_bottom )/ CycleInfo.Count;
+      float YProportional = (e.ClipRectangle.Height - padding_left )/ (float)this.PStimLength.Value;
+      for (int i = 0; i < CycleInfo.Count - 1; i++)
+      {
+        e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
+          (float)(padding_left + i * XProportional),
+          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime / 25000 * YProportional),
+          (float)(padding_left + (i + 1) * XProportional),
+          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i + 1].ElapsedStimTime / 25000 * YProportional)
+          );
+      }
+      for (int i = 0; i < CycleInfo.Count - 1; i++)
+      {
+        e.Graphics.DrawEllipse(new Pen(new SolidBrush(Color.Red)),
+          (float)(padding_left + i * XProportional),
+          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime / 25000 * YProportional),
+          (float)3,
+          (float)3
+          );
+      }
     }
 
     public void RecieveStimData(List<TAbsStimIndex> stimlist)
@@ -213,6 +235,7 @@ namespace MEAClosedLoop
               }
               PackQueue.Clear();
               EvokedPacksQueue.Clear();
+              TrainEvolutionGraph.BeginInvoke(new Action(() => TrainEvolutionGraph.Refresh()));
               /*
               loopController.OnPackFound -= RecievePackData;
               Filter.RemoveStimulConsumer(RecieveStimData);
@@ -232,7 +255,6 @@ namespace MEAClosedLoop
           {
             CycleInfo.Add(currentIteration);
             currentIteration = new ShahafCycleIteration();
-            RunNewCycleIteration();
             /*
             loopController.OnPackFound += RecievePackData;
             Filter.AddStimulConsumer(RecieveStimData);
@@ -240,12 +262,13 @@ namespace MEAClosedLoop
             */
             LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.Text += s),
                  Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Выполнен отдых культуры, итерация завершена");
+            RunNewCycleIteration();
             return;
           }
           break;
       }
       // Если цикл длится слишком долго.
-      if (CurrentTime - StartTime > this.PExpMaxLength.Value * Param.MS * 60 * 1000 && 
+      if (CurrentTime - StartTime > this.PExpMaxLength.Value * Param.MS * 60 * 1000 &&
          (CycleState == ShahafCycleState.RunningStim || CycleState == ShahafCycleState.CoolDown))
       {
         LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
@@ -269,9 +292,10 @@ namespace MEAClosedLoop
                 Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Начало новой итерации цикла");
     }
 
-    //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative (all in Points), NOT MS!
     private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
     {
+      //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative (all in Points), NOT MS!
+
       //Пачка началась сильно позже стимула? т.е. не считалась вызванной
       if (pack.Start > StimTime + StimControlDuration)
       {
