@@ -656,6 +656,9 @@ namespace MEAClosedLoop
       // InvokeRequired required compares the thread ID of the
       // calling thread to the thread ID of the creating thread.
       // If these threads are different, it returns true.
+     
+      /*Данный метод закомментирован, так как, преположительно вызыва Context Switch Dead Lock и не играл никакой роли в работе ПО*/
+      /* 
       if (this.textBox_DeviceInfo.InvokeRequired)
       {
         this.BeginInvoke(new AddTextCallback(AddText), new object[] { text });
@@ -664,6 +667,7 @@ namespace MEAClosedLoop
       {
         this.textBox_DeviceInfo.Text += text;
       }
+      */
     }
 
     // [DEBUG]

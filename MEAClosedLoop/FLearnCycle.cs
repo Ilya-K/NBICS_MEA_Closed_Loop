@@ -98,8 +98,8 @@ namespace MEAClosedLoop
         new Point(padding_left, e.ClipRectangle.Height));
       // Отрисовка графика
       if (CycleInfo.Count == 0) return;
-      float XProportional = (e.ClipRectangle.Width - padding_bottom )/ CycleInfo.Count;
-      float YProportional = (e.ClipRectangle.Height - padding_left )/ (float)this.PStimLength.Value;
+      float XProportional = (e.ClipRectangle.Width - padding_bottom) / CycleInfo.Count;
+      float YProportional = (e.ClipRectangle.Height - padding_left) / (float)this.PStimLength.Value;
       for (int i = 0; i < CycleInfo.Count - 1; i++)
       {
         e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
@@ -112,10 +112,10 @@ namespace MEAClosedLoop
       for (int i = 0; i < CycleInfo.Count - 1; i++)
       {
         e.Graphics.DrawEllipse(new Pen(new SolidBrush(Color.Red)),
-          (float)(padding_left + i * XProportional),
-          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime / 25000 * YProportional),
-          (float)3,
-          (float)3
+          (float)(padding_left + i * XProportional - 2),
+          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime / 25000 * YProportional - 2),
+          (float)4,
+          (float)4
           );
       }
     }
@@ -136,6 +136,12 @@ namespace MEAClosedLoop
 
     public void RecievePackData(CPack pack)
     {
+
+      if (TrainEvolutionGraph.InvokeRequired)
+        TrainEvolutionGraph.BeginInvoke(new Action<Control>(c => c.Refresh()), TrainEvolutionGraph);
+      else
+        TrainEvolutionGraph.Refresh();
+
       if (CycleState != ShahafCycleState.RunningStim) return;
       lock (PackQueueLock)
       {
@@ -253,7 +259,7 @@ namespace MEAClosedLoop
           // + Запускаем следующую итерацию цикла
           if (currentIteration.ElapsedCoolDownTime >= (int)(this.PCoolDownLength.Value) * Param.MS * 1000)
           {
-            CycleInfo.Add(currentIteration);
+
             currentIteration = new ShahafCycleIteration();
             /*
             loopController.OnPackFound += RecievePackData;
@@ -274,7 +280,6 @@ namespace MEAClosedLoop
         LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
                  Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Превышено максимальное время эксперимента, эксперимент завершен");
         CycleState = ShahafCycleState.Finished;
-        CycleInfo.Add(currentIteration);
 
       }
     }
@@ -286,7 +291,11 @@ namespace MEAClosedLoop
       currentIteration.ElapsedStimTime = 0;
       currentIteration.ElapsedCoolDownTime = 0;
       currentIteration.StartCoolDown = 0;
+
+      CycleInfo.Add(currentIteration);
+
       CycleState = ShahafCycleState.RunningStim;
+
       loopController.DoStim = true;
       LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
                 Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Начало новой итерации цикла");
@@ -340,6 +349,7 @@ namespace MEAClosedLoop
         control.Enabled = false;
       }
       StartCycle.Enabled = false;
+      CurrentTime = Filter.TimeStamp - StartTime;
       RunNewCycleIteration();
     }
 
@@ -573,6 +583,11 @@ namespace MEAClosedLoop
         }
 
       }
+    }
+
+    private void TrainEvolutionGraph_Click(object sender, EventArgs e)
+    {
+      TrainEvolutionGraph.Refresh();
     }
 
   }

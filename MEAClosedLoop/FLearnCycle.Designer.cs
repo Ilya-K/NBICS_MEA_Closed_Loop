@@ -28,7 +28,6 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.TrainEvolutionGraph = new System.Windows.Forms.PictureBox();
       this.label1 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
@@ -57,7 +56,7 @@
       this.LernLogTextBox = new System.Windows.Forms.TextBox();
       this.EvPacksBox = new System.Windows.Forms.GroupBox();
       this.evBurstPanel = new System.Windows.Forms.Panel();
-      ((System.ComponentModel.ISupportInitialize)(this.TrainEvolutionGraph)).BeginInit();
+      this.TrainEvolutionGraph = new System.Windows.Forms.PictureBox();
       this.ParamBox.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectName)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectIndex)).BeginInit();
@@ -69,17 +68,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.PStimLength)).BeginInit();
       this.RSBurstBox.SuspendLayout();
       this.EvPacksBox.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.TrainEvolutionGraph)).BeginInit();
       this.SuspendLayout();
-      // 
-      // TrainEvolutionGraph
-      // 
-      this.TrainEvolutionGraph.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.TrainEvolutionGraph.Location = new System.Drawing.Point(12, 369);
-      this.TrainEvolutionGraph.Name = "TrainEvolutionGraph";
-      this.TrainEvolutionGraph.Size = new System.Drawing.Size(398, 159);
-      this.TrainEvolutionGraph.TabIndex = 0;
-      this.TrainEvolutionGraph.TabStop = false;
-      this.TrainEvolutionGraph.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
       // 
       // label1
       // 
@@ -395,7 +385,7 @@
       this.RSBurstBox.Controls.Add(this.RSPacks);
       this.RSBurstBox.Location = new System.Drawing.Point(416, 11);
       this.RSBurstBox.Name = "RSBurstBox";
-      this.RSBurstBox.Size = new System.Drawing.Size(431, 705);
+      this.RSBurstBox.Size = new System.Drawing.Size(431, 652);
       this.RSBurstBox.TabIndex = 8;
       this.RSBurstBox.TabStop = false;
       this.RSBurstBox.Text = "Ответ культуры";
@@ -408,7 +398,7 @@
       this.RSPacks.AutoScroll = true;
       this.RSPacks.Location = new System.Drawing.Point(6, 18);
       this.RSPacks.Name = "RSPacks";
-      this.RSPacks.Size = new System.Drawing.Size(415, 680);
+      this.RSPacks.Size = new System.Drawing.Size(419, 628);
       this.RSPacks.TabIndex = 0;
       // 
       // label9
@@ -431,7 +421,7 @@
       // LernLogTextBox
       // 
       this.LernLogTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.LernLogTextBox.Location = new System.Drawing.Point(12, 555);
+      this.LernLogTextBox.Location = new System.Drawing.Point(7, 495);
       this.LernLogTextBox.Multiline = true;
       this.LernLogTextBox.Name = "LernLogTextBox";
       this.LernLogTextBox.ReadOnly = true;
@@ -445,23 +435,34 @@
       this.EvPacksBox.Controls.Add(this.evBurstPanel);
       this.EvPacksBox.Location = new System.Drawing.Point(867, 11);
       this.EvPacksBox.Name = "EvPacksBox";
-      this.EvPacksBox.Size = new System.Drawing.Size(427, 704);
+      this.EvPacksBox.Size = new System.Drawing.Size(427, 652);
       this.EvPacksBox.TabIndex = 12;
       this.EvPacksBox.TabStop = false;
       this.EvPacksBox.Text = "Вызванные пачки";
       // 
       // evBurstPanel
       // 
-      this.evBurstPanel.Location = new System.Drawing.Point(0, 19);
+      this.evBurstPanel.Location = new System.Drawing.Point(6, 19);
       this.evBurstPanel.Name = "evBurstPanel";
-      this.evBurstPanel.Size = new System.Drawing.Size(428, 679);
+      this.evBurstPanel.Size = new System.Drawing.Size(415, 627);
       this.evBurstPanel.TabIndex = 0;
+      // 
+      // TrainEvolutionGraph
+      // 
+      this.TrainEvolutionGraph.BackColor = System.Drawing.SystemColors.ControlLightLight;
+      this.TrainEvolutionGraph.Location = new System.Drawing.Point(7, 335);
+      this.TrainEvolutionGraph.Name = "TrainEvolutionGraph";
+      this.TrainEvolutionGraph.Size = new System.Drawing.Size(398, 154);
+      this.TrainEvolutionGraph.TabIndex = 0;
+      this.TrainEvolutionGraph.TabStop = false;
+      this.TrainEvolutionGraph.Click += new System.EventHandler(this.TrainEvolutionGraph_Click);
+      this.TrainEvolutionGraph.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
       // 
       // FLearnCycle
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(1307, 728);
+      this.ClientSize = new System.Drawing.Size(1307, 668);
       this.Controls.Add(this.EvPacksBox);
       this.Controls.Add(this.LernLogTextBox);
       this.Controls.Add(this.TimeStamp);
@@ -474,7 +475,6 @@
       this.Name = "FLearnCycle";
       this.Text = "FLearnCycle";
       this.Load += new System.EventHandler(this.FLearnCycle_Load);
-      ((System.ComponentModel.ISupportInitialize)(this.TrainEvolutionGraph)).EndInit();
       this.ParamBox.ResumeLayout(false);
       this.ParamBox.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectName)).EndInit();
@@ -487,6 +487,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.PStimLength)).EndInit();
       this.RSBurstBox.ResumeLayout(false);
       this.EvPacksBox.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.TrainEvolutionGraph)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -494,7 +495,6 @@
 
     #endregion
 
-    private System.Windows.Forms.PictureBox TrainEvolutionGraph;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;
@@ -523,5 +523,6 @@
     private volatile System.Windows.Forms.TextBox LernLogTextBox;
     private System.Windows.Forms.GroupBox EvPacksBox;
     private System.Windows.Forms.Panel evBurstPanel;
+    private System.Windows.Forms.PictureBox TrainEvolutionGraph;
   }
 }
