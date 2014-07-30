@@ -263,7 +263,7 @@
       // 
       this.PRSCount.Location = new System.Drawing.Point(331, 98);
       this.PRSCount.Maximum = new decimal(new int[] {
-            10,
+            3,
             0,
             0,
             0});
@@ -321,7 +321,7 @@
       this.PCoolDownLength.Size = new System.Drawing.Size(62, 20);
       this.PCoolDownLength.TabIndex = 4;
       this.PCoolDownLength.Value = new decimal(new int[] {
-            300,
+            10,
             0,
             0,
             0});
@@ -343,7 +343,7 @@
       this.PStimLength.Size = new System.Drawing.Size(62, 20);
       this.PStimLength.TabIndex = 4;
       this.PStimLength.Value = new decimal(new int[] {
-            600,
+            50,
             0,
             0,
             0});
@@ -385,7 +385,7 @@
       this.RSBurstBox.Controls.Add(this.RSPacks);
       this.RSBurstBox.Location = new System.Drawing.Point(416, 11);
       this.RSBurstBox.Name = "RSBurstBox";
-      this.RSBurstBox.Size = new System.Drawing.Size(431, 652);
+      this.RSBurstBox.Size = new System.Drawing.Size(423, 473);
       this.RSBurstBox.TabIndex = 8;
       this.RSBurstBox.TabStop = false;
       this.RSBurstBox.Text = "Ответ культуры";
@@ -396,9 +396,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.RSPacks.AutoScroll = true;
-      this.RSPacks.Location = new System.Drawing.Point(6, 18);
+      this.RSPacks.Location = new System.Drawing.Point(6, 19);
       this.RSPacks.Name = "RSPacks";
-      this.RSPacks.Size = new System.Drawing.Size(419, 628);
+      this.RSPacks.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
+      this.RSPacks.Size = new System.Drawing.Size(411, 454);
       this.RSPacks.TabIndex = 0;
       // 
       // label9
@@ -421,38 +422,44 @@
       // LernLogTextBox
       // 
       this.LernLogTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.LernLogTextBox.Location = new System.Drawing.Point(7, 495);
+      this.LernLogTextBox.Location = new System.Drawing.Point(7, 335);
       this.LernLogTextBox.Multiline = true;
       this.LernLogTextBox.Name = "LernLogTextBox";
       this.LernLogTextBox.ReadOnly = true;
       this.LernLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-      this.LernLogTextBox.Size = new System.Drawing.Size(398, 161);
+      this.LernLogTextBox.Size = new System.Drawing.Size(398, 317);
       this.LernLogTextBox.TabIndex = 11;
       // 
       // EvPacksBox
       // 
-      this.EvPacksBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.EvPacksBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.EvPacksBox.Controls.Add(this.evBurstPanel);
-      this.EvPacksBox.Location = new System.Drawing.Point(867, 11);
+      this.EvPacksBox.Location = new System.Drawing.Point(845, 11);
       this.EvPacksBox.Name = "EvPacksBox";
-      this.EvPacksBox.Size = new System.Drawing.Size(427, 652);
+      this.EvPacksBox.Size = new System.Drawing.Size(393, 647);
       this.EvPacksBox.TabIndex = 12;
       this.EvPacksBox.TabStop = false;
       this.EvPacksBox.Text = "Вызванные пачки";
       // 
       // evBurstPanel
       // 
+      this.evBurstPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.evBurstPanel.Location = new System.Drawing.Point(6, 19);
       this.evBurstPanel.Name = "evBurstPanel";
-      this.evBurstPanel.Size = new System.Drawing.Size(415, 627);
+      this.evBurstPanel.Size = new System.Drawing.Size(381, 622);
       this.evBurstPanel.TabIndex = 0;
       // 
       // TrainEvolutionGraph
       // 
+      this.TrainEvolutionGraph.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.TrainEvolutionGraph.BackColor = System.Drawing.SystemColors.ControlLightLight;
-      this.TrainEvolutionGraph.Location = new System.Drawing.Point(7, 335);
+      this.TrainEvolutionGraph.Location = new System.Drawing.Point(416, 498);
       this.TrainEvolutionGraph.Name = "TrainEvolutionGraph";
-      this.TrainEvolutionGraph.Size = new System.Drawing.Size(398, 154);
+      this.TrainEvolutionGraph.Size = new System.Drawing.Size(417, 154);
       this.TrainEvolutionGraph.TabIndex = 0;
       this.TrainEvolutionGraph.TabStop = false;
       this.TrainEvolutionGraph.Click += new System.EventHandler(this.TrainEvolutionGraph_Click);
@@ -462,7 +469,7 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(1307, 668);
+      this.ClientSize = new System.Drawing.Size(1251, 663);
       this.Controls.Add(this.EvPacksBox);
       this.Controls.Add(this.LernLogTextBox);
       this.Controls.Add(this.TimeStamp);
@@ -474,6 +481,7 @@
       this.Controls.Add(this.TrainEvolutionGraph);
       this.Name = "FLearnCycle";
       this.Text = "FLearnCycle";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FLearnCycle_FormClosing);
       this.Load += new System.EventHandler(this.FLearnCycle_Load);
       this.ParamBox.ResumeLayout(false);
       this.ParamBox.PerformLayout();

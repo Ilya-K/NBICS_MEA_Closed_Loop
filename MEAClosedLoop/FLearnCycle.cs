@@ -63,7 +63,6 @@ namespace MEAClosedLoop
       this.PSelectName.Value = 54;
 
     }
-
     private void FLearnCycle_Load(object sender, EventArgs e)
     {
       this.evBurstPanel.Controls.Clear();
@@ -84,9 +83,9 @@ namespace MEAClosedLoop
     private void pictureBox1_Paint(object sender, PaintEventArgs e)
     {
       int padding_left = 5;
-      int padding_bottom = 5;
-      int padding_top = 0;
-      int padding_right = 0;
+      int padding_bottom = 12;
+      int padding_top = 10;
+      int padding_right = 10;
       SolidBrush AxisBrush = new SolidBrush(Color.Black);
       Pen AxisPen = new Pen(AxisBrush, 1);
       // Отрисовка осей
@@ -96,10 +95,82 @@ namespace MEAClosedLoop
       e.Graphics.DrawLine(AxisPen,
         new Point(padding_left, padding_top),
         new Point(padding_left, e.ClipRectangle.Height));
+      // отрисовка масштаба
+
+      #region вертикаль
+      e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
+        (float)(padding_left / (float)2),
+        (float)(e.ClipRectangle.Height - padding_bottom + padding_top) / 2,
+        (float)(3 * padding_left / (float)2),
+        (float)((e.ClipRectangle.Height - padding_bottom + padding_top) / 2)
+        );
+      e.Graphics.DrawString(
+        (this.PStimLength.Value / 2).ToString(),
+        new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular),
+        new SolidBrush(Color.Black),
+        new PointF(
+          (float)(3 * padding_left / (float)2),
+          (float)((e.ClipRectangle.Height - padding_bottom + padding_top) / 2)
+          )
+        );
+      e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
+         (float)(padding_left / (float)2),
+         (float)(padding_top),
+         (float)(3 * padding_left / (float)2),
+         (float)(padding_top)
+         );
+      e.Graphics.DrawString(
+        this.PStimLength.Value.ToString() + " ,сек",
+        new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular),
+        new SolidBrush(Color.Black),
+        new PointF(
+          (float)(3 * padding_left / (float)2),
+          (float)(padding_top)
+        )
+      );
+      #endregion
+
+      #region горизонталь
+      if ((CycleInfo.Count % 2 == 0 || CycleInfo.Count > 8) && CycleInfo.Count > 1)
+      {
+        e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
+          (float)((e.ClipRectangle.Width - padding_right + padding_left) / 2),
+          (float)(e.ClipRectangle.Height - padding_bottom / (float)2),
+          (float)((e.ClipRectangle.Width - padding_right + padding_left) / 2),
+          (float)(e.ClipRectangle.Height - 3 * padding_bottom / (float)2)
+          );
+        e.Graphics.DrawString(
+          (CycleInfo.Count / 2).ToString(),
+          new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular),
+          new SolidBrush(Color.Black),
+          new PointF(
+            (float)((e.ClipRectangle.Width - padding_right + padding_left) / 2),
+            (float)(e.ClipRectangle.Height - 3 * padding_left / (float)2)
+          )
+        );
+      }
+
+      e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
+       (float)(e.ClipRectangle.Width - padding_right),
+       (float)(e.ClipRectangle.Height - padding_bottom / (float)2),
+       (float)(e.ClipRectangle.Width - padding_right),
+       (float)(e.ClipRectangle.Height - 3 * padding_bottom / (float)2)
+       );
+      e.Graphics.DrawString(
+        CycleInfo.Count.ToString() + " итераций",
+        new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular),
+        new SolidBrush(Color.Black),
+        new PointF(
+          (float)(e.ClipRectangle.Width - padding_right - 70),
+          (float)(e.ClipRectangle.Height - 3 * padding_bottom / (float)2 - 10)
+        )
+      );
+      #endregion
+
       // Отрисовка графика
       if (CycleInfo.Count == 0) return;
-      float XProportional = (e.ClipRectangle.Width - padding_bottom) / CycleInfo.Count;
-      float YProportional = (e.ClipRectangle.Height - padding_left) / (float)this.PStimLength.Value;
+      float XProportional = (e.ClipRectangle.Width - (padding_bottom + padding_top)) / (CycleInfo.Count + 1);
+      float YProportional = (e.ClipRectangle.Height - (padding_left + padding_right)) / (float)this.PStimLength.Value;
       for (int i = 0; i < CycleInfo.Count - 1; i++)
       {
         e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
@@ -122,7 +193,9 @@ namespace MEAClosedLoop
 
     public void RecieveStimData(List<TAbsStimIndex> stimlist)
     {
+
       if (CycleState != ShahafCycleState.RunningStim) return;
+      if (currentIteration != null) currentIteration.ElapsedStimCount++;
       lock (StimQueueLock)
       {
         foreach (TTime stim in stimlist)
@@ -202,6 +275,8 @@ namespace MEAClosedLoop
       //Update Time Count
       CurrentTime = Filter.TimeStamp - StartTime;
 
+      TrainEvolutionGraph.BeginInvoke(new Action(() => TrainEvolutionGraph.Refresh()));
+
       if (TimeStamp.InvokeRequired)
         TimeStamp.BeginInvoke(new Action<string>(s => TimeStamp.Text = s), (((double)CurrentTime) / 25000).ToString());
       else
@@ -232,7 +307,11 @@ namespace MEAClosedLoop
               if (PackQueue.Count() >= this.PRSCount.Value)
               {
                 LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
-                  Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Выполнен RS критерий, переход в отдых культуры");
+                  Environment.NewLine +
+                  "[" + (CurrentTime / 25000).ToString() +
+                  "] Выполнен RS критерий( " +
+                  currentIteration.ElapsedStimCount.ToString() +
+                  " стимулов ), переход в отдых культуры");
               }
               else
               {
@@ -242,18 +321,18 @@ namespace MEAClosedLoop
               PackQueue.Clear();
               EvokedPacksQueue.Clear();
               TrainEvolutionGraph.BeginInvoke(new Action(() => TrainEvolutionGraph.Refresh()));
-              /*
+
               loopController.OnPackFound -= RecievePackData;
               Filter.RemoveStimulConsumer(RecieveStimData);
-              Filter.RemoveDataConsumer(UpdateTime);
-              
-               */
+
+
               return;
             }
 
           break;
         case ShahafCycleState.CoolDown:
           //добавляем время отдыха
+
           currentIteration.ElapsedCoolDownTime = (int)(CurrentTime - currentIteration.StartCoolDown);
           //если отдых пройден полностью - завершаем итерацию.
           // + Запускаем следующую итерацию цикла
@@ -261,11 +340,11 @@ namespace MEAClosedLoop
           {
 
             currentIteration = new ShahafCycleIteration();
-            /*
+
             loopController.OnPackFound += RecievePackData;
             Filter.AddStimulConsumer(RecieveStimData);
-            Filter.AddDataConsumer(UpdateTime);
-            */
+            //Filter.AddDataConsumer(UpdateTime);
+
             LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.Text += s),
                  Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Выполнен отдых культуры, итерация завершена");
             RunNewCycleIteration();
@@ -274,7 +353,7 @@ namespace MEAClosedLoop
           break;
       }
       // Если цикл длится слишком долго.
-      if (CurrentTime - StartTime > this.PExpMaxLength.Value * Param.MS * 60 * 1000 &&
+      if (CurrentTime > this.PExpMaxLength.Value * Param.MS * 60 * 1000 + StartTime &&
          (CycleState == ShahafCycleState.RunningStim || CycleState == ShahafCycleState.CoolDown))
       {
         LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
@@ -286,6 +365,7 @@ namespace MEAClosedLoop
 
     private void RunNewCycleIteration()
     {
+
       currentIteration = new ShahafCycleIteration();
       currentIteration.StartTime = CurrentTime;
       currentIteration.ElapsedStimTime = 0;
@@ -340,10 +420,10 @@ namespace MEAClosedLoop
 
     private void StartCycle_Click(object sender, EventArgs e)
     {
+      StartTime = Filter.TimeStamp;
       loopController.OnPackFound += RecievePackData;
       Filter.AddStimulConsumer(RecieveStimData);
       Filter.AddDataConsumer(UpdateTime);
-
       foreach (Control control in ParamBox.Controls)
       {
         control.Enabled = false;
@@ -398,10 +478,10 @@ namespace MEAClosedLoop
       for (int i = 0; i < PRSCount.Value; i++)
       {
         PictureBox SomePack = new PictureBox();
-        SomePack.Location = new Point(0, 20 + 158 * i);
+        SomePack.Location = new Point(5, 1 + 151 * i);
         SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left;
         SomePack.BackColor = Color.White;
-        SomePack.Size = new Size(RSPacks.Width, 150);
+        SomePack.Size = new Size(RSPacks.Width - 10, 150);
         SomePack.Paint += SomePack_Paint;
         this.RSPacks.Controls.Add(SomePack);
         SomePack.Refresh();
@@ -576,7 +656,7 @@ namespace MEAClosedLoop
             (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * SigmaCount / HorisontalProportional);
 
           // отрисовка надписей
-          e.Graphics.DrawString(((Pack.Start - currentIteration.StartTime) / 25000).ToString() + " sec",
+          e.Graphics.DrawString(((Pack.Start - (currentIteration.StartTime + StartTime)) / 25000).ToString() + " sec",
             SystemFonts.MessageBoxFont, BurstSpikeBrush,
             new PointF(0, 0));
 
@@ -588,6 +668,13 @@ namespace MEAClosedLoop
     private void TrainEvolutionGraph_Click(object sender, EventArgs e)
     {
       TrainEvolutionGraph.Refresh();
+    }
+
+    private void FLearnCycle_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      loopController.OnPackFound -= RecievePackData;
+      Filter.RemoveStimulConsumer(RecieveStimData);
+      Filter.RemoveDataConsumer(UpdateTime);
     }
 
   }
@@ -605,6 +692,7 @@ namespace MEAClosedLoop
     public int RS = 0;
     public int ElapsedStimTime = 0;
     public int ElapsedCoolDownTime = 0;
+    public int ElapsedStimCount = 0;
     public TTime StartTime = 0;
     public TTime StartCoolDown = 0;
     public TTime FinishTime = 0;
