@@ -93,7 +93,7 @@ namespace MEAClosedLoop
       private TTime m_lastSpike = 0;
       private float percentActive = 0;
       private float percentBlind = 0;
-      public TData MeanNoise { get { return m_calcNoiseSE2.Mean; } }
+      public TData MeanNoise { get { return m_warmedUp ? m_calcNoiseSE2.Mean : 0; } }
       public TData SignalNoiseRatio { get { return m_calcPackSE.PrevSE / m_calcNoiseSE2.Mean; } }
 
       // [DEBUG]
@@ -341,8 +341,8 @@ namespace MEAClosedLoop
                   --m_warmUpCount;
                   TData shortSEwu = Math.Sqrt(m_calcShortSE.WarmUp(data[t]));
                   TData noiseSEwu = Math.Sqrt(m_calcNoiseSE.WarmUp(data[t]));
-                  TData packSEwu = Math.Sqrt(m_calcPackSE.WarmUp(data[t] * 2));      // Consider signal to be at least 2 times higher than noise
-                  m_calcShortSE2.SE(shortSEwu);
+                  TData packSEwu = Math.Sqrt(m_calcPackSE.WarmUp(data[t] * 2));      // Assume signal to be at least 2 times higher than noise
+                  m_calcShortSE2.WarmUp(shortSEwu);
                   m_calcNoiseSE2.WarmUp(noiseSEwu);
                 }
                 if (m_warmUpCount == 0)
@@ -582,8 +582,8 @@ namespace MEAClosedLoop
       // Find spike-trains on all active electrodes
       m_activeChannelList.AsParallel().ForAll(channel =>
       {
-        noiseLevelDic[channel] = m_spikeTraintDet[channel].MeanNoise;
         spikeTrains[channel] = m_spikeTraintDet[channel].FindSpikeTrains(packet[channel]);
+        noiseLevelDic[channel] = m_spikeTraintDet[channel].MeanNoise;
       });
 
       // Select found spike-trains
