@@ -404,7 +404,7 @@ namespace MEAClosedLoop
       Average average = new Average();
       for (int i = 0; i < pack.NoiseLevel.Length; i++)
       {
-        average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
+        if (!TData.IsNaN(pack.NoiseLevel[i])) average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
       }
       average.Calc();
       for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length - 1; i++)
@@ -528,7 +528,7 @@ namespace MEAClosedLoop
           Average average = new Average();
           for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
           {
-            average.AddValueElem((Pack.NoiseLevel[idx]));
+            if (!TData.IsNaN(Pack.NoiseLevel[idx])) average.AddValueElem(Pack.NoiseLevel[idx]);
           }
           average.Calc();
           //отрисовка пачки
@@ -619,7 +619,7 @@ namespace MEAClosedLoop
           Average average = new Average();
           for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
           {
-            average.AddValueElem(Pack.NoiseLevel[idx]);
+            if (!TData.IsNaN(Pack.NoiseLevel[idx])) average.AddValueElem(Pack.NoiseLevel[idx]);
           }
           average.Calc();
           //отрисовка пачки
@@ -634,7 +634,7 @@ namespace MEAClosedLoop
               (float)PackData[(int)this.PSelectIndex.Value][idx + 1] / HorisontalProportional + e.ClipRectangle.Height / 2 + 1 // + 1 - фикс для отрисовки линии, равной нулю.
               );
           }
-
+          
           // отрисовка области поиска спайка
           e.Graphics.DrawLine(new Pen(DeltaBrush),
             new Point((int)((float)(this.PDelayTime.Value - this.PSearchDelta.Value) * Param.MS * k), 0),
@@ -659,7 +659,7 @@ namespace MEAClosedLoop
           e.Graphics.DrawString(((Pack.Start - (currentIteration.StartTime + StartTime)) / 25000).ToString() + " sec",
             SystemFonts.MessageBoxFont, BurstSpikeBrush,
             new PointF(0, 0));
-
+          
         }
 
       }

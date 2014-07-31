@@ -399,7 +399,7 @@
       this.RSPacks.Location = new System.Drawing.Point(6, 19);
       this.RSPacks.Name = "RSPacks";
       this.RSPacks.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-      this.RSPacks.Size = new System.Drawing.Size(411, 454);
+      this.RSPacks.Size = new System.Drawing.Size(411, 448);
       this.RSPacks.TabIndex = 0;
       // 
       // label9
