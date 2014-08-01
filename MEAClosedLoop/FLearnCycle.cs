@@ -24,7 +24,7 @@ namespace MEAClosedLoop
 
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
     private TTime StimActualityDuration = Param.MS * 100; // Время, на протяжении которого для стимула ищется пачка
-    private int SigmaCount = 14; // во сколько раз значение сигнала должно превышать сигму шума, что бы считаться  спайком
+    private float SigmaCount = (float)3.5; // во сколько раз значение сигнала должно превышать сигму шума, что бы считаться  спайком
     public int ChannelIdx = 1;
     #endregion
 
@@ -180,7 +180,7 @@ namespace MEAClosedLoop
           (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i + 1].ElapsedStimTime / 25000 * YProportional)
           );
       }
-      for (int i = 0; i < CycleInfo.Count - 1; i++)
+      for (int i = 0; i < CycleInfo.Count; i++)
       {
         e.Graphics.DrawEllipse(new Pen(new SolidBrush(Color.Red)),
           (float)(padding_left + i * XProportional - 2),
@@ -401,18 +401,28 @@ namespace MEAClosedLoop
       TTime StartSearchTime = (pack.Start + Param.PRE_SPIKE <= StimTime)
         ? StimTime - (pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
         : (pack.Start + Param.PRE_SPIKE) - StimTime + CenterTime - Delta;
+      /*
       Average average = new Average();
       for (int i = 0; i < pack.NoiseLevel.Length; i++)
       {
-        if (!TData.IsNaN(pack.NoiseLevel[i])) average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
+        if (!TData.IsNaN(pack.NoiseLevel[i]))
+          average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
+        else
+          average.AddValueElem(0);
       }
       average.Calc();
+      
+       */
       for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length - 1; i++)
       {
+        /*
         if (Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i]) > (average.Sigma * SigmaCount))
         {
           return true;
         }
+        */
+        if (Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i]) > (SigmaCount * (float)pack.NoiseLevel[(int)this.PSelectIndex.Value]))
+          return true;
       }
 
       return false;
@@ -528,7 +538,10 @@ namespace MEAClosedLoop
           Average average = new Average();
           for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
           {
-            if (!TData.IsNaN(Pack.NoiseLevel[idx])) average.AddValueElem(Pack.NoiseLevel[idx]);
+            if (!TData.IsNaN(Pack.NoiseLevel[idx])) 
+              average.AddValueElem(Pack.NoiseLevel[idx]);
+            else
+              average.AddValueElem(0);
           }
           average.Calc();
           //отрисовка пачки
@@ -619,14 +632,19 @@ namespace MEAClosedLoop
           Average average = new Average();
           for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
           {
-            if (!TData.IsNaN(Pack.NoiseLevel[idx])) average.AddValueElem(Pack.NoiseLevel[idx]);
+            if (!TData.IsNaN(Pack.NoiseLevel[idx]))
+              average.AddValueElem(Pack.NoiseLevel[idx]);
+            else
+              average.AddValueElem(0);
           }
           average.Calc();
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[(int)this.PSelectIndex.Value].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
-            SolidBrush current_brush = (Math.Abs(PackData[(int)this.PSelectIndex.Value][idx]) < average.Sigma * SigmaCount) ? packBrush : BurstSpikeBrush;
+            SolidBrush current_brush = (Math.Abs(PackData[(int)this.PSelectIndex.Value][idx]) < SigmaCount * (float)Pack.NoiseLevel[(int)this.PSelectIndex.Value]) 
+              ? packBrush 
+              : BurstSpikeBrush;
             e.Graphics.DrawLine(new Pen(current_brush),
               (float)((idx - StimShift + PackShift - Param.PRE_SPIKE) * k),
               (float)PackData[(int)this.PSelectIndex.Value][idx] / HorisontalProportional + e.ClipRectangle.Height / 2,
@@ -646,14 +664,14 @@ namespace MEAClosedLoop
           //отрисовка уровня ограничния шума
           e.Graphics.DrawLine(new Pen(BurstSpikeBrush),
             (float)0,
-            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * SigmaCount / HorisontalProportional,
+            (float)e.ClipRectangle.Height / 2 - SigmaCount * (float)Pack.NoiseLevel[(int)this.PSelectIndex.Value] / HorisontalProportional,
             (float)e.ClipRectangle.Width,
-            (float)e.ClipRectangle.Height / 2 - (float)average.Sigma * SigmaCount / HorisontalProportional);
+            (float)e.ClipRectangle.Height / 2 - SigmaCount * (float)Pack.NoiseLevel[(int)this.PSelectIndex.Value] / HorisontalProportional);
           e.Graphics.DrawLine(new Pen(BurstSpikeBrush),
             (float)0,
-            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * SigmaCount / HorisontalProportional,
+            (float)e.ClipRectangle.Height / 2 + SigmaCount * (float)Pack.NoiseLevel[(int)this.PSelectIndex.Value] / HorisontalProportional,
             (float)e.ClipRectangle.Width,
-            (float)e.ClipRectangle.Height / 2 + (float)average.Sigma * SigmaCount / HorisontalProportional);
+            (float)e.ClipRectangle.Height / 2 + SigmaCount * (float)Pack.NoiseLevel[(int)this.PSelectIndex.Value] / HorisontalProportional);
 
           // отрисовка надписей
           e.Graphics.DrawString(((Pack.Start - (currentIteration.StartTime + StartTime)) / 25000).ToString() + " sec",

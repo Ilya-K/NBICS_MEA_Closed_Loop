@@ -24,7 +24,7 @@ namespace MEAClosedLoop
   {
     #region Стандартные значения
     int WAIT_PACK_WINDOW_LENGTH = 25; // 25 ms 
-    private const int Minimum_Pack_Requered_Count = 140;
+    private const int Minimum_Pack_Requered_Count = 340;
     #endregion
     #region Внутренние данные класса
     private CLoopController LoopCtrl;
