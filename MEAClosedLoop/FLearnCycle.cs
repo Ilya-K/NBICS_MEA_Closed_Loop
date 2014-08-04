@@ -398,13 +398,15 @@ namespace MEAClosedLoop
         MessageBox.Show("Ошибка в паре пачка - стимул");
         return false;
       }
-      TTime StartSearchTime = (pack.Start + Param.PRE_SPIKE <= StimTime)
+      TTime StartSearchTime = ((pack.Start + Param.PRE_SPIKE) <= StimTime)
         ? StimTime - (pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
         : (pack.Start + Param.PRE_SPIKE) - StimTime + CenterTime - Delta;
       Average average = new Average();
-      for (int i = 0; i < pack.NoiseLevel.Length; i++)
+
+      //вычесление среднего и сигмы для участка данных перед пачкой
+      for (int i = 0; i < Param.PRE_SPIKE; i++)
       {
-        if (!TData.IsNaN(pack.NoiseLevel[i])) average.AddValueElem(Math.Abs(pack.NoiseLevel[i]));
+        average.AddValueElem(Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i]));
       }
       average.Calc();
       for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length - 1; i++)
