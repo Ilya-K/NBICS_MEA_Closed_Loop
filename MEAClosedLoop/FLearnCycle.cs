@@ -24,7 +24,7 @@ namespace MEAClosedLoop
 
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
     private TTime StimActualityDuration = Param.MS * 100; // Время, на протяжении которого для стимула ищется пачка
-    private int SigmaCount = 14; // во сколько раз значение сигнала должно превышать сигму шума, что бы считаться  спайком
+    private int SigmaCount = 8; // во сколько раз значение сигнала должно превышать сигму шума, что бы считаться  спайком
     public int ChannelIdx = 1;
     #endregion
 
@@ -32,10 +32,13 @@ namespace MEAClosedLoop
     private CFiltering Filter;
     private CLoopController loopController;
     //private Form1 MainForm;
+
     //очередь пачек (содержит RS пачки из последних N вызванных)
-    private Queue<EvokedPackInfo> PackQueue = new Queue<EvokedPackInfo>();
+    private Queue<EvokedPackInfo> BurstQueue = new Queue<EvokedPackInfo>();
+
     //очередь стимулов (содержит не устаревшие стимулы)
     private Queue<TTime> StimQueue = new Queue<TTime>();
+
     //очередь вызванных пачек
     private Queue<EvokedPackInfo> EvokedPacksQueue = new Queue<EvokedPackInfo>();
 
@@ -83,9 +86,12 @@ namespace MEAClosedLoop
     private void pictureBox1_Paint(object sender, PaintEventArgs e)
     {
       int padding_left = 5;
-      int padding_bottom = 12;
+      int padding_bottom = 5;
       int padding_top = 10;
       int padding_right = 10;
+      int max_overhead = 30 * 1000 * Param.MS;
+      int max = (CycleInfo.Count > 0) ? (from info in CycleInfo select info.ElapsedStimTime).Max() : 0;
+      max += max_overhead;
       SolidBrush AxisBrush = new SolidBrush(Color.Black);
       Pen AxisPen = new Pen(AxisBrush, 1);
       // Отрисовка осей
@@ -105,7 +111,7 @@ namespace MEAClosedLoop
         (float)((e.ClipRectangle.Height - padding_bottom + padding_top) / 2)
         );
       e.Graphics.DrawString(
-        (this.PStimLength.Value / 2).ToString(),
+        (max / (float)(2*Param.MS * 1000)).ToString(),
         new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular),
         new SolidBrush(Color.Black),
         new PointF(
@@ -120,7 +126,7 @@ namespace MEAClosedLoop
          (float)(padding_top)
          );
       e.Graphics.DrawString(
-        this.PStimLength.Value.ToString() + " ,сек",
+        (max / (Param.MS * 1000)).ToString() + " ,сек",
         new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular),
         new SolidBrush(Color.Black),
         new PointF(
@@ -145,7 +151,7 @@ namespace MEAClosedLoop
           new SolidBrush(Color.Black),
           new PointF(
             (float)((e.ClipRectangle.Width - padding_right + padding_left) / 2),
-            (float)(e.ClipRectangle.Height - 3 * padding_left / (float)2)
+            (float)(e.ClipRectangle.Height - 3 * padding_bottom / (float)2)
           )
         );
       }
@@ -170,21 +176,21 @@ namespace MEAClosedLoop
       // Отрисовка графика
       if (CycleInfo.Count == 0) return;
       float XProportional = (e.ClipRectangle.Width - (padding_bottom + padding_top)) / (CycleInfo.Count + 1);
-      float YProportional = (e.ClipRectangle.Height - (padding_left + padding_right)) / (float)this.PStimLength.Value;
+      float YProportional = (e.ClipRectangle.Height - (padding_left + padding_right)) /(float) max;
       for (int i = 0; i < CycleInfo.Count - 1; i++)
       {
         e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Black)),
           (float)(padding_left + i * XProportional),
-          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime / 25000 * YProportional),
+          (float)(e.ClipRectangle.Height  - padding_bottom - CycleInfo[i].ElapsedStimTime * (double)YProportional),
           (float)(padding_left + (i + 1) * XProportional),
-          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i + 1].ElapsedStimTime / 25000 * YProportional)
+          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i + 1].ElapsedStimTime * (double) YProportional)
           );
       }
-      for (int i = 0; i < CycleInfo.Count - 1; i++)
+      for (int i = 0; i < CycleInfo.Count; i++)
       {
         e.Graphics.DrawEllipse(new Pen(new SolidBrush(Color.Red)),
           (float)(padding_left + i * XProportional - 2),
-          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime / 25000 * YProportional - 2),
+          (float)(e.ClipRectangle.Height - padding_bottom - CycleInfo[i].ElapsedStimTime * (double)YProportional - 2),
           (float)4,
           (float)4
           );
@@ -240,17 +246,18 @@ namespace MEAClosedLoop
         }
         lock (PackQueueLock)
         {
-          PackQueue.Clear();
+          BurstQueue.Clear();
           foreach (EvokedPackInfo ev_pack in EvokedPacksQueue)
           {
-            if (ChekSpike(ev_pack.Pack, ev_pack.AbsStim, (TAbsStimIndex)this.PDelayTime.Value * Param.MS, (TAbsStimIndex)this.PSearchDelta.Value * Param.MS))
-              PackQueue.Enqueue(ev_pack);
+            
+            if (ChekSpike(ev_pack, (TAbsStimIndex)this.PDelayTime.Value * Param.MS, (TAbsStimIndex)this.PSearchDelta.Value * Param.MS))
+              BurstQueue.Enqueue(ev_pack);
           }
 
           //10 - максимальное число S в отношении R/S
 
           // Очистка переполненных очередей
-          for (; PackQueue.Count > this.PRSCount.Value; PackQueue.Dequeue()) ;
+          for (; BurstQueue.Count > this.PRSCount.Value; BurstQueue.Dequeue()) ;
           for (; EvokedPacksQueue.Count > 10; EvokedPacksQueue.Dequeue()) ;
         }
       }
@@ -299,12 +306,12 @@ namespace MEAClosedLoop
           //завершаем стимуляцию и переходим к отдыху 
           //[TODO]: вычислить R/S, а пока false
           lock (PackQueueLock)
-            if (currentIteration.ElapsedStimTime >= (int)(this.PStimLength.Value) * Param.MS * 1000 || PackQueue.Count() >= this.PRSCount.Value)
+            if (currentIteration.ElapsedStimTime >= (int)(this.PStimLength.Value) * Param.MS * 1000 || BurstQueue.Count() >= this.PRSCount.Value)
             {
               loopController.DoStim = false;
               CycleState = ShahafCycleState.CoolDown;
               currentIteration.StartCoolDown = CurrentTime;
-              if (PackQueue.Count() >= this.PRSCount.Value)
+              if (BurstQueue.Count() >= this.PRSCount.Value)
               {
                 LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
                   Environment.NewLine +
@@ -318,7 +325,7 @@ namespace MEAClosedLoop
                 LernLogTextBox.BeginInvoke(new Action<string>(s => LernLogTextBox.AppendText(s)),
                   Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Превышено время ожидания RS критерия, переход в отдых культуры");
               }
-              PackQueue.Clear();
+              BurstQueue.Clear();
               EvokedPacksQueue.Clear();
               TrainEvolutionGraph.BeginInvoke(new Action(() => TrainEvolutionGraph.Refresh()));
 
@@ -381,37 +388,47 @@ namespace MEAClosedLoop
                 Environment.NewLine + "[" + (CurrentTime / 25000).ToString() + "] Начало новой итерации цикла");
     }
 
-    private bool ChekSpike(CPack pack, TTime StimTime, TTime CenterTime, TTime Delta)
+    private bool ChekSpike(EvokedPackInfo ev_pack, TTime CenterTime, TTime Delta)
     {
       //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative (all in Points), NOT MS!
 
       //Пачка началась сильно позже стимула? т.е. не считалась вызванной
-      if (pack.Start > StimTime + StimControlDuration)
+      if (ev_pack.Pack.Start > ev_pack.AbsStim + StimControlDuration)
       {
         MessageBox.Show("Ошибка в паре пачка - стимул");
         return false;
       }
 
       //Пачка закончилась раньше начала стимула
-      if (pack.Start + (TTime)pack.Length < StimTime)
+      if (ev_pack.Pack.Start + (TTime)ev_pack.Pack.Length < ev_pack.AbsStim)
       {
         MessageBox.Show("Ошибка в паре пачка - стимул");
         return false;
       }
-      TTime StartSearchTime = ((pack.Start + Param.PRE_SPIKE) <= StimTime)
-        ? StimTime - (pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
-        : (pack.Start + Param.PRE_SPIKE) - StimTime + CenterTime - Delta;
+      TTime StartSearchTime = ((ev_pack.Pack.Start + Param.PRE_SPIKE) <= ev_pack.AbsStim)
+        ? ev_pack.AbsStim - (ev_pack.Pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
+        : (ev_pack.Pack.Start + Param.PRE_SPIKE) - ev_pack.AbsStim + CenterTime - Delta;
       Average average = new Average();
 
       //вычесление среднего и сигмы для участка данных перед пачкой
-      for (int i = 0; i < Param.PRE_SPIKE; i++)
+      if (ev_pack.average == null || ev_pack.average.Sigma == 0)
       {
-        average.AddValueElem(Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i]));
+        for (int i = 0; i < Param.PRE_SPIKE; i++)
+        {
+          average.AddValueElem(Math.Abs(ev_pack.Pack.Data[(int)this.PSelectIndex.Value][i]));
+        }
+        average.Calc();
+        ev_pack.average = average;
       }
-      average.Calc();
-      for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)pack.Length - 1; i++)
+      else
       {
-        if (Math.Abs(pack.Data[(int)this.PSelectIndex.Value][i]) > (average.Sigma * SigmaCount))
+        average = ev_pack.average;
+      }
+
+      for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)ev_pack.Pack.Length - 1; i++)
+      {
+        double Value = Math.Abs(ev_pack.Pack.Data[(int)this.PSelectIndex.Value][i]);
+        if (Value > (average.Sigma * SigmaCount))
         {
           return true;
         }
@@ -492,27 +509,27 @@ namespace MEAClosedLoop
 
     void SomePack_Paint(object sender, PaintEventArgs e)
     {
-      int i;
+      int position;
       int HorisontalProportional = 10;
-      for (i = 0; i < RSPacks.Controls.Count; i++)
+      for (position = 0; position < RSPacks.Controls.Count; position++)
       {
-        if (RSPacks.Controls[i].Equals(sender))
+        if (RSPacks.Controls[position].Equals(sender))
         {
           break;
         }
       }
       lock (PackQueueLock)
       {
-        if (PackQueue.Count > i)
+        if (BurstQueue.Count > position)
         {
           SolidBrush packBrush = new SolidBrush(Color.DarkGray);
           SolidBrush BurstSpikeBrush = new SolidBrush(Color.DarkViolet);
           SolidBrush stimBrush = new SolidBrush(Color.DarkBlue);
           SolidBrush DeltaBrush = new SolidBrush(Color.Red);
-          if (i >= EvokedPacksQueue.Count) return;
-          TFltDataPacket PackData = PackQueue.ElementAt(i).Pack.Data;
-          CPack Pack = PackQueue.ElementAt(i).Pack;
-          TTime StimTime = PackQueue.ElementAt(i).AbsStim;
+          if (position >= EvokedPacksQueue.Count) return;
+          TFltDataPacket PackData = BurstQueue.ElementAt(position).Pack.Data;
+          CPack Pack = BurstQueue.ElementAt(position).Pack;
+          TTime StimTime = BurstQueue.ElementAt(position).AbsStim;
           // Пусть все окно - Время поиска + дельта + 10 мс
           int WindowTimelength = (int)this.PDelayTime.Value * Param.MS + (int)this.PSearchDelta.Value * Param.MS + 10 * Param.MS;
 
@@ -528,11 +545,21 @@ namespace MEAClosedLoop
 
           //DEBUG
           Average average = new Average();
-          for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
+          if (EvokedPacksQueue.ElementAt(position).average == null)
           {
-            if (!TData.IsNaN(Pack.NoiseLevel[idx])) average.AddValueElem(Pack.NoiseLevel[idx]);
+            for (int idx = 0; idx < Param.PRE_SPIKE; idx++)
+            {
+              average.AddValueElem(Pack.Data[(int)this.PSelectIndex.Value][idx]);
+            }
+            average.Calc();
+            lock (EvokedPacksLock)
+              EvokedPacksQueue.ElementAt(position).average = average;
+
           }
-          average.Calc();
+          else
+          {
+            average = EvokedPacksQueue.ElementAt(position).average;
+          }
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[(int)this.PSelectIndex.Value].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
@@ -583,27 +610,30 @@ namespace MEAClosedLoop
 
     void evPack_Paint(object sender, PaintEventArgs e)
     {
-      int i;
+      int position;
       float HorisontalProportional = 15;
-      for (i = 0; i < evBurstPanel.Controls.Count; i++)
+      for (position = 0; position < evBurstPanel.Controls.Count; position++)
       {
-        if (evBurstPanel.Controls[i].Equals(sender))
+        if (evBurstPanel.Controls[position].Equals(sender))
         {
           break;
         }
       }
       lock (PackQueueLock)
       {
-        if (evBurstPanel.Controls.Count > i)
+        if (evBurstPanel.Controls.Count > position)
         {
           SolidBrush packBrush = new SolidBrush(Color.DarkGray);
           SolidBrush BurstSpikeBrush = new SolidBrush(Color.DarkViolet);
           SolidBrush stimBrush = new SolidBrush(Color.DarkBlue);
           SolidBrush DeltaBrush = new SolidBrush(Color.Red);
-          if (i >= EvokedPacksQueue.Count) return;
-          TFltDataPacket PackData = EvokedPacksQueue.ElementAt(i).Pack.Data;
-          CPack Pack = EvokedPacksQueue.ElementAt(i).Pack;
-          TTime StimTime = EvokedPacksQueue.ElementAt(i).AbsStim;
+
+          if (position >= EvokedPacksQueue.Count) return;
+
+          TFltDataPacket PackData = EvokedPacksQueue.ElementAt(position).Pack.Data;
+          CPack Pack = EvokedPacksQueue.ElementAt(position).Pack;
+          TTime StimTime = EvokedPacksQueue.ElementAt(position).AbsStim;
+
           // Пусть все окно - Время поиска + дельта + 10 мс
           int WindowTimelength = (int)this.PDelayTime.Value * Param.MS + (int)this.PSearchDelta.Value * Param.MS + 10 * Param.MS;
 
@@ -618,14 +648,26 @@ namespace MEAClosedLoop
           float k = (float)e.ClipRectangle.Width / (float)WindowTimelength;
 
           //DEBUG
+
           Average average = new Average();
-          for (int idx = 0; idx < Pack.NoiseLevel.Length; idx++)
+          if (EvokedPacksQueue.ElementAt(position).average == null)
           {
-            if (!TData.IsNaN(Pack.NoiseLevel[idx])) average.AddValueElem(Pack.NoiseLevel[idx]);
+            for (int idx = 0; idx < Param.PRE_SPIKE; idx++)
+            {
+              average.AddValueElem(Pack.Data[(int)this.PSelectIndex.Value][idx]);
+            }
+            average.Calc();
+            lock (EvokedPacksLock)
+              EvokedPacksQueue.ElementAt(position).average = average;
+
           }
-          average.Calc();
+          else
+          {
+            average = EvokedPacksQueue.ElementAt(position).average;
+          }
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
+
           for (int idx = 0; idx < PackData[(int)this.PSelectIndex.Value].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
           {
             SolidBrush current_brush = (Math.Abs(PackData[(int)this.PSelectIndex.Value][idx]) < average.Sigma * SigmaCount) ? packBrush : BurstSpikeBrush;
@@ -703,10 +745,11 @@ namespace MEAClosedLoop
     {
     }
   }
-  public struct EvokedPackInfo
+  public class EvokedPackInfo
   {
     public CPack Pack;
     public TTime AbsStim;
+    public Average average;
   }
 
 }

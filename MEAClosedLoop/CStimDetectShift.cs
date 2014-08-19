@@ -401,7 +401,7 @@ namespace MEAClosedLoop
     #endregion
   }
   #region Среднее и сигма
-  class Average
+  public class Average
   {
     private List<double> values;
     public double Value = 0;
