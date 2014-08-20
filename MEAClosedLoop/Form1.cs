@@ -370,6 +370,7 @@ namespace MEAClosedLoop
 
         PackStatButton.Enabled = true;
         buttonStatWindow.Enabled = true;
+        UseFakeStimCheckBox.Enabled = false;
       }
     }
 
@@ -820,6 +821,11 @@ namespace MEAClosedLoop
     private void groupBox2_Enter(object sender, EventArgs e)
     {
 
+    }
+
+    private void UseFakeStimCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+      this.FakeStimulator = UseFakeStimCheckBox.Checked;
     }
   }
 }

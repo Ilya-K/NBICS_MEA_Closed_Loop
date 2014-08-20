@@ -53,6 +53,7 @@
       this.groupBox3 = new System.Windows.Forms.GroupBox();
       this.label_refreshRate = new System.Windows.Forms.Label();
       this.textBox_DeviceInfo = new System.Windows.Forms.TextBox();
+      this.UseFakeStimCheckBox = new System.Windows.Forms.CheckBox();
       this.DisplayData.SuspendLayout();
       this.groupBox2.SuspendLayout();
       this.groupBox1.SuspendLayout();
@@ -62,7 +63,7 @@
       // buttonStartDAQ
       // 
       this.buttonStartDAQ.Enabled = false;
-      this.buttonStartDAQ.Location = new System.Drawing.Point(547, 10);
+      this.buttonStartDAQ.Location = new System.Drawing.Point(875, 10);
       this.buttonStartDAQ.Name = "buttonStartDAQ";
       this.buttonStartDAQ.Size = new System.Drawing.Size(75, 23);
       this.buttonStartDAQ.TabIndex = 11;
@@ -73,7 +74,7 @@
       // buttonStop
       // 
       this.buttonStop.Enabled = false;
-      this.buttonStop.Location = new System.Drawing.Point(628, 10);
+      this.buttonStop.Location = new System.Drawing.Point(956, 10);
       this.buttonStop.Name = "buttonStop";
       this.buttonStop.Size = new System.Drawing.Size(75, 23);
       this.buttonStop.TabIndex = 12;
@@ -91,7 +92,7 @@
       // 
       // labelAmpl2
       // 
-      this.labelAmpl2.Location = new System.Drawing.Point(463, 47);
+      this.labelAmpl2.Location = new System.Drawing.Point(791, 47);
       this.labelAmpl2.Name = "labelAmpl2";
       this.labelAmpl2.Size = new System.Drawing.Size(38, 17);
       this.labelAmpl2.TabIndex = 20;
@@ -99,7 +100,7 @@
       // 
       // buttonOpen
       // 
-      this.buttonOpen.Location = new System.Drawing.Point(466, 10);
+      this.buttonOpen.Location = new System.Drawing.Point(794, 10);
       this.buttonOpen.Name = "buttonOpen";
       this.buttonOpen.Size = new System.Drawing.Size(75, 23);
       this.buttonOpen.TabIndex = 11;
@@ -110,7 +111,7 @@
       // checkBox_Manual
       // 
       this.checkBox_Manual.AutoSize = true;
-      this.checkBox_Manual.Location = new System.Drawing.Point(393, 15);
+      this.checkBox_Manual.Location = new System.Drawing.Point(721, 15);
       this.checkBox_Manual.Name = "checkBox_Manual";
       this.checkBox_Manual.Size = new System.Drawing.Size(15, 14);
       this.checkBox_Manual.TabIndex = 21;
@@ -120,7 +121,7 @@
       // button_Next
       // 
       this.button_Next.Enabled = false;
-      this.button_Next.Location = new System.Drawing.Point(414, 10);
+      this.button_Next.Location = new System.Drawing.Point(742, 10);
       this.button_Next.Name = "button_Next";
       this.button_Next.Size = new System.Drawing.Size(40, 23);
       this.button_Next.TabIndex = 22;
@@ -179,7 +180,7 @@
       // 
       // buttonClosedLoop
       // 
-      this.buttonClosedLoop.Location = new System.Drawing.Point(547, 45);
+      this.buttonClosedLoop.Location = new System.Drawing.Point(875, 45);
       this.buttonClosedLoop.Name = "buttonClosedLoop";
       this.buttonClosedLoop.Size = new System.Drawing.Size(75, 23);
       this.buttonClosedLoop.TabIndex = 11;
@@ -189,7 +190,7 @@
       // 
       // label_time
       // 
-      this.label_time.Location = new System.Drawing.Point(628, 50);
+      this.label_time.Location = new System.Drawing.Point(956, 50);
       this.label_time.Name = "label_time";
       this.label_time.Size = new System.Drawing.Size(72, 17);
       this.label_time.TabIndex = 23;
@@ -197,7 +198,7 @@
       // 
       // button_integral0
       // 
-      this.button_integral0.Location = new System.Drawing.Point(414, 39);
+      this.button_integral0.Location = new System.Drawing.Point(742, 39);
       this.button_integral0.Name = "button_integral0";
       this.button_integral0.Size = new System.Drawing.Size(40, 23);
       this.button_integral0.TabIndex = 22;
@@ -219,7 +220,7 @@
       // DisplayData
       // 
       this.DisplayData.Controls.Add(this.showChannelData);
-      this.DisplayData.Location = new System.Drawing.Point(569, 69);
+      this.DisplayData.Location = new System.Drawing.Point(536, 55);
       this.DisplayData.Name = "DisplayData";
       this.DisplayData.Size = new System.Drawing.Size(170, 48);
       this.DisplayData.TabIndex = 30;
@@ -230,7 +231,7 @@
       // groupBox2
       // 
       this.groupBox2.Controls.Add(this.button1);
-      this.groupBox2.Location = new System.Drawing.Point(191, 69);
+      this.groupBox2.Location = new System.Drawing.Point(536, 1);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(170, 48);
       this.groupBox2.TabIndex = 31;
@@ -262,7 +263,7 @@
       // groupBox1
       // 
       this.groupBox1.Controls.Add(this.PackStatButton);
-      this.groupBox1.Location = new System.Drawing.Point(371, 69);
+      this.groupBox1.Location = new System.Drawing.Point(351, 1);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(170, 48);
       this.groupBox1.TabIndex = 31;
@@ -284,7 +285,7 @@
       // groupBox3
       // 
       this.groupBox3.Controls.Add(this.buttonStatWindow);
-      this.groupBox3.Location = new System.Drawing.Point(15, 69);
+      this.groupBox3.Location = new System.Drawing.Point(351, 55);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.Size = new System.Drawing.Size(170, 48);
       this.groupBox3.TabIndex = 31;
@@ -302,17 +303,31 @@
       // 
       // textBox_DeviceInfo
       // 
-      this.textBox_DeviceInfo.Location = new System.Drawing.Point(754, 1);
+      this.textBox_DeviceInfo.Location = new System.Drawing.Point(1082, 1);
       this.textBox_DeviceInfo.Multiline = true;
       this.textBox_DeviceInfo.Name = "textBox_DeviceInfo";
       this.textBox_DeviceInfo.Size = new System.Drawing.Size(10, 10);
       this.textBox_DeviceInfo.TabIndex = 14;
       // 
+      // UseFakeStimCheckBox
+      // 
+      this.UseFakeStimCheckBox.AutoSize = true;
+      this.UseFakeStimCheckBox.Checked = true;
+      this.UseFakeStimCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.UseFakeStimCheckBox.Location = new System.Drawing.Point(86, 69);
+      this.UseFakeStimCheckBox.Name = "UseFakeStimCheckBox";
+      this.UseFakeStimCheckBox.Size = new System.Drawing.Size(95, 17);
+      this.UseFakeStimCheckBox.TabIndex = 32;
+      this.UseFakeStimCheckBox.Text = "Use Fake Stim";
+      this.UseFakeStimCheckBox.UseVisualStyleBackColor = true;
+      this.UseFakeStimCheckBox.CheckedChanged += new System.EventHandler(this.UseFakeStimCheckBox_CheckedChanged);
+      // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(765, 125);
+      this.ClientSize = new System.Drawing.Size(1112, 105);
+      this.Controls.Add(this.UseFakeStimCheckBox);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox3);
       this.Controls.Add(this.groupBox1);
@@ -377,6 +392,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label label_refreshRate;
         private System.Windows.Forms.TextBox textBox_DeviceInfo;
+        private System.Windows.Forms.CheckBox UseFakeStimCheckBox;
     }
 }
 
