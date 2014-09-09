@@ -20,12 +20,17 @@ namespace MEAClosedLoop
   #endregion
   public partial class FLearnCycle : Form
   {
+
     #region Внутренние константы
 
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
     private TTime StimActualityDuration = Param.MS * 100; // Время, на протяжении которого для стимула ищется пачка
+
     private int SigmaCount = 8; // во сколько раз значение сигнала должно превышать сигму шума, что бы считаться  спайком
-    public int ChannelIdx = 1;
+
+    public int ChannelIdx = 1; // default channel index
+    
+
     #endregion
 
     #region Внутренние данные
@@ -66,6 +71,7 @@ namespace MEAClosedLoop
       this.PSelectName.Value = 54;
 
     }
+
     private void FLearnCycle_Load(object sender, EventArgs e)
     {
       this.evBurstPanel.Controls.Clear();
