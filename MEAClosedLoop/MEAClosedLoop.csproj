@@ -119,6 +119,12 @@
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
     </Compile>
     <Compile Include="CPackDetector.cs" />
+    <Compile Include="FChSorter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FChSorter.Designer.cs">
+      <DependentUpon>FChSorter.cs</DependentUpon>
+    </Compile>
     <Compile Include="FLearnCycle.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -212,6 +218,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\FSelectExperiment.resx">
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FChSorter.resx">
+      <DependentUpon>FChSorter.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FLearnCycle.resx">
       <DependentUpon>FLearnCycle.cs</DependentUpon>
