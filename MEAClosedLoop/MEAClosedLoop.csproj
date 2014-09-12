@@ -170,6 +170,7 @@
     <Compile Include="FormCalibrate.Designer.cs">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
     </Compile>
+    <Compile Include="IRecieve.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Neurorighter\ButterworthFilter.cs" />
     <Compile Include="CInputStream.cs" />
