@@ -64,7 +64,7 @@
             this.aboutToolStripMenuItem});
       this.MainTopMenu.Location = new System.Drawing.Point(0, 0);
       this.MainTopMenu.Name = "MainTopMenu";
-      this.MainTopMenu.Size = new System.Drawing.Size(852, 24);
+      this.MainTopMenu.Size = new System.Drawing.Size(1055, 24);
       this.MainTopMenu.TabIndex = 0;
       this.MainTopMenu.Text = "MainTopMenu";
       // 
@@ -155,6 +155,7 @@
       this.findGoodChannelsToolStripMenuItem.Name = "findGoodChannelsToolStripMenuItem";
       this.findGoodChannelsToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
       this.findGoodChannelsToolStripMenuItem.Text = "Find Good Channels";
+      this.findGoodChannelsToolStripMenuItem.Click += new System.EventHandler(this.findGoodChannels_Click);
       // 
       // mainLearningExpToolStripMenuItem
       // 
@@ -223,7 +224,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.SystemColors.ButtonFace;
-      this.ClientSize = new System.Drawing.Size(852, 402);
+      this.ClientSize = new System.Drawing.Size(1055, 478);
       this.Controls.Add(this.MainTopMenu);
       this.IsMdiContainer = true;
       this.MainMenuStrip = this.MainTopMenu;

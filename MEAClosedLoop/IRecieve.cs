@@ -16,15 +16,15 @@ namespace MEAClosedLoop
   #endregion
   public interface IRecieveBusrt
   {
-    public void RecieveBurst(CPack Burst);
+     void RecieveBurst(CPack Burst);
   }
   public interface IRecieveFltData
   {
-    public void RecieveFltData(TFltDataPacket packet);
+     void RecieveFltData(TFltDataPacket packet);
   }
   public interface IRecieveStim
   {
-    public void RecieveStim(TAbsStimIndex stim);
+     void RecieveStim(TAbsStimIndex stim);
   }
 
 }

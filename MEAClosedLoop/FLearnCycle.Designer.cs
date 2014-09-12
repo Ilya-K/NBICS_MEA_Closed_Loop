@@ -483,6 +483,7 @@
       this.Text = "FLearnCycle";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FLearnCycle_FormClosing);
       this.Load += new System.EventHandler(this.FLearnCycle_Load);
+      this.ResizeEnd += new System.EventHandler(this.FLearnCycle_ResizeEnd);
       this.ParamBox.ResumeLayout(false);
       this.ParamBox.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectName)).EndInit();

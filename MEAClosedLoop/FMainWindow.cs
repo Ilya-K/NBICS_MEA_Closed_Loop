@@ -13,7 +13,8 @@ namespace MEAClosedLoop
   {
     public Form1 MainManager;
     public FRecorder Recorder;
-
+    public CFiltering Filter;
+    public CLoopController LoopController;
 
     public FMainWindow()
     {
@@ -41,6 +42,7 @@ namespace MEAClosedLoop
       }
     }
 
+    #region Recorder
     private void recorderToolStripMenuItem_Click(object sender, EventArgs e)
     {
       if (MainManager == null || MainManager.IsDisposed)
@@ -96,6 +98,7 @@ namespace MEAClosedLoop
         Recorder.Show();
       }
     }
+    #endregion
 
     private void FMainWindow_Load(object sender, EventArgs e)
     {
@@ -103,6 +106,13 @@ namespace MEAClosedLoop
       MainManager.Location = new System.Drawing.Point(0, 0);
       MainManager.Show();
     }
+
+    private void findGoodChannels_Click(object sender, EventArgs e)
+    {
+      FChSorter ChSorterForm = new FChSorter();
+      ChSorterForm.Show();
+    }
     
+
   }
 }

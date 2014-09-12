@@ -80,7 +80,7 @@ namespace MEAClosedLoop
       {
         PictureBox SomePack = new PictureBox();
         SomePack.Location = new Point(0, BoxHeight * i);
-        SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left;
+        SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top;
         SomePack.BackColor = Color.White;
         SomePack.Size = new Size(evBurstPanel.Width, BoxHeight);
         SomePack.Paint += evPack_Paint;
@@ -504,7 +504,7 @@ namespace MEAClosedLoop
       {
         PictureBox SomePack = new PictureBox();
         SomePack.Location = new Point(5, 1 + 151 * i);
-        SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left;
+        SomePack.Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top;
         SomePack.BackColor = Color.White;
         SomePack.Size = new Size(RSPacks.Width - 10, 150);
         SomePack.Paint += SomePack_Paint;
@@ -727,6 +727,10 @@ namespace MEAClosedLoop
       Filter.RemoveDataConsumer(UpdateTime);
     }
 
+    private void FLearnCycle_ResizeEnd(object sender, EventArgs e)
+    {
+      TrainEvolutionGraph.Refresh();
+    }
   }
 
   public enum ShahafCycleState
