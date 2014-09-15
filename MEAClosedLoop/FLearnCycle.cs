@@ -411,11 +411,24 @@ namespace MEAClosedLoop
         MessageBox.Show("Ошибка в паре пачка - стимул");
         return false;
       }
+      //Сдвиг начала  пачки (если стимул произошел раньше)
+      int PackShift = (ev_pack.AbsStim < ev_pack.Pack.Start) ? (int)(ev_pack.Pack.Start - ev_pack.AbsStim) : 0;
+
+      //Смещение пачки влево (если стимул внутри пачки)
+      int StimShift = (ev_pack.AbsStim > ev_pack.Pack.Start) ? (int)(ev_pack.AbsStim - ev_pack.Pack.Start) : 0;
+
+      
+      //OLD BUG-Friendly
+      /*
       TTime StartSearchTime = ((ev_pack.Pack.Start + Param.PRE_SPIKE) <= ev_pack.AbsStim)
         ? ev_pack.AbsStim - (ev_pack.Pack.Start + Param.PRE_SPIKE) + CenterTime - Delta
         : (ev_pack.Pack.Start + Param.PRE_SPIKE) - ev_pack.AbsStim + CenterTime - Delta;
-      Average average = new Average();
+      */
+      //NEW BUG-Free ?? need test
+      TTime StartSearchTime = (TTime)StimShift + Param.PRE_SPIKE + CenterTime - Delta - (TTime)PackShift;
 
+      Average average = new Average();
+      
       //вычесление среднего и сигмы для участка данных перед пачкой
       if (ev_pack.average == null || ev_pack.average.Sigma == 0)
       {
@@ -430,16 +443,15 @@ namespace MEAClosedLoop
       {
         average = ev_pack.average;
       }
-
+      double[] BurstData = ev_pack.Pack.Data[(int)this.PSelectIndex.Value];
       for (TTime i = StartSearchTime; i < StartSearchTime + 2 * Delta && i < (TTime)ev_pack.Pack.Length - 1; i++)
       {
-        double Value = Math.Abs(ev_pack.Pack.Data[(int)this.PSelectIndex.Value][i]);
+        double Value = Math.Abs(BurstData[i]);
         if (Value > (average.Sigma * SigmaCount))
         {
           return true;
         }
       }
-
       return false;
     }
 
@@ -643,7 +655,7 @@ namespace MEAClosedLoop
           // Пусть все окно - Время поиска + дельта + 10 мс
           int WindowTimelength = (int)this.PDelayTime.Value * Param.MS + (int)this.PSearchDelta.Value * Param.MS + 10 * Param.MS;
 
-          // Отрисовываем пачку от момента начала стимула
+          //Исследуем пачку от момента начала стимула
           //Сдвиг начала отрисовки пачки (если стимул произошел раньше)
           int PackShift = (StimTime < Pack.Start) ? (int)(Pack.Start - StimTime) : 0;
 
