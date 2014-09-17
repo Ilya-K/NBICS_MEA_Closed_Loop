@@ -16,11 +16,16 @@ namespace MEAClosedLoop
     public CFiltering Filter;
     public CLoopController LoopController;
 
+    List<IRecieveBusrt> BurstrRecievers = new List<IRecieveBusrt>();
+    List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();
+    List<IRecieveStim> StimRecievers = new List<IRecieveStim>();
+
     public FMainWindow()
     {
       InitializeComponent();
       MainManager = new Form1();
       MainManager.MdiParent = this;
+      MainManager.MainWindow = this;
     }
 
     private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -112,7 +117,40 @@ namespace MEAClosedLoop
       FChSorter ChSorterForm = new FChSorter();
       ChSorterForm.Show();
     }
-    
+
+    public void AddConsumer<ObjType>(ObjType Obj)
+    {//одписывание интерфейсов на раздачу потоков данных
+      if ((from obj in BurstrRecievers where obj.Equals(Obj) select obj).Count() == 0) return;
+
+      if (Obj is IRecieveBusrt)
+      {
+        BurstrRecievers.Add(Obj as IRecieveBusrt);
+      }
+      if (Obj is IRecieveFltData)
+      {
+        throw new NotImplementedException("in develop:");
+      }
+      if (Obj is IRecieveStim)
+      {
+        StimRecievers.Add(Obj as IRecieveStim);
+      }
+    }
+    public void RemoveConsumer<ObjType>(ObjType Obj)
+    {//одписывание интерфейсов на раздачу потоков данных
+      if (Obj is IRecieveBusrt)
+      {
+        throw new NotImplementedException("in develop:");
+      }
+      if (Obj is IRecieveFltData)
+      {
+        throw new NotImplementedException("in develop:");
+      }
+      if (Obj is IRecieveStim)
+      {
+        throw new NotImplementedException("in develop:");
+      }
+    }
 
   }
+
 }

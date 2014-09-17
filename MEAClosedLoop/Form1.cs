@@ -32,8 +32,10 @@ namespace MEAClosedLoop
     public CStimulator m_stimulator;
     public FRecorder m_Recorder;
     public bool FakeStimulator = true;
+    
 
     private FPackStat m_statForm;
+    public FMainWindow MainWindow;
 
     private CDataRender m_dataRender;
     private Thread dataRenderThread;
