@@ -6,19 +6,37 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
   public partial class FMainWindow : Form
   {
     public Form1 MainManager;
-    public FRecorder Recorder;
-    public CFiltering Filter;
-    public CLoopController LoopController;
+
+    private FRecorder _Recorder;
+    private CFiltering _Filter;
+    private CLoopController _LoopController;
+
+    public FRecorder Recorder 
+    {
+      get 
+      {
+        return _Recorder;
+      }
+      set
+      {
+        // необходимо проверить список
+        _Recorder = value;
+      }
+    }
+    public CFiltering Filter {get; set;}
+    public CLoopController LoopController { get; set; }
 
     List<IRecieveBusrt> BurstrRecievers = new List<IRecieveBusrt>();
     List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();
     List<IRecieveStim> StimRecievers = new List<IRecieveStim>();
+
+    //public delegate 
 
     public FMainWindow()
     {
@@ -107,6 +125,7 @@ namespace MEAClosedLoop
 
     private void FMainWindow_Load(object sender, EventArgs e)
     {
+      //открываем панель главного менеджера
       MainManager.StartPosition = FormStartPosition.Manual;
       MainManager.Location = new System.Drawing.Point(0, 0);
       MainManager.Show();
