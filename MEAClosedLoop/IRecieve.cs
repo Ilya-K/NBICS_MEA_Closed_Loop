@@ -26,5 +26,4 @@ namespace MEAClosedLoop
   {
      void RecieveStim(TAbsStimIndex stim);
   }
-
 }
