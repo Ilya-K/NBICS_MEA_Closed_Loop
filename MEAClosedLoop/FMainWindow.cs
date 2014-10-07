@@ -16,6 +16,7 @@ namespace MEAClosedLoop
     private FRecorder _Recorder;
     private CFiltering _Filter;
     private CLoopController _LoopController;
+    private CDataFlowController dataFlowController = new CDataFlowController();
 
     public FRecorder Recorder 
     {
@@ -35,8 +36,6 @@ namespace MEAClosedLoop
     List<IRecieveBusrt> BurstrRecievers = new List<IRecieveBusrt>();
     List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();
     List<IRecieveStim> StimRecievers = new List<IRecieveStim>();
-
-    //public delegate 
 
     public FMainWindow()
     {
