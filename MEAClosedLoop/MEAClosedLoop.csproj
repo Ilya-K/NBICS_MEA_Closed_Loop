@@ -85,8 +85,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CDataFlowController.cs" />
     <Compile Include="CDataRender.cs" />
-    <Compile Include="CFiltering.cs" />
     <Compile Include="CArtifRender.cs" />
     <Compile Include="Common\CCalcSE_Block.cs" />
     <Compile Include="Common\CCalcSE_N.cs" />
@@ -181,6 +181,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="IRawDataProvider.cs" />
+    <Compile Include="Neurorighter\CFiltering.cs" />
     <Compile Include="Neurorighter\NRTypes.cs" />
     <Compile Include="Neurorighter\LocalFit.cs" />
     <Compile Include="PackGraph.cs" />

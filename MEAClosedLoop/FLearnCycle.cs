@@ -425,6 +425,7 @@ namespace MEAClosedLoop
         : (ev_pack.Pack.Start + Param.PRE_SPIKE) - ev_pack.AbsStim + CenterTime - Delta;
       */
       //NEW BUG-Free ?? need test
+
       TTime StartSearchTime = (TTime)StimShift + Param.PRE_SPIKE + CenterTime - Delta - (TTime)PackShift;
 
       Average average = new Average();
@@ -562,7 +563,10 @@ namespace MEAClosedLoop
           float k = (float)e.ClipRectangle.Width / (float)WindowTimelength;
 
           //DEBUG
+          
           Average average = new Average();
+
+          /*
           if (EvokedPacksQueue.ElementAt(position).average == null)
           {
             for (int idx = 0; idx < Param.PRE_SPIKE; idx++)
@@ -578,6 +582,8 @@ namespace MEAClosedLoop
           {
             average = EvokedPacksQueue.ElementAt(position).average;
           }
+          */
+          average = EvokedPacksQueue.ElementAt(position).average;
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[(int)this.PSelectIndex.Value].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
