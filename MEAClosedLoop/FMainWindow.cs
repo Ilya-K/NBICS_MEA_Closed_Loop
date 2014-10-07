@@ -31,7 +31,14 @@ namespace MEAClosedLoop
       }
     }
     public CFiltering Filter {get; set;}
-    public CLoopController LoopController { get; set; }
+    public CLoopController LoopController 
+    { 
+      get; 
+      set 
+      {
+ 
+      } 
+    }
 
     List<IRecieveBusrt> BurstrRecievers = new List<IRecieveBusrt>();
     List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();

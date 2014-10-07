@@ -15,6 +15,7 @@ namespace MEAClosedLoop
   using TFltDataPacket = Dictionary<int, System.Double[]>;
   using TFltData = System.Double;
   #endregion
+
   public class CDataFlowController
   {
     private List<IRecieveBusrt> BurstRecievers;
@@ -28,8 +29,6 @@ namespace MEAClosedLoop
     //одписывание интерфейсов на раздачу потоков данных
     public void AddConsumer<ObjType>(ObjType Obj)
     {
-
-
       if (Obj is IRecieveBusrt && !BurstRecievers.Contains(Obj as IRecieveBusrt))
       {
         lock (LockBurstRecievers) BurstRecievers.Add(Obj as IRecieveBusrt);
@@ -43,6 +42,7 @@ namespace MEAClosedLoop
         lock (LockStimRecievers) StimRecievers.Add(Obj as IRecieveStim);
       }
     }
+
     //одписывание интерфейсов на раздачу потоков данных
     public void RemoveConsumer<ObjType>(ObjType Obj)
     {
@@ -60,6 +60,7 @@ namespace MEAClosedLoop
       }
     }
 
+    #region Recieve&Send Data Methods
     public void RecieveBurstData(CPack Pack)
     {
       lock (LockBurstRecievers)
@@ -84,8 +85,8 @@ namespace MEAClosedLoop
           reciever.RecieveStim(stim);
         }
     }
-   
-    
+    #endregion
+
 
   }
 }
