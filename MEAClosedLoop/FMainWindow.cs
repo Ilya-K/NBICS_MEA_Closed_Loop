@@ -16,11 +16,11 @@ namespace MEAClosedLoop
     private FRecorder _Recorder;
     private CFiltering _Filter;
     private CLoopController _LoopController;
-    private CDataFlowController dataFlowController = new CDataFlowController();
+    public CDataFlowController dataFlowController = new CDataFlowController();
 
-    public FRecorder Recorder 
+    public FRecorder Recorder
     {
-      get 
+      get
       {
         return _Recorder;
       }
@@ -30,14 +30,33 @@ namespace MEAClosedLoop
         _Recorder = value;
       }
     }
-    public CFiltering Filter {get; set;}
-    public CLoopController LoopController 
-    { 
-      get; 
-      set 
+
+    public CFiltering Filter { get; set; }
+
+    public CLoopController LoopController
+    {
+      get
       {
- 
-      } 
+        return _LoopController;
+      }
+      set
+      {
+        value.OnPackFound += dataFlowController.RecieveBurstData;
+        _LoopController = value;
+      }
+    }
+
+    public CFiltering Filter
+    {
+      get
+      {
+        return _Filter;
+      }
+      set
+      {
+        value.AddDataConsumer(dataFlowController.RecieveFltData);
+        value.AddStimulConsumer(dataFlowController.RecieveStim);
+      }
     }
 
     List<IRecieveBusrt> BurstrRecievers = new List<IRecieveBusrt>();
