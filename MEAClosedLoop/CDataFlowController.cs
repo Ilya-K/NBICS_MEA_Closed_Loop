@@ -77,12 +77,12 @@ namespace MEAClosedLoop
           reciever.RecieveFltData(DataPacket);
         }
     }
-    public void RecieveStim(TAbsStimIndex stim)
+    public void RecieveStim(List<TAbsStimIndex> stims)
     {
       lock(LockStimRecievers)
         foreach (IRecieveStim reciever in StimRecievers)
         {
-          reciever.RecieveStim(stim);
+          reciever.RecieveStim(stims);
         }
     }
     #endregion

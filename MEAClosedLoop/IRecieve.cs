@@ -24,6 +24,6 @@ namespace MEAClosedLoop
   }
   public interface IRecieveStim
   {
-     void RecieveStim(TAbsStimIndex stim);
+     void RecieveStim(List<TAbsStimIndex> stim);
   }
 }
