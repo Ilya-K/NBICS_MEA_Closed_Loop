@@ -88,6 +88,7 @@
     <Compile Include="CDataFlowController.cs" />
     <Compile Include="CDataRender.cs" />
     <Compile Include="CArtifRender.cs" />
+    <Compile Include="CEvokedPackDetector.cs" />
     <Compile Include="Common\CCalcSE_Block.cs" />
     <Compile Include="Common\CCalcSE_N.cs" />
     <Compile Include="CLoopController.cs" />
