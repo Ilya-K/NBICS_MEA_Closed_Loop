@@ -365,6 +365,7 @@ namespace MEAClosedLoop
         //m_bandpassFilter = new CFiltering(m_inputStream, null, parBF);
         //m_salpaFilter.OnDataAvailable = PeekData;
         m_salpaFilter.AddDataConsumer(PeekData);
+        MainWindow.Filter = m_salpaFilter;
         //m_spikeDetector = new CSpikeDetector(m_salpaFilter, -4.9);
         //m_rasterPlotter = new CRasterPlot(m_panelSpikeRaster, 200, Param.DEF_PACKET_LENGTH, 2);
 
@@ -638,6 +639,7 @@ namespace MEAClosedLoop
         }
 
         m_closedLoop = new CLoopController(m_inputStream, m_salpaFilter, m_stimulator);
+        MainWindow.LoopController = m_closedLoop;
       }
       showChannelData.Enabled = true;
       if (m_Recorder != null)
@@ -650,7 +652,6 @@ namespace MEAClosedLoop
       buttonClosedLoop.Enabled = false;
       if (checkBox_Manual.Checked) m_inputStream.Pause();
 
-      //buttonClosedLoop.Text = 
     }
 
     // [DEBUG]
@@ -660,7 +661,7 @@ namespace MEAClosedLoop
       // calling thread to the thread ID of the creating thread.
       // If these threads are different, it returns true.
      
-      /*Данный метод закомментирован, так как, преположительно вызыва Context Switch Dead Lock и не играл никакой роли в работе ПО*/
+      /*Данный метод закомментирован, так как, преположительно вызывал Context Switch Dead Lock и не играл никакой роли в работе ПО*/
       /* 
       if (this.textBox_DeviceInfo.InvokeRequired)
       {
@@ -720,6 +721,7 @@ namespace MEAClosedLoop
       dataRenderThread = new Thread(DrawDataFunction);
       dataRenderThread.Start();
     }
+
     private void DrawDataFunction()
     {
 

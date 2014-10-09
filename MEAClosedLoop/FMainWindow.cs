@@ -31,8 +31,6 @@ namespace MEAClosedLoop
       }
     }
 
-    public CFiltering Filter { get; set; }
-
     public CLoopController LoopController
     {
       get
@@ -159,6 +157,8 @@ namespace MEAClosedLoop
     private void findGoodChannels_Click(object sender, EventArgs e)
     {
       FChSorter ChSorterForm = new FChSorter();
+      ChSorterForm.MdiParent = this;
+      dataFlowController.AddConsumer(ChSorterForm);
       ChSorterForm.Show();
     }
   }

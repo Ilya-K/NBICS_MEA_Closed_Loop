@@ -18,13 +18,13 @@ namespace MEAClosedLoop
 
   public class CDataFlowController
   {
-    private List<IRecieveBusrt> BurstRecievers;
-    private List<IRecieveFltData> FltDataRecievers;
-    private List<IRecieveStim> StimRecievers;
+    private List<IRecieveBusrt> BurstRecievers = new List<IRecieveBusrt>();
+    private List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();
+    private List<IRecieveStim> StimRecievers = new List<IRecieveStim>();
 
-    private object LockBurstRecievers;
-    private object LockFltDataRecievers;
-    private object LockStimRecievers;
+    private object LockBurstRecievers = new object();
+    private object LockFltDataRecievers = new object();
+    private object LockStimRecievers = new object();
 
     //одписывание интерфейсов на раздачу потоков данных
     public void AddConsumer<ObjType>(ObjType Obj)

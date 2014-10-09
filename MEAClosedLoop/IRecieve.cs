@@ -26,4 +26,8 @@ namespace MEAClosedLoop
   {
      void RecieveStim(List<TAbsStimIndex> stim);
   }
+  public interface IRecieveEvokedBurst
+  {
+    void RecieveEvokedBurst(TAbsStimIndex stim, CPack Burst);
+  }
 }

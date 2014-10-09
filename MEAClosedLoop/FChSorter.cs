@@ -39,8 +39,9 @@ namespace MEAClosedLoop
       BeginInvoke(processBurstDelegate, pack);
     }
 
-    public void RecieveStim(TAbsStimIndex stim)
+    public void RecieveStim(List<TAbsStimIndex> stims)
     {
+      foreach(TAbsStimIndex stim in stims)
       BeginInvoke(processStimDelegate, stim);
     }
     public void ProcessBurst(CPack burst)
