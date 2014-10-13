@@ -252,6 +252,7 @@
       this.Controls.Add(this.StatTable);
       this.Name = "FChSorter";
       this.Text = "FChSorter";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FChSorter_FormClosing);
       groupBox1.ResumeLayout(false);
       groupBox1.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();

@@ -758,6 +758,7 @@ namespace MEAClosedLoop
     CoolDown,
     Finished
   }
+
   public class ShahafCycleIteration
   {
     public int num = 0;
@@ -773,6 +774,7 @@ namespace MEAClosedLoop
     {
     }
   }
+
   public class EvokedPackInfo
   {
     public CPack Pack;

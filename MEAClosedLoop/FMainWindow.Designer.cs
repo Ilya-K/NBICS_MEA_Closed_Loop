@@ -50,6 +50,8 @@
       this.aboutProgrammToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.versionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.reportABugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.dataFlowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.findEvokedPacksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.MainTopMenu.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -61,7 +63,8 @@
             this.experimentsToolStripMenuItem,
             this.recordToolStripMenuItem,
             this.opitonsToolStripMenuItem,
-            this.aboutToolStripMenuItem});
+            this.aboutToolStripMenuItem,
+            this.dataFlowToolStripMenuItem});
       this.MainTopMenu.Location = new System.Drawing.Point(0, 0);
       this.MainTopMenu.Name = "MainTopMenu";
       this.MainTopMenu.Size = new System.Drawing.Size(1055, 24);
@@ -131,14 +134,14 @@
       // managerToolStripMenuItem
       // 
       this.managerToolStripMenuItem.Name = "managerToolStripMenuItem";
-      this.managerToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+      this.managerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.managerToolStripMenuItem.Text = "Manager";
       this.managerToolStripMenuItem.Click += new System.EventHandler(this.newManagerToolStripMenuItem_Click);
       // 
       // mchannelDataToolStripMenuItem
       // 
       this.mchannelDataToolStripMenuItem.Name = "mchannelDataToolStripMenuItem";
-      this.mchannelDataToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+      this.mchannelDataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.mchannelDataToolStripMenuItem.Text = "MchannelData";
       // 
       // experimentsToolStripMenuItem
@@ -219,6 +222,20 @@
       this.reportABugToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
       this.reportABugToolStripMenuItem.Text = "Report a bug";
       // 
+      // dataFlowToolStripMenuItem
+      // 
+      this.dataFlowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findEvokedPacksToolStripMenuItem});
+      this.dataFlowToolStripMenuItem.Name = "dataFlowToolStripMenuItem";
+      this.dataFlowToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
+      this.dataFlowToolStripMenuItem.Text = "DataFlow";
+      // 
+      // findEvokedPacksToolStripMenuItem
+      // 
+      this.findEvokedPacksToolStripMenuItem.Name = "findEvokedPacksToolStripMenuItem";
+      this.findEvokedPacksToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+      this.findEvokedPacksToolStripMenuItem.Text = "FindEvokedPacks";
+      // 
       // FMainWindow
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -263,5 +280,7 @@
     private System.Windows.Forms.ToolStripMenuItem mchannelDataToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem findGoodChannelsToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem mainLearningExpToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem dataFlowToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem findEvokedPacksToolStripMenuItem;
   }
 }
