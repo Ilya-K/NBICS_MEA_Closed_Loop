@@ -63,7 +63,7 @@
       // buttonStartDAQ
       // 
       this.buttonStartDAQ.Enabled = false;
-      this.buttonStartDAQ.Location = new System.Drawing.Point(875, 10);
+      this.buttonStartDAQ.Location = new System.Drawing.Point(852, 10);
       this.buttonStartDAQ.Name = "buttonStartDAQ";
       this.buttonStartDAQ.Size = new System.Drawing.Size(75, 23);
       this.buttonStartDAQ.TabIndex = 11;
@@ -74,7 +74,7 @@
       // buttonStop
       // 
       this.buttonStop.Enabled = false;
-      this.buttonStop.Location = new System.Drawing.Point(956, 10);
+      this.buttonStop.Location = new System.Drawing.Point(933, 10);
       this.buttonStop.Name = "buttonStop";
       this.buttonStop.Size = new System.Drawing.Size(75, 23);
       this.buttonStop.TabIndex = 12;
@@ -92,7 +92,7 @@
       // 
       // labelAmpl2
       // 
-      this.labelAmpl2.Location = new System.Drawing.Point(791, 47);
+      this.labelAmpl2.Location = new System.Drawing.Point(768, 47);
       this.labelAmpl2.Name = "labelAmpl2";
       this.labelAmpl2.Size = new System.Drawing.Size(38, 17);
       this.labelAmpl2.TabIndex = 20;
@@ -100,7 +100,7 @@
       // 
       // buttonOpen
       // 
-      this.buttonOpen.Location = new System.Drawing.Point(794, 10);
+      this.buttonOpen.Location = new System.Drawing.Point(771, 10);
       this.buttonOpen.Name = "buttonOpen";
       this.buttonOpen.Size = new System.Drawing.Size(75, 23);
       this.buttonOpen.TabIndex = 11;
@@ -111,7 +111,7 @@
       // checkBox_Manual
       // 
       this.checkBox_Manual.AutoSize = true;
-      this.checkBox_Manual.Location = new System.Drawing.Point(721, 15);
+      this.checkBox_Manual.Location = new System.Drawing.Point(698, 15);
       this.checkBox_Manual.Name = "checkBox_Manual";
       this.checkBox_Manual.Size = new System.Drawing.Size(15, 14);
       this.checkBox_Manual.TabIndex = 21;
@@ -121,7 +121,7 @@
       // button_Next
       // 
       this.button_Next.Enabled = false;
-      this.button_Next.Location = new System.Drawing.Point(742, 10);
+      this.button_Next.Location = new System.Drawing.Point(719, 10);
       this.button_Next.Name = "button_Next";
       this.button_Next.Size = new System.Drawing.Size(40, 23);
       this.button_Next.TabIndex = 22;
@@ -180,7 +180,7 @@
       // 
       // buttonClosedLoop
       // 
-      this.buttonClosedLoop.Location = new System.Drawing.Point(875, 45);
+      this.buttonClosedLoop.Location = new System.Drawing.Point(852, 45);
       this.buttonClosedLoop.Name = "buttonClosedLoop";
       this.buttonClosedLoop.Size = new System.Drawing.Size(75, 23);
       this.buttonClosedLoop.TabIndex = 11;
@@ -190,7 +190,7 @@
       // 
       // label_time
       // 
-      this.label_time.Location = new System.Drawing.Point(956, 50);
+      this.label_time.Location = new System.Drawing.Point(933, 50);
       this.label_time.Name = "label_time";
       this.label_time.Size = new System.Drawing.Size(72, 17);
       this.label_time.TabIndex = 23;
@@ -198,7 +198,7 @@
       // 
       // button_integral0
       // 
-      this.button_integral0.Location = new System.Drawing.Point(742, 39);
+      this.button_integral0.Location = new System.Drawing.Point(719, 39);
       this.button_integral0.Name = "button_integral0";
       this.button_integral0.Size = new System.Drawing.Size(40, 23);
       this.button_integral0.TabIndex = 22;
@@ -220,7 +220,7 @@
       // DisplayData
       // 
       this.DisplayData.Controls.Add(this.showChannelData);
-      this.DisplayData.Location = new System.Drawing.Point(536, 55);
+      this.DisplayData.Location = new System.Drawing.Point(527, 1);
       this.DisplayData.Name = "DisplayData";
       this.DisplayData.Size = new System.Drawing.Size(170, 48);
       this.DisplayData.TabIndex = 30;
@@ -231,9 +231,9 @@
       // groupBox2
       // 
       this.groupBox2.Controls.Add(this.button1);
-      this.groupBox2.Location = new System.Drawing.Point(536, 1);
+      this.groupBox2.Location = new System.Drawing.Point(1014, 36);
       this.groupBox2.Name = "groupBox2";
-      this.groupBox2.Size = new System.Drawing.Size(170, 48);
+      this.groupBox2.Size = new System.Drawing.Size(25, 10);
       this.groupBox2.TabIndex = 31;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Recorder";
@@ -285,9 +285,9 @@
       // groupBox3
       // 
       this.groupBox3.Controls.Add(this.buttonStatWindow);
-      this.groupBox3.Location = new System.Drawing.Point(351, 55);
+      this.groupBox3.Location = new System.Drawing.Point(1014, 20);
       this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(170, 48);
+      this.groupBox3.Size = new System.Drawing.Size(13, 10);
       this.groupBox3.TabIndex = 31;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Debug";
@@ -303,7 +303,7 @@
       // 
       // textBox_DeviceInfo
       // 
-      this.textBox_DeviceInfo.Location = new System.Drawing.Point(1082, 1);
+      this.textBox_DeviceInfo.Location = new System.Drawing.Point(1014, 4);
       this.textBox_DeviceInfo.Multiline = true;
       this.textBox_DeviceInfo.Name = "textBox_DeviceInfo";
       this.textBox_DeviceInfo.Size = new System.Drawing.Size(10, 10);
@@ -326,7 +326,7 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(1112, 105);
+      this.ClientSize = new System.Drawing.Size(1041, 96);
       this.Controls.Add(this.UseFakeStimCheckBox);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox3);

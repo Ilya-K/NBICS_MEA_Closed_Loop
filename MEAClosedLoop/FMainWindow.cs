@@ -16,7 +16,10 @@ namespace MEAClosedLoop
     private FRecorder _Recorder;
     private CFiltering _Filter;
     private CLoopController _LoopController;
+    private CEvokedBurstDetector _EvokedBurstDetector;
     public CDataFlowController dataFlowController = new CDataFlowController();
+
+    public FDataSourceControl dataSourceControl;
 
     public FRecorder Recorder
     {
@@ -57,9 +60,18 @@ namespace MEAClosedLoop
       }
     }
 
-    List<IRecieveBusrt> BurstrRecievers = new List<IRecieveBusrt>();
-    List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();
-    List<IRecieveStim> StimRecievers = new List<IRecieveStim>();
+    public CEvokedBurstDetector EvokedBurstDetector
+    {
+      get
+      {
+        return _EvokedBurstDetector;
+      }
+      set
+      {
+        dataFlowController.AddConsumer(value);
+        _EvokedBurstDetector = value;
+      }
+    }
 
     public FMainWindow()
     {
@@ -67,6 +79,10 @@ namespace MEAClosedLoop
       MainManager = new Form1();
       MainManager.MdiParent = this;
       MainManager.MainWindow = this;
+
+      dataSourceControl = new FDataSourceControl(dataFlowController, this);
+      dataSourceControl.MdiParent = this;
+      
     }
 
     private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -152,6 +168,9 @@ namespace MEAClosedLoop
       MainManager.StartPosition = FormStartPosition.Manual;
       MainManager.Location = new System.Drawing.Point(0, 0);
       MainManager.Show();
+      dataSourceControl.StartPosition = FormStartPosition.Manual;
+      dataSourceControl.Location = new System.Drawing.Point(MainManager.Width + 20, 0);
+      dataSourceControl.Show();
     }
 
     private void findGoodChannels_Click(object sender, EventArgs e)
@@ -160,6 +179,11 @@ namespace MEAClosedLoop
       ChSorterForm.MdiParent = this;
       dataFlowController.AddConsumer(ChSorterForm);
       ChSorterForm.Show();
+    }
+
+    private void dataControlToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+
     }
   }
 

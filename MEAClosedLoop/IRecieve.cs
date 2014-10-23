@@ -16,18 +16,22 @@ namespace MEAClosedLoop
   #endregion
   public interface IRecieveBusrt
   {
-     void RecieveBurst(CPack Burst);
+    // класс наслденик должен реализовать метод, принимающий пачку
+    // а так же вызов события OnObjDisposed, если для окна или класса вызывается obj.Dispose
+    //public delegate void OnDisposeDelegate();
+    //public event OnDisposeDelegate OnObjDisposed;
+    void RecieveBurst(CPack Burst);
   }
   public interface IRecieveFltData
   {
-     void RecieveFltData(TFltDataPacket packet);
+    void RecieveFltData(TFltDataPacket packet);
   }
   public interface IRecieveStim
   {
-     void RecieveStim(List<TAbsStimIndex> stim);
+    void RecieveStim(List<TAbsStimIndex> stim);
   }
   public interface IRecieveEvokedBurst
   {
-    void RecieveEvokedBurst(TAbsStimIndex stim, CPack Burst);
+    void RecieveEvokedBurst(SEvokedPack evBurst);
   }
 }

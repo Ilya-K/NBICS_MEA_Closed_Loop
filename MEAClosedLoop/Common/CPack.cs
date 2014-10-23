@@ -9,6 +9,7 @@ namespace MEAClosedLoop
   using TData = System.Double;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
   using TSpikesBinary =  Dictionary<int, bool[]>;
+  using TAbsStimIndex = System.UInt64;
   
   // Pack events can be of two types:
   // S: Start, EOP = false; T: Stop, EOP = true
@@ -36,5 +37,10 @@ namespace MEAClosedLoop
       data = _data;
       noiseLevel = _noiseLevel;
     }
+  }
+  public struct SEvokedPack
+  {
+    public CPack Burst;
+    public TAbsStimIndex stim;
   }
 }

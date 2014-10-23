@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FMainWindow));
       this.MainTopMenu = new System.Windows.Forms.MenuStrip();
       this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.newProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,13 +47,17 @@
       this.recorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.recordOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.opitonsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.dataFlowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.findEvokedPacksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.dataControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.aboutProgrammToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.versionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.reportABugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.dataFlowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.findEvokedPacksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+      this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
       this.MainTopMenu.SuspendLayout();
+      this.toolStrip1.SuspendLayout();
       this.SuspendLayout();
       // 
       // MainTopMenu
@@ -63,8 +68,8 @@
             this.experimentsToolStripMenuItem,
             this.recordToolStripMenuItem,
             this.opitonsToolStripMenuItem,
-            this.aboutToolStripMenuItem,
-            this.dataFlowToolStripMenuItem});
+            this.dataFlowToolStripMenuItem,
+            this.aboutToolStripMenuItem});
       this.MainTopMenu.Location = new System.Drawing.Point(0, 0);
       this.MainTopMenu.Name = "MainTopMenu";
       this.MainTopMenu.Size = new System.Drawing.Size(1055, 24);
@@ -134,14 +139,14 @@
       // managerToolStripMenuItem
       // 
       this.managerToolStripMenuItem.Name = "managerToolStripMenuItem";
-      this.managerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.managerToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
       this.managerToolStripMenuItem.Text = "Manager";
       this.managerToolStripMenuItem.Click += new System.EventHandler(this.newManagerToolStripMenuItem_Click);
       // 
       // mchannelDataToolStripMenuItem
       // 
       this.mchannelDataToolStripMenuItem.Name = "mchannelDataToolStripMenuItem";
-      this.mchannelDataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.mchannelDataToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
       this.mchannelDataToolStripMenuItem.Text = "MchannelData";
       // 
       // experimentsToolStripMenuItem
@@ -194,6 +199,28 @@
       this.opitonsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
       this.opitonsToolStripMenuItem.Text = "Opitons";
       // 
+      // dataFlowToolStripMenuItem
+      // 
+      this.dataFlowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.findEvokedPacksToolStripMenuItem,
+            this.dataControlToolStripMenuItem});
+      this.dataFlowToolStripMenuItem.Name = "dataFlowToolStripMenuItem";
+      this.dataFlowToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
+      this.dataFlowToolStripMenuItem.Text = "DataFlow";
+      // 
+      // findEvokedPacksToolStripMenuItem
+      // 
+      this.findEvokedPacksToolStripMenuItem.Name = "findEvokedPacksToolStripMenuItem";
+      this.findEvokedPacksToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+      this.findEvokedPacksToolStripMenuItem.Text = "FindEvokedPacks";
+      // 
+      // dataControlToolStripMenuItem
+      // 
+      this.dataControlToolStripMenuItem.Name = "dataControlToolStripMenuItem";
+      this.dataControlToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+      this.dataControlToolStripMenuItem.Text = "Data Control";
+      this.dataControlToolStripMenuItem.Click += new System.EventHandler(this.dataControlToolStripMenuItem_Click);
+      // 
       // aboutToolStripMenuItem
       // 
       this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -222,19 +249,24 @@
       this.reportABugToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
       this.reportABugToolStripMenuItem.Text = "Report a bug";
       // 
-      // dataFlowToolStripMenuItem
+      // toolStrip1
       // 
-      this.dataFlowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.findEvokedPacksToolStripMenuItem});
-      this.dataFlowToolStripMenuItem.Name = "dataFlowToolStripMenuItem";
-      this.dataFlowToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
-      this.dataFlowToolStripMenuItem.Text = "DataFlow";
+      this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton1});
+      this.toolStrip1.Location = new System.Drawing.Point(0, 24);
+      this.toolStrip1.Name = "toolStrip1";
+      this.toolStrip1.Size = new System.Drawing.Size(1055, 25);
+      this.toolStrip1.TabIndex = 2;
+      this.toolStrip1.Text = "toolStrip1";
       // 
-      // findEvokedPacksToolStripMenuItem
+      // toolStripButton1
       // 
-      this.findEvokedPacksToolStripMenuItem.Name = "findEvokedPacksToolStripMenuItem";
-      this.findEvokedPacksToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
-      this.findEvokedPacksToolStripMenuItem.Text = "FindEvokedPacks";
+      this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+      this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+      this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+      this.toolStripButton1.Name = "toolStripButton1";
+      this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
+      this.toolStripButton1.Text = "toolStripButton1";
       // 
       // FMainWindow
       // 
@@ -242,6 +274,7 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.SystemColors.ButtonFace;
       this.ClientSize = new System.Drawing.Size(1055, 478);
+      this.Controls.Add(this.toolStrip1);
       this.Controls.Add(this.MainTopMenu);
       this.IsMdiContainer = true;
       this.MainMenuStrip = this.MainTopMenu;
@@ -251,6 +284,8 @@
       this.Load += new System.EventHandler(this.FMainWindow_Load);
       this.MainTopMenu.ResumeLayout(false);
       this.MainTopMenu.PerformLayout();
+      this.toolStrip1.ResumeLayout(false);
+      this.toolStrip1.PerformLayout();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -282,5 +317,8 @@
     private System.Windows.Forms.ToolStripMenuItem mainLearningExpToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem dataFlowToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem findEvokedPacksToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem dataControlToolStripMenuItem;
+    private System.Windows.Forms.ToolStrip toolStrip1;
+    private System.Windows.Forms.ToolStripButton toolStripButton1;
   }
 }

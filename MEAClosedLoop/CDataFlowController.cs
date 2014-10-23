@@ -21,10 +21,12 @@ namespace MEAClosedLoop
     private List<IRecieveBusrt> BurstRecievers = new List<IRecieveBusrt>();
     private List<IRecieveFltData> FltDataRecievers = new List<IRecieveFltData>();
     private List<IRecieveStim> StimRecievers = new List<IRecieveStim>();
+    private List<IRecieveEvokedBurst> EvokedBurstRecievers = new List<IRecieveEvokedBurst>();
 
     private object LockBurstRecievers = new object();
     private object LockFltDataRecievers = new object();
     private object LockStimRecievers = new object();
+    private object LockEvBurstRecievers = new object();
 
     //одписывание интерфейсов на раздачу потоков данных
     public void AddConsumer<ObjType>(ObjType Obj)
@@ -40,6 +42,10 @@ namespace MEAClosedLoop
       if (Obj is IRecieveStim && !StimRecievers.Contains(Obj as IRecieveStim))
       {
         lock (LockStimRecievers) StimRecievers.Add(Obj as IRecieveStim);
+      }
+      if (Obj is IRecieveEvokedBurst && !EvokedBurstRecievers.Contains(Obj as IRecieveEvokedBurst))
+      {
+        lock (LockEvBurstRecievers) EvokedBurstRecievers.Add(Obj as IRecieveEvokedBurst);
       }
     }
 
@@ -63,27 +69,79 @@ namespace MEAClosedLoop
     #region Recieve&Send Data Methods
     public void RecieveBurstData(CPack Pack)
     {
+      List<IRecieveBusrt> RecieversToRemove = new List<IRecieveBusrt>();
       lock (LockBurstRecievers)
         foreach (IRecieveBusrt reciever in BurstRecievers)
         {
-          reciever.RecieveBurst(Pack);
+          try
+          {
+            reciever.RecieveBurst(Pack);
+          }
+          catch(Exception e)
+          {
+            RecieversToRemove.Add(reciever);
+          }
         }
+      lock (LockBurstRecievers)
+      {
+        BurstRecievers.RemoveAll(s => RecieversToRemove.Contains(s));
+      }
     }
     public void RecieveFltData(TFltDataPacket DataPacket)
     {
+      List<IRecieveFltData> RecieversToRemove = new List<IRecieveFltData>();
       lock (LockFltDataRecievers)
         foreach (IRecieveFltData reciever in FltDataRecievers)
         {
-          reciever.RecieveFltData(DataPacket);
+          try
+          {
+            reciever.RecieveFltData(DataPacket);
+          }
+          catch (Exception e)
+          {
+            RecieversToRemove.Add(reciever);
+          }
         }
+      lock(LockFltDataRecievers)
+      {
+        FltDataRecievers.RemoveAll(s => RecieversToRemove.Contains(s));
+      }
     }
     public void RecieveStim(List<TAbsStimIndex> stims)
     {
-      lock(LockStimRecievers)
+      List<IRecieveStim> RecieversToRemove = new List<IRecieveStim>();
+      lock (LockStimRecievers)
         foreach (IRecieveStim reciever in StimRecievers)
         {
-          reciever.RecieveStim(stims);
+          try
+          {
+            reciever.RecieveStim(stims);
+          }
+          catch (Exception e)
+          {
+            RecieversToRemove.Add(reciever);
+          }
         }
+      lock (LockStimRecievers) StimRecievers.RemoveAll(s => RecieversToRemove.Contains(s));
+    }
+    public void RecieveEvPack(SEvokedPack EvBurst)
+    {
+      List<IRecieveEvokedBurst> RecieversToRemove = new List<IRecieveEvokedBurst>();
+      lock (LockEvBurstRecievers)
+      {
+        foreach (IRecieveEvokedBurst reciever in EvokedBurstRecievers)
+        {
+          try
+          {
+            reciever.RecieveEvokedBurst(EvBurst);
+          }
+          catch (Exception e)
+          {
+            RecieversToRemove.Add(reciever);
+          }
+        }
+      }
+      lock (LockEvBurstRecievers) EvokedBurstRecievers.RemoveAll(s => RecieversToRemove.Contains(s));
     }
     #endregion
 

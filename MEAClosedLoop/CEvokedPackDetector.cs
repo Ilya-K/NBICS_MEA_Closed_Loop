@@ -19,8 +19,11 @@ namespace MEAClosedLoop
   using TFltDataPacket = Dictionary<int, System.Double[]>;
   using TFltData = System.Double;
   #endregion
-  public class CEvokedPackDetector : IRecieveBusrt, IRecieveStim
+  public class CEvokedBurstDetector : IRecieveBusrt, IRecieveStim
   {
+    // Простой, вспомогательный класс для отсеивания непосредственно вызванных пачек.
+    // 
+
     #region константы 
     private TTime StimControlDuration = Param.MS * 25; //Время до которого после стимула пачка считается вызванной 
     private TTime StimActualityDuration = Param.MS * 100; // Время, на протяжении которого для стимула ищется пачка
@@ -28,8 +31,8 @@ namespace MEAClosedLoop
     private List<TAbsStimIndex> StimList = new List<TAbsStimIndex>();
     private object StimQueueLock = new object();
     
-    public delegate void OnPackFoundDelegate(CPack pack, TAbsStimIndex stim);
-    public event OnPackFoundDelegate OnEvPackFound;
+    public delegate void OnEvPackFoundDelegate(SEvokedPack evPack);
+    public event OnEvPackFoundDelegate OnEvPackFound;
 
     private delegate void ProcessBurstDelegate(CPack burst);
     private ProcessBurstDelegate processBurstDelegate;
@@ -38,15 +41,16 @@ namespace MEAClosedLoop
 
     private TTime CurrentTime = 0;
 
-    public CEvokedPackDetector()
+    public CEvokedBurstDetector()
     {
       processBurstDelegate += ProcessBurst;
       processStimDelegate += ProcessStim;
     }
 
+    #region External Recieve Methods
     public void RecieveBurst(CPack pack)
     {
-      
+      processBurstDelegate(pack);
     }
 
     public void RecieveStim(List<TAbsStimIndex> stims)
@@ -54,28 +58,29 @@ namespace MEAClosedLoop
       foreach (TAbsStimIndex stim in stims)
       processStimDelegate(stim);
     }
+    #endregion
+
     public void ProcessBurst(CPack burst)
     {
-      //lock (StimListLock)
-      //  foreach (TTime stim in StimList)
-      //  {
-      //    // стимул должен находится внутри пачки или быть раньшее её не более чем на StimControlDuration.
-      //    if (stim + StimControlDuration > pack.Start && stim < pack.Start + (TTime)pack.Length)
-      //    {
-
-      //    }
-      //  }
-
+      lock (StimQueueLock)
+        foreach (TTime stim in StimList)
+        {
+          // стимул должен находится внутри пачки или быть раньшее её не более чем на StimControlDuration.
+          if (stim + StimControlDuration > burst.Start && stim < burst.Start + (TTime)burst.Length)
+          {
+            SEvokedPack evPack;
+            evPack.Burst = burst;
+            evPack.stim = stim;
+            OnEvPackFound(evPack);
+          }
+        }
     }
     public void ProcessStim(TAbsStimIndex stim)
     {
       lock (StimQueueLock)
       {
-        
         StimList.Add(stim);
         StimList = (List<TAbsStimIndex>) StimList.TakeWhile(s => s + StimActualityDuration > CurrentTime);
-        //old version
-        //for (; StimQueue.ElementAt(0) + StimActualityDuration < CurrentTime; StimQueue.Dequeue()) ;
       }
     }
 

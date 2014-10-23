@@ -213,6 +213,12 @@
     <Compile Include="FStatForm.Designer.cs">
       <DependentUpon>FStatForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI Forms\FDataSourceControl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI Forms\FDataSourceControl.Designer.cs">
+      <DependentUpon>FDataSourceControl.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Common\FCreateMeasure.resx">
       <DependentUpon>FCreateMeasure.cs</DependentUpon>
     </EmbeddedResource>
@@ -267,6 +273,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FStatForm.resx">
       <DependentUpon>FStatForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI Forms\FDataSourceControl.resx">
+      <DependentUpon>FDataSourceControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config">
       <SubType>Designer</SubType>
