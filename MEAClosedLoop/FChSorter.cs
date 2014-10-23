@@ -20,7 +20,7 @@ namespace MEAClosedLoop
   using TRawData = UInt16;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   #endregion
-  public partial class FChSorter : Form, IRecieveBusrt, IRecieveStim
+  public partial class FChSorter : Form, IRecieveEvokedBurst
   {
     private delegate void ProcessBurstDelegate(CPack burst);
     private ProcessBurstDelegate processBurstDelegate;
@@ -76,6 +76,8 @@ namespace MEAClosedLoop
       processBurstDelegate -= ProcessBurst;
       processStimDelegate -= ProcessStim;
     }
-
+    public void RecieveEvokedBurst(SEvokedPack evBurst)
+    {
+    }
   }
 }

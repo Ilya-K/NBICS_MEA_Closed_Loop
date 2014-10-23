@@ -60,6 +60,7 @@ namespace MEAClosedLoop
     }
     #endregion
 
+
     public void ProcessBurst(CPack burst)
     {
       lock (StimQueueLock)

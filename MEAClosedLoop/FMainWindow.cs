@@ -57,6 +57,7 @@ namespace MEAClosedLoop
       {
         value.AddDataConsumer(dataFlowController.RecieveFltData);
         value.AddStimulConsumer(dataFlowController.RecieveStim);
+        _Filter = value;
       }
     }
 
