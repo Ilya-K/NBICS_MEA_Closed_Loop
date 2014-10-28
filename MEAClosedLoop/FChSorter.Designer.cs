@@ -29,12 +29,12 @@
     private void InitializeComponent()
     {
       System.Windows.Forms.GroupBox groupBox1;
-      this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+      this.SigmaUpDown = new System.Windows.Forms.NumericUpDown();
       this.label5 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
-      this.textBox2 = new System.Windows.Forms.TextBox();
-      this.textBox1 = new System.Windows.Forms.TextBox();
+      this.T3StartValue = new System.Windows.Forms.TextBox();
+      this.T1EndValue = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
       this.StopButton = new System.Windows.Forms.Button();
@@ -50,7 +50,7 @@
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       groupBox1 = new System.Windows.Forms.GroupBox();
       groupBox1.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.SigmaUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.StatTable)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
       this.groupBox2.SuspendLayout();
@@ -58,34 +58,35 @@
       // 
       // groupBox1
       // 
-      groupBox1.Controls.Add(this.numericUpDown1);
+      groupBox1.Controls.Add(this.SigmaUpDown);
       groupBox1.Controls.Add(this.label5);
       groupBox1.Controls.Add(this.label4);
       groupBox1.Controls.Add(this.label3);
-      groupBox1.Controls.Add(this.textBox2);
-      groupBox1.Controls.Add(this.textBox1);
+      groupBox1.Controls.Add(this.T3StartValue);
+      groupBox1.Controls.Add(this.T1EndValue);
       groupBox1.Controls.Add(this.label2);
       groupBox1.Controls.Add(this.label1);
       groupBox1.Controls.Add(this.StopButton);
       groupBox1.Controls.Add(this.StartButton);
-      groupBox1.Location = new System.Drawing.Point(570, 7);
+      groupBox1.Location = new System.Drawing.Point(553, 7);
       groupBox1.Name = "groupBox1";
       groupBox1.Size = new System.Drawing.Size(391, 174);
       groupBox1.TabIndex = 3;
       groupBox1.TabStop = false;
       groupBox1.Text = "Анализ";
       // 
-      // numericUpDown1
+      // SigmaUpDown
       // 
-      this.numericUpDown1.Location = new System.Drawing.Point(88, 76);
-      this.numericUpDown1.Name = "numericUpDown1";
-      this.numericUpDown1.Size = new System.Drawing.Size(60, 20);
-      this.numericUpDown1.TabIndex = 8;
-      this.numericUpDown1.Value = new decimal(new int[] {
+      this.SigmaUpDown.Location = new System.Drawing.Point(88, 76);
+      this.SigmaUpDown.Name = "SigmaUpDown";
+      this.SigmaUpDown.Size = new System.Drawing.Size(60, 20);
+      this.SigmaUpDown.TabIndex = 8;
+      this.SigmaUpDown.Value = new decimal(new int[] {
             8,
             0,
             0,
             0});
+      this.SigmaUpDown.ValueChanged += new System.EventHandler(this.SigmaUpDown_ValueChanged);
       // 
       // label5
       // 
@@ -114,21 +115,21 @@
       this.label3.TabIndex = 6;
       this.label3.Text = "мс";
       // 
-      // textBox2
+      // T3StartValue
       // 
-      this.textBox2.Location = new System.Drawing.Point(88, 50);
-      this.textBox2.Name = "textBox2";
-      this.textBox2.Size = new System.Drawing.Size(60, 20);
-      this.textBox2.TabIndex = 5;
-      this.textBox2.Text = "60";
+      this.T3StartValue.Location = new System.Drawing.Point(88, 50);
+      this.T3StartValue.Name = "T3StartValue";
+      this.T3StartValue.Size = new System.Drawing.Size(60, 20);
+      this.T3StartValue.TabIndex = 5;
+      this.T3StartValue.Text = "60";
       // 
-      // textBox1
+      // T1EndValue
       // 
-      this.textBox1.Location = new System.Drawing.Point(88, 21);
-      this.textBox1.Name = "textBox1";
-      this.textBox1.Size = new System.Drawing.Size(60, 20);
-      this.textBox1.TabIndex = 5;
-      this.textBox1.Text = "40";
+      this.T1EndValue.Location = new System.Drawing.Point(88, 21);
+      this.T1EndValue.Name = "T1EndValue";
+      this.T1EndValue.Size = new System.Drawing.Size(60, 20);
+      this.T1EndValue.TabIndex = 5;
+      this.T1EndValue.Text = "40";
       // 
       // label2
       // 
@@ -182,7 +183,7 @@
       this.StatTable.Location = new System.Drawing.Point(3, 7);
       this.StatTable.Name = "StatTable";
       this.StatTable.ReadOnly = true;
-      this.StatTable.Size = new System.Drawing.Size(561, 344);
+      this.StatTable.Size = new System.Drawing.Size(544, 344);
       this.StatTable.TabIndex = 0;
       // 
       // Midx
@@ -235,7 +236,7 @@
       // groupBox2
       // 
       this.groupBox2.Controls.Add(this.pictureBox1);
-      this.groupBox2.Location = new System.Drawing.Point(571, 187);
+      this.groupBox2.Location = new System.Drawing.Point(554, 187);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(390, 164);
       this.groupBox2.TabIndex = 5;
@@ -246,16 +247,17 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(965, 354);
+      this.ClientSize = new System.Drawing.Size(951, 354);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(groupBox1);
       this.Controls.Add(this.StatTable);
       this.Name = "FChSorter";
       this.Text = "FChSorter";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FChSorter_FormClosing);
+      this.Load += new System.EventHandler(this.FChSorter_Load);
       groupBox1.ResumeLayout(false);
       groupBox1.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.SigmaUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.StatTable)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
       this.groupBox2.ResumeLayout(false);
@@ -274,12 +276,12 @@
     private System.Windows.Forms.DataGridViewTextBoxColumn T_1;
     private System.Windows.Forms.DataGridViewTextBoxColumn T_2;
     private System.Windows.Forms.DataGridViewTextBoxColumn Koef;
-    private System.Windows.Forms.NumericUpDown numericUpDown1;
+    private System.Windows.Forms.NumericUpDown SigmaUpDown;
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.Label label3;
-    private System.Windows.Forms.TextBox textBox2;
-    private System.Windows.Forms.TextBox textBox1;
+    private System.Windows.Forms.TextBox T3StartValue;
+    private System.Windows.Forms.TextBox T1EndValue;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.PictureBox pictureBox1;

@@ -71,6 +71,7 @@ namespace MEAClosedLoop
       {
         dataFlowController.AddConsumer(value);
         _EvokedBurstDetector = value;
+        _EvokedBurstDetector.OnEvPackFound += dataFlowController.RecieveEvPack;
       }
     }
 
@@ -169,8 +170,9 @@ namespace MEAClosedLoop
       MainManager.StartPosition = FormStartPosition.Manual;
       MainManager.Location = new System.Drawing.Point(0, 0);
       MainManager.Show();
+      // панель контроля источников данных
       dataSourceControl.StartPosition = FormStartPosition.Manual;
-      dataSourceControl.Location = new System.Drawing.Point(MainManager.Width + 20, 0);
+      dataSourceControl.Location = new System.Drawing.Point(0, MainManager.Height + 10);
       dataSourceControl.Show();
     }
 

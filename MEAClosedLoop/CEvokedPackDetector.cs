@@ -32,7 +32,7 @@ namespace MEAClosedLoop
     private object StimQueueLock = new object();
     
     public delegate void OnEvPackFoundDelegate(SEvokedPack evPack);
-    public event OnEvPackFoundDelegate OnEvPackFound;
+    public OnEvPackFoundDelegate OnEvPackFound;
 
     private delegate void ProcessBurstDelegate(CPack burst);
     private ProcessBurstDelegate processBurstDelegate;
@@ -63,6 +63,7 @@ namespace MEAClosedLoop
 
     public void ProcessBurst(CPack burst)
     {
+      CurrentTime = burst.Start;
       lock (StimQueueLock)
         foreach (TTime stim in StimList)
         {
@@ -72,7 +73,7 @@ namespace MEAClosedLoop
             SEvokedPack evPack;
             evPack.Burst = burst;
             evPack.stim = stim;
-            OnEvPackFound(evPack);
+            if(OnEvPackFound != null)OnEvPackFound(evPack);
           }
         }
     }
@@ -81,7 +82,8 @@ namespace MEAClosedLoop
       lock (StimQueueLock)
       {
         StimList.Add(stim);
-        StimList = (List<TAbsStimIndex>) StimList.TakeWhile(s => s + StimActualityDuration > CurrentTime);
+        StimList.RemoveAll(s => s + StimActualityDuration < CurrentTime);
+        //StimList = (List<TAbsStimIndex>) StimList.TakeWhile(s => s + StimActualityDuration > CurrentTime);
       }
     }
 
