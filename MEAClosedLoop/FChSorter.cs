@@ -62,20 +62,15 @@ namespace MEAClosedLoop
         {
           T3[key] += 1;
         }
-        //int rowID = 0;
+        int rowID = 0;
         foreach (DataGridViewRow row in StatTable.Rows)
         {
-          if (row.Cells[0].Value.Equals(key))
-          {
-            row.Cells[2].Value = T1[key];///(double) BurstQueue.Count;
-            row.Cells[3].Value = T2[key];///(double) BurstQueue.Count;
-            row.Cells[4].Value = T3[key];///(double) BurstQueue.Count;
-          }
-          //rowID = row.Index;
+          if(row.Cells[0].Value.Equals(key))
+            rowID = row.Index;
         }
-        //StatTable.Rows[rowID].Cells[2].Value = T1[key];///(double) BurstQueue.Count;
-        //StatTable.Rows[rowID].Cells[3].Value = T2[key];///(double) BurstQueue.Count;
-        //StatTable.Rows[rowID].Cells[4].Value = T3[key];///(double) BurstQueue.Count;
+        StatTable.Rows[rowID].Cells[2].Value = T1[key];///(double) BurstQueue.Count;
+        StatTable.Rows[rowID].Cells[3].Value = T2[key];///(double) BurstQueue.Count;
+        StatTable.Rows[rowID].Cells[4].Value = T3[key];///(double) BurstQueue.Count;
       }
 
       //refresh table
