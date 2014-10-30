@@ -40,19 +40,20 @@
       this.StopButton = new System.Windows.Forms.Button();
       this.StartButton = new System.Windows.Forms.Button();
       this.StatTable = new System.Windows.Forms.DataGridView();
-      this.Midx = new System.Windows.Forms.DataGridViewTextBoxColumn();
+      this.AverageBurstPanel = new System.Windows.Forms.PictureBox();
+      this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.idx = new System.Windows.Forms.DataGridViewTextBoxColumn();
+      this.Midx = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.T_0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.T_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.T_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.Koef = new System.Windows.Forms.DataGridViewTextBoxColumn();
-      this.pictureBox1 = new System.Windows.Forms.PictureBox();
-      this.groupBox2 = new System.Windows.Forms.GroupBox();
+      this.K2_Column = new System.Windows.Forms.DataGridViewTextBoxColumn();
       groupBox1 = new System.Windows.Forms.GroupBox();
       groupBox1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.SigmaUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.StatTable)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.AverageBurstPanel)).BeginInit();
       this.groupBox2.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -172,76 +173,93 @@
       // 
       this.StatTable.AllowUserToAddRows = false;
       this.StatTable.AllowUserToDeleteRows = false;
+      this.StatTable.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
       this.StatTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
       this.StatTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Midx,
             this.idx,
+            this.Midx,
             this.T_0,
             this.T_1,
             this.T_2,
-            this.Koef});
+            this.Koef,
+            this.K2_Column});
       this.StatTable.Location = new System.Drawing.Point(3, 7);
       this.StatTable.Name = "StatTable";
       this.StatTable.ReadOnly = true;
       this.StatTable.Size = new System.Drawing.Size(544, 344);
       this.StatTable.TabIndex = 0;
+      this.StatTable.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.StatTable_RowHeaderMouseClick);
       // 
-      // Midx
+      // AverageBurstPanel
       // 
-      this.Midx.HeaderText = "Midx";
-      this.Midx.Name = "Midx";
-      this.Midx.ReadOnly = true;
-      this.Midx.Width = 50;
-      // 
-      // idx
-      // 
-      this.idx.HeaderText = "idx";
-      this.idx.Name = "idx";
-      this.idx.ReadOnly = true;
-      this.idx.Width = 50;
-      // 
-      // T_0
-      // 
-      this.T_0.HeaderText = "%T_0";
-      this.T_0.Name = "T_0";
-      this.T_0.ReadOnly = true;
-      // 
-      // T_1
-      // 
-      this.T_1.HeaderText = "%T_1";
-      this.T_1.Name = "T_1";
-      this.T_1.ReadOnly = true;
-      // 
-      // T_2
-      // 
-      this.T_2.HeaderText = "%T_2";
-      this.T_2.Name = "T_2";
-      this.T_2.ReadOnly = true;
-      // 
-      // Koef
-      // 
-      this.Koef.HeaderText = "K";
-      this.Koef.Name = "Koef";
-      this.Koef.ReadOnly = true;
-      // 
-      // pictureBox1
-      // 
-      this.pictureBox1.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-      this.pictureBox1.Location = new System.Drawing.Point(6, 19);
-      this.pictureBox1.Name = "pictureBox1";
-      this.pictureBox1.Size = new System.Drawing.Size(376, 136);
-      this.pictureBox1.TabIndex = 4;
-      this.pictureBox1.TabStop = false;
+      this.AverageBurstPanel.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+      this.AverageBurstPanel.Location = new System.Drawing.Point(6, 19);
+      this.AverageBurstPanel.Name = "AverageBurstPanel";
+      this.AverageBurstPanel.Size = new System.Drawing.Size(376, 136);
+      this.AverageBurstPanel.TabIndex = 4;
+      this.AverageBurstPanel.TabStop = false;
+      this.AverageBurstPanel.Click += new System.EventHandler(this.AverageBurstPanel_Click);
+      this.AverageBurstPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.AverageBurstPanel_Paint);
       // 
       // groupBox2
       // 
-      this.groupBox2.Controls.Add(this.pictureBox1);
+      this.groupBox2.Controls.Add(this.AverageBurstPanel);
       this.groupBox2.Location = new System.Drawing.Point(554, 187);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(390, 164);
       this.groupBox2.TabIndex = 5;
       this.groupBox2.TabStop = false;
       this.groupBox2.Text = "Усреднение для выбранного";
+      // 
+      // idx
+      // 
+      this.idx.HeaderText = "idx";
+      this.idx.Name = "idx";
+      this.idx.ReadOnly = true;
+      this.idx.Width = 30;
+      // 
+      // Midx
+      // 
+      this.Midx.HeaderText = "Midx";
+      this.Midx.Name = "Midx";
+      this.Midx.ReadOnly = true;
+      this.Midx.Width = 32;
+      // 
+      // T_0
+      // 
+      this.T_0.HeaderText = "%T_0";
+      this.T_0.Name = "T_0";
+      this.T_0.ReadOnly = true;
+      this.T_0.Width = 80;
+      // 
+      // T_1
+      // 
+      this.T_1.HeaderText = "%T_1";
+      this.T_1.Name = "T_1";
+      this.T_1.ReadOnly = true;
+      this.T_1.Width = 80;
+      // 
+      // T_2
+      // 
+      this.T_2.HeaderText = "%T_2";
+      this.T_2.Name = "T_2";
+      this.T_2.ReadOnly = true;
+      this.T_2.Width = 80;
+      // 
+      // Koef
+      // 
+      this.Koef.HeaderText = "K";
+      this.Koef.Name = "Koef";
+      this.Koef.ReadOnly = true;
+      this.Koef.Width = 80;
+      // 
+      // K2_Column
+      // 
+      this.K2_Column.HeaderText = "K2";
+      this.K2_Column.Name = "K2_Column";
+      this.K2_Column.ReadOnly = true;
+      this.K2_Column.Width = 80;
       // 
       // FChSorter
       // 
@@ -259,7 +277,7 @@
       groupBox1.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.SigmaUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.StatTable)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.AverageBurstPanel)).EndInit();
       this.groupBox2.ResumeLayout(false);
       this.ResumeLayout(false);
 
@@ -270,12 +288,6 @@
     private System.Windows.Forms.DataGridView StatTable;
     private System.Windows.Forms.Button StartButton;
     private System.Windows.Forms.Button StopButton;
-    private System.Windows.Forms.DataGridViewTextBoxColumn Midx;
-    private System.Windows.Forms.DataGridViewTextBoxColumn idx;
-    private System.Windows.Forms.DataGridViewTextBoxColumn T_0;
-    private System.Windows.Forms.DataGridViewTextBoxColumn T_1;
-    private System.Windows.Forms.DataGridViewTextBoxColumn T_2;
-    private System.Windows.Forms.DataGridViewTextBoxColumn Koef;
     private System.Windows.Forms.NumericUpDown SigmaUpDown;
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.Label label4;
@@ -284,7 +296,14 @@
     private System.Windows.Forms.TextBox T1EndValue;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label1;
-    private System.Windows.Forms.PictureBox pictureBox1;
+    private System.Windows.Forms.PictureBox AverageBurstPanel;
     private System.Windows.Forms.GroupBox groupBox2;
+    private System.Windows.Forms.DataGridViewTextBoxColumn idx;
+    private System.Windows.Forms.DataGridViewTextBoxColumn Midx;
+    private System.Windows.Forms.DataGridViewTextBoxColumn T_0;
+    private System.Windows.Forms.DataGridViewTextBoxColumn T_1;
+    private System.Windows.Forms.DataGridViewTextBoxColumn T_2;
+    private System.Windows.Forms.DataGridViewTextBoxColumn Koef;
+    private System.Windows.Forms.DataGridViewTextBoxColumn K2_Column;
   }
 }

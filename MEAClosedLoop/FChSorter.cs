@@ -32,7 +32,12 @@ namespace MEAClosedLoop
     private Dictionary<int, int> T1 = new Dictionary<int, int>();
     private Dictionary<int, int> T2 = new Dictionary<int, int>();
     private Dictionary<int, int> T3 = new Dictionary<int, int>();
+    private Dictionary<int, Bitmap> BurstPlotData = new Dictionary<int, Bitmap>();
     private List<int> KeysCollection = new List<int>();
+
+    private const int MaxBurstPlotWidth = 300;
+    private const int MaxBurstPlotDuration = MaxBurstPlotWidth * Param.MS;
+    private int CurrentChannelID = -1;
 
     private Queue<SEvokedPack> BurstQueue = new Queue<SEvokedPack>();
 
@@ -43,41 +48,59 @@ namespace MEAClosedLoop
     public FChSorter()
     {
       InitializeComponent();
-    } 
+    }
 
-    public void ProcessEvBurst(SEvokedPack EvBusrt)
+    public void ProcessEvBurst(SEvokedPack evBurst)
     {
-      lock (LockBurstQueue) BurstQueue.Enqueue(EvBusrt);
-      foreach (int key in T1.Keys)
+      lock (LockBurstQueue) BurstQueue.Enqueue(evBurst);
+      foreach (int key in evBurst.Burst.Data.Keys)
       {
-        if (ChekSpike(EvBusrt, 0, ulong.Parse(T1EndValue.Text), key))
+
+        if (ChekSpike(evBurst, 0, ulong.Parse(T1EndValue.Text) * Param.MS, key))
         {
           T1[key] += 1;
         }
-        if (ChekSpike(EvBusrt, ulong.Parse(T1EndValue.Text) * Param.MS, ulong.Parse(T3StartValue.Text) * Param.MS, key))
+        if (ChekSpike(evBurst, ulong.Parse(T1EndValue.Text) * Param.MS, ulong.Parse(T3StartValue.Text) * Param.MS, key))
         {
           T2[key] += 1;
         }
-        if (ChekSpike(EvBusrt, ulong.Parse(T3StartValue.Text) * Param.MS, ulong.Parse(T1EndValue.Text) * Param.MS + 25000, key))
+        if (ChekSpike(evBurst, ulong.Parse(T3StartValue.Text) * Param.MS, ulong.Parse(T1EndValue.Text) * Param.MS + 100 * Param.MS, key))
         {
           T3[key] += 1;
         }
-        int rowID = 0;
+        TFltDataPacket data = evBurst.Burst.Data;
+        Brush brush = new SolidBrush(Color.Gray);
+        Pen grayPen = new Pen(brush);
+        using (Graphics gr = Graphics.FromImage(BurstPlotData[key]))
+        {
+          for (int i = 1; i < data[key].Length && i < MaxBurstPlotDuration; i++)
+          {
+            gr.DrawLine(grayPen,
+              (float)((i - 1) * .5),
+              (float)(data[key][i - 1]*.1 + 50),
+              (float)(i * (float).5),
+              (float)(data[key][i] * .1 + 50));
+          }
+        }
+
+        //refresh table
+        //TODO need export to anther function like RefreshTable()
         foreach (DataGridViewRow row in StatTable.Rows)
         {
-          if(row.Cells[0].Value.Equals(key))
-            rowID = row.Index;
+          if (row.Cells[0].Value.Equals(key))
+          {
+            row.Cells[2].Value = T1[key];///(double) BurstQueue.Count;
+            row.Cells[3].Value = T2[key];///(double) BurstQueue.Count;
+            row.Cells[4].Value = T3[key];///(double) BurstQueue.Count;
+            row.Cells[5].Value = T2[key] * 100 / (T1[key] + 1);
+            row.Cells[6].Value = T2[key] * 100 / (T3[key] + 1);
+          }
         }
-        StatTable.Rows[rowID].Cells[2].Value = T1[key];///(double) BurstQueue.Count;
-        StatTable.Rows[rowID].Cells[3].Value = T2[key];///(double) BurstQueue.Count;
-        StatTable.Rows[rowID].Cells[4].Value = T3[key];///(double) BurstQueue.Count;
       }
 
-      //refresh table
-      //TODO need export to anther function like RefreshTable()
-      
 
     }
+
     private bool ChekSpike(SEvokedPack ev_pack, TTime StartTime, TTime EndTime, int Channel)
     {
       //Pack Start Time && Stim Time may be absolute but Center && Delta mast be relative (all in Points), NOT MS!
@@ -89,7 +112,7 @@ namespace MEAClosedLoop
       int StimShift = (ev_pack.stim > ev_pack.Burst.Start) ? (int)(ev_pack.stim - ev_pack.Burst.Start) : 0;
 
       TTime StartSearchTime = (TTime)StimShift + Param.PRE_SPIKE + StartTime - (TTime)PackShift;
-
+      TTime EndSearchTime = (TTime)StimShift + Param.PRE_SPIKE + EndTime - (TTime)PackShift;
       Average average = new Average();
 
       //вычесление среднего и сигмы для участка данных перед пачкой
@@ -121,11 +144,18 @@ namespace MEAClosedLoop
         T1.Add(key, 0);
         T2.Add(key, 0);
         T3.Add(key, 0);
+        BurstPlotData.Add(key, new Bitmap(AverageBurstPanel.Width, MaxBurstPlotWidth));
+      }
+      foreach (DataGridViewRow row in StatTable.Rows)
+      {
+        row.Cells[0].Style.BackColor = Color.Aqua;
+        row.Cells[1].Style.BackColor = Color.LightBlue;
+        row.Cells[2].Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        row.Cells[3].Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        row.Cells[4].Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
       }
       processEvBurstDelegate += ProcessEvBurst;
     }
-
-
 
     private void StartButton_Click(object sender, EventArgs e)
     {
@@ -151,6 +181,27 @@ namespace MEAClosedLoop
     private void SigmaUpDown_ValueChanged(object sender, EventArgs e)
     {
       SigmaCount = (int)SigmaUpDown.Value;
+    }
+
+    private void StatTable_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+    {
+
+      CurrentChannelID = (int)StatTable.Rows[e.RowIndex].Cells[0].Value;
+      AverageBurstPanel.BeginInvoke(new Action <Control>( s => s.Refresh()),AverageBurstPanel);
+      //AverageBurstPanel.Refresh();
+
+    }
+
+    private void AverageBurstPanel_Paint(object sender, PaintEventArgs e)
+    {
+      e.Graphics.Clear(Color.White);
+      if (BurstPlotData.Keys.Contains(CurrentChannelID))
+        AverageBurstPanel.Image = BurstPlotData[CurrentChannelID];
+    }
+
+    private void AverageBurstPanel_Click(object sender, EventArgs e)
+    {
+      AverageBurstPanel.Refresh();
     }
 
   }
