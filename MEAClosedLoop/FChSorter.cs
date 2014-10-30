@@ -37,11 +37,13 @@ namespace MEAClosedLoop
 
     private const int MaxBurstPlotWidth = 300;
     private const int MaxBurstPlotDuration = MaxBurstPlotWidth * Param.MS;
-    private int CurrentChannelID = -1;
+    private int CurrentChannelID = 58;
 
     private Queue<SEvokedPack> BurstQueue = new Queue<SEvokedPack>();
 
     private object LockBurstQueue = new object();
+    private object LockBurstPlotData = new object();
+
 
     private int SigmaCount = 8;
 
@@ -52,6 +54,15 @@ namespace MEAClosedLoop
 
     public void ProcessEvBurst(SEvokedPack evBurst)
     {
+      //Сдвиг начала  пачки (если стимул произошел раньше)
+      int PackShift = (evBurst.stim < evBurst.Burst.Start) ? (int)(evBurst.Burst.Start - evBurst.stim) : 0;
+
+      //Смещение пачки влево (если стимул внутри пачки)
+      int StimShift = (evBurst.stim > evBurst.Burst.Start) ? (int)(evBurst.stim - evBurst.Burst.Start) : 0;
+
+      TTime StartDrawTime = (TTime)StimShift + Param.PRE_SPIKE  - (TTime)PackShift;
+      TTime EndDrawTime = (TTime)StimShift + Param.PRE_SPIKE  - (TTime)PackShift ;
+
       lock (LockBurstQueue) BurstQueue.Enqueue(evBurst);
       foreach (int key in evBurst.Burst.Data.Keys)
       {
@@ -71,9 +82,11 @@ namespace MEAClosedLoop
         TFltDataPacket data = evBurst.Burst.Data;
         Brush brush = new SolidBrush(Color.Gray);
         Pen grayPen = new Pen(brush);
+        lock (LockBurstPlotData)
         using (Graphics gr = Graphics.FromImage(BurstPlotData[key]))
         {
-          for (int i = 1; i < data[key].Length && i < MaxBurstPlotDuration; i++)
+
+          for (int i = (int)StartDrawTime + 1; i < data[key].Length && i < (int)StartDrawTime + MaxBurstPlotDuration; i++)
           {
             gr.DrawLine(grayPen,
               (float)((i - 1) * .5),
@@ -144,7 +157,10 @@ namespace MEAClosedLoop
         T1.Add(key, 0);
         T2.Add(key, 0);
         T3.Add(key, 0);
-        BurstPlotData.Add(key, new Bitmap(AverageBurstPanel.Width, MaxBurstPlotWidth));
+        lock (LockBurstPlotData)
+        {
+          BurstPlotData.Add(key, new Bitmap(AverageBurstPanel.Width, MaxBurstPlotWidth));
+        }
       }
       foreach (DataGridViewRow row in StatTable.Rows)
       {
@@ -187,16 +203,15 @@ namespace MEAClosedLoop
     {
 
       CurrentChannelID = (int)StatTable.Rows[e.RowIndex].Cells[0].Value;
-      AverageBurstPanel.BeginInvoke(new Action <Control>( s => s.Refresh()),AverageBurstPanel);
+      //AverageBurstPanel.BeginInvoke(new Action <Control>( s => s.Refresh()),AverageBurstPanel);
+      if (BurstPlotData.Keys.Contains(CurrentChannelID))
+        AverageBurstPanel.Image = (Bitmap)BurstPlotData[CurrentChannelID].Clone();
       //AverageBurstPanel.Refresh();
 
     }
 
     private void AverageBurstPanel_Paint(object sender, PaintEventArgs e)
     {
-      e.Graphics.Clear(Color.White);
-      if (BurstPlotData.Keys.Contains(CurrentChannelID))
-        AverageBurstPanel.Image = BurstPlotData[CurrentChannelID];
     }
 
     private void AverageBurstPanel_Click(object sender, EventArgs e)
