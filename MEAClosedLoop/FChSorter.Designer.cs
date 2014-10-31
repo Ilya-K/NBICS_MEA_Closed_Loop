@@ -59,6 +59,8 @@
       // 
       // groupBox1
       // 
+      groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       groupBox1.Controls.Add(this.SigmaUpDown);
       groupBox1.Controls.Add(this.label5);
       groupBox1.Controls.Add(this.label4);
@@ -152,6 +154,7 @@
       // 
       // StopButton
       // 
+      this.StopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.StopButton.Location = new System.Drawing.Point(310, 48);
       this.StopButton.Name = "StopButton";
       this.StopButton.Size = new System.Drawing.Size(75, 23);
@@ -161,6 +164,7 @@
       // 
       // StartButton
       // 
+      this.StartButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.StartButton.Location = new System.Drawing.Point(310, 19);
       this.StartButton.Name = "StartButton";
       this.StartButton.Size = new System.Drawing.Size(75, 23);
@@ -193,6 +197,8 @@
       // 
       // AverageBurstPanel
       // 
+      this.AverageBurstPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.AverageBurstPanel.BackColor = System.Drawing.SystemColors.ButtonHighlight;
       this.AverageBurstPanel.Location = new System.Drawing.Point(6, 19);
       this.AverageBurstPanel.Name = "AverageBurstPanel";
@@ -201,9 +207,12 @@
       this.AverageBurstPanel.TabStop = false;
       this.AverageBurstPanel.Click += new System.EventHandler(this.AverageBurstPanel_Click);
       this.AverageBurstPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.AverageBurstPanel_Paint);
+      this.AverageBurstPanel.DoubleClick += new System.EventHandler(this.AverageBurstPanel_DoubleClick);
       // 
       // groupBox2
       // 
+      this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.groupBox2.Controls.Add(this.AverageBurstPanel);
       this.groupBox2.Location = new System.Drawing.Point(554, 187);
       this.groupBox2.Name = "groupBox2";

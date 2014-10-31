@@ -201,13 +201,9 @@ namespace MEAClosedLoop
 
     private void StatTable_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
-
       CurrentChannelID = (int)StatTable.Rows[e.RowIndex].Cells[0].Value;
-      //AverageBurstPanel.BeginInvoke(new Action <Control>( s => s.Refresh()),AverageBurstPanel);
       if (BurstPlotData.Keys.Contains(CurrentChannelID))
         AverageBurstPanel.Image = (Bitmap)BurstPlotData[CurrentChannelID].Clone();
-      //AverageBurstPanel.Refresh();
-
     }
 
     private void AverageBurstPanel_Paint(object sender, PaintEventArgs e)
@@ -217,6 +213,18 @@ namespace MEAClosedLoop
     private void AverageBurstPanel_Click(object sender, EventArgs e)
     {
       AverageBurstPanel.Refresh();
+    }
+
+    private void AverageBurstPanel_DoubleClick(object sender, EventArgs e)
+    {
+      switch (MessageBox.Show("отобразить подробно?", "", MessageBoxButtons.YesNo))
+      {
+        case System.Windows.Forms.DialogResult.Yes:
+
+          break;
+        case System.Windows.Forms.DialogResult.No:
+          break;
+      }
     }
 
   }
