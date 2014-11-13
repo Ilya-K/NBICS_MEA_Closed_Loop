@@ -225,6 +225,7 @@
     <Compile Include="UI Forms\FDataSourceControl.Designer.cs">
       <DependentUpon>FDataSourceControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="CDataRenderNew.cs" />
     <EmbeddedResource Include="Common\FCreateMeasure.resx">
       <DependentUpon>FCreateMeasure.cs</DependentUpon>
     </EmbeddedResource>
