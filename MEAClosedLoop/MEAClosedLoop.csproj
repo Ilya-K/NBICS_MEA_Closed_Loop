@@ -119,6 +119,7 @@
     <Compile Include="Common\FSelectExperiment.Designer.cs">
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
     </Compile>
+    <Compile Include="Core\CCamReader.cs" />
     <Compile Include="CPackDetector.cs" />
     <Compile Include="FChSorter.cs">
       <SubType>Form</SubType>
@@ -177,6 +178,8 @@
     <Compile Include="FormCalibrate.Designer.cs">
       <DependentUpon>FormCalibrate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interfaces\Delegates.cs" />
+    <Compile Include="Interfaces\ICamReader.cs" />
     <Compile Include="IRecieve.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Neurorighter\ButterworthFilter.cs" />
