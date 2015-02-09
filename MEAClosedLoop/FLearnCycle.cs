@@ -245,7 +245,7 @@ namespace MEAClosedLoop
                 evokedPackInfo.Pack = pack;
                 evokedPackInfo.AbsStim = stim;
                 EvokedPacksQueue.Enqueue(evokedPackInfo);
-
+                break;
               }
             }
           }

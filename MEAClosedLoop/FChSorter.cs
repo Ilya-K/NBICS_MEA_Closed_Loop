@@ -35,7 +35,7 @@ namespace MEAClosedLoop
     private Dictionary<int, Bitmap> BurstPlotData = new Dictionary<int, Bitmap>();
     private List<int> KeysCollection = new List<int>();
 
-    private const int MaxBurstPlotWidth = 300;
+    private const int MaxBurstPlotWidth = 3300;
     private const int MaxBurstPlotDuration = MaxBurstPlotWidth * Param.MS;
     private int CurrentChannelID = 58;
 
@@ -154,11 +154,15 @@ namespace MEAClosedLoop
       foreach (int key in evBurst.Burst.Data.Keys)
       {
         StatTable.Rows.Add(key, MEA.IDX2NAME[key]);
-        T1.Add(key, 0);
-        T2.Add(key, 0);
-        T3.Add(key, 0);
+        if (!T1.ContainsKey(key))
+          T1.Add(key, 0);
+        if (!T2.ContainsKey(key))
+          T2.Add(key, 0);
+        if (!T3.ContainsKey(key))
+          T3.Add(key, 0);
         lock (LockBurstPlotData)
         {
+          if(!BurstPlotData.ContainsKey(key))
           BurstPlotData.Add(key, new Bitmap(AverageBurstPanel.Width, MaxBurstPlotWidth));
         }
       }

@@ -1,4 +1,4 @@
-﻿//#define GRAPH
+﻿#define GRAPH
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace MEAClosedLoop
     private const TAbsStimIndex BLANK_ARTIF_PRE_MAX_LENGTH = 32;
     private const int FULL_RESEARCH_MODE_STEP = 3; //100% is 1, more increase speed, but decrease accuracy
     public TAbsStimIndex MaximumShiftRange = 900; // 1200 - MAX VALUE
-    private TStimIndex MinimumLengthBetweenPegs = 10; // 240 - for standart hiFreq Stim
+    private TStimIndex MinimumLengthBetweenPegs = 290; // 240 - for standart hiFreq Stim
     private const TRawData Defaul_Zero_Point = 32768;
     public bool FullResearch = true; //True for unoptimized research
     public bool SkipStims = false; // не искать артефакты
@@ -369,11 +369,13 @@ namespace MEAClosedLoop
           if (!pre_average.IsInArea(DataPacket[t + 1]))
             if (!pre_average.IsInArea(post_average.Value - pre_average.TripleSigma))
               if (!pre_average.IsInArea(post_average.Value + pre_average.TripleSigma))
+                if (!post_average.IsInArea(pre_average.Value - post_average.TripleSigma))
+                  if (!post_average.IsInArea(pre_average.Value + post_average.TripleSigma))
                 //Clipping Fix
                 if (pre_average.Value > 0)
                   if (pre_average.Value < 65535)
                     //StableLinesFix
-                    if (Math.Abs(pre_average.Value - post_average.Value) > 250) //варируемый параметр, отсекает резкие спаки
+                    if (Math.Abs(pre_average.Value - post_average.Value) > 350) //варируемый параметр, отсекает резкие спаки
                       //Blanking Fix
                       if (pre_average.Sigma < 100)
                       {
