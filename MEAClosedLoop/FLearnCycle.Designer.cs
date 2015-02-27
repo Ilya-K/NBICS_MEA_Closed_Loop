@@ -32,6 +32,7 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
       this.ParamBox = new System.Windows.Forms.GroupBox();
+      this.StimBreakCheckBox = new System.Windows.Forms.CheckBox();
       this.PSelectName = new System.Windows.Forms.NumericUpDown();
       this.PSelectIndex = new System.Windows.Forms.NumericUpDown();
       this.PSearchDelta = new System.Windows.Forms.NumericUpDown();
@@ -57,6 +58,8 @@
       this.EvPacksBox = new System.Windows.Forms.GroupBox();
       this.evBurstPanel = new System.Windows.Forms.Panel();
       this.TrainEvolutionGraph = new System.Windows.Forms.PictureBox();
+      this.label12 = new System.Windows.Forms.Label();
+      this.RSManualButton = new System.Windows.Forms.Button();
       this.ParamBox.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectName)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PSelectIndex)).BeginInit();
@@ -100,6 +103,7 @@
       // 
       // ParamBox
       // 
+      this.ParamBox.Controls.Add(this.StimBreakCheckBox);
       this.ParamBox.Controls.Add(this.PSelectName);
       this.ParamBox.Controls.Add(this.PSelectIndex);
       this.ParamBox.Controls.Add(this.PSearchDelta);
@@ -124,6 +128,20 @@
       this.ParamBox.TabIndex = 4;
       this.ParamBox.TabStop = false;
       this.ParamBox.Text = "Параметры цикла";
+      // 
+      // StimBreakCheckBox
+      // 
+      this.StimBreakCheckBox.AutoSize = true;
+      this.StimBreakCheckBox.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+      this.StimBreakCheckBox.Checked = true;
+      this.StimBreakCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.StimBreakCheckBox.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+      this.StimBreakCheckBox.Location = new System.Drawing.Point(6, 229);
+      this.StimBreakCheckBox.Name = "StimBreakCheckBox";
+      this.StimBreakCheckBox.Size = new System.Drawing.Size(147, 17);
+      this.StimBreakCheckBox.TabIndex = 8;
+      this.StimBreakCheckBox.Text = "выключать стимуляцию";
+      this.StimBreakCheckBox.UseVisualStyleBackColor = true;
       // 
       // PSelectName
       // 
@@ -163,9 +181,9 @@
       // 
       // PSearchDelta
       // 
-      this.PSearchDelta.Location = new System.Drawing.Point(331, 164);
+      this.PSearchDelta.Location = new System.Drawing.Point(331, 161);
       this.PSearchDelta.Maximum = new decimal(new int[] {
-            20,
+            50,
             0,
             0,
             0});
@@ -185,7 +203,7 @@
       // 
       // PDelayTime
       // 
-      this.PDelayTime.Location = new System.Drawing.Point(331, 138);
+      this.PDelayTime.Location = new System.Drawing.Point(331, 135);
       this.PDelayTime.Maximum = new decimal(new int[] {
             200,
             0,
@@ -235,7 +253,7 @@
       // label7
       // 
       this.label7.AutoSize = true;
-      this.label7.Location = new System.Drawing.Point(6, 166);
+      this.label7.Location = new System.Drawing.Point(6, 163);
       this.label7.Name = "label7";
       this.label7.Size = new System.Drawing.Size(173, 13);
       this.label7.TabIndex = 6;
@@ -244,7 +262,7 @@
       // label6
       // 
       this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(6, 140);
+      this.label6.Location = new System.Drawing.Point(6, 137);
       this.label6.Name = "label6";
       this.label6.Size = new System.Drawing.Size(262, 13);
       this.label6.TabIndex = 6;
@@ -465,6 +483,26 @@
       this.TrainEvolutionGraph.Click += new System.EventHandler(this.TrainEvolutionGraph_Click);
       this.TrainEvolutionGraph.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
       // 
+      // label12
+      // 
+      this.label12.AutoSize = true;
+      this.label12.Location = new System.Drawing.Point(122, 311);
+      this.label12.Name = "label12";
+      this.label12.Size = new System.Drawing.Size(107, 13);
+      this.label12.TabIndex = 6;
+      this.label12.Text = "Ручное прерывание";
+      // 
+      // RSManualButton
+      // 
+      this.RSManualButton.Enabled = false;
+      this.RSManualButton.Location = new System.Drawing.Point(235, 306);
+      this.RSManualButton.Name = "RSManualButton";
+      this.RSManualButton.Size = new System.Drawing.Size(98, 23);
+      this.RSManualButton.TabIndex = 5;
+      this.RSManualButton.Text = "R/S выполнен";
+      this.RSManualButton.UseVisualStyleBackColor = true;
+      this.RSManualButton.Click += new System.EventHandler(this.RSManualButton_Click);
+      // 
       // FLearnCycle
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -476,7 +514,9 @@
       this.Controls.Add(this.label9);
       this.Controls.Add(this.RSBurstBox);
       this.Controls.Add(this.FinishCycle);
+      this.Controls.Add(this.RSManualButton);
       this.Controls.Add(this.StartCycle);
+      this.Controls.Add(this.label12);
       this.Controls.Add(this.ParamBox);
       this.Controls.Add(this.TrainEvolutionGraph);
       this.Name = "FLearnCycle";
@@ -533,5 +573,8 @@
     private System.Windows.Forms.GroupBox EvPacksBox;
     private System.Windows.Forms.Panel evBurstPanel;
     private System.Windows.Forms.PictureBox TrainEvolutionGraph;
+    private System.Windows.Forms.CheckBox StimBreakCheckBox;
+    private System.Windows.Forms.Label label12;
+    private System.Windows.Forms.Button RSManualButton;
   }
 }
