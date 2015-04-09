@@ -439,6 +439,8 @@
       // 
       // LernLogTextBox
       // 
+      this.LernLogTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
       this.LernLogTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
       this.LernLogTextBox.Location = new System.Drawing.Point(7, 335);
       this.LernLogTextBox.Multiline = true;
@@ -447,6 +449,7 @@
       this.LernLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.LernLogTextBox.Size = new System.Drawing.Size(398, 317);
       this.LernLogTextBox.TabIndex = 11;
+      this.LernLogTextBox.TextChanged += new System.EventHandler(this.LernLogTextBox_TextChanged);
       // 
       // EvPacksBox
       // 

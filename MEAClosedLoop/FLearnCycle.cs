@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 using MEAClosedLoop.Common;
 namespace MEAClosedLoop
 {
@@ -79,6 +80,7 @@ namespace MEAClosedLoop
     private List<ShahafCycleIteration> CycleInfo = new List<ShahafCycleIteration>();
     private ShahafCycleIteration currentIteration = new ShahafCycleIteration();
 
+    private string logFilePath = "";
     #endregion
 
     public FLearnCycle(CLoopController _LoopController, CFiltering _Filter)
@@ -516,6 +518,13 @@ namespace MEAClosedLoop
 
     private void StartCycle_Click(object sender, EventArgs e)
     {
+      SaveFileDialog dialog = new SaveFileDialog();
+      switch (dialog.ShowDialog())
+      {
+        case System.Windows.Forms.DialogResult.OK:
+          logFilePath = dialog.FileName;
+          break;
+      }
       StartTime = Filter.TimeStamp;
       loopController.OnPackFound += RecievePackData;
       Filter.AddStimulConsumer(RecieveStimData);
@@ -812,6 +821,15 @@ namespace MEAClosedLoop
     private void RSManualButton_Click(object sender, EventArgs e)
     {
       ManualBreak = true;
+    }
+
+    private void LernLogTextBox_TextChanged(object sender, EventArgs e)
+    {
+      if(logFilePath.Length > 10)
+      using (StreamWriter swr = new StreamWriter(logFilePath))
+      {
+        swr.Write(LernLogTextBox.Text);
+      }
     }
   }
 
