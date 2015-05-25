@@ -651,7 +651,8 @@ namespace MEAClosedLoop
             average = EvokedPacksQueue.ElementAt(position).average;
           }
           */
-          average = EvokedPacksQueue.ElementAt(position).average;
+
+          average = BurstQueue.ElementAt(position).average;
           //отрисовка пачки
           //[TODO]: Сделать оптимизацию (отрисовывать только входяющую в окно часть пачки)
           for (int idx = 0; idx < PackData[(int)this.PSelectIndex.Value].Length - 1 /*&& idx < 110 * Param.MS*/; idx++)
