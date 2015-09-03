@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MEAClosedLoop.Common;
+using MEAClosedLoop.UI_Forms;
 namespace MEAClosedLoop
 {
   public partial class FMainWindow : Form
@@ -187,6 +188,22 @@ namespace MEAClosedLoop
     private void dataControlToolStripMenuItem_Click(object sender, EventArgs e)
     {
 
+    }
+    
+    private void burstDescMethodsDevelopToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      FBurstDescription form = new FBurstDescription();
+      form.MdiParent = this;
+      dataFlowController.AddConsumer(form);
+      form.Show();
+    }
+
+    private void singleChannelViewToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      FSingleChDisplay form = new FSingleChDisplay();
+      //form.MdiParent = this;
+      dataFlowController.AddConsumer(form);
+      form.Show();
     }
   }
 

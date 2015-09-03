@@ -83,6 +83,10 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="ZedGraph, Version=1.0.1812.29779, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\ZedGraph_Control_Test\ZedGraph.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CDataFlowController.cs" />
@@ -120,6 +124,12 @@
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
     </Compile>
     <Compile Include="CPackDetector.cs" />
+    <Compile Include="FBurstDescription.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FBurstDescription.Designer.cs">
+      <DependentUpon>FBurstDescription.cs</DependentUpon>
+    </Compile>
     <Compile Include="FChSorter.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -213,11 +223,18 @@
     <Compile Include="FStatForm.Designer.cs">
       <DependentUpon>FStatForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="TypeDefs.cs" />
     <Compile Include="UI Forms\FBurstFormDisplay.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI Forms\FBurstFormDisplay.Designer.cs">
       <DependentUpon>FBurstFormDisplay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI Forms\FSingleChDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI Forms\FSingleChDisplay.Designer.cs">
+      <DependentUpon>FSingleChDisplay.cs</DependentUpon>
     </Compile>
     <Compile Include="UI Forms\FDataSourceControl.cs">
       <SubType>Form</SubType>
@@ -234,6 +251,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\FSelectExperiment.resx">
       <DependentUpon>FSelectExperiment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FBurstDescription.resx">
+      <DependentUpon>FBurstDescription.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FChSorter.resx">
       <DependentUpon>FChSorter.cs</DependentUpon>
@@ -283,6 +303,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI Forms\FBurstFormDisplay.resx">
       <DependentUpon>FBurstFormDisplay.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI Forms\FSingleChDisplay.resx">
+      <DependentUpon>FSingleChDisplay.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI Forms\FDataSourceControl.resx">
       <DependentUpon>FDataSourceControl.cs</DependentUpon>

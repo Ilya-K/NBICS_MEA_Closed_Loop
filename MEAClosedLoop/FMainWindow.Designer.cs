@@ -42,6 +42,8 @@
       this.experimentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.findGoodChannelsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.mainLearningExpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.burstSortingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.burstDescMethodsDevelopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.recordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.recorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.recordOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,6 +55,7 @@
       this.aboutProgrammToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.versionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.reportABugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.singleChannelViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.MainTopMenu.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -127,7 +130,8 @@
       // 
       this.windowsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.managerToolStripMenuItem,
-            this.mchannelDataToolStripMenuItem});
+            this.mchannelDataToolStripMenuItem,
+            this.singleChannelViewToolStripMenuItem});
       this.windowsToolStripMenuItem.Name = "windowsToolStripMenuItem";
       this.windowsToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
       this.windowsToolStripMenuItem.Text = "Windows";
@@ -135,21 +139,22 @@
       // managerToolStripMenuItem
       // 
       this.managerToolStripMenuItem.Name = "managerToolStripMenuItem";
-      this.managerToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+      this.managerToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
       this.managerToolStripMenuItem.Text = "Manager";
       this.managerToolStripMenuItem.Click += new System.EventHandler(this.newManagerToolStripMenuItem_Click);
       // 
       // mchannelDataToolStripMenuItem
       // 
       this.mchannelDataToolStripMenuItem.Name = "mchannelDataToolStripMenuItem";
-      this.mchannelDataToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
+      this.mchannelDataToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
       this.mchannelDataToolStripMenuItem.Text = "MchannelData";
       // 
       // experimentsToolStripMenuItem
       // 
       this.experimentsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.findGoodChannelsToolStripMenuItem,
-            this.mainLearningExpToolStripMenuItem});
+            this.mainLearningExpToolStripMenuItem,
+            this.burstSortingToolStripMenuItem});
       this.experimentsToolStripMenuItem.Name = "experimentsToolStripMenuItem";
       this.experimentsToolStripMenuItem.Size = new System.Drawing.Size(83, 20);
       this.experimentsToolStripMenuItem.Text = "Experiments";
@@ -166,6 +171,21 @@
       this.mainLearningExpToolStripMenuItem.Name = "mainLearningExpToolStripMenuItem";
       this.mainLearningExpToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
       this.mainLearningExpToolStripMenuItem.Text = "Main Learning Exp";
+      // 
+      // burstSortingToolStripMenuItem
+      // 
+      this.burstSortingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.burstDescMethodsDevelopToolStripMenuItem});
+      this.burstSortingToolStripMenuItem.Name = "burstSortingToolStripMenuItem";
+      this.burstSortingToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+      this.burstSortingToolStripMenuItem.Text = "Burst Sorting";
+      // 
+      // burstDescMethodsDevelopToolStripMenuItem
+      // 
+      this.burstDescMethodsDevelopToolStripMenuItem.Name = "burstDescMethodsDevelopToolStripMenuItem";
+      this.burstDescMethodsDevelopToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+      this.burstDescMethodsDevelopToolStripMenuItem.Text = "Methods Develop ";
+      this.burstDescMethodsDevelopToolStripMenuItem.Click += new System.EventHandler(this.burstDescMethodsDevelopToolStripMenuItem_Click);
       // 
       // recordToolStripMenuItem
       // 
@@ -245,6 +265,13 @@
       this.reportABugToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
       this.reportABugToolStripMenuItem.Text = "Report a bug";
       // 
+      // singleChannelViewToolStripMenuItem
+      // 
+      this.singleChannelViewToolStripMenuItem.Name = "singleChannelViewToolStripMenuItem";
+      this.singleChannelViewToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+      this.singleChannelViewToolStripMenuItem.Text = "Single Channel View";
+      this.singleChannelViewToolStripMenuItem.Click += new System.EventHandler(this.singleChannelViewToolStripMenuItem_Click);
+      // 
       // FMainWindow
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -292,5 +319,8 @@
     private System.Windows.Forms.ToolStripMenuItem dataFlowToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem findEvokedPacksToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem dataControlToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem burstSortingToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem burstDescMethodsDevelopToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem singleChannelViewToolStripMenuItem;
   }
 }
