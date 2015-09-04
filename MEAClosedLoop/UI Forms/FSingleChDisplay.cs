@@ -27,10 +27,23 @@ namespace MEAClosedLoop.UI_Forms
     const uint updateInterval = 1000;
     int currentChNum = 0;
     uint _Duration2 = Param.MS * 1000;
+    uint _Amplitude = 100;
+    uint Amplitude2
+    {
+      get
+      {
+        return _Amplitude;
+      }
+      set
+      {
+        if (value > 10 && value < 3000)
+          _Amplitude = value;
+      }
+    }
     uint Duration2
     {
       get { return _Duration2; }
-      set { _Duration2 = value; }
+      set { if(value >= Param.MS * 1000)  _Duration2 = value; }
     }
     public FSingleChDisplay()
     {
@@ -66,13 +79,11 @@ namespace MEAClosedLoop.UI_Forms
     }
     private void updatePlot()
     {
+      int debug = Environment.TickCount;
       GraphPane pane = zedGraphPlot.GraphPane;
       pane.CurveList.Clear();
 
       PointPairList f1_list = new PointPairList();
-
-      // Создадим список точек для кривой f2(x)
-      PointPairList f2_list = new PointPairList();
 
       //data prepear;
       double[] Data;
@@ -89,46 +100,41 @@ namespace MEAClosedLoop.UI_Forms
           }
         }
       }
-      Data = dataQueue.ToArray(); ;
+      Data = dataQueue.ToArray();
+      TData[] x = new TData[Data.Length];
+      TData[] y = new TData[Data.Length];
+
       for (int i = 0; i < Data.Length; i++)
       {
-        f1_list.Add(i / 25.0, Data[i]);
+        //f1_list.Add(i / 25.0, Data[i]);
+        x[i] = i / 25.0;
+        y[i] = Data[i];
       }
-      //int window = 40;
-      //double[] averages = new double[Data.Length];
+      FilteredPointList filteredList = new FilteredPointList(x, y);
+    
+      if(Duration2 > Param.MS * 1000 * 3)
+        filteredList.SetBounds(x[0], x[x.Length - 1], zedGraphPlot.Width * 5);
+      pane.XAxis.Scale.Min = 0;
+      pane.XAxis.Scale.Max = Data.Length/25.0;
+      pane.YAxis.Scale.Min = -Amplitude2;
+      pane.YAxis.Scale.Max = Amplitude2;
 
-      //double[] fxs = new double[Data.Length];
-      //fxs[0] = Data[0] / 5;
-      //for (int i = 1; i < Data.Length; i++)
-      //{
-      //  double last = fxs[i - 1];
-      //  fxs[i] = last + Math.Abs(Data[i]) / 5 - last / 60;
-      //}
-      //double average = fxs.Take(window).Average() / (double)window;
-      //for (int i = 0; i < window; i++)
-      //{
-      //  averages[i] = average;
-      //}
+      
 
-      //for (int i = window; i < Data.Length; i++)
-      //{
-      //  average += (fxs[i] - fxs[i - window]) / (double)window;
-      //  averages[i] = average;
-      //}
-      //for (int i = 1; i < Data.Length; i++)
-      //{
-      //  f2_list.Add(i / 25.0, averages[i]);
-      //}
-
-      LineItem f1_curve = pane.AddCurve("Sinc", f1_list, Color.Blue, SymbolType.None);
+      LineItem f1_curve = pane.AddCurve("Activity", filteredList, Color.Blue, SymbolType.None);
       //LineItem f2_curve = pane.AddCurve("In  tegral", f2_list, Color.Red, SymbolType.None);
       // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
       // В противном случае на рисунке будет показана только часть графика, 
       // которая умещается в интервалы по осям, установленные по умолчанию
       zedGraphPlot.AxisChange();
-
+      string s = (Environment.TickCount - debug).ToString() + " ms";
+      if (UpdateTimeLabel.InvokeRequired)
+        UpdateTimeLabel.BeginInvoke(new Action<System.Windows.Forms.Label>((lab) => lab.Text = s), UpdateTimeLabel);
+      else
+        UpdateTimeLabel.Text = s;
       // Обновляем график
       zedGraphPlot.Invalidate();
+
     }
     private void start()
     {
@@ -145,6 +151,23 @@ namespace MEAClosedLoop.UI_Forms
     private void stopButton_Click(object sender, EventArgs e)
     {
       stop();
+    }
+
+    private void AmplitudeChecker_ValueChanged(object sender, EventArgs e)
+    {
+
+      Amplitude2 = (uint)(sender as NumericUpDown).Value;
+    }
+
+    private void DurationChecker_ValueChanged(object sender, EventArgs e)
+    {
+      Duration2 = (uint)(sender as NumericUpDown).Value * Param.MS * 1000;
+
+    }
+
+    private void ChNumChecker_ValueChanged(object sender, EventArgs e)
+    {
+      currentChNum = (int)(sender as NumericUpDown).Value;
     }
   }
 }
