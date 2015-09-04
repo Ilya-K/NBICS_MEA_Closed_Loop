@@ -103,25 +103,39 @@ namespace MEAClosedLoop.UI_Forms
       Data = dataQueue.ToArray();
       TData[] x = new TData[Data.Length];
       TData[] y = new TData[Data.Length];
-
+      
       for (int i = 0; i < Data.Length; i++)
       {
         //f1_list.Add(i / 25.0, Data[i]);
         x[i] = i / 25.0;
         y[i] = Data[i];
       }
+      int PartsLength= Data.Length / zedGraphPlot.Width;
+      int PartsCount = Data.Length / PartsLength;
+      double min = double.MaxValue;
+      double max = double.MinValue;
+      for (int i = 0; i < PartsCount; i++)
+      {
+        min = double.MaxValue;
+        max = double.MinValue;
+        for (int ii = 0; ii < PartsLength; ii++)
+        {
+          if (Data[i * PartsLength + ii] > max) max = Data[i * PartsLength + ii];
+          if (Data[i * PartsLength + ii] < min) min = Data[i * PartsLength + ii];
+        }
+        f1_list.Add(i * PartsLength / 25.0, min);
+        f1_list.Add(i * PartsLength / 25.0, max);
+      }
       FilteredPointList filteredList = new FilteredPointList(x, y);
-    
+      
       if(Duration2 > Param.MS * 1000 * 3)
         filteredList.SetBounds(x[0], x[x.Length - 1], zedGraphPlot.Width * 5);
       pane.XAxis.Scale.Min = 0;
-      pane.XAxis.Scale.Max = Data.Length/25.0;
+      pane.XAxis.Scale.Max = Duration2/25.0;
       pane.YAxis.Scale.Min = -Amplitude2;
-      pane.YAxis.Scale.Max = Amplitude2;
+      pane.YAxis.Scale.Max = +Amplitude2;
 
-      
-
-      LineItem f1_curve = pane.AddCurve("Activity", filteredList, Color.Blue, SymbolType.None);
+      LineItem f1_curve = pane.AddCurve("Neuronal Activity", f1_list, Color.Blue, SymbolType.None);
       //LineItem f2_curve = pane.AddCurve("In  tegral", f2_list, Color.Red, SymbolType.None);
       // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
       // В противном случае на рисунке будет показана только часть графика, 
@@ -132,8 +146,10 @@ namespace MEAClosedLoop.UI_Forms
         UpdateTimeLabel.BeginInvoke(new Action<System.Windows.Forms.Label>((lab) => lab.Text = s), UpdateTimeLabel);
       else
         UpdateTimeLabel.Text = s;
+      
       // Обновляем график
       zedGraphPlot.Invalidate();
+      filteredList = new FilteredPointList(new double[0], new double[0]);
 
     }
     private void start()
@@ -162,12 +178,15 @@ namespace MEAClosedLoop.UI_Forms
     private void DurationChecker_ValueChanged(object sender, EventArgs e)
     {
       Duration2 = (uint)(sender as NumericUpDown).Value * Param.MS * 1000;
-
     }
 
     private void ChNumChecker_ValueChanged(object sender, EventArgs e)
     {
-      currentChNum = (int)(sender as NumericUpDown).Value;
+      lock (DataQueueLock)
+      {
+        dataQueue.Clear();
+        currentChNum = (int)(sender as NumericUpDown).Value;
+      }
     }
   }
 }
