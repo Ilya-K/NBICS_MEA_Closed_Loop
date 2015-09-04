@@ -18,9 +18,10 @@ namespace MEAClosedLoop.UI_Forms
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
 
-  public partial class FSingleChDisplay : Form, IRecieveFltData
+  public partial class FMultiChDisplay : Form, IRecieveFltData
   {
     private Queue<double> dataQueue = new Queue<double>();
+    private Dictionary<int, Queue<double>> mchDataQueue = new Dictionary<int, Queue<TData>>();
     private Queue<TFltDataPacket> unpackedFltDataQueue = new Queue<TFltDataPacket>();
     private object DataQueueLock = new object();
     Timer plotUpdater;
@@ -45,15 +46,11 @@ namespace MEAClosedLoop.UI_Forms
       get { return _Duration2; }
       set { if (value >= Param.MS * 1000)  _Duration2 = value; }
     }
-    public FSingleChDisplay()
+    public FMultiChDisplay()
     {
       InitializeComponent();
+      initPlot();
     }
-    public FSingleChDisplay(int ChNum)
-    {
-      InitializeComponent();
-    }
-
     void IRecieveFltData.RecieveFltData(TFltDataPacket packet)
     {
       lock (DataQueueLock)
@@ -77,6 +74,67 @@ namespace MEAClosedLoop.UI_Forms
       updatetask.Start();
 
     }
+    void initPlot()
+    {
+      // Создаем экземпляр класса MasterPane, который представляет собой область, 
+      // на которйо "лежат" все графики (экземпляры класса GraphPane)
+
+      ZedGraph.MasterPane masterPane = zedGraphPlot.MasterPane;
+      // По умолчанию в MasterPane содержится один экземпляр класса GraphPane 
+      // (который можно получить из свойства zedGraph.GraphPane)
+      // Очистим этот список, так как потом мы будем создавать графики вручную
+      masterPane.PaneList.Clear();
+      masterPane.Margin.All = 0;
+      masterPane.Border.IsVisible = false;
+      masterPane.InnerPaneGap = 0;
+      // Добавим три графика
+      for (int i = 0; i < 64; i++)
+      {
+        // Создаем экземпляр класса GraphPane, представляющий собой один график
+        GraphPane pane = new GraphPane();
+        pane.Margin.Top = 0;
+        pane.Margin.Left = -0;
+        pane.Margin.Right = -0;
+        pane.Margin.Bottom = -0;
+        pane.XAxis.Scale.IsSkipFirstLabel = true;
+        pane.XAxis.Scale.IsSkipLastLabel = true;
+        pane.XAxis.Scale.FontSpec.Size = 14;
+        if(i > 7 && i < 56)
+          pane.XAxis.IsVisible = false;
+        if (i < 8)
+          pane.XAxis.Cross = Amplitude2;
+        if (i % 8 != 1 || i % 8 != 0 )
+          pane.YAxis.IsVisible = false;
+        //pane.YAxis.IsVisible = false;
+        //pane.XAxis.IsVisible = false;
+        pane.Legend.IsVisible = false;
+        pane.Title.IsVisible = false;
+        //pane.TitleGap = 0;
+        // Заполнение графика данными не изменилось, 
+        // поэтому вынесем заполнение точек в отдельный метод DrawSingleGraph()
+        //DrawSingleGraph (pane); 
+
+        // Добавим новый график в MasterPane
+        masterPane.Add(pane);
+      }
+
+      // Будем размещать добавленные графики в MasterPane
+      using (Graphics g = CreateGraphics())
+      {
+        // Графики будут размещены в три строки.
+        // В первой будет 4 столбца,
+        // Во второй - 2
+        // В третей - 3
+        // Если бы второй аргумент был равен false, то массив из третьего аргумента
+        // задавал бы не количество столбцов в каждой строке,
+        // а количество строк в каждом столбце
+        masterPane.SetLayout(g, true, new int[] { 8, 8, 8, 8, 8, 8, 8, 8 });
+      }
+
+      // Обновим оси и перерисуем график
+      zedGraphPlot.AxisChange();
+      zedGraphPlot.Invalidate();
+    }
     private void updatePlot()
     {
       if (this.IsDisposed)
@@ -86,17 +144,8 @@ namespace MEAClosedLoop.UI_Forms
       }
       int debug = Environment.TickCount;
       GraphPane pane = zedGraphPlot.GraphPane;
-      pane.Margin.Top = 0;
-      pane.Margin.Left = 0;
-      pane.Margin.Right = -5;
-      pane.Margin.Bottom = 0;
-      pane.XAxis.Title.IsVisible = false;
-      pane.YAxis.Title.IsVisible = false;
-      pane.Legend.IsVisible = false;
-      pane.Title.IsVisible = false;
-      pane.TitleGap = 0;
-
       pane.CurveList.Clear();
+
       PointPairList f1_list = new PointPairList();
 
       //data prepear;
@@ -129,29 +178,21 @@ namespace MEAClosedLoop.UI_Forms
       int PartsCount = (PartsLength > 0) ? Data.Length / PartsLength : 0;
       double min = double.MaxValue;
       double max = double.MinValue;
-      if (Duration2 > Param.MS * 1000)
-        for (int i = 0; i < PartsCount; i++)
-        {
-          min = double.MaxValue;
-          max = double.MinValue;
-          for (int ii = 0; ii < PartsLength; ii++)
-          {
-            if (Data[i * PartsLength + ii] > max) max = Data[i * PartsLength + ii];
-            if (Data[i * PartsLength + ii] < min) min = Data[i * PartsLength + ii];
-          }
-          f1_list.Add(i * PartsLength / 25.0, min);
-          f1_list.Add(i * PartsLength / 25.0, max);
-        }
-      else
+      for (int i = 0; i < PartsCount; i++)
       {
-        for (int i = 0; i < Data.Length; i++)
+        min = double.MaxValue;
+        max = double.MinValue;
+        for (int ii = 0; ii < PartsLength; ii++)
         {
-          f1_list.Add(i / 25.0, Data[i]);
+          if (Data[i * PartsLength + ii] > max) max = Data[i * PartsLength + ii];
+          if (Data[i * PartsLength + ii] < min) min = Data[i * PartsLength + ii];
         }
+        f1_list.Add(i * PartsLength / 25.0, min);
+        f1_list.Add(i * PartsLength / 25.0, max);
       }
       FilteredPointList filteredList = new FilteredPointList(x, y);
 
-      if (Duration2 > Param.MS * 1000 * 3 && x.Length > 0)
+      if (Duration2 > Param.MS * 1000 * 3)
         filteredList.SetBounds(x[0], x[x.Length - 1], zedGraphPlot.Width * 5);
       pane.XAxis.Scale.Min = 0;
       pane.XAxis.Scale.Max = Duration2 / 25.0;
@@ -194,6 +235,7 @@ namespace MEAClosedLoop.UI_Forms
 
     private void AmplitudeChecker_ValueChanged(object sender, EventArgs e)
     {
+
       Amplitude2 = (uint)(sender as NumericUpDown).Value;
     }
 

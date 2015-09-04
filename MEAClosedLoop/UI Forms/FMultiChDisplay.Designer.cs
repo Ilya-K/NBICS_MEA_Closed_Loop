@@ -1,6 +1,6 @@
 ﻿namespace MEAClosedLoop.UI_Forms
 {
-  partial class FSingleChDisplay
+  partial class FMultiChDisplay
   {
     /// <summary>
     /// Required designer variable.
@@ -30,8 +30,6 @@
     {
       this.components = new System.ComponentModel.Container();
       this.zedGraphPlot = new ZedGraph.ZedGraphControl();
-      this.label8 = new System.Windows.Forms.Label();
-      this.ChNumChecker = new System.Windows.Forms.NumericUpDown();
       this.label7 = new System.Windows.Forms.Label();
       this.label6 = new System.Windows.Forms.Label();
       this.DurationChecker = new System.Windows.Forms.NumericUpDown();
@@ -42,7 +40,6 @@
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.UpdateTimeLabel = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
-      ((System.ComponentModel.ISupportInitialize)(this.ChNumChecker)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.DurationChecker)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.AmplitudeChecker)).BeginInit();
       this.groupBox2.SuspendLayout();
@@ -67,32 +64,10 @@
       this.zedGraphPlot.Size = new System.Drawing.Size(917, 343);
       this.zedGraphPlot.TabIndex = 1;
       // 
-      // label8
-      // 
-      this.label8.AutoSize = true;
-      this.label8.Location = new System.Drawing.Point(6, 18);
-      this.label8.Name = "label8";
-      this.label8.Size = new System.Drawing.Size(55, 13);
-      this.label8.TabIndex = 0;
-      this.label8.Text = "Канал  №";
-      // 
-      // ChNumChecker
-      // 
-      this.ChNumChecker.Location = new System.Drawing.Point(79, 16);
-      this.ChNumChecker.Name = "ChNumChecker";
-      this.ChNumChecker.Size = new System.Drawing.Size(38, 20);
-      this.ChNumChecker.TabIndex = 1;
-      this.ChNumChecker.Value = new decimal(new int[] {
-            56,
-            0,
-            0,
-            0});
-      this.ChNumChecker.ValueChanged += new System.EventHandler(this.ChNumChecker_ValueChanged);
-      // 
       // label7
       // 
       this.label7.AutoSize = true;
-      this.label7.Location = new System.Drawing.Point(123, 18);
+      this.label7.Location = new System.Drawing.Point(6, 18);
       this.label7.Name = "label7";
       this.label7.Size = new System.Drawing.Size(105, 13);
       this.label7.TabIndex = 2;
@@ -101,7 +76,7 @@
       // label6
       // 
       this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(350, 18);
+      this.label6.Location = new System.Drawing.Point(266, 18);
       this.label6.Name = "label6";
       this.label6.Size = new System.Drawing.Size(62, 13);
       this.label6.TabIndex = 3;
@@ -109,7 +84,7 @@
       // 
       // DurationChecker
       // 
-      this.DurationChecker.Location = new System.Drawing.Point(246, 16);
+      this.DurationChecker.Location = new System.Drawing.Point(117, 16);
       this.DurationChecker.Maximum = new decimal(new int[] {
             200,
             0,
@@ -132,7 +107,7 @@
       // 
       // AmplitudeChecker
       // 
-      this.AmplitudeChecker.Location = new System.Drawing.Point(418, 16);
+      this.AmplitudeChecker.Location = new System.Drawing.Point(334, 16);
       this.AmplitudeChecker.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -156,7 +131,7 @@
       // label5
       // 
       this.label5.AutoSize = true;
-      this.label5.Location = new System.Drawing.Point(301, 18);
+      this.label5.Location = new System.Drawing.Point(182, 18);
       this.label5.Name = "label5";
       this.label5.Size = new System.Drawing.Size(43, 13);
       this.label5.TabIndex = 6;
@@ -193,8 +168,6 @@
       this.groupBox2.Controls.Add(this.DurationChecker);
       this.groupBox2.Controls.Add(this.label6);
       this.groupBox2.Controls.Add(this.label7);
-      this.groupBox2.Controls.Add(this.ChNumChecker);
-      this.groupBox2.Controls.Add(this.label8);
       this.groupBox2.Location = new System.Drawing.Point(12, 12);
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.Size = new System.Drawing.Size(917, 46);
@@ -219,16 +192,15 @@
       this.label1.TabIndex = 8;
       this.label1.Text = "update: ";
       // 
-      // FSingleChDisplay
+      // FMultiChDisplay
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(941, 419);
       this.Controls.Add(this.zedGraphPlot);
       this.Controls.Add(this.groupBox2);
-      this.Name = "FSingleChDisplay";
+      this.Name = "FMultiChDisplay";
       this.Text = "FDataDisplay";
-      ((System.ComponentModel.ISupportInitialize)(this.ChNumChecker)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.DurationChecker)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.AmplitudeChecker)).EndInit();
       this.groupBox2.ResumeLayout(false);
@@ -240,8 +212,6 @@
     #endregion
 
     private ZedGraph.ZedGraphControl zedGraphPlot;
-    private System.Windows.Forms.Label label8;
-    private System.Windows.Forms.NumericUpDown ChNumChecker;
     private System.Windows.Forms.Label label7;
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.NumericUpDown DurationChecker;

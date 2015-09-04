@@ -205,6 +205,13 @@ namespace MEAClosedLoop
       dataFlowController.AddConsumer(form);
       form.Show();
     }
+
+    private void multiChannelToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      FMultiChDisplay form = new FMultiChDisplay();
+      dataFlowController.AddConsumer(form);
+      form.Show();
+    }
   }
 
 }
