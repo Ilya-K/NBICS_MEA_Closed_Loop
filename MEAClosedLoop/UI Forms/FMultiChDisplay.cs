@@ -29,7 +29,7 @@ namespace MEAClosedLoop.UI_Forms
     const uint updateInterval = 1000;
     int currentChNum = 0;
     uint _Duration2 = Param.MS * 1000;
-    uint _Amplitude = 100;
+    uint _Amplitude = 600;
     uint Amplitude2
     {
       get
@@ -55,6 +55,7 @@ namespace MEAClosedLoop.UI_Forms
     void IRecieveFltData.RecieveFltData(TFltDataPacket packet)
     {
       if (onPacketRecieved != null) onPacketRecieved(packet);
+      if (plotUpdater.Enabled)
       lock (DataQueueLock)
       {
         unpackedFltDataQueue.Enqueue(packet);
@@ -97,7 +98,7 @@ namespace MEAClosedLoop.UI_Forms
         
         pane.Margin.Top = 0;
         pane.Margin.Left = 1;
-        pane.Margin.Right = 1;
+        pane.Margin.Right = 1; 
         pane.Margin.Bottom = 0;
         pane.XAxis.Scale.IsSkipFirstLabel = true;
         pane.XAxis.Scale.IsSkipLastLabel = true;
@@ -105,10 +106,10 @@ namespace MEAClosedLoop.UI_Forms
         pane.YAxis.Scale.IsSkipLastLabel = true;
         pane.XAxis.Scale.FontSpec.Size = 9;
         pane.YAxis.Scale.FontSpec.Size = 9;
-        pane.XAxis.Scale.MajorStep = 0.5;
-        pane.XAxis.Scale.MinorStep = 0.5;
-        pane.YAxis.Scale.MajorStep = 0.5;
-        pane.YAxis.Scale.MinorStep = 0.5;
+        //pane.XAxis.Scale.MajorStep = 0.5;
+        //pane.XAxis.Scale.MinorStep = 0.5;
+        //pane.YAxis.Scale.MajorStep = 0.5;
+        //pane.YAxis.Scale.MinorStep = 0.5;
         pane.YAxis.Scale.Align =  AlignP.Inside;
         pane.YAxis.Scale.AlignH = AlignH.Right;
         //pane.XAxis.Scale.AlignH = AlignH.Left;
@@ -125,7 +126,7 @@ namespace MEAClosedLoop.UI_Forms
         {
           pane.XAxis.IsVisible = true;
         }
-        pane.Margin.Left = -15;
+        //pane.Margin.Left = -15;
         if (i % 8 == 0)
         {
           pane.Margin.Left = 0;
@@ -199,7 +200,6 @@ namespace MEAClosedLoop.UI_Forms
             mchDataQueue[key].RemoveRange(0, dequeueCount * 2);
         }
       }
-      //plotUpdater.Stop();
       if (this.IsDisposed)
       {
         plotUpdater.Stop();
@@ -211,6 +211,7 @@ namespace MEAClosedLoop.UI_Forms
       PaneList paneList = zedGraphPlot.MasterPane.PaneList;
       for (int ch = 0; ch < 59; ch++)
       {
+        pane = paneList[ch];
         pane.XAxis.Scale.Min = 0;
         pane.XAxis.Scale.Max = Duration2 / 25.0;
         pane.YAxis.Scale.Min = -Amplitude2;
