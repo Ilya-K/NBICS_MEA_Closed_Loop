@@ -201,6 +201,7 @@
       this.Controls.Add(this.groupBox2);
       this.Name = "FMultiChDisplay";
       this.Text = "FDataDisplay";
+      this.Load += new System.EventHandler(this.FMultiChDisplay_Load);
       ((System.ComponentModel.ISupportInitialize)(this.DurationChecker)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.AmplitudeChecker)).EndInit();
       this.groupBox2.ResumeLayout(false);

@@ -17,11 +17,12 @@ namespace MEAClosedLoop.UI_Forms
   using TAbsStimIndex = System.UInt64;
   using TRawDataPacket = Dictionary<int, ushort[]>;
   using TFltDataPacket = Dictionary<int, System.Double[]>;
-
+  public delegate void OnPacketRecievedDelegate(TFltDataPacket packet);
   public partial class FMultiChDisplay : Form, IRecieveFltData
   {
+    private event OnPacketRecievedDelegate onPacketRecieved;
     private Queue<double> dataQueue = new Queue<double>();
-    private Dictionary<int, Queue<double>> mchDataQueue = new Dictionary<int, Queue<TData>>();
+    private Dictionary<int, PointPairList> mchDataQueue = new Dictionary<int, PointPairList>();
     private Queue<TFltDataPacket> unpackedFltDataQueue = new Queue<TFltDataPacket>();
     private object DataQueueLock = new object();
     Timer plotUpdater;
@@ -53,6 +54,7 @@ namespace MEAClosedLoop.UI_Forms
     }
     void IRecieveFltData.RecieveFltData(TFltDataPacket packet)
     {
+      if (onPacketRecieved != null) onPacketRecieved(packet);
       lock (DataQueueLock)
       {
         unpackedFltDataQueue.Enqueue(packet);
@@ -87,33 +89,51 @@ namespace MEAClosedLoop.UI_Forms
       masterPane.Margin.All = 0;
       masterPane.Border.IsVisible = false;
       masterPane.InnerPaneGap = 0;
-      // Добавим три графика
+      masterPane.IsAntiAlias = false;
       for (int i = 0; i < 64; i++)
       {
         // Создаем экземпляр класса GraphPane, представляющий собой один график
         GraphPane pane = new GraphPane();
+        
         pane.Margin.Top = 0;
-        pane.Margin.Left = -0;
-        pane.Margin.Right = -0;
-        pane.Margin.Bottom = -0;
+        pane.Margin.Left = 1;
+        pane.Margin.Right = 1;
+        pane.Margin.Bottom = 0;
         pane.XAxis.Scale.IsSkipFirstLabel = true;
         pane.XAxis.Scale.IsSkipLastLabel = true;
-        pane.XAxis.Scale.FontSpec.Size = 14;
-        if(i > 7 && i < 56)
-          pane.XAxis.IsVisible = false;
+        pane.YAxis.Scale.IsSkipFirstLabel = true;
+        pane.YAxis.Scale.IsSkipLastLabel = true;
+        pane.XAxis.Scale.FontSpec.Size = 9;
+        pane.YAxis.Scale.FontSpec.Size = 9;
+        pane.XAxis.Scale.MajorStep = 0.5;
+        pane.XAxis.Scale.MinorStep = 0.5;
+        pane.YAxis.Scale.MajorStep = 0.5;
+        pane.YAxis.Scale.MinorStep = 0.5;
+        pane.YAxis.Scale.Align =  AlignP.Inside;
+        pane.YAxis.Scale.AlignH = AlignH.Right;
+        //pane.XAxis.Scale.AlignH = AlignH.Left;
+        //pane.XAxis.Scale.Align = AlignP.Inside;
+
+        pane.XAxis.Cross = +Amplitude2;
+        pane.X2Axis.IsVisible = false;
+        pane.XAxis.Title.IsVisible = false;
+        pane.BaseDimension = 1.5f;
+        pane.XAxis.IsVisible = false;
+        pane.Y2Axis.IsVisible = false;
+        pane.YAxis.IsVisible = false;
         if (i < 8)
-          pane.XAxis.Cross = Amplitude2;
-        if (i % 8 != 1 || i % 8 != 0 )
-          pane.YAxis.IsVisible = false;
-        //pane.YAxis.IsVisible = false;
-        //pane.XAxis.IsVisible = false;
+        {
+          pane.XAxis.IsVisible = true;
+        }
+        pane.Margin.Left = -15;
+        if (i % 8 == 0)
+        {
+          pane.Margin.Left = 0;
+          pane.YAxis.IsVisible = true;
+        }
         pane.Legend.IsVisible = false;
         pane.Title.IsVisible = false;
         //pane.TitleGap = 0;
-        // Заполнение графика данными не изменилось, 
-        // поэтому вынесем заполнение точек в отдельный метод DrawSingleGraph()
-        //DrawSingleGraph (pane); 
-
         // Добавим новый график в MasterPane
         masterPane.Add(pane);
       }
@@ -135,8 +155,51 @@ namespace MEAClosedLoop.UI_Forms
       zedGraphPlot.AxisChange();
       zedGraphPlot.Invalidate();
     }
+
     private void updatePlot()
     {
+      lock (DataQueueLock)
+      {
+        while (unpackedFltDataQueue.Count > 0)
+        {
+          
+          TFltDataPacket currentPacket = unpackedFltDataQueue.Dequeue();
+          int PartsLength ;
+          int PartsCount;
+          foreach (int key in mchDataQueue.Keys)
+          {
+            double[] Data = currentPacket[key];
+
+            PartsLength = (Data.Length > 0) ? Data.Length / zedGraphPlot.Width : 0;
+            PartsCount = (PartsLength > 0) ? Data.Length / PartsLength : 0;
+
+            double min = double.MaxValue;
+            double max = double.MinValue;
+            for (int i = 0; i <= PartsCount; i++)
+            {
+              min = double.MaxValue;
+              max = double.MinValue;
+              for (int ii = 0; ii < PartsLength && i * PartsLength + ii < Data.Length; ii++)
+              {
+                if (Data[i * PartsLength + ii] > max) max = Data[i * PartsLength + ii];
+                if (Data[i * PartsLength + ii] < min) min = Data[i * PartsLength + ii];
+              }
+              mchDataQueue[key].Add(i * PartsLength / 25.0, min);
+              mchDataQueue[key].Add(i * PartsLength / 25.0, max);
+            }
+          }
+        }
+        int length = 0;
+        int dequeueCount = 0;
+        foreach (int key in mchDataQueue.Keys)
+        {
+          length = mchDataQueue[key].Count / 2;
+          dequeueCount = length - (int)Duration2;
+          if (dequeueCount > 0)
+            mchDataQueue[key].RemoveRange(0, dequeueCount * 2);
+        }
+      }
+      //plotUpdater.Stop();
       if (this.IsDisposed)
       {
         plotUpdater.Stop();
@@ -145,66 +208,23 @@ namespace MEAClosedLoop.UI_Forms
       int debug = Environment.TickCount;
       GraphPane pane = zedGraphPlot.GraphPane;
       pane.CurveList.Clear();
-
-      PointPairList f1_list = new PointPairList();
-
-      //data prepear;
-      double[] Data;
-      lock (DataQueueLock)
+      PaneList paneList = zedGraphPlot.MasterPane.PaneList;
+      for (int ch = 0; ch < 59; ch++)
       {
-        while (unpackedFltDataQueue.Count > 0)
-        {
-          double[] data = unpackedFltDataQueue.Dequeue()[currentChNum];
-          for (int i = 0; i < data.Length; i++)
-            dataQueue.Enqueue(data[i]);
-          while (dataQueue.Count > Duration2)
-          {
-            dataQueue.Dequeue();
-          }
-        }
-      }
-      Data = dataQueue.ToArray();
-      TData[] x = new TData[Data.Length];
-      TData[] y = new TData[Data.Length];
+        pane.XAxis.Scale.Min = 0;
+        pane.XAxis.Scale.Max = Duration2 / 25.0;
+        pane.YAxis.Scale.Min = -Amplitude2;
+        pane.YAxis.Scale.Max = +Amplitude2;
+        
+        LineItem f1_curve = pane.AddCurve("Neuronal Activity", mchDataQueue[ch], Color.Blue, SymbolType.None);
+        //LineItem f2_curve = pane.AddCurve("In  tegral", f2_list, Color.Red, SymbolType.None);
+        // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
+        // В противном случае на рисунке будет показана только часть графика, 
+        // которая умещается в интервалы по осям, установленные по умолчанию
 
-      for (int i = 0; i < Data.Length; i++)
-      {
-        //f1_list.Add(i / 25.0, Data[i]);
-        x[i] = i / 25.0;
-        y[i] = Data[i];
       }
-      int PartsLength;
-      PartsLength = (Data.Length > 0) ? Data.Length / zedGraphPlot.Width : 0;
-      int PartsCount = (PartsLength > 0) ? Data.Length / PartsLength : 0;
-      double min = double.MaxValue;
-      double max = double.MinValue;
-      for (int i = 0; i < PartsCount; i++)
-      {
-        min = double.MaxValue;
-        max = double.MinValue;
-        for (int ii = 0; ii < PartsLength; ii++)
-        {
-          if (Data[i * PartsLength + ii] > max) max = Data[i * PartsLength + ii];
-          if (Data[i * PartsLength + ii] < min) min = Data[i * PartsLength + ii];
-        }
-        f1_list.Add(i * PartsLength / 25.0, min);
-        f1_list.Add(i * PartsLength / 25.0, max);
-      }
-      FilteredPointList filteredList = new FilteredPointList(x, y);
-
-      if (Duration2 > Param.MS * 1000 * 3)
-        filteredList.SetBounds(x[0], x[x.Length - 1], zedGraphPlot.Width * 5);
-      pane.XAxis.Scale.Min = 0;
-      pane.XAxis.Scale.Max = Duration2 / 25.0;
-      pane.YAxis.Scale.Min = -Amplitude2;
-      pane.YAxis.Scale.Max = +Amplitude2;
-
-      LineItem f1_curve = pane.AddCurve("Neuronal Activity", f1_list, Color.Blue, SymbolType.None);
-      //LineItem f2_curve = pane.AddCurve("In  tegral", f2_list, Color.Red, SymbolType.None);
-      // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
-      // В противном случае на рисунке будет показана только часть графика, 
-      // которая умещается в интервалы по осям, установленные по умолчанию
       zedGraphPlot.AxisChange();
+
       string s = (Environment.TickCount - debug).ToString() + " ms";
       if (UpdateTimeLabel.InvokeRequired)
         UpdateTimeLabel.BeginInvoke(new Action<System.Windows.Forms.Label>((lab) => lab.Text = s), UpdateTimeLabel);
@@ -213,9 +233,10 @@ namespace MEAClosedLoop.UI_Forms
 
       // Обновляем график
       zedGraphPlot.Invalidate();
-      filteredList = new FilteredPointList(new double[0], new double[0]);
-
+      //filteredList = new FilteredPointList(new double[0], new double[0]);
+      //plotUpdater.Start();
     }
+
     private void start()
     {
       plotUpdater = new Timer();
@@ -223,6 +244,7 @@ namespace MEAClosedLoop.UI_Forms
       plotUpdater.Tick += plotUpdater_Tick;
       plotUpdater.Start();
     }
+
     private void stop()
     {
       plotUpdater.Stop();
@@ -251,6 +273,18 @@ namespace MEAClosedLoop.UI_Forms
         dataQueue.Clear();
         currentChNum = (int)(sender as NumericUpDown).Value;
       }
+    }
+
+    private void FMultiChDisplay_Load(object sender, EventArgs e)
+    {
+      onPacketRecieved += initCollection;
+    }
+
+    private void initCollection(TFltDataPacket packet)
+    {
+      foreach (int key in packet.Keys)
+        mchDataQueue.Add(key, new PointPairList());
+      onPacketRecieved -= initCollection;
     }
   }
 }

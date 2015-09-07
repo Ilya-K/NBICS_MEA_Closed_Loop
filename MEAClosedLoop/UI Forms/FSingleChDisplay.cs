@@ -86,17 +86,23 @@ namespace MEAClosedLoop.UI_Forms
       }
       int debug = Environment.TickCount;
       GraphPane pane = zedGraphPlot.GraphPane;
+      zedGraphPlot.MasterPane.Border = new Border(false, Color.White, 0);
+      zedGraphPlot.MasterPane.InnerPaneGap = 0;
+      //zedGraphPlot.MasterPane.BaseDimension = 3;
       pane.Margin.Top = 0;
       pane.Margin.Left = 0;
-      pane.Margin.Right = -5;
+      pane.Margin.Right = 0;
       pane.Margin.Bottom = 0;
       pane.XAxis.Title.IsVisible = false;
       pane.YAxis.Title.IsVisible = false;
       pane.Legend.IsVisible = false;
       pane.Title.IsVisible = false;
       pane.TitleGap = 0;
-
       pane.CurveList.Clear();
+      pane.XAxis.IsVisible = false;
+      pane.X2Axis.Cross = +Amplitude2;
+      pane.BaseDimension = 11;
+      pane.X2Axis.IsVisible = true;
       PointPairList f1_list = new PointPairList();
 
       //data prepear;
