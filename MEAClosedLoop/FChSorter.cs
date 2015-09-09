@@ -80,12 +80,11 @@ namespace MEAClosedLoop
           T3[key] += 1;
         }
         TFltDataPacket data = evBurst.Burst.Data;
-        Brush brush = new SolidBrush(Color.Gray);
+        Brush brush = new SolidBrush(Color.FromArgb(20, 50, 50, 50));
         Pen grayPen = new Pen(brush);
         lock (LockBurstPlotData)
         using (Graphics gr = Graphics.FromImage(BurstPlotData[key]))
         {
-
           for (int i = (int)StartDrawTime + 1; i < data[key].Length && i < (int)StartDrawTime + MaxBurstPlotDuration; i++)
           {
             gr.DrawLine(grayPen,
