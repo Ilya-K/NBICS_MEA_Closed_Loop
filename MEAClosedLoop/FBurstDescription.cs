@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define NORMALISE
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,13 +19,13 @@ namespace MEAClosedLoop
     }
     void IRecieveBusrt.RecieveBurst(CPack Burst)
     {
-      Burst.BuildDescription();
+      //Burst.BuildDescription();
       lock (PlotLock)
         try
         {
           GraphPane pane = PlotGraph.GraphPane;
-          pane.CurveList.Clear();
-          //pane.Legend.IsVisible = false;
+          //pane.CurveList.Clear();
+          pane.Legend.IsVisible = false;
           PointPairList f1_list = new PointPairList();
 
           // Создадим список точек для кривой f2(x)
@@ -56,7 +57,7 @@ namespace MEAClosedLoop
             fxs[i] = (Data[i] > stat.Sigma * 3) ? last + Math.Abs(Data[i]) / 30 - last / 460 : last - last / 460;
           }
 
-          double average = stat.Sigma * 4; 
+          double average = stat.Sigma * 4;
           for (int i = 0; i < window; i++)
           {
             averages[i] = average;
@@ -67,18 +68,31 @@ namespace MEAClosedLoop
             average += (fxs[i] - fxs[i - window]) / (double)window;
             averages[i] = average > 0 ? average : 0;
           }
+#if NORMALISE
+          double min = averages.Min();
+          for (int i = 0; i < Data.Length; i++)
+          {
+            averages[i] -= min;
+          }
+          double max = averages.Max();
+          double k = 500 / max;
+          for (int i = 0; i < Data.Length; i++)
+          {
+            averages[i] *= k;
+          }
+#endif
           for (int i = 1; i < Data.Length; i++)
           {
             f3_list.Add(i / 25.0, fxs[i]);
           }
-          for (int i = 0; i < Data.Length; i += 25)
+          for (int i = 0; i < Data.Length; i += 5)
           {
             f2_list.Add(i / 25.0, averages[i]);
           }
 
           LineItem f2_curve = pane.AddCurve("Integral after Mooveing Avarage", f2_list, Color.Red, SymbolType.None);
-          LineItem f3_curve = pane.AddCurve("Integral", f3_list, Color.Green, SymbolType.None);
-          LineItem f1_curve = pane.AddCurve("Raw Burst", f1_list, Color.FromArgb(100, 70,70,70), SymbolType.None);
+          //LineItem f3_curve = pane.AddCurve("Integral", f3_list, Color.Green, SymbolType.None);
+          //LineItem f1_curve = pane.AddCurve("Raw Burst", f1_list, Color.FromArgb(100, 70,70,70), SymbolType.None);
 
           // Вызываем метод AxisChange (), чтобы обновить данные об осях. 
           // В противном случае на рисунке будет показана только часть графика, 
