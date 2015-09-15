@@ -228,6 +228,7 @@
       this.Controls.Add(this.groupBox2);
       this.Name = "FSingleChDisplay";
       this.Text = "FDataDisplay";
+      this.Load += new System.EventHandler(this.FSingleChDisplay_Load);
       ((System.ComponentModel.ISupportInitialize)(this.ChNumChecker)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.DurationChecker)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.AmplitudeChecker)).EndInit();

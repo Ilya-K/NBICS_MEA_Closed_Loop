@@ -112,6 +112,8 @@ namespace MEAClosedLoop.UI_Forms
         //pane.YAxis.Scale.MinorStep = 0.5;
         pane.YAxis.Scale.Align =  AlignP.Inside;
         pane.YAxis.Scale.AlignH = AlignH.Right;
+        pane.Title.IsVisible = false;
+
         //pane.XAxis.Scale.AlignH = AlignH.Left;
         //pane.XAxis.Scale.Align = AlignP.Inside;
 

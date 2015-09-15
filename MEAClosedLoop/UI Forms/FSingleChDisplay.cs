@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 using System.Windows.Forms;
+
+using System.Diagnostics;
 using ZedGraph;
 
 namespace MEAClosedLoop.UI_Forms
@@ -79,6 +81,8 @@ namespace MEAClosedLoop.UI_Forms
     }
     private void updatePlot()
     {
+      Stopwatch sw = new Stopwatch();
+      sw.Start();
       if (this.IsDisposed)
       {
         plotUpdater.Stop();
@@ -155,10 +159,7 @@ namespace MEAClosedLoop.UI_Forms
           f1_list.Add(i / 25.0, Data[i]);
         }
       }
-      FilteredPointList filteredList = new FilteredPointList(x, y);
-
-      if (Duration2 > Param.MS * 1000 * 3 && x.Length > 0)
-        filteredList.SetBounds(x[0], x[x.Length - 1], zedGraphPlot.Width * 5);
+      
       pane.XAxis.Scale.Min = 0;
       pane.XAxis.Scale.Max = Duration2 / 25.0;
       pane.YAxis.Scale.Min = -Amplitude2;
@@ -170,16 +171,17 @@ namespace MEAClosedLoop.UI_Forms
       // В противном случае на рисунке будет показана только часть графика, 
       // которая умещается в интервалы по осям, установленные по умолчанию
       zedGraphPlot.AxisChange();
-      string s = (Environment.TickCount - debug).ToString() + " ms";
+      
+
+      // Обновляем график
+      zedGraphPlot.Invalidate();
+      //filteredList = new FilteredPointList(new double[0], new double[0]);
+      sw.Stop();
+      string s = sw.ElapsedMilliseconds.ToString() + " ms";
       if (UpdateTimeLabel.InvokeRequired)
         UpdateTimeLabel.BeginInvoke(new Action<System.Windows.Forms.Label>((lab) => lab.Text = s), UpdateTimeLabel);
       else
         UpdateTimeLabel.Text = s;
-
-      // Обновляем график
-      zedGraphPlot.Invalidate();
-      filteredList = new FilteredPointList(new double[0], new double[0]);
-
     }
     private void start()
     {
@@ -215,6 +217,13 @@ namespace MEAClosedLoop.UI_Forms
         dataQueue.Clear();
         currentChNum = (int)(sender as NumericUpDown).Value;
       }
+    }
+
+    private void FSingleChDisplay_Load(object sender, EventArgs e)
+    {
+
+      zedGraphPlot.GraphPane.XAxis.Title.IsVisible = false;
+      zedGraphPlot.GraphPane.YAxis.Title.IsVisible = false;
     }
   }
 }
